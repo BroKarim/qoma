@@ -24,7 +24,7 @@ final class FocusSessionManager: ObservableObject {
             .sink { [weak self] remainingTime, isRunning, timerIsPaused in
                 guard let self else { return }
 
-                if self.state != .idle,
+                if !self.state.isIdle,
                    !self.completionHandled,
                    !isRunning,
                    !timerIsPaused,
@@ -42,7 +42,7 @@ final class FocusSessionManager: ObservableObject {
         self.duration = duration
         self.isActive = true
         self.isPaused = false
-        self.state = .focusing
+        self.state = .running(mode: .quickSession, phase: .focus)
         self.completionHandled = false
 
         self.timerService.start(duration: duration)
@@ -78,16 +78,16 @@ final class FocusSessionManager: ObservableObject {
         self.completionHandled = true
         self.playCompletionSoundIfNeeded()
 
-        switch self.state {
-        case .focusing:
+        switch self.state.phase {
+        case .focus:
             self.prepareBreak(type: .short)
             WindowManager.shared.hideFloating()
             MenuBarController.shared?.showPopover()
-        case .breaking:
-            self.resetSession()
+        case .shortBreak, .longBreak:
+            self.completeSession(mode: self.state.mode ?? .quickSession)
             WindowManager.shared.hideFloating()
             MenuBarController.shared?.showPopover()
-        case .idle:
+        case .completed, .none:
             break
         }
     }
@@ -101,12 +101,21 @@ final class FocusSessionManager: ObservableObject {
         self.completionHandled = true
     }
 
+    private func completeSession(mode: SessionMode) {
+        self.isActive = false
+        self.isPaused = false
+        self.activeTask = ""
+        self.duration = 0
+        self.state = .completed(mode: mode)
+        self.completionHandled = true
+    }
+
     private func prepareBreak(type: BreakType) {
         self.activeTask = ""
         self.duration = self.breakDuration(for: type)
         self.isActive = false
         self.isPaused = false
-        self.state = .breaking(type)
+        self.state = .configured(mode: .quickSession, phase: type.sessionPhase)
     }
 
     private func playCompletionSoundIfNeeded() {
