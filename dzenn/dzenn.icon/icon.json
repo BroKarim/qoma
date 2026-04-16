@@ -1,28 +1,40 @@
 {
   "fill" : {
-    "automatic-gradient" : "display-p3:1.00000,0.38251,0.19529,1.00000"
+    "linear-gradient" : [
+      "srgb:0.00000,0.00000,0.00000,1.00000",
+      "display-p3:0.00000,0.00000,0.00000,1.00000"
+    ],
+    "orientation" : {
+      "start" : {
+        "x" : 0.5,
+        "y" : 0
+      },
+      "stop" : {
+        "x" : 0.5,
+        "y" : 0.7
+      }
+    }
   },
   "groups" : [
     {
-      "layers" : [
-
-      ],
-      "shadow" : {
-        "kind" : "neutral",
-        "opacity" : 0.5
-      },
-      "translucency" : {
-        "enabled" : true,
-        "value" : 0.5
-      }
-    },
-    {
       "hidden" : true,
       "layers" : [
         {
-          "glass" : false,
-          "image-name" : "text-2.png",
-          "name" : "text-2"
+          "glass-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : false
+            }
+          ],
+          "image-name" : "text-4 2.png",
+          "name" : "text-4 2",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              24,
+              -11
+            ]
+          }
         }
       ],
       "shadow" : {
@@ -35,14 +47,25 @@
       }
     },
     {
+      "blend-mode" : "normal",
       "hidden" : true,
       "layers" : [
         {
-          "blend-mode" : "normal",
-          "fill" : "none",
-          "glass" : true,
-          "image-name" : "text-3.png",
-          "name" : "text-3"
+          "glass-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : false
+            }
+          ],
+          "image-name" : "text-4 2.png",
+          "name" : "text-4 2",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              24,
+              -11
+            ]
+          }
         }
       ],
       "shadow" : {
@@ -55,6 +78,8 @@
       }
     },
     {
+      "blend-mode" : "normal",
+      "hidden" : false,
       "layers" : [
         {
           "glass-specializations" : [
