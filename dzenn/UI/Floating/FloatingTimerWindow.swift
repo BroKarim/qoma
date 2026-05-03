@@ -7,6 +7,8 @@ struct FloatingTimerView: View {
 
     @AppStorage(AppConstants.FloatingThemeSettings.opacityKey)
     private var floatingOpacity: Double = AppConstants.FloatingThemeSettings.defaultOpacity
+    @AppStorage(AppConstants.FloatingThemeSettings.selectedThemeKey)
+    private var selectedThemeID: String = AppConstants.FloatingThemeSettings.defaultThemeID
     @AppStorage(AppConstants.FloatingLayoutSettings.selectedLayoutKey)
     private var layoutModeID: String = AppConstants.FloatingLayoutSettings.defaultLayoutID
     @AppStorage(AppConstants.FloatingLayoutSettings.imagePathKey) private var imagePath: String = ""
@@ -18,11 +20,11 @@ struct FloatingTimerView: View {
     @State private var cachedImage: NSImage?
 
     var body: some View {
-        let theme: FloatingTheme = .black
+        let layoutMode = FloatingLayoutMode.from(id: self.layoutModeID)
+        let theme = self.theme(for: layoutMode)
         let clampedOpacity = min(
             AppConstants.FloatingThemeSettings.maxOpacity,
             max(AppConstants.FloatingThemeSettings.minOpacity, self.floatingOpacity))
-        let layoutMode = FloatingLayoutMode.from(id: self.layoutModeID)
 
         Group {
             switch layoutMode {
@@ -55,7 +57,7 @@ struct FloatingTimerView: View {
             self.cachedImage = self.loadImage(path: newPath)
         }
         .onChange(of: self.layoutModeID) { _ in
-            WindowManager.shared.updateFloatingSize(mode: layoutMode)
+            WindowManager.shared.updateFloatingSize(mode: FloatingLayoutMode.from(id: self.layoutModeID))
         }
     }
 
@@ -136,6 +138,15 @@ struct FloatingTimerView: View {
         guard !path.isEmpty else { return nil }
         guard FileManager.default.fileExists(atPath: path) else { return nil }
         return NSImage(contentsOfFile: path)
+    }
+
+    private func theme(for layoutMode: FloatingLayoutMode) -> FloatingTheme {
+        switch layoutMode {
+        case .timerOnly:
+            FloatingTheme.from(id: self.selectedThemeID)
+        case .mixed, .imageOnly:
+            .graphite
+        }
     }
 
     private func format(_ time: TimeInterval) -> String {

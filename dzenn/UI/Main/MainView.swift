@@ -19,7 +19,7 @@ struct MainView: View {
                 .padding(.top, self.columnTopPadding)
                 .padding(.bottom, self.columnBottomPadding)
         }
-        .frame(minWidth: 720, minHeight: 480)
+        .frame(minWidth: 860, minHeight: 580)
         .background(self.mainBackground.ignoresSafeArea())
         .ignoresSafeArea(.container, edges: .top)
     }
@@ -30,6 +30,17 @@ struct MainView: View {
                 .frame(height: self.titlebarInset)
 
             VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Settings")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.white)
+
+                    Text("Tune focus flow and floating window.")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(Color.white.opacity(0.6))
+                }
+                .padding(.bottom, 10)
+
                 ForEach(SidebarItem.allCases) { item in
                     SidebarRow(item: item, isSelected: self.selection == item)
                         .onTapGesture {
@@ -56,12 +67,17 @@ struct MainView: View {
             switch self.selection ?? .general {
             case .general:
                 GeneralSettingsView()
-            case .floatingApp:
+            case .appearance:
                 FloatingAppSettingsView()
             }
         }
+        .padding(8)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(self.mainBackground)
+        .background(self.detailBackground)
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .stroke(Color.white.opacity(0.08), lineWidth: 1))
     }
 
     private var mainBackground: Color {
@@ -70,6 +86,11 @@ struct MainView: View {
 
     private var sidebarBackground: Color {
         .dzennSidebarBackground
+    }
+
+    private var detailBackground: some View {
+        RoundedRectangle(cornerRadius: 12, style: .continuous)
+            .fill(Color.white.opacity(0.03))
     }
 }
 
@@ -82,41 +103,144 @@ private struct SidebarRow: View {
             Image(systemName: self.item.systemImage)
                 .font(.system(size: 14, weight: .medium))
                 .frame(width: 20)
+                .foregroundColor(self.isSelected ? .white : Color.white.opacity(0.68))
 
             Text(self.item.title)
-                .font(.system(size: 13, weight: .regular))
+                .font(.system(size: 13, weight: self.isSelected ? .semibold : .regular))
+                .foregroundColor(self.isSelected ? .white : Color.white.opacity(0.72))
 
             Spacer()
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 6)
-        .background(self.isSelected ? Color.white.opacity(0.1) : Color.clear)
+        .background(
+            RoundedRectangle(cornerRadius: 9, style: .continuous)
+                .fill(self.isSelected ? Color.white.opacity(0.1) : Color.clear))
+        .overlay(
+            RoundedRectangle(cornerRadius: 9, style: .continuous)
+                .stroke(self.isSelected ? Color.white.opacity(0.12) : Color.clear, lineWidth: 1))
         .cornerRadius(8)
         .contentShape(Rectangle())
     }
 }
 
 private enum SidebarItem: String, CaseIterable, Identifiable {
-    case general, floatingApp
+    case general, appearance
     var id: String {
         rawValue
     }
 
     var title: String {
-        self == .general ? "General" : "Floating App"
+        self == .general ? "General" : "Appearance"
     }
 
     var systemImage: String {
-        self == .general ? "gearshape" : "rectangle.on.rectangle"
+        self == .general ? "gearshape" : "swatchpalette"
     }
 }
 
 private struct GeneralSettingsView: View {
     var body: some View {
-        VStack(spacing: 20) {
-            DurationSelectorView()
+        DurationSelectorView()
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+}
+
+struct SettingsPageHeader: View {
+    let title: String
+    let subtitle: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(self.title)
+                .font(.system(size: 28, weight: .semibold))
+
+            Text(self.subtitle)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(.secondary)
         }
-        .padding(2)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+}
+
+struct SettingsSectionHeading: View {
+    let title: String
+    let subtitle: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(self.title)
+                .font(.system(size: 16, weight: .semibold))
+
+            Text(self.subtitle)
+                .font(.system(size: 12.5, weight: .medium))
+                .foregroundColor(.secondary)
+        }
+    }
+}
+
+struct SettingsSurfaceCard<Content: View>: View {
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            self.content()
+        }
+        .padding(20)
+        .background(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(Color.white.opacity(0.035)))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .stroke(Color.white.opacity(0.08), lineWidth: 1))
+    }
+}
+
+struct SettingsRow<Content: View>: View {
+    let title: String
+    let subtitle: String?
+    @ViewBuilder let content: () -> Content
+
+    init(
+        title: String,
+        subtitle: String? = nil,
+        @ViewBuilder content: @escaping () -> Content)
+    {
+        self.title = title
+        self.subtitle = subtitle
+        self.content = content
+    }
+
+    var body: some View {
+        HStack(alignment: self.subtitle == nil ? .center : .top, spacing: 18) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(self.title)
+                    .font(.system(size: 13.5, weight: .medium))
+
+                if let subtitle = self.subtitle {
+                    Text(subtitle)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            Spacer(minLength: 16)
+
+            self.content()
+        }
+    }
+}
+
+struct SettingsBadge: View {
+    let title: String
+
+    var body: some View {
+        Text(self.title)
+            .font(.system(size: 11, weight: .semibold))
+            .foregroundColor(.secondary)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(
+                Capsule()
+                    .fill(Color.white.opacity(0.06)))
     }
 }

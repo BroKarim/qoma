@@ -19,78 +19,93 @@ struct DurationSelectorView: View {
     private var compactMenuBarIcon: Bool = true
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Text("General")
-                .font(.title2)
-                .fontWeight(.semibold)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 18) {
+                SettingsPageHeader(
+                    title: "General",
+                    subtitle: "Manage daily presets, sound behavior, and menu bar basics.")
 
-            VStack(spacing: 12) {
-                Text("Quick Presets (minutes)")
-                    .font(.title3)
-                    .fontWeight(.semibold)
+                SettingsSurfaceCard {
+                    VStack(alignment: .leading, spacing: 16) {
+                        SettingsSectionHeading(
+                            title: "Quick presets",
+                            subtitle: "Three fast durations for menu bar launch.")
 
-                HStack {
-                    Spacer()
-                    HStack(spacing: 12) {
-                        self.presetField(value: self.$quickPreset1)
-                        self.presetField(value: self.$quickPreset2)
-                        self.presetField(value: self.$quickPreset3)
-                    }
-                    Spacer()
-                }
-            }
-            .padding(.bottom, 16)
-            .frame(maxWidth: .infinity, alignment: .center)
-
-            VStack(alignment: .leading, spacing: 16) {
-                HStack {
-                    Text("Completion Sound")
-                    Spacer()
-                    Picker("", selection: self.$selectedSoundID) {
-                        ForEach(AppConstants.SoundSettings.options) { option in
-                            Text(option.title).tag(option.id)
+                        HStack {
+                            Spacer()
+                            HStack(spacing: 12) {
+                                self.presetField(value: self.$quickPreset1)
+                                self.presetField(value: self.$quickPreset2)
+                                self.presetField(value: self.$quickPreset3)
+                            }
+                            Spacer()
                         }
                     }
-                    .pickerStyle(.menu)
-                    .frame(width: 200, alignment: .trailing)
                 }
-                .padding(.bottom, 12)
 
-                HStack {
-                    Text("Volume")
-                    Spacer()
-                    HStack(spacing: 4) {
-                        Image(systemName: "speaker.wave.1")
-                            .foregroundColor(.secondary)
-                        CustomSlider(
-                            value: self.$soundVolume,
-                            range: AppConstants.SoundSettings.minVolume...AppConstants.SoundSettings.maxVolume,
-                            step: 0.05)
-                            .frame(width: 180)
-                        Image(systemName: "speaker.wave.3")
-                            .foregroundColor(.secondary)
+                SettingsSurfaceCard {
+                    VStack(alignment: .leading, spacing: 16) {
+                        SettingsSectionHeading(
+                            title: "Completion sound",
+                            subtitle: "Choose how session ending feels and how loud it lands.")
+
+                        SettingsRow(title: "Sound", subtitle: "Played when focus or break finishes.") {
+                            Picker("", selection: self.$selectedSoundID) {
+                                ForEach(AppConstants.SoundSettings.options) { option in
+                                    Text(option.title).tag(option.id)
+                                }
+                            }
+                            .pickerStyle(.menu)
+                            .frame(width: 220, alignment: .trailing)
+                        }
+
+                        Divider()
+
+                        SettingsRow(title: "Volume", subtitle: "Applies to all completion sounds.") {
+                            HStack(spacing: 6) {
+                                Image(systemName: "speaker.wave.1")
+                                    .foregroundColor(.secondary)
+                                CustomSlider(
+                                    value: self.$soundVolume,
+                                    range: AppConstants.SoundSettings.minVolume...AppConstants.SoundSettings.maxVolume,
+                                    step: 0.05)
+                                    .frame(width: 180)
+                                Image(systemName: "speaker.wave.3")
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+
+                        Divider()
+
+                        SettingsRow(
+                            title: "Auto mute after 5 seconds",
+                            subtitle: "Keep alert short after timer completes.")
+                        {
+                            Toggle("", isOn: self.$autoMuteAfter5Seconds)
+                                .toggleStyle(.switch)
+                        }
                     }
                 }
-                .padding(.bottom, 12)
 
-                HStack {
-                    Text("Automatically mute after 5 seconds")
-                    Spacer()
-                    Toggle("", isOn: self.$autoMuteAfter5Seconds)
-                        .toggleStyle(.switch)
-                }
+                SettingsSurfaceCard {
+                    VStack(alignment: .leading, spacing: 16) {
+                        SettingsSectionHeading(
+                            title: "Menu bar",
+                            subtitle: "Control how Dzenn looks in compact top-bar mode.")
 
-                HStack {
-                    Text("Compact icon on menu bar")
-                    Spacer()
-                    Toggle("", isOn: self.$compactMenuBarIcon)
-                        .toggleStyle(.switch)
+                        SettingsRow(
+                            title: "Compact icon",
+                            subtitle: "Use smaller menu bar presence for cleaner desktop.")
+                        {
+                            Toggle("", isOn: self.$compactMenuBarIcon)
+                                .toggleStyle(.switch)
+                        }
+                    }
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(24)
+            .frame(maxWidth: .infinity, alignment: .topLeading)
         }
-        .padding(.horizontal, 24)
-        .padding(.bottom, 24)
         .onAppear {
             if !AppConstants.SoundSettings.options.contains(where: { $0.id == selectedSoundID }) {
                 self.selectedSoundID = AppConstants.SoundSettings.defaultSoundID

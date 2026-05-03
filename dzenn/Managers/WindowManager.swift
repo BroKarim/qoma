@@ -83,7 +83,7 @@ final class WindowManager: ObservableObject {
     }
 
     private func makeMainWindow() -> NSWindow {
-        let fixedSize = NSSize(width: 520, height: 420)
+        let fixedSize = NSSize(width: 860, height: 580)
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: fixedSize.width, height: fixedSize.height),
             styleMask: [.titled, .closable, .miniaturizable, .fullSizeContentView],
