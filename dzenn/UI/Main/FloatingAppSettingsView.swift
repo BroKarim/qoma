@@ -29,7 +29,7 @@ struct FloatingAppSettingsView: View {
     ]
 
     var body: some View {
-        ScrollView {
+        ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 18) {
                 SettingsPageHeader(
                     title: "Appearance",

@@ -19,7 +19,7 @@ struct DurationSelectorView: View {
     private var compactMenuBarIcon: Bool = true
 
     var body: some View {
-        ScrollView {
+        ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 18) {
                 SettingsPageHeader(
                     title: "General",

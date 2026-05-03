@@ -71,13 +71,8 @@ struct MainView: View {
                 FloatingAppSettingsView()
             }
         }
-        .padding(8)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(self.detailBackground)
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .stroke(Color.white.opacity(0.08), lineWidth: 1))
+        .background(self.mainBackground)
     }
 
     private var mainBackground: Color {
@@ -86,11 +81,6 @@ struct MainView: View {
 
     private var sidebarBackground: Color {
         .dzennSidebarBackground
-    }
-
-    private var detailBackground: some View {
-        RoundedRectangle(cornerRadius: 12, style: .continuous)
-            .fill(Color.white.opacity(0.03))
     }
 }
 
