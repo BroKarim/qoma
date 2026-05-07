@@ -69,4 +69,30 @@ enum AppConstants {
         static let panelWidth: CGFloat = 250
         static let panelHeight: CGFloat = 138
     }
+
+    enum AnalyticsSettings {
+        static let focusSessionsFile = "focus-sessions.json"
+        static let appActivityFile = "app-activity.json"
+        static let websiteVisitsFile = "website-visits.json"
+        static let analyticsDirectoryName = "Analytics"
+        static let retentionDays = 180
+        static let analyticsEnabledKey = "analyticsEnabled"
+        static let defaultDashboardRangeDays = 30
+        static let heatmapDays = 30
+        static let weeklySummaryDays = 7
+
+        static let supportedBrowsers: [String: String] = [
+            "com.apple.Safari": "Safari",
+            "com.google.Chrome": "Google Chrome",
+            "org.mozilla.firefox": "Firefox",
+            "com.microsoft.edgemac": "Microsoft Edge",
+            "com.brave.Browser": "Brave Browser",
+            "com.operasoftware.Opera": "Opera",
+        ]
+
+        static var analyticsDirectoryURL: URL {
+            let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+            return appSupport.appendingPathComponent("Dzenn").appendingPathComponent(analyticsDirectoryName)
+        }
+    }
 }

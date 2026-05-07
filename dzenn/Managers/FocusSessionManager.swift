@@ -17,6 +17,7 @@ final class FocusSessionManager: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private var completionHandled = false
     private let soundAlertPlayer = SoundAlertPlayer()
+    private var activeSessionRecord: FocusSessionRecord?
 
     private init() {
         self.timerService.$remainingTime
@@ -45,10 +46,18 @@ final class FocusSessionManager: ObservableObject {
         self.state = .running(mode: .quickSession, phase: .focus)
         self.completionHandled = false
 
+        let sessionRecord = FocusSessionRecord(
+            plannedMinutes: Int(duration / 60),
+            sessionMode: .quickSession
+        )
+        self.activeSessionRecord = sessionRecord
+        ActivityTracker.shared.startTracking(sessionID: sessionRecord.id)
+
         self.timerService.start(duration: duration)
     }
 
     func stop() {
+        finalizeAnalyticsSession(completed: false, interruptedReason: "User stopped")
         self.soundAlertPlayer.stop()
         self.timerService.stop()
         self.completionHandled = true
@@ -59,12 +68,16 @@ final class FocusSessionManager: ObservableObject {
         guard self.isActive, !self.isPaused else { return }
         self.timerService.pause()
         self.isPaused = true
+        ActivityTracker.shared.pauseTracking()
     }
 
     func resume() {
         guard self.isActive, self.isPaused else { return }
         self.timerService.resume()
         self.isPaused = false
+        if let sessionRecord = self.activeSessionRecord {
+            ActivityTracker.shared.resumeTracking(sessionID: sessionRecord.id)
+        }
     }
 
     private func breakDuration(for type: BreakType) -> TimeInterval {
@@ -80,6 +93,9 @@ final class FocusSessionManager: ObservableObject {
 
         switch self.state.phase {
         case .focus:
+            if self.state.mode == .quickSession {
+                finalizeAnalyticsSession(completed: true)
+            }
             self.prepareBreak(type: .short)
             WindowManager.shared.hideFloating()
             MenuBarController.shared?.showPopover()
@@ -99,6 +115,7 @@ final class FocusSessionManager: ObservableObject {
         self.duration = 0
         self.state = .idle
         self.completionHandled = true
+        self.activeSessionRecord = nil
     }
 
     private func completeSession(mode: SessionMode) {
@@ -108,6 +125,24 @@ final class FocusSessionManager: ObservableObject {
         self.duration = 0
         self.state = .completed(mode: mode)
         self.completionHandled = true
+        self.activeSessionRecord = nil
+    }
+
+    private func finalizeAnalyticsSession(completed: Bool, interruptedReason: String? = nil) {
+        guard var sessionRecord = self.activeSessionRecord else { return }
+
+        let appEvents = ActivityTracker.shared.stopTracking()
+        let focusSeconds = appEvents.reduce(0) { $0 + $1.durationSeconds }
+
+        sessionRecord.endedAt = Date()
+        sessionRecord.actualFocusSeconds = focusSeconds
+        sessionRecord.completed = completed
+        sessionRecord.interruptedReason = interruptedReason
+
+        AnalyticsStore.shared.updateFocusSession(sessionRecord)
+        AnalyticsStore.shared.appendAppActivityEvents(appEvents)
+
+        self.activeSessionRecord = nil
     }
 
     private func prepareBreak(type: BreakType) {

@@ -69,6 +69,8 @@ struct MainView: View {
                 GeneralSettingsView()
             case .appearance:
                 FloatingAppSettingsView()
+            case .analytics:
+                AnalyticsDashboardView()
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -115,17 +117,25 @@ private struct SidebarRow: View {
 }
 
 private enum SidebarItem: String, CaseIterable, Identifiable {
-    case general, appearance
+    case general, appearance, analytics
     var id: String {
         rawValue
     }
 
     var title: String {
-        self == .general ? "General" : "Appearance"
+        switch self {
+        case .general: "General"
+        case .appearance: "Appearance"
+        case .analytics: "Analytics"
+        }
     }
 
     var systemImage: String {
-        self == .general ? "gearshape" : "swatchpalette"
+        switch self {
+        case .general: "gearshape"
+        case .appearance: "swatchpalette"
+        case .analytics: "chart.bar.xaxis"
+        }
     }
 }
 
