@@ -13,7 +13,7 @@ struct DzennApp: App {
 
     var body: some Scene {
         Settings {
-            EmptyView()
+            MainView()
         }
     }
 }

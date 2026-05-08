@@ -1,7 +1,8 @@
 import SwiftUI
 
 struct MainView: View {
-    @State private var selection: SidebarItem? = .general
+    @AppStorage("mainViewSelectedSidebarItem")
+    private var selectionID: String = SidebarItem.general.rawValue
     private let columnBottomPadding: CGFloat = 6
     private let outerSidePadding: CGFloat = 6
     private let columnTopPadding: CGFloat = 6
@@ -42,12 +43,14 @@ struct MainView: View {
                 .padding(.bottom, 10)
 
                 ForEach(SidebarItem.allCases) { item in
-                    SidebarRow(item: item, isSelected: self.selection == item)
-                        .onTapGesture {
-                            withAnimation(.easeInOut(duration: 0.16)) {
-                                self.selection = item
-                            }
-                        }
+                    Button {
+                        self.select(item)
+                    } label: {
+                        SidebarRow(item: item, isSelected: self.selection == item)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(item.title)
+                    .accessibilityAddTraits(self.selection == item ? .isSelected : [])
                 }
                 Spacer()
             }
@@ -64,7 +67,7 @@ struct MainView: View {
 
     private var detailSection: some View {
         Group {
-            switch self.selection ?? .general {
+            switch self.selection {
             case .general:
                 GeneralSettingsView()
             case .appearance:
@@ -75,6 +78,17 @@ struct MainView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(self.mainBackground)
+    }
+
+    private var selection: SidebarItem {
+        SidebarItem(rawValue: self.selectionID) ?? .general
+    }
+
+    private func select(_ item: SidebarItem) {
+        guard self.selection != item else { return }
+        withAnimation(.easeInOut(duration: 0.16)) {
+            self.selectionID = item.rawValue
+        }
     }
 
     private var mainBackground: Color {

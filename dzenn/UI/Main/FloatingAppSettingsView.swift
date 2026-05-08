@@ -38,7 +38,6 @@ struct FloatingAppSettingsView: View {
                 self.styleSection
                 self.windowFeelSection
                 self.modeSpecificSection
-                self.plannedControlsSection
             }
             .padding(24)
             .frame(maxWidth: .infinity, alignment: .topLeading)
@@ -74,9 +73,34 @@ struct FloatingAppSettingsView: View {
         self.cachedImage != nil
     }
 
+    private var hasMissingStoredImage: Bool {
+        !self.imagePath.isEmpty && self.cachedImage == nil
+    }
+
     private var selectedImageName: String {
         guard !self.imagePath.isEmpty else { return "No image selected" }
         return URL(fileURLWithPath: self.imagePath).lastPathComponent
+    }
+
+    private var selectedImageLabel: String {
+        if self.hasSelectedImage {
+            return self.selectedImageName
+        }
+        if self.hasMissingStoredImage {
+            return "\(self.selectedImageName) unavailable"
+        }
+        return "No image selected"
+    }
+
+    private var imageSelectionSubtitle: String {
+        if self.hasMissingStoredImage {
+            return "Stored artwork can no longer be loaded. Choose replacement to restore image layouts."
+        }
+        return "Wide artwork works best. You can replace it anytime."
+    }
+
+    private var imagePickerButtonTitle: String {
+        self.hasSelectedImage || self.hasMissingStoredImage ? "Replace Image..." : "Choose Image..."
     }
 
     private var styleSection: some View {
@@ -186,18 +210,18 @@ struct FloatingAppSettingsView: View {
                         : "Image Only hides timer and turns panel into visual board.")
 
                 SettingsRow(
-                    title: self.hasSelectedImage ? self.selectedImageName : "No image selected",
-                    subtitle: "Wide artwork works best. You can replace it anytime.")
+                    title: self.selectedImageLabel,
+                    subtitle: self.imageSelectionSubtitle)
                 {
                     HStack(spacing: 10) {
-                        Button(self.hasSelectedImage ? "Replace Image..." : "Choose Image...") {
+                        Button(self.imagePickerButtonTitle) {
                             self.pickImage()
                         }
 
                         Button("Remove") {
                             self.removeStoredImage()
                         }
-                        .disabled(!self.hasSelectedImage)
+                        .disabled(self.imagePath.isEmpty)
                     }
                 }
 
@@ -208,31 +232,6 @@ struct FloatingAppSettingsView: View {
                 if let image = self.cachedImage {
                     Divider()
                     self.imagePositioningSection(image: image)
-                }
-            }
-        }
-    }
-
-    private var plannedControlsSection: some View {
-        SettingsSurfaceCard {
-            VStack(alignment: .leading, spacing: 16) {
-                SettingsSectionHeading(
-                    title: "Good next additions",
-                    subtitle: "Strong candidates for future Appearance page polish.")
-
-                VStack(spacing: 10) {
-                    PlannedAppearanceRow(
-                        title: "Corner radius",
-                        subtitle: "Switch between sharper or softer floating edges.")
-                    PlannedAppearanceRow(
-                        title: "Glass intensity",
-                        subtitle: "Control how much blur and translucency show through.")
-                    PlannedAppearanceRow(
-                        title: "Typography",
-                        subtitle: "Alternate timer font, weight, and number spacing.")
-                    PlannedAppearanceRow(
-                        title: "Shadow depth",
-                        subtitle: "Choose softer calm shadow or stronger lifted card.")
                 }
             }
         }
@@ -574,35 +573,6 @@ private struct FloatingImageEmptyState: View {
         .overlay(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .stroke(Color.white.opacity(0.08), style: StrokeStyle(lineWidth: 1, dash: [5, 6])))
-    }
-}
-
-private struct PlannedAppearanceRow: View {
-    let title: String
-    let subtitle: String
-
-    var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(self.title)
-                    .font(.system(size: 13.5, weight: .semibold))
-
-                Text(self.subtitle)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.secondary)
-            }
-
-            Spacer(minLength: 12)
-
-            SettingsBadge(title: "Coming soon")
-        }
-        .padding(14)
-        .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(Color.white.opacity(0.03)))
-        .overlay(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .stroke(Color.white.opacity(0.08), lineWidth: 1))
     }
 }
 

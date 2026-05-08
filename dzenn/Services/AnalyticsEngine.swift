@@ -7,10 +7,17 @@ final class AnalyticsEngine {
 
     // MARK: - Summary
 
-    func buildSummary(from sessions: [FocusSessionRecord], appEvents: [AppActivityEvent], webVisits: [WebsiteVisitRecord]) -> AnalyticsSummary {
+    func buildSummary(
+        from sessions: [FocusSessionRecord],
+        appEvents: [AppActivityEvent],
+        webVisits: [WebsiteVisitRecord]) -> AnalyticsSummary
+    {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
-        let weekStart = calendar.date(byAdding: .day, value: -(AppConstants.AnalyticsSettings.weeklySummaryDays - 1), to: today)!
+        let weekStart = calendar.date(
+            byAdding: .day,
+            value: -(AppConstants.AnalyticsSettings.weeklySummaryDays - 1),
+            to: today)!
 
         let todaySessions = sessions.filter { calendar.startOfDay(for: $0.startedAt) == today }
         let weekSessions = sessions.filter { $0.startedAt >= weekStart }
@@ -21,48 +28,23 @@ final class AnalyticsEngine {
         let streak = calculateStreak(from: sessions)
         let (bestDay, bestDaySeconds) = calculateBestDay(from: sessions)
 
-        let totalAppSeconds = appEvents.reduce(0) { $0 + $1.durationSeconds }
-        let appGroups = Dictionary(grouping: appEvents, by: { $0.appName })
-        let topApps = appGroups
-            .map { name, events in
-                AnalyticsBreakdownItem(name: name, seconds: events.reduce(0) { $0 + $1.durationSeconds }, icon: nil)
-            }
-            .sorted { $0.seconds > $1.seconds }
-            .prefix(10)
-            .map { item in
-                var copy = item
-                copy.percentage = totalAppSeconds > 0 ? (item.seconds / totalAppSeconds) * 100 : 0
-                return copy
-            }
-
-        let totalWebSeconds = webVisits.reduce(0) { $0 + $1.durationSeconds }
-        let domainGroups = Dictionary(grouping: webVisits, by: { $0.domain })
-        let topDomains = domainGroups
-            .map { domain, visits in
-                AnalyticsBreakdownItem(name: domain, seconds: visits.reduce(0) { $0 + $1.durationSeconds }, icon: nil)
-            }
-            .sorted { $0.seconds > $1.seconds }
-            .prefix(10)
-            .map { item in
-                var copy = item
-                copy.percentage = totalWebSeconds > 0 ? (item.seconds / totalWebSeconds) * 100 : 0
-                return copy
-            }
-
         return AnalyticsSummary(
             todayFocusSeconds: todayFocus,
             weekFocusSeconds: weekFocus,
             streakDays: streak,
             bestDay: bestDay,
             bestDaySeconds: bestDaySeconds,
-            topApps: Array(topApps),
-            topDomains: Array(topDomains)
+            topApps: self.buildTopApps(from: appEvents),
+            topDomains: self.buildTopDomains(from: webVisits)
         )
     }
 
     // MARK: - Heatmap
 
-    func buildHeatmapCells(from sessions: [FocusSessionRecord], days: Int = AppConstants.AnalyticsSettings.heatmapDays) -> [AnalyticsHeatmapCell] {
+    func buildHeatmapCells(
+        from sessions: [FocusSessionRecord],
+        days: Int = AppConstants.AnalyticsSettings.heatmapDays) -> [AnalyticsHeatmapCell]
+    {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         let startDate = calendar.date(byAdding: .day, value: -(days - 1), to: today)!
@@ -78,7 +60,11 @@ final class AnalyticsEngine {
         while currentDate <= today {
             let seconds = dayTotals[currentDate] ?? 0
             let level = intensityLevel(for: seconds)
-            cells.append(AnalyticsHeatmapCell(date: currentDate, focusSeconds: seconds, intensityLevel: level))
+            cells.append(
+                AnalyticsHeatmapCell(
+                    date: currentDate,
+                    focusSeconds: seconds,
+                    intensityLevel: level))
             currentDate = calendar.date(byAdding: .day, value: 1, to: currentDate)!
         }
         return cells
@@ -86,7 +72,12 @@ final class AnalyticsEngine {
 
     // MARK: - Daily Snapshots
 
-    func buildDailySnapshots(from sessions: [FocusSessionRecord], appEvents: [AppActivityEvent], webVisits: [WebsiteVisitRecord], days: Int = AppConstants.AnalyticsSettings.defaultDashboardRangeDays) -> [DailyAnalyticsSnapshot] {
+    func buildDailySnapshots(
+        from sessions: [FocusSessionRecord],
+        appEvents: [AppActivityEvent],
+        webVisits: [WebsiteVisitRecord],
+        days: Int = AppConstants.AnalyticsSettings.defaultDashboardRangeDays) -> [DailyAnalyticsSnapshot]
+    {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         let startDate = calendar.date(byAdding: .day, value: -(days - 1), to: today)!
@@ -119,7 +110,9 @@ final class AnalyticsEngine {
             let appGroups = Dictionary(grouping: apps, by: { $0.appName })
             let topApps = appGroups
                 .map { name, events in
-                    DailyAnalyticsSnapshot.TopItem(name: name, seconds: events.reduce(0) { $0 + $1.durationSeconds })
+                    DailyAnalyticsSnapshot.TopItem(
+                        name: name,
+                        seconds: events.reduce(0) { $0 + $1.durationSeconds })
                 }
                 .sorted { $0.seconds > $1.seconds }
                 .prefix(5)
@@ -128,7 +121,9 @@ final class AnalyticsEngine {
             let domainGroups = Dictionary(grouping: visits, by: { $0.domain })
             let topDomains = domainGroups
                 .map { domain, v in
-                    DailyAnalyticsSnapshot.TopItem(name: domain, seconds: v.reduce(0) { $0 + $1.durationSeconds })
+                    DailyAnalyticsSnapshot.TopItem(
+                        name: domain,
+                        seconds: v.reduce(0) { $0 + $1.durationSeconds })
                 }
                 .sorted { $0.seconds > $1.seconds }
                 .prefix(5)
@@ -149,7 +144,11 @@ final class AnalyticsEngine {
 
     // MARK: - Timeline
 
-    func buildTimeline(for date: Date, appEvents: [AppActivityEvent], webVisits: [WebsiteVisitRecord]) -> [AnalyticsTimelineEntry] {
+    func buildTimeline(
+        for date: Date,
+        appEvents: [AppActivityEvent],
+        webVisits: [WebsiteVisitRecord]) -> [AnalyticsTimelineEntry]
+    {
         let calendar = Calendar.current
         let dayStart = calendar.startOfDay(for: date)
         let dayEnd = calendar.date(byAdding: .day, value: 1, to: dayStart)!
@@ -191,12 +190,51 @@ final class AnalyticsEngine {
         return entries.sorted { $0.startedAt < $1.startedAt }
     }
 
+    // MARK: - Breakdown
+
+    func buildTopApps(
+        from appEvents: [AppActivityEvent],
+        startDate: Date? = nil,
+        endDate: Date? = nil,
+        limit: Int = 10) -> [AnalyticsBreakdownItem]
+    {
+        let filteredEvents = appEvents.filter { event in
+            self.isWithinRange(event.startedAt, startDate: startDate, endDate: endDate)
+        }
+
+        return self.buildBreakdownItems(
+            from: filteredEvents,
+            groupKey: \.appName,
+            duration: \.durationSeconds,
+            limit: limit)
+    }
+
+    func buildTopDomains(
+        from webVisits: [WebsiteVisitRecord],
+        startDate: Date? = nil,
+        endDate: Date? = nil,
+        limit: Int = 10) -> [AnalyticsBreakdownItem]
+    {
+        let filteredVisits = webVisits.filter { visit in
+            self.isWithinRange(visit.startedAt, startDate: startDate, endDate: endDate)
+        }
+
+        return self.buildBreakdownItems(
+            from: filteredVisits,
+            groupKey: \.domain,
+            duration: \.durationSeconds,
+            limit: limit)
+    }
+
     // MARK: - Helpers
 
     private func calculateStreak(from sessions: [FocusSessionRecord]) -> Int {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
-        var uniqueDays = Set(sessions.filter { $0.actualFocusSeconds > 0 }.map { calendar.startOfDay(for: $0.startedAt) })
+        let uniqueDays = Set(
+            sessions
+                .filter { $0.actualFocusSeconds > 0 }
+                .map { calendar.startOfDay(for: $0.startedAt) })
 
         var streak = 0
         var currentDay = today
@@ -238,5 +276,40 @@ final class AnalyticsEngine {
         if minutes < 60 { return 3 }
         if minutes < 120 { return 4 }
         return 5
+    }
+
+    private func isWithinRange(_ date: Date, startDate: Date?, endDate: Date?) -> Bool {
+        if let startDate, date < startDate {
+            return false
+        }
+        if let endDate, date >= endDate {
+            return false
+        }
+        return true
+    }
+
+    private func buildBreakdownItems<T>(
+        from items: [T],
+        groupKey: KeyPath<T, String>,
+        duration: KeyPath<T, Double>,
+        limit: Int) -> [AnalyticsBreakdownItem]
+    {
+        let totalSeconds = items.reduce(0) { $0 + $1[keyPath: duration] }
+        let groups = Dictionary(grouping: items, by: { $0[keyPath: groupKey] })
+
+        return groups
+            .map { name, groupedItems in
+                AnalyticsBreakdownItem(
+                    name: name,
+                    seconds: groupedItems.reduce(0) { $0 + $1[keyPath: duration] },
+                    icon: nil)
+            }
+            .sorted { $0.seconds > $1.seconds }
+            .prefix(limit)
+            .map { item in
+                var copy = item
+                copy.percentage = totalSeconds > 0 ? (item.seconds / totalSeconds) * 100 : 0
+                return copy
+            }
     }
 }

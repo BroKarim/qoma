@@ -114,7 +114,7 @@ struct FloatingTimerView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 10))
                 }
             } else {
-                Text("Image")
+                Text("Choose Image")
                     .font(.caption)
                     .foregroundColor(theme.secondaryTextColor)
             }
@@ -150,7 +150,7 @@ struct FloatingTimerView: View {
     }
 
     private func format(_ time: TimeInterval) -> String {
-        let total = Int(time)
+        let total = max(0, Int(time.rounded(.down)))
         let m = total / 60
         let s = total % 60
         return String(format: "%02d:%02d", m, s)

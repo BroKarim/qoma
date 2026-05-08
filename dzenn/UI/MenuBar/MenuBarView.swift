@@ -23,17 +23,19 @@ struct MenuBarView: View {
                 .padding(.top, 12)
                 .padding(.bottom, 4)
                 .padding(.horizontal, 10)
+                .accessibilityLabel("Focus Duration")
+                .accessibilityValue("\(self.minutes) minutes")
 
             HStack(spacing: 8) {
                 if self.session.isActive {
-                    Button("cancel") {
+                    Button("Cancel") {
                         self.cancelSession()
                     }
                     .font(.system(size: 13, weight: .regular))
                     .foregroundColor(.secondary)
                     .buttonStyle(.plain)
 
-                    Button("restart") {
+                    Button("Restart") {
                         self.startSession()
                     }
                     .font(.system(size: 13, weight: .regular))
@@ -68,19 +70,26 @@ struct MenuBarView: View {
                         .foregroundColor(.primary)
                 }
                 .buttonStyle(.plain)
+                .keyboardShortcut(.defaultAction)
 
                 Spacer(minLength: 0)
 
                 Menu(content: {
-                    Button("Settings") {
-                        MenuBarController.shared?.openSettingsWindow()
-                        if MenuBarController.shared == nil {
-                            WindowManager.shared.showMainWindow()
+                    if #available(macOS 14.0, *) {
+                        SettingsLink {
+                            Text("Settings...")
                         }
+                        .keyboardShortcut(",", modifiers: .command)
+                    } else {
+                        Button("Settings...") {
+                            MenuBarController.shared?.openLegacySettingsWindow()
+                        }
+                        .keyboardShortcut(",", modifiers: .command)
                     }
                     Button("Contact Us") { self.openContact() }
                     Divider()
                     Button("Quit") { NSApp.terminate(nil) }
+                        .keyboardShortcut("q", modifiers: .command)
                 }, label: {
                     Image(systemName: "ellipsis")
                         .font(.system(size: 16))
@@ -103,14 +112,31 @@ struct MenuBarView: View {
             RoundedRectangle(cornerRadius: 12, style: .continuous)
                 .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1))
         .onAppear {
-            self.minutes = min(self.maxTime, max(self.minTime, self.selectedPresetMinutes))
+            self.minutes = self.clampMinutes(self.selectedPresetMinutes)
+        }
+        .onChange(of: self.minutes) { newValue in
+            let clamped = self.clampMinutes(newValue)
+            if self.minutes != clamped {
+                self.minutes = clamped
+                return
+            }
+            self.selectedPresetMinutes = clamped
+        }
+        .onChange(of: self.selectedPresetMinutes) { newValue in
+            let clamped = self.clampMinutes(newValue)
+            if self.minutes != clamped {
+                self.minutes = clamped
+            }
         }
     }
 
     // MARK: - Actions
 
     private func startSession() {
-        self.session.start(task: "Focus Session", duration: TimeInterval(self.minutes * 60))
+        let clampedMinutes = self.clampMinutes(self.minutes)
+        self.minutes = clampedMinutes
+        self.selectedPresetMinutes = clampedMinutes
+        self.session.start(task: "Focus Session", duration: TimeInterval(clampedMinutes * 60))
         WindowManager.shared.showFloating()
     }
 
@@ -121,8 +147,8 @@ struct MenuBarView: View {
     }
 
     private var primaryButtonTitle: String {
-        if !self.session.isActive { return "start" }
-        return self.session.isPaused ? "resume" : "pause"
+        if !self.session.isActive { return "Start" }
+        return self.session.isPaused ? "Resume" : "Pause"
     }
 
     private func handlePrimaryAction() {
@@ -141,6 +167,10 @@ struct MenuBarView: View {
     private func cancelSession() {
         self.session.stop()
         WindowManager.shared.hideFloating()
+    }
+
+    private func clampMinutes(_ value: Int) -> Int {
+        min(self.maxTime, max(self.minTime, value))
     }
 }
 

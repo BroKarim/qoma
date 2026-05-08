@@ -4,27 +4,28 @@ struct AnalyticsTimelineView: View {
     let entries: [AnalyticsTimelineEntry]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Activity Timeline")
-                .font(.headline)
+        SettingsSurfaceCard {
+            VStack(alignment: .leading, spacing: 16) {
+                SettingsSectionHeading(
+                    title: "Activity Timeline",
+                    subtitle: "Chronological view of tracked apps and sites for today.")
 
-            if entries.isEmpty {
-                Text("No activity recorded for this day.")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .padding()
-            } else {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 0) {
-                        ForEach(entries) { entry in
-                            TimelineRow(entry: entry)
+                if self.entries.isEmpty {
+                    Text("No activity recorded for this day.")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                } else {
+                    ScrollView {
+                        LazyVStack(alignment: .leading, spacing: 0) {
+                            ForEach(self.entries) { entry in
+                                TimelineRow(entry: entry)
+                            }
                         }
                     }
+                    .frame(maxHeight: 300)
                 }
-                .frame(maxHeight: 300)
             }
         }
-        .padding()
     }
 }
 
@@ -65,6 +66,9 @@ struct TimelineRow: View {
     }
 
     private func formatDuration(_ seconds: Double) -> String {
+        if seconds < 60 {
+            return "<1m"
+        }
         let mins = Int(seconds / 60)
         if mins >= 60 {
             return "\(mins / 60)h \(mins % 60)m"

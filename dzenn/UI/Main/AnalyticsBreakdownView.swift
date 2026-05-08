@@ -1,8 +1,10 @@
 import SwiftUI
 
 struct AnalyticsBreakdownView: View {
-    let apps: [AnalyticsBreakdownItem]
-    let domains: [AnalyticsBreakdownItem]
+    let todayApps: [AnalyticsBreakdownItem]
+    let todayDomains: [AnalyticsBreakdownItem]
+    let weekApps: [AnalyticsBreakdownItem]
+    let weekDomains: [AnalyticsBreakdownItem]
     @State private var selectedRange: BreakdownRange = .today
 
     enum BreakdownRange: String, CaseIterable {
@@ -11,47 +13,70 @@ struct AnalyticsBreakdownView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Picker("Range", selection: $selectedRange) {
-                ForEach(BreakdownRange.allCases, id: \.self) { range in
-                    Text(range.rawValue).tag(range)
-                }
-            }
-            .pickerStyle(.segmented)
-
+        SettingsSurfaceCard {
             VStack(alignment: .leading, spacing: 16) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Top Apps")
-                        .font(.headline)
-                    if apps.isEmpty {
-                        Text("No app data yet")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                    } else {
-                        ForEach(apps.prefix(5)) { item in
-                            BreakdownRow(item: item)
-                        }
+                SettingsSectionHeading(
+                    title: "Breakdown",
+                    subtitle: "See which apps and sites take most of your tracked focus time.")
+
+                Picker("Range", selection: $selectedRange) {
+                    ForEach(BreakdownRange.allCases, id: \.self) { range in
+                        Text(range.rawValue).tag(range)
                     }
                 }
+                .pickerStyle(.segmented)
 
-                Divider()
+                VStack(alignment: .leading, spacing: 16) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Top Apps")
+                            .font(.headline)
+                        if self.visibleApps.isEmpty {
+                            Text("No app data in this range")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        } else {
+                            ForEach(self.visibleApps.prefix(5)) { item in
+                                BreakdownRow(item: item)
+                            }
+                        }
+                    }
 
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Top Websites")
-                        .font(.headline)
-                    if domains.isEmpty {
-                        Text("No website data yet")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                    } else {
-                        ForEach(domains.prefix(5)) { item in
-                            BreakdownRow(item: item)
+                    Divider()
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Top Websites")
+                            .font(.headline)
+                        if self.visibleDomains.isEmpty {
+                            Text("No website data in this range")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        } else {
+                            ForEach(self.visibleDomains.prefix(5)) { item in
+                                BreakdownRow(item: item)
+                            }
                         }
                     }
                 }
             }
         }
-        .padding()
+    }
+
+    private var visibleApps: [AnalyticsBreakdownItem] {
+        switch self.selectedRange {
+        case .today:
+            self.todayApps
+        case .week:
+            self.weekApps
+        }
+    }
+
+    private var visibleDomains: [AnalyticsBreakdownItem] {
+        switch self.selectedRange {
+        case .today:
+            self.todayDomains
+        case .week:
+            self.weekDomains
+        }
     }
 }
 
