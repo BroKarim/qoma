@@ -5,15 +5,15 @@ struct AnalyticsHeatmapView: View {
     @Binding var selectedDate: Date
 
     private let intensityColors: [Color] = [
-        Color.gray.opacity(0.15),
-        Color.green.opacity(0.28),
-        Color.green.opacity(0.45),
-        Color.green.opacity(0.62),
-        Color.green.opacity(0.78),
-        Color.green,
+        Color(red: 0.20, green: 0.21, blue: 0.22),
+        Color(red: 0.28, green: 0.31, blue: 0.32),
+        Color(red: 0.34, green: 0.42, blue: 0.39),
+        Color(red: 0.44, green: 0.55, blue: 0.48),
+        Color(red: 0.58, green: 0.71, blue: 0.58),
+        Color(red: 0.74, green: 0.84, blue: 0.68),
     ]
-    private let cellSize: CGFloat = 16
-    private let cellSpacing: CGFloat = 4
+    private let rowSpacing: CGFloat = 6
+    private let columnSpacing: CGFloat = 4
 
     private static let monthFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -23,41 +23,62 @@ struct AnalyticsHeatmapView: View {
 
     private static let dayFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.dateFormat = "MMM d"
+        formatter.dateFormat = "d MMM"
         return formatter
     }()
 
     var body: some View {
         SettingsSurfaceCard {
             VStack(alignment: .leading, spacing: 18) {
-                SettingsSectionHeading(
-                    title: "Focus Heatmap",
-                    subtitle: "Weekly columns across recent months. Click day to inspect activity.")
+                self.header
 
                 if self.weekColumns.isEmpty {
                     Text("No focus history yet.")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 } else {
-                    VStack(alignment: .leading, spacing: 10) {
-                        self.monthAxis
+                    GeometryReader { proxy in
+                        let metrics = self.gridMetrics(for: proxy.size.width)
 
-                        HStack(alignment: .top, spacing: self.cellSpacing) {
-                            self.weekdayAxis
-
-                            HStack(alignment: .top, spacing: self.cellSpacing) {
+                        VStack(alignment: .leading, spacing: 14) {
+                            HStack(alignment: .top, spacing: self.columnSpacing) {
                                 ForEach(Array(self.weekColumns.enumerated()), id: \.offset) { _, week in
-                                    VStack(spacing: self.cellSpacing) {
+                                    VStack(spacing: self.rowSpacing) {
                                         ForEach(week, id: \.id) { cell in
-                                            self.heatmapCell(cell)
+                                            self.heatmapCell(cell, metrics: metrics)
                                         }
                                     }
+                                    .frame(width: metrics.columnWidth)
                                 }
                             }
-                        }
-                    }
 
-                    self.legend
+                            self.monthAxis(metrics: metrics)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    }
+                    .frame(height: self.gridHeight)
+                }
+            }
+        }
+    }
+
+    private var header: some View {
+        HStack(alignment: .center, spacing: 12) {
+            Text("Activity")
+                .font(.system(size: 17, weight: .medium))
+                .foregroundColor(.primary)
+
+            Spacer(minLength: 16)
+
+            if let selectedCell = self.selectedCell {
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(Self.dayFormatter.string(from: selectedCell.date))
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.primary.opacity(0.82))
+
+                    Text("\(Int(selectedCell.focusSeconds / 60)) min focus")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
             }
         }
@@ -67,68 +88,51 @@ struct AnalyticsHeatmapView: View {
         self.cells.chunked(into: 7)
     }
 
-    private var monthAxis: some View {
-        HStack(alignment: .center, spacing: self.cellSpacing) {
-            Color.clear
-                .frame(width: 26)
+    private var gridHeight: CGFloat {
+        let rows = 7
+        let cellSize: CGFloat = 18
+        let monthAxisHeight: CGFloat = 24
+        return (CGFloat(rows) * cellSize) + (CGFloat(rows - 1) * self.rowSpacing) + monthAxisHeight
+    }
 
-            HStack(alignment: .center, spacing: self.cellSpacing) {
-                ForEach(Array(self.weekColumns.enumerated()), id: \.offset) { index, week in
-                    let label = self.monthLabel(for: week, index: index)
-                    Text(label ?? "")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                        .frame(width: self.cellSize, alignment: .leading)
-                }
+    private var selectedCell: AnalyticsHeatmapCell? {
+        self.cells.first { Calendar.current.isDate($0.date, inSameDayAs: self.selectedDate) }
+    }
+
+    private func monthAxis(metrics: GridMetrics) -> some View {
+        HStack(alignment: .center, spacing: self.columnSpacing) {
+            ForEach(Array(self.weekColumns.enumerated()), id: \.offset) { index, week in
+                Text(self.monthLabel(for: week, index: index) ?? "")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.primary.opacity(0.78))
+                    .frame(width: metrics.columnWidth, alignment: .leading)
             }
         }
     }
 
-    private var weekdayAxis: some View {
-        VStack(spacing: self.cellSpacing) {
-            ForEach(self.weekdayLabels.indices, id: \.self) { index in
-                Text(self.weekdayLabels[index])
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-                    .frame(width: 26, height: self.cellSize, alignment: .leading)
-            }
-        }
-    }
-
-    private var legend: some View {
-        HStack(spacing: 12) {
-            Text("Less")
-                .font(.caption2)
-                .foregroundColor(.secondary)
-
-            ForEach(self.intensityColors.indices, id: \.self) { level in
-                RoundedRectangle(cornerRadius: 3, style: .continuous)
-                    .fill(self.intensityColors[level])
-                    .frame(width: 12, height: 12)
-            }
-
-            Text("More")
-                .font(.caption2)
-                .foregroundColor(.secondary)
-        }
-    }
-
-    private func heatmapCell(_ cell: AnalyticsHeatmapCell) -> some View {
+    private func heatmapCell(_ cell: AnalyticsHeatmapCell, metrics: GridMetrics) -> some View {
         let isSelected = Calendar.current.isDate(cell.date, inSameDayAs: self.selectedDate)
 
         return Button {
             self.selectedDate = cell.date
         } label: {
-            RoundedRectangle(cornerRadius: 4, style: .continuous)
+            RoundedRectangle(cornerRadius: metrics.cornerRadius, style: .continuous)
                 .fill(self.intensityColors[cell.intensityLevel])
-                .frame(width: self.cellSize, height: self.cellSize)
+                .frame(width: metrics.cellSize, height: metrics.cellSize)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 4, style: .continuous)
+                    RoundedRectangle(cornerRadius: metrics.cornerRadius, style: .continuous)
                         .stroke(
-                            isSelected ? Color.white.opacity(0.9) : Color.secondary.opacity(0.16),
-                            lineWidth: isSelected ? 1.6 : 0.5))
+                            isSelected
+                                ? Color(red: 0.56, green: 0.71, blue: 0.58)
+                                : Color.black.opacity(0.18),
+                            lineWidth: isSelected ? 1.8 : 0.8))
+                .shadow(
+                    color: isSelected ? Color(red: 0.56, green: 0.71, blue: 0.58).opacity(0.22) : .clear,
+                    radius: 6,
+                    y: 1)
         }
         .buttonStyle(.plain)
+        .frame(width: metrics.columnWidth, alignment: .center)
         .help("\(self.formatDate(cell.date)): \(Int(cell.focusSeconds / 60))m focus")
     }
 
@@ -158,12 +162,24 @@ struct AnalyticsHeatmapView: View {
         Self.dayFormatter.string(from: date)
     }
 
-    private var weekdayLabels: [String] {
-        let calendar = Calendar.current
-        let labels = calendar.shortWeekdaySymbols
-        let shift = max(calendar.firstWeekday - 1, 0)
-        return (Array(labels[shift...]) + Array(labels[..<shift])).map { String($0.prefix(3)) }
+    private func gridMetrics(for width: CGFloat) -> GridMetrics {
+        let safeWidth = max(width, 320)
+        let columnCount = max(CGFloat(self.weekColumns.count), 1)
+        let totalSpacing = CGFloat(max(self.weekColumns.count - 1, 0)) * self.columnSpacing
+        let columnWidth = (safeWidth - totalSpacing) / columnCount
+        let cellSize = min(18, max(11, columnWidth * 0.56))
+
+        return GridMetrics(
+            cellSize: cellSize,
+            columnWidth: max(columnWidth, cellSize),
+            cornerRadius: min(5, max(3, cellSize * 0.24)))
     }
+}
+
+private struct GridMetrics {
+    let cellSize: CGFloat
+    let columnWidth: CGFloat
+    let cornerRadius: CGFloat
 }
 
 extension Array {

@@ -43,31 +43,27 @@ final class AnalyticsEngine {
 
     func buildHeatmapCells(
         from sessions: [FocusSessionRecord],
-        maxWeeks: Int = AppConstants.AnalyticsSettings.heatmapWeeks) -> [AnalyticsHeatmapCell]
+        days: Int = 120) -> [AnalyticsHeatmapCell]
     {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
-        let recentLimit = calendar.date(
-            byAdding: .day,
-            value: -((maxWeeks * 7) - 1),
-            to: today)!
-        let earliestSessionDate = sessions
-            .map(\.startedAt)
-            .min()
-            .map { calendar.startOfDay(for: $0) }
-        let visibleStart = max(earliestSessionDate ?? recentLimit, recentLimit)
-        let startDate = self.startOfWeek(for: visibleStart, calendar: calendar)
-        let endDate = self.endOfWeek(for: today, calendar: calendar)
+        let targetStart = calendar.date(byAdding: .day, value: -(days - 1), to: today)!
+
+        let weekday = calendar.component(.weekday, from: targetStart)
+        let daysToSunday = weekday - 1
+        let actualStart = calendar.date(byAdding: .day, value: -daysToSunday, to: targetStart)!
 
         var dayTotals: [Date: Double] = [:]
-        for session in sessions where session.startedAt >= startDate {
+        for session in sessions {
             let day = calendar.startOfDay(for: session.startedAt)
-            dayTotals[day, default: 0] += session.actualFocusSeconds
+            if day >= actualStart && day <= today {
+                dayTotals[day, default: 0] += session.actualFocusSeconds
+            }
         }
 
         var cells: [AnalyticsHeatmapCell] = []
-        var currentDate = startDate
-        while currentDate <= endDate {
+        var currentDate = actualStart
+        while currentDate <= today {
             let seconds = dayTotals[currentDate] ?? 0
             let level = intensityLevel(for: seconds)
             cells.append(
