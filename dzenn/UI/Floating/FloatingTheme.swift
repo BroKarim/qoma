@@ -29,7 +29,7 @@ enum FloatingTheme: String, CaseIterable, Identifiable {
     var backgroundColor: Color {
         switch self {
         case .graphite:
-            Color(red: 20.0 / 255.0, green: 23.0 / 255.0, blue: 31.0 / 255.0)
+            .black
         case .ocean:
             Color(red: 15.0 / 255.0, green: 44.0 / 255.0, blue: 63.0 / 255.0)
         case .forest:

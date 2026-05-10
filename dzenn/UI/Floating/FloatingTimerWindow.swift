@@ -46,7 +46,7 @@ struct FloatingTimerView: View {
             }
         }
         .frame(width: layoutMode.contentSize.width)
-        .background(self.panelBackground(theme: theme, opacity: clampedOpacity))
+        .background(self.panelBackground(theme: theme, opacity: clampedOpacity, isTimerOnly: layoutMode == .timerOnly))
         .clipShape(RoundedRectangle(cornerRadius: 18))
         .animation(.easeInOut(duration: 0.2), value: self.floatingOpacity)
         .onAppear {
@@ -62,15 +62,10 @@ struct FloatingTimerView: View {
     }
 
     private func timerOnlyContent(theme: FloatingTheme) -> some View {
-        VStack(spacing: 0) {
-            Spacer(minLength: 0)
-            Text(self.format(self.timer.remainingTime))
-                .font(.custom(Self.timerFontName, size: AppConstants.FloatingLayoutSettings.timerOnlyFontSize))
-                .foregroundColor(theme.textColor)
-                .padding(.horizontal, AppConstants.FloatingLayoutSettings.timerOnlyHorizontalPadding)
-                .offset(y: AppConstants.FloatingLayoutSettings.timerOnlyVerticalOffset)
-            Spacer(minLength: 0)
-        }
+        Text(self.format(self.timer.remainingTime))
+            .font(.custom(Self.timerFontName, size: AppConstants.FloatingLayoutSettings.timerOnlyFontSize))
+            .foregroundColor(theme.textColor)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private func timerContent(theme: FloatingTheme) -> some View {
@@ -123,15 +118,57 @@ struct FloatingTimerView: View {
     }
 
     @ViewBuilder
-    private func panelBackground(theme: FloatingTheme, opacity: Double) -> some View {
+    private func panelBackground(theme: FloatingTheme, opacity: Double, isTimerOnly: Bool = false) -> some View {
         let panelShape = RoundedRectangle(cornerRadius: 18)
+        let baseBackground = panelShape.fill(theme.backgroundColor.opacity(opacity))
 
-        panelShape
-            .fill(theme.backgroundColor.opacity(opacity))
-            .overlay(
-                panelShape
-                    .stroke(theme.borderColor, lineWidth: 1))
-            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+        if isTimerOnly {
+            baseBackground
+                .overlay(panelShape.stroke(Color.black.opacity(0.3), lineWidth: 1))
+                .shadow(color: Color.black.opacity(0.30), radius: 32, x: 0, y: 16)
+                .shadow(color: Color.black.opacity(0.30), radius: 16, x: 0, y: 8)
+                .shadow(color: Color.black.opacity(0.24), radius: 8, x: 0, y: 4)
+                .shadow(color: Color.black.opacity(0.24), radius: 4, x: 0, y: 2)
+                .shadow(color: Color.black.opacity(0.16), radius: 0, x: 0, y: -8)
+                .shadow(color: Color.black.opacity(0.24), radius: 2, x: 0, y: 1)
+                .overlay(
+                    panelShape
+                        .stroke(Color.black.opacity(1.0), lineWidth: 1)
+                )
+                .overlay(
+                    panelShape
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    Color.white.opacity(0.08),
+                                    Color.white.opacity(0.0)
+                                ]),
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                )
+                .overlay(
+                    panelShape
+                        .stroke(
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    Color.white.opacity(0.20),
+                                    Color.white.opacity(0.0)
+                                ]),
+                                startPoint: .top,
+                                endPoint: .bottom
+                            ),
+                            lineWidth: 1
+                        )
+                )
+        } else {
+            baseBackground
+                .overlay(
+                    panelShape
+                        .stroke(theme.borderColor, lineWidth: 1))
+                .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+        }
     }
 
     private func loadImage(path: String) -> NSImage? {
