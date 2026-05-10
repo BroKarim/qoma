@@ -12,8 +12,8 @@ struct AnalyticsHeatmapView: View {
         Color(red: 0.58, green: 0.71, blue: 0.58),
         Color(red: 0.74, green: 0.84, blue: 0.68),
     ]
-    private let rowSpacing: CGFloat = 3
-    private let columnSpacing: CGFloat = 3
+    private let cellSize: CGFloat = 14
+    private let cellSpacing: CGFloat = 4 
 
     private static let monthFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -29,7 +29,7 @@ struct AnalyticsHeatmapView: View {
         return formatter
     }()
 
-    var body: some View {
+   var body: some View {
         SettingsSurfaceCard {
             VStack(alignment: .leading, spacing: 18) {
                 self.header
@@ -39,26 +39,39 @@ struct AnalyticsHeatmapView: View {
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 } else {
-                    GeometryReader { proxy in
-                        let metrics = self.gridMetrics(for: proxy.size.width)
-
-                        VStack(alignment: .leading, spacing: 14) {
-                            HStack(alignment: .top, spacing: self.columnSpacing) {
-                                ForEach(Array(self.weekColumns.enumerated()), id: \.offset) { _, week in
-                                    VStack(spacing: self.rowSpacing) {
-                                        ForEach(week, id: \.id) { cell in
-                                            self.heatmapCell(cell, metrics: metrics)
-                                        }
+                    // Pakai GeometryReader hanya untuk month axis positioning
+                    VStack(alignment: .leading, spacing: 6) {
+                        // Grid heatmap — HStack spacing = cellSpacing (bukan columnWidth)
+                        HStack(alignment: .top, spacing: self.cellSpacing) {
+                            ForEach(Array(self.weekColumns.enumerated()), id: \.offset) { _, week in
+                                VStack(spacing: self.cellSpacing) {
+                                    ForEach(week, id: \.id) { cell in
+                                        self.heatmapCell(cell)
                                     }
-                                    .frame(width: metrics.columnWidth)
+                                }
+                                .frame(width: self.cellSize)
+                            }
+                        }
+
+                        // Month axis — pakai HStack spacing yang SAMA
+                        HStack(alignment: .center, spacing: self.cellSpacing) {
+                            ForEach(Array(self.weekColumns.enumerated()), id: \.offset) { index, week in
+                                // Lebar label = cellSize kolom itu + sisa sampai label berikutnya
+                                // Tapi cukup beri minWidth = 0, maxWidth = .infinity agar tidak terpotong
+                                // dan sembunyikan jika nil
+                                if let label = self.monthLabel(for: week, index: index) {
+                                    Text(label)
+                                        .font(.system(size: 10, weight: .medium))
+                                        .foregroundColor(.primary.opacity(0.78))
+                                        .fixedSize()  // <-- KUNCI: tidak terpotong
+                                        .frame(width: self.cellSize, alignment: .leading)
+                                } else {
+                                    Color.clear
+                                        .frame(width: self.cellSize)
                                 }
                             }
-
-                            self.monthAxis(metrics: metrics)
                         }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                     }
-                    .frame(height: self.gridHeight)
                 }
             }
         }
@@ -91,10 +104,10 @@ struct AnalyticsHeatmapView: View {
     }
 
     private var gridHeight: CGFloat {
-        let rows = 7
-        let cellSize: CGFloat = 12
-        let monthAxisHeight: CGFloat = 20
-        return (CGFloat(rows) * cellSize) + (CGFloat(rows - 1) * self.rowSpacing) + monthAxisHeight
+        let rows: CGFloat = 7
+        let monthAxisHeight: CGFloat = 14
+        let spacing: CGFloat = 6  // spacing antara grid dan month axis
+        return (rows * self.cellSize) + (CGFloat(rows - 1) * self.cellSpacing) + spacing + monthAxisHeight
     }
 
     private var selectedCell: AnalyticsHeatmapCell? {
@@ -102,27 +115,29 @@ struct AnalyticsHeatmapView: View {
     }
 
     private func monthAxis(metrics: GridMetrics) -> some View {
-        HStack(alignment: .center, spacing: self.columnSpacing) {
+        HStack(alignment: .center, spacing: self.cellSpacing) {
             ForEach(Array(self.weekColumns.enumerated()), id: \.offset) { index, week in
                 Text(self.monthLabel(for: week, index: index) ?? "")
-                    .font(.system(size: 12, weight: .medium))
+                    .font(.system(size: 10, weight: .medium))
                     .foregroundColor(.primary.opacity(0.78))
+                    .lineLimit(1)
                     .frame(width: metrics.columnWidth, alignment: .leading)
             }
         }
     }
 
-    private func heatmapCell(_ cell: AnalyticsHeatmapCell, metrics: GridMetrics) -> some View {
+    private func heatmapCell(_ cell: AnalyticsHeatmapCell) -> some View {
         let isSelected = Calendar.current.isDate(cell.date, inSameDayAs: self.selectedDate)
+        let cornerRadius = min(3, max(2, self.cellSize * 0.2))
 
         return Button {
             self.selectedDate = cell.date
         } label: {
-            RoundedRectangle(cornerRadius: metrics.cornerRadius, style: .continuous)
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                 .fill(self.intensityColors[cell.intensityLevel])
-                .frame(width: metrics.cellSize, height: metrics.cellSize)
+                .frame(width: self.cellSize, height: self.cellSize)
                 .overlay(
-                    RoundedRectangle(cornerRadius: metrics.cornerRadius, style: .continuous)
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                         .stroke(
                             isSelected
                                 ? Color(red: 0.56, green: 0.71, blue: 0.58)
@@ -134,7 +149,6 @@ struct AnalyticsHeatmapView: View {
                     y: 1)
         }
         .buttonStyle(.plain)
-        .frame(width: metrics.columnWidth, alignment: .center)
         .help("\(self.formatDate(cell.date)): \(Int(cell.focusSeconds / 60))m focus")
     }
 
@@ -167,9 +181,9 @@ struct AnalyticsHeatmapView: View {
     private func gridMetrics(for width: CGFloat) -> GridMetrics {
         let safeWidth = max(width, 320)
         let columnCount = max(CGFloat(self.weekColumns.count), 1)
-        let totalSpacing = CGFloat(max(self.weekColumns.count - 1, 0)) * self.columnSpacing
+        let totalSpacing = CGFloat(max(self.weekColumns.count - 1, 0)) * self.cellSpacing
         let columnWidth = (safeWidth - totalSpacing) / columnCount
-        let cellSize = min(12, max(10, columnWidth * 0.6))
+        let cellSize = min(14, max(11, columnWidth * 0.55))
 
         return GridMetrics(
             cellSize: cellSize,
