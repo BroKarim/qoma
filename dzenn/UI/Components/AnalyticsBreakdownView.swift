@@ -5,7 +5,7 @@ struct AnalyticsBreakdownView: View {
     let date: Date
     let apps: [AnalyticsBreakdownItem]
     let domains: [AnalyticsBreakdownItem]
-    @State private var automationStatus = AutomationStatus()
+    @StateObject private var permissionsManager = AnalyticsPermissionsManager()
 
     private static let dayFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -20,7 +20,7 @@ struct AnalyticsBreakdownView: View {
                     title: "Daily Breakdown",
                     subtitle: "Top apps and websites for \(Self.dayFormatter.string(from: self.date)).")
 
-                if !self.automationStatus.hasAutomationAccess && self.domains.isEmpty {
+                if !self.permissionsManager.hasAutomationAccess && self.domains.isEmpty {
                     self.websiteTrackingDisabledView
                 } else {
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
@@ -40,7 +40,7 @@ struct AnalyticsBreakdownView: View {
             }
         }
         .onAppear {
-            self.automationStatus.refresh()
+            self.permissionsManager.checkAutomation()
         }
     }
 
@@ -60,7 +60,7 @@ struct AnalyticsBreakdownView: View {
                 .multilineTextAlignment(.center)
 
             Button(action: {
-                self.automationStatus.openSystemSettings()
+                self.permissionsManager.openAutomationSettings()
             }) {
                 HStack {
                     Image(systemName: "gearshape")
@@ -76,21 +76,6 @@ struct AnalyticsBreakdownView: View {
         }
         .frame(maxWidth: .infinity, minHeight: 180)
         .padding()
-    }
-}
-
-private class AutomationStatus: ObservableObject {
-    @Published var hasAutomationAccess = false
-
-    func refresh() {
-        let status = AXIsProcessTrusted()
-        hasAutomationAccess = status
-    }
-
-    func openSystemSettings() {
-        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation") {
-            NSWorkspace.shared.open(url)
-        }
     }
 }
 
