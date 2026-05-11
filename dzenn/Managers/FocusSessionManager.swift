@@ -131,7 +131,7 @@ final class FocusSessionManager: ObservableObject {
     private func finalizeAnalyticsSession(completed: Bool, interruptedReason: String? = nil) {
         guard var sessionRecord = self.activeSessionRecord else { return }
 
-        let appEvents = ActivityTracker.shared.stopTracking()
+        let (appEvents, websiteVisits) = ActivityTracker.shared.stopTracking()
         let focusSeconds = appEvents.reduce(0) { $0 + $1.durationSeconds }
 
         sessionRecord.endedAt = Date()
@@ -141,6 +141,7 @@ final class FocusSessionManager: ObservableObject {
 
         AnalyticsStore.shared.updateFocusSession(sessionRecord)
         AnalyticsStore.shared.appendAppActivityEvents(appEvents)
+        AnalyticsStore.shared.appendWebsiteVisits(websiteVisits)
 
         self.activeSessionRecord = nil
     }
