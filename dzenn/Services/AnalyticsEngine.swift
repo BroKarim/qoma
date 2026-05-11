@@ -43,7 +43,7 @@ final class AnalyticsEngine {
 
     func buildHeatmapCells(
         from sessions: [FocusSessionRecord],
-        days: Int = 273) -> [AnalyticsHeatmapCell]
+        days: Int = 210) -> [AnalyticsHeatmapCell]
     {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
