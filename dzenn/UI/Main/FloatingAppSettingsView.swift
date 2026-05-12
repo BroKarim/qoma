@@ -438,18 +438,24 @@ private struct FloatingStyleOptionCard: View {
     }
 
     private var mixedPreview: some View {
-        VStack(spacing: 0) {
+        ZStack(alignment: .topLeading) {
             self.imagePanel(cornerRadius: 10)
-                .frame(height: 58)
 
-            RoundedRectangle(cornerRadius: 0, style: .continuous)
-                .fill(Color(red: 20.0 / 255.0, green: 23.0 / 255.0, blue: 31.0 / 255.0))
-                .overlay(
-                    Text("25:00")
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundColor(.white))
-                .frame(height: 28)
+            Text("25:00")
+                .font(.system(size: 13, weight: .semibold, design: .monospaced))
+                .foregroundColor(.white)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        .fill(Color(red: 0.55, green: 0.1, blue: 0.1))
+                )
+                .padding(6)
         }
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .stroke(Color.white.opacity(0.08), lineWidth: 1))
         .padding(.horizontal, 20)
         .padding(.vertical, 8)
     }

@@ -35,14 +35,8 @@ struct FloatingTimerView: View {
                 self.imageContent(theme: theme)
                     .frame(height: AppConstants.FloatingLayoutSettings.imageOnlyHeight)
             case .mixed:
-                VStack(spacing: 0) {
-                    self.imageContent(
-                        theme: theme,
-                        padding: EdgeInsets(top: 10, leading: 10, bottom: 0, trailing: 10))
-                        .frame(height: AppConstants.FloatingLayoutSettings.mixedImageHeight)
-                    self.timerContent(theme: theme)
-                        .frame(height: AppConstants.FloatingLayoutSettings.mixedTimerHeight)
-                }
+                self.mixedContent(theme: theme)
+                    .frame(height: AppConstants.FloatingLayoutSettings.mixedHeight)
             }
         }
         .frame(width: layoutMode.contentSize.width)
@@ -84,6 +78,29 @@ struct FloatingTimerView: View {
         .padding(.horizontal, AppConstants.FloatingLayoutSettings.mixedTimerHorizontalPadding)
         .padding(.vertical, 0)
         .frame(maxHeight: .infinity)
+    }
+
+    private func mixedContent(theme: FloatingTheme) -> some View {
+        ZStack(alignment: .topLeading) {
+            self.imageContent(
+                theme: theme,
+                padding: EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+
+            Text(self.format(self.timer.remainingTime))
+                .font(.system(size: 15, weight: .semibold, design: .monospaced))
+                .foregroundColor(.white)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(Color(red: 0.55, green: 0.1, blue: 0.1))
+                )
+                .padding(10)
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .stroke(Color.white.opacity(0.08), lineWidth: 1))
     }
 
     private func imageContent(
