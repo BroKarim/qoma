@@ -36,25 +36,9 @@ enum AppConstants {
     }
 
     enum FloatingLayoutSettings {
-        static let selectedLayoutKey = "floatingLayoutMode"
-        static let defaultLayoutID = "timerOnly"
-        static let imagePathKey = "floatingImagePath"
-        static let showTimerOnImageKey = "showTimerOnImage"
-        static let imageOffsetXKey = "floatingImageOffsetX"
-        static let imageOffsetYKey = "floatingImageOffsetY"
-        static let defaultImageOffset = 0.0
         static let timerOnlyWidth: CGFloat = 110
-        static let width: CGFloat = 230
         static let timerOnlyHeight: CGFloat = 62
         static let timerOnlyFontSize: CGFloat = 30
-        static let timerOnlyHorizontalPadding: CGFloat = 0
-        static let timerOnlyVerticalOffset: CGFloat = 1
-        static let imageOnlyHeight: CGFloat = 142
-        static let mixedHeight: CGFloat = 192
-        static let mixedImageHeight: CGFloat = 142
-        static let mixedTimerHeight: CGFloat = 50
-        static let mixedTimerFontSize: CGFloat = 28
-        static let mixedTimerHorizontalPadding: CGFloat = 12
     }
 
     enum BreakDuration {

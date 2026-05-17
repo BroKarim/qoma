@@ -20,10 +20,9 @@ final class WindowManager: ObservableObject {
 
         self.objectWillChange.send()
 
-        let layoutMode = FloatingLayoutMode.from(
-            id: UserDefaults.standard.string(forKey: AppConstants.FloatingLayoutSettings.selectedLayoutKey)
-                ?? AppConstants.FloatingLayoutSettings.defaultLayoutID)
-        let contentSize = layoutMode.contentSize
+        let contentSize = CGSize(
+            width: AppConstants.FloatingLayoutSettings.timerOnlyWidth,
+            height: AppConstants.FloatingLayoutSettings.timerOnlyHeight)
 
         let contentView = FloatingTimerView()
 
@@ -124,9 +123,11 @@ final class WindowManager: ObservableObject {
         zoomButton.frame.origin.y += MainWindowChrome.trafficLightsVerticalOffset
     }
 
-    func updateFloatingSize(mode: FloatingLayoutMode) {
+    func updateFloatingSize() {
         guard let window = floatingWindow else { return }
-        let size = mode.contentSize
+        let size = CGSize(
+            width: AppConstants.FloatingLayoutSettings.timerOnlyWidth,
+            height: AppConstants.FloatingLayoutSettings.timerOnlyHeight)
 
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.2
