@@ -28,14 +28,14 @@ struct MenuBarView: View {
 
             HStack(spacing: 8) {
                 if self.session.isActive {
-                    Button("Cancel") {
+                    Button("cancel") {
                         self.cancelSession()
                     }
                     .font(.system(size: 13, weight: .regular))
                     .foregroundColor(.secondary)
                     .buttonStyle(.plain)
 
-                    Button("Restart") {
+                    Button("restart") {
                         self.startSession()
                     }
                     .font(.system(size: 13, weight: .regular))
@@ -147,8 +147,8 @@ struct MenuBarView: View {
     }
 
     private var primaryButtonTitle: String {
-        if !self.session.isActive { return "Start" }
-        return self.session.isPaused ? "Resume" : "Pause"
+        if !self.session.isActive { return "start" }
+        return self.session.isPaused ? "resume" : "pause"
     }
 
     private func handlePrimaryAction() {
