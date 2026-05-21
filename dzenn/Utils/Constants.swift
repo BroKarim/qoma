@@ -81,7 +81,13 @@ enum AnalyticsSettings {
         }
 
         static var isAnalyticsEnabled: Bool {
-            get { UserDefaults.standard.bool(forKey: analyticsEnabledKey) }
+            get {
+                let defaults = UserDefaults.standard
+                guard defaults.object(forKey: analyticsEnabledKey) != nil else {
+                    return defaultAnalyticsEnabled
+                }
+                return defaults.bool(forKey: analyticsEnabledKey)
+            }
             set { UserDefaults.standard.set(newValue, forKey: analyticsEnabledKey) }
         }
     }

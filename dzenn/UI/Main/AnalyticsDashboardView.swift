@@ -56,6 +56,9 @@ struct AnalyticsDashboardView: View {
                 date: self.selectedDay,
                 apps: self.selectedDayApps(in: data),
                 domains: self.selectedDayDomains(in: data))
+            AnalyticsTimelineView(
+                date: self.selectedDay,
+                entries: self.selectedDayTimeline(in: data))
         }
     }
 
@@ -233,6 +236,13 @@ struct AnalyticsDashboardView: View {
             startDate: range.start,
             endDate: range.end,
             limit: 5)
+    }
+
+    private func selectedDayTimeline(in data: AnalyticsDashboardData) -> [AnalyticsTimelineEntry] {
+        AnalyticsEngine.shared.buildTimeline(
+            for: self.selectedDay,
+            appEvents: data.appEvents,
+            webVisits: data.webVisits)
     }
 
     private func topApps(for session: FocusSessionRecord, in data: AnalyticsDashboardData) -> [AnalyticsBreakdownItem] {

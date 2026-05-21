@@ -6,10 +6,12 @@ final class AnalyticsStore {
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
     private let ioQueue = DispatchQueue(label: "com.personal.dzenn.analyticsstore.io")
+    private let queueKey = DispatchSpecificKey<Void>()
 
     init() {
         encoder.dateEncodingStrategy = .iso8601
         decoder.dateDecodingStrategy = .iso8601
+        ioQueue.setSpecific(key: queueKey, value: ())
         bootstrapDirectory()
     }
 
@@ -106,19 +108,20 @@ final class AnalyticsStore {
     // MARK: - Generic Load/Save
 
     private func load<T: Decodable>(from filename: String) -> T? {
-        let url = fileURL(for: filename)
-        guard let data = try? Data(contentsOf: url) else { return nil }
-        do {
-            return try decoder.decode(T.self, from: data)
-        } catch {
-            print("[AnalyticsStore] Decode error for \(filename): \(error)")
-            return nil
+        syncIO {
+            let url = fileURL(for: filename)
+            guard let data = try? Data(contentsOf: url) else { return nil }
+            do {
+                return try decoder.decode(T.self, from: data)
+            } catch {
+                print("[AnalyticsStore] Decode error for \(filename): \(error)")
+                return nil
+            }
         }
     }
 
     private func save<T: Encodable>(_ value: T, to filename: String) {
-        ioQueue.async { [weak self] in
-            guard let self else { return }
+        syncIO {
             let url = self.fileURL(for: filename)
             do {
                 let data = try self.encoder.encode(value)
@@ -127,5 +130,13 @@ final class AnalyticsStore {
                 print("[AnalyticsStore] Save error for \(filename): \(error)")
             }
         }
+    }
+
+    private func syncIO<T>(_ work: () -> T) -> T {
+        if DispatchQueue.getSpecific(key: queueKey) != nil {
+            return work()
+        }
+
+        return ioQueue.sync(execute: work)
     }
 }

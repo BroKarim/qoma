@@ -1,14 +1,21 @@
 import SwiftUI
 
 struct AnalyticsTimelineView: View {
+    let date: Date
     let entries: [AnalyticsTimelineEntry]
+
+    private static let dayFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEEE, d MMMM"
+        return formatter
+    }()
 
     var body: some View {
         SettingsSurfaceCard {
             VStack(alignment: .leading, spacing: 16) {
                 SettingsSectionHeading(
                     title: "Activity Timeline",
-                    subtitle: "Chronological view of tracked apps and sites for today.")
+                    subtitle: self.subtitleText)
 
                 if self.entries.isEmpty {
                     Text("No activity recorded for this day.")
@@ -26,6 +33,10 @@ struct AnalyticsTimelineView: View {
                 }
             }
         }
+    }
+
+    private var subtitleText: String {
+        "Chronological view of tracked apps and sites for \(Self.dayFormatter.string(from: self.date))."
     }
 }
 

@@ -13,7 +13,14 @@ final class AnalyticsStoreTests: XCTestCase {
 
     override func tearDown() {
         cleanupTestFiles()
+        UserDefaults.standard.removeObject(forKey: AppConstants.AnalyticsSettings.analyticsEnabledKey)
         super.tearDown()
+    }
+
+    func testAnalyticsEnabledDefaultsToTrue() {
+        UserDefaults.standard.removeObject(forKey: AppConstants.AnalyticsSettings.analyticsEnabledKey)
+
+        XCTAssertTrue(AppConstants.AnalyticsSettings.isAnalyticsEnabled)
     }
 
     func testFocusSessionRoundTrip() {
