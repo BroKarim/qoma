@@ -28,17 +28,20 @@ final class ActivityTracker: NSObject, ObservableObject {
         isTracking = true
         currentSessionID = sessionID
         pendingEvents = []
+        print("[ActivityTracker] 🟢 Started tracking session: \(sessionID)")
         captureCurrentApp()
     }
 
     func pauseTracking() {
         finalizeCurrentEvent()
         isTracking = false
+        print("[ActivityTracker] ⏸ Paused tracking")
     }
 
     func resumeTracking(sessionID: UUID) {
         isTracking = true
         currentSessionID = sessionID
+        print("[ActivityTracker] ▶️ Resumed tracking session: \(sessionID)")
         captureCurrentApp()
     }
 
@@ -47,6 +50,9 @@ final class ActivityTracker: NSObject, ObservableObject {
         isTracking = false
         let events = pendingEvents
         let visits = pendingWebsiteVisits
+        
+        print("[ActivityTracker] 🛑 Stopped tracking - Captured \(events.count) app events, \(visits.count) website visits")
+        
         pendingEvents = []
         pendingWebsiteVisits = []
         currentSessionID = nil
@@ -60,19 +66,29 @@ final class ActivityTracker: NSObject, ObservableObject {
     }
 
     private func captureCurrentApp() {
-        guard let app = NSWorkspace.shared.frontmostApplication else { return }
-        currentAppBundleID = app.bundleIdentifier ?? app.localizedName ?? "unknown"
-        currentAppName = app.localizedName ?? "Unknown"
+        guard let app = NSWorkspace.shared.frontmostApplication else {
+            print("[ActivityTracker] ⚠️ Failed to get frontmost application")
+            return
+        }
+        
+        let bundleID = app.bundleIdentifier ?? app.localizedName ?? "unknown"
+        let name = app.localizedName ?? "Unknown"
+        
+        currentAppBundleID = bundleID
+        currentAppName = name
         currentAppStartTime = Date()
+        
+        print("[ActivityTracker] 📱 Captured app: \(name) (\(bundleID))")
 
-        if let bundleID = app.bundleIdentifier,
-           let tabInfo = BrowserActivityResolver.shared.resolveCurrentTab(for: bundleID) {
-            captureWebsiteVisit(
-                sessionID: currentSessionID,
-                bundleID: bundleID,
-                appName: currentAppName ?? "Unknown",
-                domain: tabInfo.domain,
-                title: tabInfo.title)
+        if let bundleID = app.bundleIdentifier {
+            if let tabInfo = BrowserActivityResolver.shared.resolveCurrentTab(for: bundleID) {
+                captureWebsiteVisit(
+                    sessionID: currentSessionID,
+                    bundleID: bundleID,
+                    appName: name,
+                    domain: tabInfo.domain,
+                    title: tabInfo.title)
+            }
         }
     }
 
@@ -95,6 +111,7 @@ final class ActivityTracker: NSObject, ObservableObject {
             durationSeconds: 0
         )
         pendingWebsiteVisits.append(visit)
+        print("[ActivityTracker] 🌐 Captured website: \(domain) from \(appName)")
     }
 
     private func finalizeCurrentEvent() {

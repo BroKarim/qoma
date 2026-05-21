@@ -36,8 +36,14 @@ enum AnalyticsPreviewFactory {
             let weekday = calendar.component(.weekday, from: currentDate)
             let isWeekend = weekday == 1 || weekday == 7
             let randomSeconds = isWeekend ? Double.random(in: 0...600) : Double.random(in: 600...7200)
+            let sessionCount = randomSeconds > 0 ? Int.random(in: 1...4) : 0
             let level = intensityLevel(for: randomSeconds)
-            cells.append(AnalyticsHeatmapCell(date: currentDate, focusSeconds: randomSeconds, intensityLevel: level))
+            cells.append(
+                AnalyticsHeatmapCell(
+                    date: currentDate,
+                    focusSeconds: randomSeconds,
+                    sessionCount: sessionCount,
+                    intensityLevel: level))
             currentDate = calendar.date(byAdding: .day, value: 1, to: currentDate)!
         }
         return cells

@@ -5,6 +5,7 @@ struct AnalyticsHeatmapCell: Identifiable, Hashable {
     let id = UUID()
     var date: Date
     var focusSeconds: Double
+    var sessionCount: Int = 0
     var intensityLevel: Int
 
     var displayDay: String {

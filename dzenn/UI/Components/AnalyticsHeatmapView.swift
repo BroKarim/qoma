@@ -91,7 +91,7 @@ struct AnalyticsHeatmapView: View {
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundColor(.primary.opacity(0.82))
 
-                    Text("\(Int(selectedCell.focusSeconds / 60)) min focus")
+                    Text(self.focusSummary(for: selectedCell))
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -149,7 +149,7 @@ struct AnalyticsHeatmapView: View {
                     y: 1)
         }
         .buttonStyle(.plain)
-        .help("\(self.formatDate(cell.date)): \(Int(cell.focusSeconds / 60))m focus")
+        .help(self.helpText(for: cell))
     }
 
     private func monthLabel(for week: [AnalyticsHeatmapCell], index: Int) -> String? {
@@ -176,6 +176,23 @@ struct AnalyticsHeatmapView: View {
 
     private func formatDate(_ date: Date) -> String {
         Self.dayFormatter.string(from: date)
+    }
+
+    private func focusSummary(for cell: AnalyticsHeatmapCell) -> String {
+        let minutes = Int(cell.focusSeconds / 60)
+        guard cell.sessionCount > 0 else {
+            return "\(minutes) min focus"
+        }
+
+        return "\(minutes) min focus • \(self.sessionCountLabel(cell.sessionCount))"
+    }
+
+    private func helpText(for cell: AnalyticsHeatmapCell) -> String {
+        "\(self.formatDate(cell.date)): \(self.focusSummary(for: cell))"
+    }
+
+    private func sessionCountLabel(_ count: Int) -> String {
+        count == 1 ? "1 session" : "\(count) sessions"
     }
 
     private func gridMetrics(for width: CGFloat) -> GridMetrics {

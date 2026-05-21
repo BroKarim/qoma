@@ -66,4 +66,16 @@ final class TimerService: ObservableObject {
         guard self.isPaused, self.remainingTime > 0 else { return }
         self.start(duration: self.remainingTime)
     }
+
+    func elapsedTime(totalDuration: TimeInterval, now: Date = Date()) -> TimeInterval {
+        max(0, totalDuration - currentRemainingTime(now: now))
+    }
+
+    private func currentRemainingTime(now: Date) -> TimeInterval {
+        if self.isRunning, let endTime = self.endTime {
+            return max(0, endTime.timeIntervalSince(now))
+        }
+
+        return max(0, self.remainingTime)
+    }
 }

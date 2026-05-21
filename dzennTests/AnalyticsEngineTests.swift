@@ -26,10 +26,15 @@ final class AnalyticsEngineTests: XCTestCase {
 
     func testBuildHeatmapCells() {
         let cells = engine.buildHeatmapCells(from: testSessions)
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let yesterday = calendar.date(byAdding: .day, value: -1, to: today)!
 
         XCTAssertGreaterThan(cells.count, 0)
         XCTAssertEqual(cells.count % 7, 0, "Heatmap should have complete weeks")
         XCTAssertTrue(cells.allSatisfy { $0.intensityLevel >= 0 && $0.intensityLevel <= 5 })
+        XCTAssertEqual(cells.first(where: { calendar.isDate($0.date, inSameDayAs: today) })?.sessionCount, 2)
+        XCTAssertEqual(cells.first(where: { calendar.isDate($0.date, inSameDayAs: yesterday) })?.sessionCount, 1)
     }
 
     func testBuildTopApps() {

@@ -137,10 +137,14 @@ final class FocusSessionManager: ObservableObject {
         guard AppConstants.AnalyticsSettings.isAnalyticsEnabled,
               var sessionRecord = self.activeSessionRecord else { return }
 
+        let endedAt = Date()
         let (appEvents, websiteVisits) = ActivityTracker.shared.stopTracking()
-        let focusSeconds = appEvents.reduce(0) { $0 + $1.durationSeconds }
+        let trackedFocusSeconds = appEvents.reduce(0) { $0 + $1.durationSeconds }
+        let elapsedSessionSeconds = self.timerService.elapsedTime(totalDuration: self.duration, now: endedAt)
+        let plannedFocusSeconds = Double(sessionRecord.plannedMinutes * 60)
+        let focusSeconds = min(plannedFocusSeconds, max(trackedFocusSeconds, elapsedSessionSeconds))
 
-        sessionRecord.endedAt = Date()
+        sessionRecord.endedAt = endedAt
         sessionRecord.actualFocusSeconds = focusSeconds
         sessionRecord.completed = completed
         sessionRecord.interruptedReason = interruptedReason

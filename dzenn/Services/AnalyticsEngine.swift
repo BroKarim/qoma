@@ -54,10 +54,12 @@ final class AnalyticsEngine {
         let actualStart = calendar.date(byAdding: .day, value: -daysToSunday, to: targetStart)!
 
         var dayTotals: [Date: Double] = [:]
+        var daySessionCounts: [Date: Int] = [:]
         for session in sessions {
             let day = calendar.startOfDay(for: session.startedAt)
             if day >= actualStart && day <= today {
                 dayTotals[day, default: 0] += session.actualFocusSeconds
+                daySessionCounts[day, default: 0] += 1
             }
         }
 
@@ -65,11 +67,13 @@ final class AnalyticsEngine {
         var currentDate = actualStart
         while currentDate <= today {
             let seconds = dayTotals[currentDate] ?? 0
+            let sessionCount = daySessionCounts[currentDate] ?? 0
             let level = intensityLevel(for: seconds)
             cells.append(
                 AnalyticsHeatmapCell(
                     date: currentDate,
                     focusSeconds: seconds,
+                    sessionCount: sessionCount,
                     intensityLevel: level))
             currentDate = calendar.date(byAdding: .day, value: 1, to: currentDate)!
         }

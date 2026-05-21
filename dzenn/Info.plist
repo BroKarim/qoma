@@ -8,5 +8,16 @@
 	<array>
 		<string>RobotoMono-VariableFont_wght.ttf</string>
 	</array>
+	<key>NSAppleEventsDefaultHandlingEnabled</key>
+	<true/>
+	<key>NSRequiredAppleEvents</key>
+	<array>
+		<string>OSAScriptingAccessControlEvent</string>
+		<string>ApplicationDefinedEvent</string>
+	</array>
+	<key>NSSystemAdministrationUsageDescription</key>
+	<string>Dzenn needs automation permissions to read your active browser tab when tracking website activity during focus sessions.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Dzenn monitors application activity during your focus sessions.</string>
 </dict>
 </plist>
