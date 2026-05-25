@@ -216,6 +216,7 @@ final class AnalyticsEngine {
             from: filteredEvents,
             groupKey: \.appName,
             duration: \.durationSeconds,
+            bundleIdKey: \.appBundleID,
             limit: limit)
     }
 
@@ -233,7 +234,9 @@ final class AnalyticsEngine {
             from: filteredVisits,
             groupKey: \.domain,
             duration: \.durationSeconds,
-            limit: limit)
+            bundleIdKey: nil,
+            limit: limit,
+            isWebsite: true)
     }
 
     // MARK: - Helpers
@@ -314,17 +317,27 @@ final class AnalyticsEngine {
         from items: [T],
         groupKey: KeyPath<T, String>,
         duration: KeyPath<T, Double>,
-        limit: Int) -> [AnalyticsBreakdownItem]
+        bundleIdKey: KeyPath<T, String>?,
+        limit: Int,
+        isWebsite: Bool = false) -> [AnalyticsBreakdownItem]
     {
         let totalSeconds = items.reduce(0) { $0 + $1[keyPath: duration] }
         let groups = Dictionary(grouping: items, by: { $0[keyPath: groupKey] })
 
         return groups
             .map { name, groupedItems in
-                AnalyticsBreakdownItem(
+                let bundleID: String? = bundleIdKey.flatMap { key in
+                    groupedItems.first?[keyPath: key]
+                }
+                let iconData: Data? = bundleID.flatMap { IconUtils.getAppIconAsPNG(for: $0) }
+
+                return AnalyticsBreakdownItem(
                     name: name,
                     seconds: groupedItems.reduce(0) { $0 + $1[keyPath: duration] },
-                    icon: nil)
+                    icon: nil,
+                    bundleID: bundleID,
+                    iconData: iconData,
+                    isWebsite: isWebsite)
             }
             .sorted { $0.seconds > $1.seconds }
             .prefix(limit)

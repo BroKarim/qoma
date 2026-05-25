@@ -73,7 +73,27 @@ enum AnalyticsSettings {
             "com.microsoft.edgemac": "Microsoft Edge",
             "com.brave.Browser": "Brave Browser",
             "com.operasoftware.Opera": "Opera",
+            "company.com.Arc": "Arc",
+            "com.vivaldi.Vivaldi": "Vivaldi",
         ]
+
+        static let excludedBundleIds: Set<String> = [
+            "com.apple.dock",
+            "com.apple.loginwindow",
+            "com.apple.Spotlight",
+            "com.apple.notificationcenterui",
+            "com.apple.controlcenter",
+            "com.apple.WindowManager",
+            "com.apple.SystemUIServer",
+        ]
+
+        static let pollingInterval: TimeInterval = 1.0
+        static let idleThreshold: TimeInterval = 300.0
+
+        static let websitePollCooldown: TimeInterval = 5.0
+        static let websitePollGracePeriod: TimeInterval = 8.0
+        static let websitePollMaxConcurrent = 2
+        static let websitePollFailureThreshold = 3
 
         static var analyticsDirectoryURL: URL {
             let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!

@@ -141,7 +141,11 @@ private struct PermissionAlert: View {
                 .font(.headline)
 
             VStack(alignment: .leading, spacing: 6) {
-                Text("Dzenn needs Automation permission to read Safari or Chrome active tab.")
+                Text("Dzenn needs Automation permission to read browser tabs.")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+
+                Text("Enable Dzenn in System Settings > Privacy & Security > Automation for each browser.")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
 
@@ -155,7 +159,7 @@ private struct PermissionAlert: View {
                 label: {
                     HStack(spacing: 8) {
                         Image(systemName: "gearshape")
-                        Text("Open System Settings")
+                        Text("Open Automation Settings")
                     }
                     .padding(.horizontal, 14)
                     .padding(.vertical, 8)
@@ -173,13 +177,27 @@ private struct BreakdownRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 7) {
-            HStack(alignment: .firstTextBaseline, spacing: 12) {
+            HStack(alignment: .center, spacing: 10) {
+                if item.isWebsite {
+                    AnalyticsIconView(
+                        type: .website(domain: item.name, iconData: item.iconData),
+                        size: 22)
+                } else if let bundleID = item.bundleID {
+                    AnalyticsIconView(
+                        type: .app(bundleID: bundleID, iconData: item.iconData),
+                        size: 22)
+                } else {
+                    AnalyticsIconView(
+                        type: .app(bundleID: item.name, iconData: item.iconData),
+                        size: 22)
+                }
+
                 Text(self.item.name)
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(.primary)
                     .lineLimit(1)
 
-                Spacer(minLength: 12)
+                Spacer(minLength: 8)
 
                 Text(self.item.displayDuration)
                     .font(.system(size: 12, weight: .semibold, design: .rounded))

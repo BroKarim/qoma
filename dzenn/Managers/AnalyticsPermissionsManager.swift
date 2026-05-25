@@ -3,7 +3,11 @@ import Combine
 import AppKit
 
 final class AnalyticsPermissionsManager: ObservableObject {
-    @Published private(set) var automationStatus: AutomationStatus = .unknown
+    static let shared = AnalyticsPermissionsManager()
+
+    @Published private(set) var automationStatus: PermissionStatus = .unknown
+    @Published private(set) var accessibilityStatus: PermissionStatus = .unknown
+    @Published private(set) var lastError: String?
 
     var hasAutomationAccess: Bool {
         automationStatus == .granted
@@ -13,44 +17,92 @@ final class AnalyticsPermissionsManager: ObservableObject {
         automationStatus == .denied
     }
 
+    var hasAccessibilityAccess: Bool {
+        accessibilityStatus == .granted
+    }
+
+    var needsAccessibilityPermission: Bool {
+        accessibilityStatus == .denied
+    }
+
+    func checkAllPermissions() {
+        checkAutomation()
+        checkAccessibility()
+    }
+
     func checkAutomation() {
         let testScript = NSAppleScript(source: """
+            with timeout of 3 seconds
             tell application "System Events"
                 get name of every process
             end tell
-        """)
-        
+            end timeout
+            """)
+
         var error: NSDictionary?
         testScript?.executeAndReturnError(&error)
 
         if let error = error {
             let code = error[NSAppleScript.errorNumber] as? Int ?? 0
             let message = error[NSAppleScript.errorMessage] as? String ?? ""
-            
-            // Error code -1743 = "System Events got an error: osascript is not allowed assistive access"
-            // Error code -1748 = "Execution error"
-            if code == -1743 || message.lowercased().contains("not allowed assistive access") {
+
+            if code == -1743 || message.lowercased().contains("not allowed") {
                 automationStatus = .denied
-                print("[AnalyticsPermissionsManager] Automation permission DENIED - user needs to grant in System Settings")
+                lastError = "Automation permission denied (code \(code))"
+                print("[AnalyticsPermissionsManager] Automation permission DENIED")
             } else {
                 automationStatus = .granted
+                lastError = nil
                 print("[AnalyticsPermissionsManager] Automation permission GRANTED")
             }
         } else {
             automationStatus = .granted
-            print("[AnalyticsPermissionsManager] Automation permission check successful - GRANTED")
+            lastError = nil
+            print("[AnalyticsPermissionsManager] Automation permission GRANTED")
         }
     }
 
+    func checkAccessibility() {
+        let trusted = AXIsProcessTrustedWithOptions(
+            [kAXTrustedCheckOptionPrompt.takeUnretainedValue(): false] as CFDictionary
+        )
+        accessibilityStatus = trusted ? .granted : .denied
+        print("[AnalyticsPermissionsManager] Accessibility permission: \(trusted ? "GRANTED" : "DENIED")")
+    }
+
+    func promptAccessibilityIfNeeded() {
+        let trusted = AXIsProcessTrustedWithOptions(
+            [kAXTrustedCheckOptionPrompt.takeUnretainedValue(): true] as CFDictionary
+        )
+        accessibilityStatus = trusted ? .granted : .denied
+    }
+
     func openAutomationSettings() {
-        // Open System Settings at Privacy & Security > Accessibility
+        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation") {
+            NSWorkspace.shared.open(url)
+            print("[AnalyticsPermissionsManager] Opening System Settings > Privacy & Security > Automation")
+        }
+    }
+
+    func openAccessibilitySettings() {
         if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
             NSWorkspace.shared.open(url)
             print("[AnalyticsPermissionsManager] Opening System Settings > Privacy & Security > Accessibility")
         }
     }
 
-    enum AutomationStatus {
+    func handleBrowserPermissionResult(success: Bool, browserName: String? = nil) {
+        if success {
+            automationStatus = .granted
+            lastError = nil
+        } else {
+            let browser = browserName ?? "browser"
+            lastError = "Automation permission needed for \(browser)"
+            print("[AnalyticsPermissionsManager] Browser permission failed for \(browser)")
+        }
+    }
+
+    enum PermissionStatus {
         case unknown
         case granted
         case denied
