@@ -907,6 +907,7 @@ class TrackerController {
 - [ ] Handle pause/resume (pause polling during Pomodoro break)
 
 
+
 ## 13. Icon Handling Checklist
 
 

@@ -22,8 +22,19 @@
 		};
 /* End PBXAggregateTarget section */
 
+/* Begin PBXContainerItemProxy section */
+		8F4D8B342FC704AA009BA817 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8F01630E2F332C8D000A6490 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8F0163152F332C8D000A6490;
+			remoteInfo = dzenn;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		8F0163162F332C8D000A6490 /* dzenn.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = dzenn.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8F4D8B302FC704AA009BA817 /* dzennTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = dzennTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -45,10 +56,22 @@
 			path = dzenn;
 			sourceTree = "<group>";
 		};
+		8F4D8B312FC704AA009BA817 /* dzennTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = dzennTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		8F0163132F332C8D000A6490 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8F4D8B2D2FC704AA009BA817 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -62,6 +85,7 @@
 			isa = PBXGroup;
 			children = (
 				8F0163182F332C8D000A6490 /* dzenn */,
+				8F4D8B312FC704AA009BA817 /* dzennTests */,
 				8F0163172F332C8D000A6490 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -70,6 +94,7 @@
 			isa = PBXGroup;
 			children = (
 				8F0163162F332C8D000A6490 /* dzenn.app */,
+				8F4D8B302FC704AA009BA817 /* dzennTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -100,6 +125,29 @@
 			productReference = 8F0163162F332C8D000A6490 /* dzenn.app */;
 			productType = "com.apple.product-type.application";
 		};
+		8F4D8B2F2FC704AA009BA817 /* dzennTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8F4D8B382FC704AA009BA817 /* Build configuration list for PBXNativeTarget "dzennTests" */;
+			buildPhases = (
+				8F4D8B2C2FC704AA009BA817 /* Sources */,
+				8F4D8B2D2FC704AA009BA817 /* Frameworks */,
+				8F4D8B2E2FC704AA009BA817 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8F4D8B352FC704AA009BA817 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				8F4D8B312FC704AA009BA817 /* dzennTests */,
+			);
+			name = dzennTests;
+			packageProductDependencies = (
+			);
+			productName = dzennTests;
+			productReference = 8F4D8B302FC704AA009BA817 /* dzennTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -112,6 +160,10 @@
 				TargetAttributes = {
 					8F0163152F332C8D000A6490 = {
 						CreatedOnToolsVersion = 26.2;
+					};
+					8F4D8B2F2FC704AA009BA817 = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = 8F0163152F332C8D000A6490;
 					};
 					8FC509702F627D8F00E852DA = {
 						CreatedOnToolsVersion = 26.2;
@@ -137,12 +189,20 @@
 			targets = (
 				8F0163152F332C8D000A6490 /* dzenn */,
 				8FC509702F627D8F00E852DA /* Periphery */,
+				8F4D8B2F2FC704AA009BA817 /* dzennTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		8F0163142F332C8D000A6490 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8F4D8B2E2FC704AA009BA817 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -179,9 +239,21 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		8F4D8B2C2FC704AA009BA817 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		8F4D8B352FC704AA009BA817 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8F0163152F332C8D000A6490 /* dzenn */;
+			targetProxy = 8F4D8B342FC704AA009BA817 /* PBXContainerItemProxy */;
+		};
 		8F7F07F22F569E18007C346B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			productRef = 8F7F07F12F569E18007C346B /* SwiftLintBuildToolPlugin */;
@@ -384,6 +456,48 @@
 			};
 			name = Release;
 		};
+		8F4D8B362FC704AA009BA817 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4P9YD49S3A;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.7;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.personal.dzennTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/dzenn.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/dzenn";
+			};
+			name = Debug;
+		};
+		8F4D8B372FC704AA009BA817 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4P9YD49S3A;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.7;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.personal.dzennTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/dzenn.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/dzenn";
+			};
+			name = Release;
+		};
 		8FC509722F627D8F00E852DA /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -419,6 +533,15 @@
 			buildConfigurations = (
 				8F0163222F332C8F000A6490 /* Debug */,
 				8F0163232F332C8F000A6490 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8F4D8B382FC704AA009BA817 /* Build configuration list for PBXNativeTarget "dzennTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8F4D8B362FC704AA009BA817 /* Debug */,
+				8F4D8B372FC704AA009BA817 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
