@@ -6,6 +6,7 @@
 //  Tests for AnalyticsBreakdownItem displayDuration, codable, and related types
 //
 
+import Foundation
 import Testing
 @testable import dzenn
 

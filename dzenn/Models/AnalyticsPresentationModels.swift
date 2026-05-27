@@ -45,7 +45,11 @@ struct AnalyticsBreakdownItem: Identifiable, Hashable, Codable {
         case id, name, seconds, icon, bundleID, isWebsite, percentage
     }
 
-    init(name: String, seconds: Double, icon: String? = nil, bundleID: String? = nil, iconData: Data? = nil, isWebsite: Bool = false, percentage: Double = 0) {
+    init(
+        name: String, seconds: Double, icon: String? = nil,
+        bundleID: String? = nil, iconData: Data? = nil,
+        isWebsite: Bool = false, percentage: Double = 0
+    ) {
         self.name = name
         self.seconds = seconds
         self.icon = icon

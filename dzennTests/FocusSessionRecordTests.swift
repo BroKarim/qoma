@@ -6,6 +6,7 @@
 //  Tests for FocusSessionRecord model
 //
 
+import Foundation
 import Testing
 @testable import dzenn
 

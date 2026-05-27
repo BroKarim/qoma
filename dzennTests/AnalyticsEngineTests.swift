@@ -6,6 +6,7 @@
 //  Tests for AnalyticsEngine aggregation and computation logic
 //
 
+import Foundation
 import Testing
 @testable import dzenn
 

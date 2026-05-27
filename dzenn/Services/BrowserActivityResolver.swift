@@ -40,7 +40,8 @@ final class BrowserActivityResolver {
             if consecutiveFailures >= AppConstants.AnalyticsSettings.websitePollFailureThreshold {
                 cooldownUntil = Date().addingTimeInterval(AppConstants.AnalyticsSettings.websitePollCooldown)
                 consecutiveFailures = 0
-                print("[BrowserActivityResolver] Cooldown triggered after \(AppConstants.AnalyticsSettings.websitePollFailureThreshold) failures")
+                let threshold = AppConstants.AnalyticsSettings.websitePollFailureThreshold
+                print("[BrowserActivityResolver] Cooldown triggered after \(threshold) failures")
             }
             return nil
         }

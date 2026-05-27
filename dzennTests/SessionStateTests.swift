@@ -6,6 +6,7 @@
 //  Tests for SessionState, SessionMode, SessionPhase, BreakType
 //
 
+import Foundation
 import Testing
 @testable import dzenn
 

@@ -6,6 +6,7 @@
 //  Tests for AppConstants configuration values
 //
 
+import Foundation
 import Testing
 @testable import dzenn
 

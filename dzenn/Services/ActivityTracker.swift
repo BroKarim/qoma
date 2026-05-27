@@ -62,7 +62,10 @@ final class ActivityTracker: NSObject, ObservableObject {
         let events = pendingEvents
         let visits = pendingWebsiteVisits
 
-        print("[ActivityTracker] Stopped tracking - Captured \(events.count) app events, \(visits.count) website visits")
+        print("""
+            [ActivityTracker] Stopped tracking - Captured \
+            \(events.count) app events, \(visits.count) website visits
+            """)
 
         pendingEvents = []
         pendingWebsiteVisits = []

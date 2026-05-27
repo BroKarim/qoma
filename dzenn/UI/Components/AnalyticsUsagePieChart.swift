@@ -45,7 +45,7 @@ private struct PieChartRing: View {
 
     var body: some View {
         ZStack {
-            ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
+            ForEach(Array(items.enumerated()), id: \.element.id) { index, _ in
                 PieSlice(
                     startAngle: self.startAngle(for: index),
                     endAngle: self.endAngle(for: index))

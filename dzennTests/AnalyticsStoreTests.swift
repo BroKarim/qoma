@@ -6,6 +6,7 @@
 //  Tests for AnalyticsStore persistence and settings
 //
 
+import Foundation
 import Testing
 @testable import dzenn
 

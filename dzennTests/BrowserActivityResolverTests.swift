@@ -6,6 +6,7 @@
 //  Tests for BrowserActivityResolver browser detection and constants
 //
 
+import Foundation
 import Testing
 @testable import dzenn
 
