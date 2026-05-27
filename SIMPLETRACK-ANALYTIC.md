@@ -909,6 +909,8 @@ class TrackerController {
 
 ## 13. Icon Handling Checklist
 
+
+
 ### 13.1 Extract App Icon (copy `IconUtils.swift`)
 
 ```swift
@@ -1086,3 +1088,431 @@ ForEach(topWebsites, id: \.identifier) { site in
 - [ ] Copy `IconView.swift` — render with letter fallback
 - [ ] Pass `iconData` through aggregation pipeline (iconMap)
 - [ ] Render `IconView` in all app/website list views
+
+
+---
+
+
+## 15. ActiveTimeCard with Day Mode Charts
+### 15.1 How It Works
+SimplyTrack's `ActiveTimeCard` wraps 2 charts behind a segmented picker:
+```
+┌─────────────────────────────────────┐
+│ Active Time          2h 34m 56s     │
+│ ┌─────────┬─────────┐              │
+│ │ Timeline │  Pie    │  ← segmented picker
+│ └─────────┴─────────┘              │
+│ ┌─────────────────────────────────┐ │
+│ │  [blue bars on 24h timeline]   │ │  ← HourlyTimelineChart
+│ │  0  3  6  9  12  15  18  21   │ │
+│ └─────────────────────────────────┘ │
+└─────────────────────────────────────┘
+Switch to Pie:
+┌─────────────────────────────────────┐
+│ Active Time          2h 34m 56s     │
+│ ┌─────────┬─────────┐              │
+│ │ Timeline │  Pie    │              │
+│ └─────────┴─────────┘              │
+│  ┌──────┐  🟢 Xcode    1h 12m     │
+│  │pie   │  🔵 Safari    45m        │
+│  │chart │  🟠 Slack     30m        │
+│  └──────┘  🟡 VS Code   7m         │
+│            Total: 2h 34m           │
+└─────────────────────────────────────┘
+```
+**Day mode only** (skip week mode): Picker shows `chart.line.uptrend.xyaxis` (tag 0) and `chart.pie` (tag 1).
+### 15.2 Copy This Pattern
+```swift
+// ActiveTimeCard.swift — simplified for day-only mode
+struct ActiveTimeCard: View {
+    let selectedDate: Date
+    let workPeriods: [(startTime: Date, endTime: Date, duration: TimeInterval)]
+    let totalActiveTime: TimeInterval
+    let topApps: [(identifier: String, name: String, iconData: Data?, totalTime: TimeInterval)]
+    let topWebsites: [(identifier: String, name: String, iconData: Data?, totalTime: TimeInterval)]
+    @Binding var currentPage: Int
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("Active Time")
+                    .font(.headline)
+                Spacer()
+                Text(totalActiveTime.formattedDuration)
+            }
+            // Segmented picker: Timeline vs Pie
+            VStack(spacing: 8) {
+                Picker(selection: $currentPage, label: EmptyView()) {
+                    Image(systemName: "chart.line.uptrend.xyaxis")
+                        .tag(0)
+                    Image(systemName: "chart.pie")
+                        .tag(1)
+                }
+                .pickerStyle(.segmented)
+                .frame(width: 80)
+                .fixedSize()
+                Group {
+                    if currentPage == 0 {
+                        HourlyTimelineChart(
+                            selectedDate: selectedDate,
+                            workPeriods: workPeriods
+                        )
+                    } else {
+                        UsagePieChart(
+                            selectedDate: selectedDate,
+                            topApps: topApps  // includes iconData
+                        )
+                    }
+                }
+                .animation(.easeInOut(duration: 0.2), value: currentPage)
+            }
+            .frame(height: 120)
+        }
+        .padding(12)
+        .background(Color(NSColor.controlBackgroundColor))
+        .cornerRadius(8)
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color(NSColor.separatorColor), lineWidth: 1)
+        )
+    }
+}
+```
+### 15.3 HourlyTimelineChart (with icons)
+```swift
+struct HourlyTimelineChart: View {
+    let selectedDate: Date
+    let workPeriods: [(startTime: Date, endTime: Date, duration: TimeInterval)]
+    var body: some View {
+        VStack(spacing: 6) {
+            GeometryReader { geometry in
+                let timelineWidth = geometry.size.width
+                let calendar = Calendar.current
+                let startOfDay = calendar.startOfDay(for: selectedDate)
+                let dayDuration: TimeInterval = 24 * 3600
+                ZStack(alignment: .leading) {
+                    Rectangle()
+                        .fill(Color(NSColor.controlBackgroundColor))
+                        .frame(height: 80)
+                        .cornerRadius(2)
+                    ForEach(Array(workPeriods.enumerated()), id: \.offset) { _, period in
+                        let sessionStart = period.startTime.timeIntervalSince(startOfDay)
+                        let sessionDuration = period.duration
+                        let startPosition = (sessionStart / dayDuration) * timelineWidth
+                        let sessionWidth = max((sessionDuration / dayDuration) * timelineWidth, 2)
+                        Rectangle()
+                            .fill(Color.blue.opacity(0.8))
+                            .frame(width: sessionWidth, height: 80)
+                            .cornerRadius(1)
+                            .offset(x: startPosition)
+                    }
+                }
+            }
+            .frame(height: 80)
+            // Hour labels: 0, 3, 6, 9, 12, 15, 18, 21
+            HStack {
+                ForEach(Array(stride(from: 0, through: 21, by: 3)), id: \.self) { hour in
+                    Text("\(hour)")
+                        .font(.caption2)
+                        .foregroundColor(Color(NSColor.secondaryLabelColor))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+        }
+        .frame(height: 100)
+    }
+}
+```
+### 15.4 UsagePieChart (with icons in legend)
+```swift
+struct UsagePieChart: View {
+    let selectedDate: Date
+    let topApps: [(identifier: String, name: String, iconData: Data?, totalTime: TimeInterval)]
+    private var topFive: ArraySlice<...> { topApps.prefix(5) }
+    private let colors: [Color] = [.blue, .green, .orange, .red, .purple]
+    var body: some View {
+        HStack(spacing: 12) {
+            // Donut chart
+            Chart {
+                ForEach(Array(topFive.enumerated()), id: \.element.identifier) { index, app in
+                    SectorMark(
+                        angle: .value("Usage", app.totalTime),
+                        innerRadius: .ratio(0.5),
+                        angularInset: 1.5
+                    )
+                    .foregroundStyle(colors[index % colors.count].opacity(0.8))
+                }
+            }
+            .frame(width: 100, height: 100)
+            // Legend with icons
+            VStack(alignment: .leading, spacing: 2) {
+                Spacer()
+                ForEach(Array(topFive.enumerated()), id: \.element.identifier) { index, app in
+                    HStack(spacing: 6) {
+                        IconView(
+                            type: .app(identifier: app.identifier, iconData: app.iconData),
+                            size: 12
+                        )
+                        Text(app.name)
+                            .font(.caption2)
+                            .lineLimit(1)
+                        Spacer()
+                    }
+                }
+                Spacer()
+            }
+        }
+        .frame(height: 100)
+    }
+}
+```
+### 15.5 UsageListView (Top Apps / Top Websites with icons)
+```swift
+struct UsageListView: View {
+    let type: UsageListType  // .apps or .websites
+    let items: [(identifier: String, name: String, iconData: Data?, totalTime: TimeInterval)]
+    @Binding var showAllItems: Bool
+    private var displayedItems: ArraySlice<...> {
+        showAllItems ? items[...] : items.prefix(5)
+    }
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text(type.title)
+                    .font(.headline)
+                Spacer()
+                if items.count > 5 {
+                    Button(showAllItems ? "Show less" : "Show more") {
+                        withAnimation { showAllItems.toggle() }
+                    }
+                    .buttonStyle(.borderless)
+                    .font(.caption)
+                }
+            }
+            VStack(spacing: 8) {
+                ForEach(displayedItems, id: \.identifier) { item in
+                    HStack {
+                        // Icon: app = rounded rect, website = circle
+                        IconView(
+                            type: type.iconType(item.identifier, item.name, item.iconData),
+                            size: type.iconSize
+                        )
+                        Text(item.name)
+                        Spacer()
+                        Text(item.totalTime.formattedDuration)
+                    }
+                }
+            }
+        }
+        .padding(12)
+        .background(Color(NSColor.controlBackgroundColor))
+        .cornerRadius(8)
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color(NSColor.separatorColor), lineWidth: 1)
+        )
+    }
+}
+```
+### 15.6 Required Permissions
+| Feature | Permission | Why |
+|---|---|---|
+| `NSWorkspace.shared.frontmostApplication` | None | Public API |
+| `NSRunningApplication.icon` | **Accessibility** | `AXIsProcessTrusted` |
+| `CGWindowListCopyWindowInfo` (timeline) | **Screen Recording** | macOS prompts auto |
+| AppleScript (browser tabs) | **Automation** | Browser-specific |
+| `NSWorkspace.didActivateApplicationNotification` | None | Public API |
+**Important**: For macOS 15+, Screen Recording permission is needed for `NSRunningApplication.icon` too (not just `CGWindowListCopyWindowInfo`).
+### 15.7 Checklist
+- [ ] Create `ActiveTimeCard` view with segmented picker (0=timeline, 1=pie)
+- [ ] Create `HourlyTimelineChart` with 24h blue bars + hour labels
+- [ ] Create `UsagePieChart` with donut chart + `IconView` in legend
+- [ ] Create `UsageListView` with `IconView` per item (app=rounded rect, website=circle)
+- [ ] Create `UsageListType` enum with `.apps`/`.websites` cases
+- [ ] Pass `iconData` through aggregation → chart → list
+- [ ] Add `IconView` with letter fallback for missing icons
+- [ ] Add Accessibility permission prompt at launch
+- [ ] Add Screen Recording usage description in Info.plist
+- [ ] Add Automation permission handling for browser tracking
+- [ ] Wire `currentPage` binding to parent view state
+- [ ] Add smooth animation on chart switch (`.animation(.easeInOut, value: currentPage)`)
+---
+## 16. Swift Doc Comments
+### 16.1 Is This Standard Swift? YES
+`///` doc comments are **official Swift convention** (Swift DocC). SimplyTrack uses them extensively. This is NOT repo-specific — it's Apple's recommended practice for all Swift projects.
+### 16.2 What SimplyTrack Does
+Every file starts with file header comment:
+```swift
+//
+//  FileName.swift
+//  SimplyTrack
+//
+//  Created by Author on DD.MM.YYYY.
+//
+```
+Every public/internal type and method gets `///` doc comment:
+```swift
+/// Displays app and website icons with fallback generation for missing icons.
+/// Supports both cached icon data and automatic letter-based fallback icons.
+/// Applies appropriate styling (rounded rectangle for apps, circle for websites).
+struct IconView: View {
+    /// Type of icon to display
+    let type: IconType
+    /// Size of the icon in points
+    let size: CGFloat
+}
+```
+Parameters documented with `- Parameters:` block:
+```swift
+/// Creates an icon view with specified type and size
+/// - Parameters:
+///   - type: Icon type (app or website) with associated data
+///   - size: Icon size in points (default: 25)
+init(type: IconType, size: CGFloat = 25) {
+```
+### 16.3 Comment Styles by Context
+| Context | Style | Example |
+|---|---|---|
+| File header | `// FileName.swift // SimplyTrack` | Every file |
+| Type doc | `/// Description of purpose` | Before `class`/`struct`/`enum` |
+| Property doc | `/// Brief description` | Before `let`/`var` |
+| Method doc | `/// Description + - Parameters:` | Before `func` |
+| MARK section | `// MARK: - Section Name` | Within files |
+| Inline comment | `// Explanation of non-obvious logic` | Where needed |
+| `#if DEBUG` blocks | `#if DEBUG` / `#else` | Environment-specific |
+### 16.4 Checklist
+- [ ] Add file header comment to every `.swift` file
+- [ ] Add `///` doc comment to every public/internal type (class, struct, enum)
+- [ ] Add `///` doc comment to every public/internal property
+- [ ] Add `///` doc comment with `- Parameters:` to every public/internal method
+- [ ] Add `// MARK: -` sections to organize code within files
+- [ ] Use `//` inline comments only for non-obvious logic
+- [ ] Do NOT over-comment obvious code (e.g., `// set name` before `self.name = name`)
+- [ ] Target: ~30% comment lines (not 5%, not 80%)
+---
+
+## 17. Testing
+### 17.1 Frameworks Used
+| Type | Framework | Import | Syntax |
+|---|---|---|---|
+| Unit tests | **Swift Testing** | `import Testing` | `@Test func`, `#expect(...)`, `#require(...)` |
+| UI tests | **XCTest** | `import XCTest` | `XCTestCase`, `XCTAssert*`, `measure(metrics:)` |
+**Swift Testing** is the modern Apple framework (2024+). **XCTest** is the legacy framework, still used for UI tests.
+### 17.2 Test Targets
+| Target | Type | Bundle | Notes |
+|---|---|---|---|
+| `YourAppTests` | Unit tests | Hosted (`TEST_HOST = YourApp.app`) | Can `@testable import` |
+| `YourAppUITests` | UI tests | Standalone | Launches app externally |
+### 17.3 Key Patterns
+**Pattern A: In-Memory SwiftData**
+```swift
+// Create in-memory container for each test
+let container = try ModelContainer(
+    for: UsageSession.self,
+    configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+)
+let context = ModelContext(container)
+// Insert test data
+let session = UsageSession(type: .app, identifier: "com.apple.Xcode", name: "Xcode", startTime: testDate)
+session.endSession(at: testDate.addingTimeInterval(3600))
+context.insert(session)
+try context.save()
+// Assert
+let descriptor = FetchDescriptor<UsageSession>(predicate: #Predicate { $0.type == "app" })
+let results = try context.fetch(descriptor)
+#expect(results.count == 1)
+```
+**Pattern B: Protocol-Based Mocking**
+```swift
+// Production: define protocol
+protocol DataProvider {
+    func fetchData() async throws -> [Item]
+}
+// Production: real implementation
+class RealProvider: DataProvider {
+    func fetchData() async throws -> [Item] { ... }
+}
+// Test: mock implementation
+struct MockProvider: DataProvider {
+    var result: [Item] = []
+    func fetchData() async throws -> [Item] { result }
+}
+// Service accepts protocol (default = real)
+class MyService {
+    let provider: DataProvider
+    init(provider: DataProvider = RealProvider()) { self.provider = provider }
+}
+// Test injects mock
+let mock = MockProvider(result: [testItem])
+let service = MyService(provider: mock)
+```
+**Pattern C: Pure Logic Tests**
+```swift
+@Test func csvEscapesCommas() {
+    let row = CSVExportService.Row(name: "Xcode, Inc.", duration: 3600)
+    let csv = row.csvString
+    #expect(csv.contains("\"Xcode, Inc.\""))
+}
+@Test func durationFormatting() {
+    #expect TimeInterval(3661).formattedDuration == "1h 1m"
+}
+```
+**Pattern D: Error Testing**
+```swift
+@Test func invalidInputThrows() {
+    #expect(throws: ValidationError.self) {
+        try validateInput("")
+    }
+}
+@Test func asyncErrorHandling() async {
+    do {
+        _ = try await service.fetchData()
+    } catch {
+        #expect(error is NetworkError)
+        Issue.record("Expected NetworkError but got \(error)")
+    }
+}
+```
+### 17.4 CI Testing Commands
+```bash
+# Build + run all unit tests (skip UI tests)
+xcodebuild -project YourApp.xcodeproj \
+    -scheme YourApp \
+    -configuration Debug \
+    -skip-testing:YourAppUITests \
+    CODE_SIGNING_ALLOWED=NO \
+    test
+# Run single test
+xcodebuild ... -only-testing:YourAppTests/YourTests/testName
+# Format lint
+swift-format lint --recursive YourApp/ YourAppTests/
+```
+### 17.5 What to Test for Pomodoro App
+| Component | Test Type | What to Verify |
+|---|---|---|
+| `TrackedSession` model | Unit | `duration` computed property, `endSession()` |
+| `computeWorkPeriods()` | Unit | Merging overlapping sessions |
+| `aggregateAppSessions()` | Unit | Group by identifier, sum duration, sort |
+| `aggregateWebsiteSessions()` | Unit | Same for domains |
+| `extractDomain()` | Unit | Strip www, filter non-http |
+| `Icon` staleness | Unit | `needsUpdate` after 1 week |
+| `TrackerController` | Unit (mock) | Start/stop lifecycle, session creation |
+| `BrowserInterface` | Unit (mock) | URL parsing, error handling |
+| `AnalyticsBreakdownView` | UI | Renders correct items from data |
+| `ActiveTimeCard` | UI | Switches between timeline/pie |
+| App launch | UI | Permissions granted → data flows |
+### 17.6 Checklist
+- [ ] Add `YourAppTests` target to Xcode project
+- [ ] Add `YourAppUITests` target to Xcode project
+- [ ] Write file header comment in all test files
+- [ ] `@testable import YourApp` in all test files
+- [ ] Create in-memory `ModelContainer` for SwiftData tests
+- [ ] Define `DataProvider` protocol for services (enable mocking)
+- [ ] Write unit tests for aggregation functions
+- [ ] Write unit tests for `computeWorkPeriods()` edge cases
+- [ ] Write unit tests for `extractDomain()` URL parsing
+- [ ] Write unit tests for `Icon.needsUpdate` staleness
+- [ ] Write mock for browser AppleScript execution
+- [ ] Write UI test: `ActiveTimeCard` chart switching
+- [ ] Write UI test: `UsageListView` shows items with icons
+- [ ] Add CI test command to `ci.yml`: `xcodebuild ... test -skip-testing:YourAppUITests`
+- [ ] Verify all tests pass before committing

@@ -50,6 +50,12 @@ struct AnalyticsDashboardView: View {
         case .loaded(let data):
             AnalyticsHeatmapView(cells: data.heatmapCells, selectedDate: self.$selectedDay)
             self.dayOverviewView(data: data)
+            AnalyticsActiveTimeCard(
+                selectedDate: self.selectedDay,
+                workPeriods: self.selectedDayWorkPeriods(in: data),
+                totalActiveTime: self.selectedDayTotalActiveTime(in: data),
+                topApps: self.selectedDayApps(in: data),
+                topWebsites: self.selectedDayDomains(in: data))
             // Session Summaries - deferred to next release
             // self.sessionSummariesView(data: data)
             AnalyticsBreakdownView(
@@ -243,6 +249,38 @@ struct AnalyticsDashboardView: View {
             for: self.selectedDay,
             appEvents: data.appEvents,
             webVisits: data.webVisits)
+    }
+
+    private func selectedDayWorkPeriods(in data: AnalyticsDashboardData) -> [(startTime: Date, endTime: Date, duration: TimeInterval)] {
+        let sessions = self.selectedDaySessions(in: data)
+        let completedSessions = sessions.compactMap { session -> (Date, Date)? in
+            guard let endTime = session.endedAt else { return nil }
+            return (session.startedAt, endTime)
+        }.sorted { $0.0 < $1.0 }
+
+        guard !completedSessions.isEmpty else { return [] }
+
+        var mergedPeriods: [(Date, Date)] = []
+        var currentStart = completedSessions[0].0
+        var currentEnd = completedSessions[0].1
+
+        for (sessionStart, sessionEnd) in completedSessions.dropFirst() {
+            if sessionStart <= currentEnd {
+                currentEnd = max(currentEnd, sessionEnd)
+            } else {
+                mergedPeriods.append((currentStart, currentEnd))
+                currentStart = sessionStart
+                currentEnd = sessionEnd
+            }
+        }
+        mergedPeriods.append((currentStart, currentEnd))
+
+        return mergedPeriods.map { ($0, $1, $1.timeIntervalSince($0)) }
+    }
+
+    private func selectedDayTotalActiveTime(in data: AnalyticsDashboardData) -> Double {
+        let sessions = self.selectedDaySessions(in: data)
+        return sessions.reduce(0) { $0 + $1.actualFocusSeconds }
     }
 
     private func topApps(for session: FocusSessionRecord, in data: AnalyticsDashboardData) -> [AnalyticsBreakdownItem] {
