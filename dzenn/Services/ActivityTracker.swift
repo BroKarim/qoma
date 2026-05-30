@@ -10,6 +10,7 @@ final class ActivityTracker: NSObject, ObservableObject {
     @Published var currentSessionID: UUID?
 
     private let browserResolver: BrowserActivityResolver
+    private let iconCache: IconCacheActor
     private var pollingTimer: Timer?
     private var workspaceObserver: NSObjectProtocol?
     private var currentAppSession: AppActivityEvent?
@@ -19,10 +20,11 @@ final class ActivityTracker: NSObject, ObservableObject {
     private var lastActivityTime: Date?
     private var activeWebsitePollTasks = 0
     private var websitePollGeneration = 0
-    private var appIconCache: [String: Data] = [:]
+    private var websiteGraceTimer: Timer?
 
-    init(browserResolver: BrowserActivityResolver = .shared) {
+    init(browserResolver: BrowserActivityResolver = .shared, iconCache: IconCacheActor = .init()) {
         self.browserResolver = browserResolver
+        self.iconCache = iconCache
         super.init()
     }
 
@@ -145,6 +147,10 @@ final class ActivityTracker: NSObject, ObservableObject {
             return
         }
 
+        if WindowDetectionService.shared.isFloatingWindow(app: frontmostApp) {
+            return
+        }
+
         lastActivityTime = Date()
         cacheIcon(for: bundleId)
         updateAppSession(identifier: bundleId, name: name)
@@ -154,9 +160,11 @@ final class ActivityTracker: NSObject, ObservableObject {
     // MARK: - App Session
 
     private func cacheIcon(for bundleId: String) {
-        guard appIconCache[bundleId] == nil else { return }
-        if let iconData = IconUtils.getAppIconAsPNG(for: bundleId) {
-            appIconCache[bundleId] = iconData
+        Task {
+            guard await iconCache.get(bundleId) == nil else { return }
+            if let iconData = IconUtils.getAppIconAsPNG(for: bundleId) {
+                await iconCache.set(bundleId, value: iconData)
+            }
         }
     }
 
@@ -208,7 +216,7 @@ final class ActivityTracker: NSObject, ObservableObject {
         currentAppSession = nil
     }
 
-    // MARK: - Website Session (Generation Tracking)
+    // MARK: - Website Session (Generation Tracking + Grace Period)
 
     private func scheduleWebsitePoll(bundleId: String, appName: String) {
         guard browserResolver.isBrowserSupported(bundleId) else {
@@ -234,7 +242,8 @@ final class ActivityTracker: NSObject, ObservableObject {
 
             if let tabInfo = browserResolver.resolveCurrentTab(for: bundleId) {
                 guard currentGeneration == self.websitePollGeneration else { return }
-                updateWebsiteSession(
+                self.cancelWebsiteGracePeriod()
+                self.updateWebsiteSession(
                     bundleId: bundleId,
                     appName: appName,
                     domain: tabInfo.domain,
@@ -242,9 +251,25 @@ final class ActivityTracker: NSObject, ObservableObject {
                 )
             } else {
                 guard currentGeneration == self.websitePollGeneration else { return }
-                finalizeCurrentWebsiteSession()
+                self.beginWebsiteGracePeriod()
             }
         }
+    }
+
+    private func beginWebsiteGracePeriod() {
+        guard websiteGraceTimer == nil, currentWebsiteSession != nil else { return }
+        websiteGraceTimer = Timer.scheduledTimer(
+            withTimeInterval: AppConstants.AnalyticsSettings.websitePollGracePeriod,
+            repeats: false
+        ) { [weak self] _ in
+            self?.finalizeCurrentWebsiteSession()
+        }
+        Logger.tracking.debug("Website grace period started (\(AppConstants.AnalyticsSettings.websitePollGracePeriod)s)")
+    }
+
+    private func cancelWebsiteGracePeriod() {
+        websiteGraceTimer?.invalidate()
+        websiteGraceTimer = nil
     }
 
     private func updateWebsiteSession(
@@ -298,6 +323,8 @@ final class ActivityTracker: NSObject, ObservableObject {
     private func finalizeCurrentWebsiteSession() {
         guard var visit = currentWebsiteSession else { return }
 
+        cancelWebsiteGracePeriod()
+
         let endTime = Date()
         visit.endedAt = endTime
         visit.durationSeconds = endTime.timeIntervalSince(visit.startedAt)
@@ -307,10 +334,12 @@ final class ActivityTracker: NSObject, ObservableObject {
         }
 
         currentWebsiteSession = nil
+        Logger.tracking.debug("Finalized website session for \(visit.domain, privacy: .public)")
     }
 
     deinit {
         pollingTimer?.invalidate()
+        websiteGraceTimer?.invalidate()
         uninstallWorkspaceObserver()
     }
 }

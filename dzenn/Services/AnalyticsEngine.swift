@@ -25,8 +25,8 @@ final class AnalyticsEngine {
         let todayFocus = todaySessions.reduce(0) { $0 + $1.actualFocusSeconds }
         let weekFocus = weekSessions.reduce(0) { $0 + $1.actualFocusSeconds }
 
-        let streak = calculateStreak(from: sessions)
-        let (bestDay, bestDaySeconds) = calculateBestDay(from: sessions)
+        let streak = Self.calculateStreak(from: sessions)
+        let (bestDay, bestDaySeconds) = Self.calculateBestDay(from: sessions)
 
         return AnalyticsSummary(
             todayFocusSeconds: todayFocus,
@@ -68,7 +68,7 @@ final class AnalyticsEngine {
         while currentDate <= today {
             let seconds = dayTotals[currentDate] ?? 0
             let sessionCount = daySessionCounts[currentDate] ?? 0
-            let level = intensityLevel(for: seconds)
+            let level = Self.intensityLevel(for: seconds)
             cells.append(
                 AnalyticsHeatmapCell(
                     date: currentDate,
@@ -144,7 +144,7 @@ final class AnalyticsEngine {
                 sessionCount: sessions.count,
                 topApps: Array(topApps),
                 topDomains: Array(topDomains),
-                heatmapScore: intensityLevel(for: focusSeconds)
+                heatmapScore: Self.intensityLevel(for: focusSeconds)
             ))
 
             currentDate = calendar.date(byAdding: .day, value: 1, to: currentDate)!
@@ -209,7 +209,7 @@ final class AnalyticsEngine {
         limit: Int = 10) -> [AnalyticsBreakdownItem]
     {
         let filteredEvents = appEvents.filter { event in
-            self.isWithinRange(event.startedAt, startDate: startDate, endDate: endDate)
+            Self.isWithinRange(event.startedAt, startDate: startDate, endDate: endDate)
         }
 
         return self.buildBreakdownItems(
@@ -227,7 +227,7 @@ final class AnalyticsEngine {
         limit: Int = 10) -> [AnalyticsBreakdownItem]
     {
         let filteredVisits = webVisits.filter { visit in
-            self.isWithinRange(visit.startedAt, startDate: startDate, endDate: endDate)
+            Self.isWithinRange(visit.startedAt, startDate: startDate, endDate: endDate)
         }
 
         return self.buildBreakdownItems(
@@ -241,7 +241,7 @@ final class AnalyticsEngine {
 
     // MARK: - Helpers
 
-    private func calculateStreak(from sessions: [FocusSessionRecord]) -> Int {
+    nonisolated static func calculateStreak(from sessions: [FocusSessionRecord]) -> Int {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         let uniqueDays = Set(
@@ -268,7 +268,7 @@ final class AnalyticsEngine {
         return streak
     }
 
-    private func calculateBestDay(from sessions: [FocusSessionRecord]) -> (Date?, Double) {
+    nonisolated static func calculateBestDay(from sessions: [FocusSessionRecord]) -> (Date?, Double) {
         let calendar = Calendar.current
         var dayTotals: [Date: Double] = [:]
         for session in sessions where session.actualFocusSeconds > 0 {
@@ -281,7 +281,7 @@ final class AnalyticsEngine {
         return (bestEntry.key, bestEntry.value)
     }
 
-    private func intensityLevel(for seconds: Double) -> Int {
+    nonisolated static func intensityLevel(for seconds: Double) -> Int {
         let minutes = seconds / 60.0
         if minutes == 0 { return 0 }
         if minutes < 15 { return 1 }
@@ -291,19 +291,19 @@ final class AnalyticsEngine {
         return 5
     }
 
-    private func startOfWeek(for date: Date, calendar: Calendar) -> Date {
+    nonisolated static func startOfWeek(for date: Date, calendar: Calendar) -> Date {
         let components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)
         return calendar.date(from: components) ?? calendar.startOfDay(for: date)
     }
 
-    private func endOfWeek(for date: Date, calendar: Calendar) -> Date {
+    nonisolated static func endOfWeek(for date: Date, calendar: Calendar) -> Date {
         guard let weekStart = calendar.dateInterval(of: .weekOfYear, for: date)?.start else {
             return calendar.startOfDay(for: date)
         }
         return calendar.date(byAdding: .day, value: 6, to: weekStart) ?? calendar.startOfDay(for: date)
     }
 
-    private func isWithinRange(_ date: Date, startDate: Date?, endDate: Date?) -> Bool {
+    nonisolated static func isWithinRange(_ date: Date, startDate: Date?, endDate: Date?) -> Bool {
         if let startDate, date < startDate {
             return false
         }

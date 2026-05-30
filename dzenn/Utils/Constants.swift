@@ -77,6 +77,18 @@ enum AnalyticsSettings {
             "com.vivaldi.Vivaldi": "Vivaldi",
         ]
 
+        static let knownFloatingApps: Set<String> = [
+            "com.1password.1password",
+            "com.1password.7",
+            "com.ghostty",
+            "com.runningwithcrayons.Alfred",
+            "com.raycast.macos",
+            "com.macpaw.CleanMyMac-setapp",
+            "com.macpaw.CleanMyMac4",
+            "com.figma.Desktop",
+            "com.tinyspeck.slackmacgap",
+        ]
+
         static let excludedBundleIds: Set<String> = [
             "com.apple.dock",
             "com.apple.loginwindow",
