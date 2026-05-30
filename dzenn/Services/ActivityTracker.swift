@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import AppKit
+import OSLog
 
 final class ActivityTracker: NSObject, ObservableObject {
     static let shared = ActivityTracker()
@@ -8,16 +9,20 @@ final class ActivityTracker: NSObject, ObservableObject {
     @Published var isTracking = false
     @Published var currentSessionID: UUID?
 
+    private let browserResolver: BrowserActivityResolver
     private var pollingTimer: Timer?
+    private var workspaceObserver: NSObjectProtocol?
     private var currentAppSession: AppActivityEvent?
     private var currentWebsiteSession: WebsiteVisitRecord?
     private var pendingEvents: [AppActivityEvent] = []
     private var pendingWebsiteVisits: [WebsiteVisitRecord] = []
     private var lastActivityTime: Date?
     private var activeWebsitePollTasks = 0
+    private var websitePollGeneration = 0
     private var appIconCache: [String: Data] = [:]
 
-    private override init() {
+    init(browserResolver: BrowserActivityResolver = .shared) {
+        self.browserResolver = browserResolver
         super.init()
     }
 
@@ -28,18 +33,20 @@ final class ActivityTracker: NSObject, ObservableObject {
         pendingWebsiteVisits = []
         lastActivityTime = Date()
 
-        print("[ActivityTracker] Started tracking session: \(sessionID)")
+        Logger.tracking.info("Started tracking session: \(sessionID, privacy: .public)")
 
+        installWorkspaceObserver()
         startPolling()
         tick()
     }
 
     func pauseTracking() {
+        uninstallWorkspaceObserver()
         stopPolling()
         finalizeCurrentAppSession()
         finalizeCurrentWebsiteSession()
         isTracking = false
-        print("[ActivityTracker] Paused tracking")
+        Logger.tracking.info("Paused tracking")
     }
 
     func resumeTracking(sessionID: UUID) {
@@ -47,13 +54,15 @@ final class ActivityTracker: NSObject, ObservableObject {
         currentSessionID = sessionID
         lastActivityTime = Date()
 
-        print("[ActivityTracker] Resumed tracking session: \(sessionID)")
+        Logger.tracking.info("Resumed tracking session: \(sessionID, privacy: .public)")
 
+        installWorkspaceObserver()
         startPolling()
         tick()
     }
 
     func stopTracking() -> ([AppActivityEvent], [WebsiteVisitRecord]) {
+        uninstallWorkspaceObserver()
         stopPolling()
         finalizeCurrentAppSession()
         finalizeCurrentWebsiteSession()
@@ -62,10 +71,7 @@ final class ActivityTracker: NSObject, ObservableObject {
         let events = pendingEvents
         let visits = pendingWebsiteVisits
 
-        print("""
-            [ActivityTracker] Stopped tracking - Captured \
-            \(events.count) app events, \(visits.count) website visits
-            """)
+        Logger.tracking.info("Stopped tracking — Captured \(events.count) app events, \(visits.count) website visits")
 
         pendingEvents = []
         pendingWebsiteVisits = []
@@ -74,6 +80,30 @@ final class ActivityTracker: NSObject, ObservableObject {
         currentWebsiteSession = nil
         return (events, visits)
     }
+
+    // MARK: - Workspace Notification (Hybrid Polling)
+
+    private func installWorkspaceObserver() {
+        uninstallWorkspaceObserver()
+        workspaceObserver = NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didActivateApplicationNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                self?.tick()
+            }
+        }
+    }
+
+    private func uninstallWorkspaceObserver() {
+        if let observer = workspaceObserver {
+            NSWorkspace.shared.notificationCenter.removeObserver(observer)
+            workspaceObserver = nil
+        }
+    }
+
+    // MARK: - Polling
 
     private func startPolling() {
         pollingTimer?.invalidate()
@@ -91,6 +121,8 @@ final class ActivityTracker: NSObject, ObservableObject {
         pollingTimer?.invalidate()
         pollingTimer = nil
     }
+
+    // MARK: - Tick
 
     private func tick() {
         guard isTracking else { return }
@@ -118,6 +150,8 @@ final class ActivityTracker: NSObject, ObservableObject {
         updateAppSession(identifier: bundleId, name: name)
         scheduleWebsitePoll(bundleId: bundleId, appName: name)
     }
+
+    // MARK: - App Session
 
     private func cacheIcon(for bundleId: String) {
         guard appIconCache[bundleId] == nil else { return }
@@ -157,7 +191,7 @@ final class ActivityTracker: NSObject, ObservableObject {
             durationSeconds: 0
         )
         currentAppSession = event
-        print("[ActivityTracker] Started app session: \(name)")
+        Logger.tracking.info("Started app session: \(name, privacy: .public)")
     }
 
     private func finalizeCurrentAppSession() {
@@ -174,8 +208,10 @@ final class ActivityTracker: NSObject, ObservableObject {
         currentAppSession = nil
     }
 
+    // MARK: - Website Session (Generation Tracking)
+
     private func scheduleWebsitePoll(bundleId: String, appName: String) {
-        guard BrowserActivityResolver.shared.isBrowserSupported(bundleId) else {
+        guard browserResolver.isBrowserSupported(bundleId) else {
             return
         }
 
@@ -183,12 +219,21 @@ final class ActivityTracker: NSObject, ObservableObject {
             return
         }
 
+        websitePollGeneration += 1
+        let currentGeneration = websitePollGeneration
         activeWebsitePollTasks += 1
 
         Task {
             defer { activeWebsitePollTasks -= 1 }
 
-            if let tabInfo = BrowserActivityResolver.shared.resolveCurrentTab(for: bundleId) {
+            // Abort if a newer poll has started
+            guard currentGeneration == self.websitePollGeneration else {
+                Logger.browser.debug("Skipped stale website poll (gen \(currentGeneration) != \(self.websitePollGeneration))")
+                return
+            }
+
+            if let tabInfo = browserResolver.resolveCurrentTab(for: bundleId) {
+                guard currentGeneration == self.websitePollGeneration else { return }
                 updateWebsiteSession(
                     bundleId: bundleId,
                     appName: appName,
@@ -196,6 +241,7 @@ final class ActivityTracker: NSObject, ObservableObject {
                     title: tabInfo.title
                 )
             } else {
+                guard currentGeneration == self.websitePollGeneration else { return }
                 finalizeCurrentWebsiteSession()
             }
         }
@@ -246,7 +292,7 @@ final class ActivityTracker: NSObject, ObservableObject {
             durationSeconds: 0
         )
         currentWebsiteSession = visit
-        print("[ActivityTracker] Started website session: \(domain)")
+        Logger.tracking.info("Started website session: \(domain, privacy: .public)")
     }
 
     private func finalizeCurrentWebsiteSession() {
@@ -265,5 +311,6 @@ final class ActivityTracker: NSObject, ObservableObject {
 
     deinit {
         pollingTimer?.invalidate()
+        uninstallWorkspaceObserver()
     }
 }

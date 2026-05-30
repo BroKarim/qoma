@@ -1,5 +1,6 @@
 import Foundation
 import AppKit
+import OSLog
 
 final class BrowserActivityResolver {
     static let shared = BrowserActivityResolver()
@@ -41,7 +42,7 @@ final class BrowserActivityResolver {
                 cooldownUntil = Date().addingTimeInterval(AppConstants.AnalyticsSettings.websitePollCooldown)
                 consecutiveFailures = 0
                 let threshold = AppConstants.AnalyticsSettings.websitePollFailureThreshold
-                print("[BrowserActivityResolver] Cooldown triggered after \(threshold) failures")
+                Logger.browser.warning("Cooldown triggered after \(threshold) failures")
             }
             return nil
         }

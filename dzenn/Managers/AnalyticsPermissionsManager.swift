@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import AppKit
+import OSLog
 
 final class AnalyticsPermissionsManager: ObservableObject {
     static let shared = AnalyticsPermissionsManager()
@@ -49,16 +50,16 @@ final class AnalyticsPermissionsManager: ObservableObject {
             if code == -1743 || message.lowercased().contains("not allowed") {
                 automationStatus = .denied
                 lastError = "Automation permission denied (code \(code))"
-                print("[AnalyticsPermissionsManager] Automation permission DENIED")
+                Logger.permissions.error("Automation permission DENIED")
             } else {
                 automationStatus = .granted
                 lastError = nil
-                print("[AnalyticsPermissionsManager] Automation permission GRANTED")
+                Logger.permissions.info("Automation permission GRANTED")
             }
         } else {
             automationStatus = .granted
             lastError = nil
-            print("[AnalyticsPermissionsManager] Automation permission GRANTED")
+            Logger.permissions.info("Automation permission GRANTED")
         }
     }
 
@@ -67,7 +68,7 @@ final class AnalyticsPermissionsManager: ObservableObject {
             [kAXTrustedCheckOptionPrompt.takeUnretainedValue(): false] as CFDictionary
         )
         accessibilityStatus = trusted ? .granted : .denied
-        print("[AnalyticsPermissionsManager] Accessibility permission: \(trusted ? "GRANTED" : "DENIED")")
+        Logger.permissions.info("Accessibility permission: \(trusted ? "GRANTED" : "DENIED", privacy: .public)")
     }
 
     func promptAccessibilityIfNeeded() {
@@ -80,14 +81,14 @@ final class AnalyticsPermissionsManager: ObservableObject {
     func openAutomationSettings() {
         if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation") {
             NSWorkspace.shared.open(url)
-            print("[AnalyticsPermissionsManager] Opening System Settings > Privacy & Security > Automation")
+            Logger.permissions.info("Opening System Settings > Privacy & Security > Automation")
         }
     }
 
     func openAccessibilitySettings() {
         if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
             NSWorkspace.shared.open(url)
-            print("[AnalyticsPermissionsManager] Opening System Settings > Privacy & Security > Accessibility")
+            Logger.permissions.info("Opening System Settings > Privacy & Security > Accessibility")
         }
     }
 
@@ -98,7 +99,7 @@ final class AnalyticsPermissionsManager: ObservableObject {
         } else {
             let browser = browserName ?? "browser"
             lastError = "Automation permission needed for \(browser)"
-            print("[AnalyticsPermissionsManager] Browser permission failed for \(browser)")
+            Logger.permissions.error("Browser permission failed for \(browser, privacy: .public)")
         }
     }
 

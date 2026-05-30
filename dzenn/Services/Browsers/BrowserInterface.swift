@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 
 struct AppleScriptResult {
     let result: String?
@@ -33,10 +34,10 @@ class BaseBrowser: BrowserInterface {
                 success: false, browserName: displayName)
             return nil
         } else if scriptResult.errorCode == -1712 {
-            print("[\(displayName)] AppleScript timeout — transient error")
+            Logger.browser.warning("\(self.displayName, privacy: .public) AppleScript timeout — transient error")
             return nil
         } else if scriptResult.errorCode == -1719 {
-            print("[\(displayName)] AppleScript invalid index — tab may have changed")
+            Logger.browser.warning("\(self.displayName, privacy: .public) AppleScript invalid index — tab may have changed")
             return nil
         }
 

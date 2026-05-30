@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 
 final class AnalyticsStore {
     static let shared = AnalyticsStore()
@@ -114,7 +115,7 @@ final class AnalyticsStore {
             do {
                 return try decoder.decode(T.self, from: data)
             } catch {
-                print("[AnalyticsStore] Decode error for \(filename): \(error)")
+                Logger.store.error("Decode error for \(filename, privacy: .public): \(error.localizedDescription, privacy: .public)")
                 return nil
             }
         }
@@ -127,7 +128,7 @@ final class AnalyticsStore {
                 let data = try self.encoder.encode(value)
                 try data.write(to: url, options: .atomic)
             } catch {
-                print("[AnalyticsStore] Save error for \(filename): \(error)")
+                Logger.store.error("Save error for \(filename, privacy: .public): \(error.localizedDescription, privacy: .public)")
             }
         }
     }

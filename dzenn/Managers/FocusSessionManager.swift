@@ -1,6 +1,7 @@
 import AVFoundation
 import Combine
 import Foundation
+import OSLog
 
 @MainActor
 final class FocusSessionManager: ObservableObject {
@@ -12,6 +13,8 @@ final class FocusSessionManager: ObservableObject {
     @Published var isPaused: Bool = false
     @Published var state: SessionState = .idle
 
+    private let activityTracker: ActivityTracker
+    private let analyticsStore: AnalyticsStore
     private(set) var timerService = TimerService()
 
     private var cancellables = Set<AnyCancellable>()
@@ -19,7 +22,13 @@ final class FocusSessionManager: ObservableObject {
     private let soundAlertPlayer = SoundAlertPlayer()
     private var activeSessionRecord: FocusSessionRecord?
 
-    private init() {
+    init(
+        activityTracker: ActivityTracker = .shared,
+        analyticsStore: AnalyticsStore = .shared)
+    {
+        self.activityTracker = activityTracker
+        self.analyticsStore = analyticsStore
+
         self.timerService.$remainingTime
             .combineLatest(self.timerService.$isRunning, self.timerService.$isPaused)
             .sink { [weak self] remainingTime, isRunning, timerIsPaused in
@@ -55,10 +64,11 @@ final class FocusSessionManager: ObservableObject {
                 taskPlanId: nil
             )
             self.activeSessionRecord = sessionRecord
-            ActivityTracker.shared.startTracking(sessionID: sessionRecord.id)
+            self.activityTracker.startTracking(sessionID: sessionRecord.id)
         }
 
         self.timerService.start(duration: duration)
+        Logger.session.info("Started focus session: \(task, privacy: .public) for \(Int(duration/60))m")
     }
 
     func stop() {
@@ -67,13 +77,15 @@ final class FocusSessionManager: ObservableObject {
         self.timerService.stop()
         self.completionHandled = true
         self.resetSession()
+        Logger.session.info("Stopped focus session")
     }
 
     func pause() {
         guard self.isActive, !self.isPaused else { return }
         self.timerService.pause()
         self.isPaused = true
-        ActivityTracker.shared.pauseTracking()
+        self.activityTracker.pauseTracking()
+        Logger.session.info("Paused focus session")
     }
 
     func resume() {
@@ -81,8 +93,9 @@ final class FocusSessionManager: ObservableObject {
         self.timerService.resume()
         self.isPaused = false
         if let sessionRecord = self.activeSessionRecord {
-            ActivityTracker.shared.resumeTracking(sessionID: sessionRecord.id)
+            self.activityTracker.resumeTracking(sessionID: sessionRecord.id)
         }
+        Logger.session.info("Resumed focus session")
     }
 
     private func breakDuration(for type: BreakType) -> TimeInterval {
@@ -104,10 +117,12 @@ final class FocusSessionManager: ObservableObject {
             self.prepareBreak(type: .short)
             WindowManager.shared.hideFloating()
             MenuBarController.shared?.showPopover()
+            Logger.session.info("Focus timer finished — showing break")
         case .shortBreak, .longBreak:
             self.completeSession(mode: self.state.mode ?? .quickSession)
             WindowManager.shared.hideFloating()
             MenuBarController.shared?.showPopover()
+            Logger.session.info("Break timer finished — showing menu bar")
         case .completed, .none:
             break
         }
@@ -138,7 +153,7 @@ final class FocusSessionManager: ObservableObject {
               var sessionRecord = self.activeSessionRecord else { return }
 
         let endedAt = Date()
-        let (appEvents, websiteVisits) = ActivityTracker.shared.stopTracking()
+        let (appEvents, websiteVisits) = self.activityTracker.stopTracking()
         let trackedFocusSeconds = appEvents.reduce(0) { $0 + $1.durationSeconds }
         let elapsedSessionSeconds = self.timerService.elapsedTime(totalDuration: self.duration, now: endedAt)
         let plannedFocusSeconds = Double(sessionRecord.plannedMinutes * 60)
@@ -149,11 +164,12 @@ final class FocusSessionManager: ObservableObject {
         sessionRecord.completed = completed
         sessionRecord.interruptedReason = interruptedReason
 
-        AnalyticsStore.shared.updateFocusSession(sessionRecord)
-        AnalyticsStore.shared.appendAppActivityEvents(appEvents)
-        AnalyticsStore.shared.appendWebsiteVisits(websiteVisits)
+        self.analyticsStore.updateFocusSession(sessionRecord)
+        self.analyticsStore.appendAppActivityEvents(appEvents)
+        self.analyticsStore.appendWebsiteVisits(websiteVisits)
 
         self.activeSessionRecord = nil
+        Logger.session.info("Finalized analytics session: \(focusSeconds/60, privacy: .public) min focus")
     }
 
     private func prepareBreak(type: BreakType) {
@@ -190,7 +206,7 @@ private final class SoundAlertPlayer {
         self.stop()
 
         guard let option = AppConstants.SoundSettings.options.first(where: { $0.id == soundID }) else {
-            print("[SoundAlertPlayer] Unknown sound id: \(soundID)")
+            Logger.sound.error("Unknown sound id: \(soundID, privacy: .public)")
             return
         }
 
@@ -204,7 +220,7 @@ private final class SoundAlertPlayer {
                 withExtension: option.fileExtension)
 
         guard let soundURL else {
-            print("[SoundAlertPlayer] Sound file not found: \(option.fileName).\(option.fileExtension)")
+            Logger.sound.error("Sound file not found: \(option.fileName).\(option.fileExtension, privacy: .public)")
             return
         }
 
@@ -215,8 +231,9 @@ private final class SoundAlertPlayer {
             player.numberOfLoops = -1
             player.prepareToPlay()
             player.play()
+            Logger.sound.info("Playing sound: \(option.title, privacy: .public)")
         } catch {
-            print("[SoundAlertPlayer] Failed to play sound: \(error.localizedDescription)")
+            Logger.sound.error("Failed to play sound: \(error.localizedDescription, privacy: .public)")
             return
         }
 
