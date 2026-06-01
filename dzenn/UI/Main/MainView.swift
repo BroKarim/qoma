@@ -11,9 +11,8 @@ struct MainView: View {
     var body: some View {
         HStack(spacing: 2) {
             self.sidebarSection
-                .padding(.leading, self.outerSidePadding)
                 .padding(.top, self.columnTopPadding)
-                .padding(.bottom, self.columnBottomPadding)
+                .padding(.bottom, 0)
 
             self.detailSection
                 .padding(.trailing, self.outerSidePadding)
@@ -59,10 +58,8 @@ struct MainView: View {
         .frame(width: 220)
         .frame(maxHeight: .infinity)
         .background(self.sidebarBackground)
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .stroke(Color.white.opacity(0.1), lineWidth: 1))
+        .clipShape(SidebarClipShape())
+        .overlay(SidebarClipShape().stroke(Color.white.opacity(0.1), lineWidth: 1))
     }
 
     private var detailSection: some View {
@@ -97,6 +94,23 @@ struct MainView: View {
 
     private var sidebarBackground: Color {
         .dzennSidebarBackground
+    }
+}
+
+private struct SidebarClipShape: Shape {
+    func path(in rect: CGRect) -> Path {
+        let r: CGFloat = 12
+        var p = Path()
+        p.move(to: CGPoint(x: rect.minX, y: rect.minY))
+        p.addLine(to: CGPoint(x: rect.maxX - r, y: rect.minY))
+        p.addArc(center: CGPoint(x: rect.maxX - r, y: rect.minY + r), radius: r,
+                 startAngle: .degrees(-90), endAngle: .degrees(0), clockwise: false)
+        p.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY - r))
+        p.addArc(center: CGPoint(x: rect.maxX - r, y: rect.maxY - r), radius: r,
+                 startAngle: .degrees(0), endAngle: .degrees(90), clockwise: false)
+        p.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+        p.closeSubpath()
+        return p
     }
 }
 
