@@ -21,6 +21,7 @@ struct FloatingAppSettingsView: View {
                 self.timerThemeSection
             }
             .padding(24)
+            .padding(.top, 8)
             .frame(maxWidth: .infinity, alignment: .topLeading)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)

@@ -68,7 +68,7 @@ final class FocusSessionManager: ObservableObject {
         }
 
         self.timerService.start(duration: duration)
-        Logger.session.info("Started focus session: \(task, privacy: .public) for \(Int(duration/60))m")
+        Logger.session.info("Started focus session: \(task, privacy: .public) for \(Int(duration / 60))m")
     }
 
     func stop() {
@@ -169,7 +169,7 @@ final class FocusSessionManager: ObservableObject {
         self.analyticsStore.appendWebsiteVisits(websiteVisits)
 
         self.activeSessionRecord = nil
-        Logger.session.info("Finalized analytics session: \(focusSeconds/60, privacy: .public) min focus")
+        Logger.session.info("Finalized analytics session: \(focusSeconds / 60, privacy: .public) min focus")
     }
 
     private func prepareBreak(type: BreakType) {

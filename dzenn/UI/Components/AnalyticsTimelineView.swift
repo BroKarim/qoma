@@ -19,7 +19,7 @@ struct AnalyticsTimelineView: View {
 
                 if self.entries.isEmpty {
                     Text("No activity recorded for this day.")
-                        .font(.subheadline)
+                        .font(.dzennSubheadline)
                         .foregroundColor(.secondary)
                 } else {
                     ScrollView {
@@ -47,10 +47,10 @@ struct TimelineRow: View {
         HStack(alignment: .top, spacing: 12) {
             VStack(alignment: .trailing, spacing: 0) {
                 Text(entry.timeLabel)
-                    .font(.caption)
+                    .font(.dzennCaption)
                     .foregroundColor(.secondary)
                 Text(formatDuration(entry.seconds))
-                    .font(.caption2)
+                    .font(.dzennCaption2)
                     .foregroundColor(.secondary)
             }
             .frame(width: 80)
@@ -60,12 +60,12 @@ struct TimelineRow: View {
                     Image(systemName: entry.kind == .app ? "macwindow" : "network")
                         .foregroundColor(entry.kind == .app ? .blue : .purple)
                     Text(entry.name)
-                        .font(.subheadline)
+                        .font(.dzennSubheadline)
                 }
 
                 if let detail = entry.detail, !detail.isEmpty {
                     Text(detail)
-                        .font(.caption)
+                        .font(.dzennCaption)
                         .foregroundColor(.secondary)
                 }
             }

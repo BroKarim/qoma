@@ -21,6 +21,7 @@ struct AnalyticsDashboardView: View {
                 self.content
             }
             .padding(24)
+            .padding(.top, 8)
             .frame(maxWidth: .infinity, alignment: .topLeading)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -40,7 +41,7 @@ struct AnalyticsDashboardView: View {
                 HStack(spacing: 12) {
                     ProgressView()
                     Text("Loading analytics...")
-                        .font(.subheadline)
+                        .font(.dzennSubheadline)
                         .foregroundColor(.secondary)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -50,21 +51,19 @@ struct AnalyticsDashboardView: View {
         case .loaded(let data):
             AnalyticsHeatmapView(cells: data.heatmapCells, selectedDate: self.$selectedDay)
             self.dayOverviewView(data: data)
-            AnalyticsActiveTimeCard(
-                selectedDate: self.selectedDay,
-                workPeriods: self.selectedDayWorkPeriods(in: data),
-                totalActiveTime: self.selectedDayTotalActiveTime(in: data),
-                topApps: self.selectedDayApps(in: data),
-                topWebsites: self.selectedDayDomains(in: data))
+            // AnalyticsActiveTimeCard — deferred to next update
+            // AnalyticsActiveTimeCard(
+            //     selectedDate: self.selectedDay,
+            //     workPeriods: self.selectedDayWorkPeriods(in: data),
+            //     totalActiveTime: self.selectedDayTotalActiveTime(in: data),
+            //     topApps: self.selectedDayApps(in: data),
+            //     topWebsites: self.selectedDayDomains(in: data))
             // Session Summaries - deferred to next release
             // self.sessionSummariesView(data: data)
             AnalyticsBreakdownView(
                 date: self.selectedDay,
                 apps: self.selectedDayApps(in: data),
                 domains: self.selectedDayDomains(in: data))
-            AnalyticsTimelineView(
-                date: self.selectedDay,
-                entries: self.selectedDayTimeline(in: data))
         }
     }
 
@@ -96,7 +95,7 @@ struct AnalyticsDashboardView: View {
 
                 if sessions.isEmpty {
                     Text("No sessions recorded for this day.")
-                        .font(.subheadline)
+                        .font(.dzennSubheadline)
                         .foregroundColor(.secondary)
                 } else {
                     HStack(spacing: 16) {
@@ -143,7 +142,7 @@ struct AnalyticsDashboardView: View {
 
                 if sessions.isEmpty {
                     Text("No focus sessions on this day.")
-                        .font(.subheadline)
+                        .font(.dzennSubheadline)
                         .foregroundColor(.secondary)
                 } else {
                     VStack(alignment: .leading, spacing: 14) {
@@ -251,7 +250,9 @@ struct AnalyticsDashboardView: View {
             webVisits: data.webVisits)
     }
 
-    private func selectedDayWorkPeriods(in data: AnalyticsDashboardData) -> [(startTime: Date, endTime: Date, duration: TimeInterval)] {
+    private func selectedDayWorkPeriods(
+        in data: AnalyticsDashboardData
+    ) -> [(startTime: Date, endTime: Date, duration: TimeInterval)] {
         let sessions = self.selectedDaySessions(in: data)
         let completedSessions = sessions.compactMap { session -> (Date, Date)? in
             guard let endTime = session.endedAt else { return nil }
@@ -499,16 +500,16 @@ private struct OverviewStatCard: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 6) {
                 Image(systemName: self.icon)
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(.dzenn(size: 12, weight: .semibold))
                     .foregroundColor(self.color)
 
                 Text(self.title)
-                    .font(.caption)
+                    .font(.dzennCaption)
                     .foregroundColor(.secondary)
             }
 
             Text(self.value)
-                .font(.title2)
+                .font(.dzennTitle2)
                 .fontWeight(.bold)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -554,12 +555,12 @@ private struct AnalyticsSessionSummaryCard: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .firstTextBaseline, spacing: 12) {
                 Text(self.timeRange)
-                    .font(.system(size: 14, weight: .semibold, design: .rounded))
+                    .font(.dzenn(size: 14, weight: .semibold))
 
                 Spacer(minLength: 12)
 
                 Text(self.statusLabel)
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.dzenn(size: 11, weight: .semibold))
                     .foregroundColor(self.statusColor)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
@@ -569,12 +570,12 @@ private struct AnalyticsSessionSummaryCard: View {
 
             if let taskTitle = self.session.taskTitle, !taskTitle.isEmpty {
                 Text(taskTitle)
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.dzenn(size: 14, weight: .medium))
                     .foregroundColor(.primary)
             }
 
             Text(self.summaryText)
-                .font(.subheadline)
+                .font(.dzennSubheadline)
                 .foregroundColor(.secondary)
 
             HStack(spacing: 16) {
@@ -633,11 +634,11 @@ private struct AnalyticsSessionSummaryCard: View {
     private func metaPill(title: String, value: String) -> some View {
         HStack(spacing: 6) {
             Text(title)
-                .font(.caption2)
+                .font(.dzennCaption2)
                 .foregroundColor(.secondary)
 
             Text(value)
-                .font(.caption)
+                .font(.dzennCaption)
                 .foregroundColor(.primary)
         }
         .padding(.horizontal, 10)

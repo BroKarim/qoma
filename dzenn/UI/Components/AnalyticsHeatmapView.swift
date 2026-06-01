@@ -36,7 +36,7 @@ struct AnalyticsHeatmapView: View {
 
                 if self.weekColumns.isEmpty {
                     Text("No focus history yet.")
-                        .font(.subheadline)
+                        .font(.dzennSubheadline)
                         .foregroundColor(.secondary)
                 } else {
                     // Pakai GeometryReader hanya untuk month axis positioning
@@ -61,7 +61,7 @@ struct AnalyticsHeatmapView: View {
                                 // dan sembunyikan jika nil
                                 if let label = self.monthLabel(for: week, index: index) {
                                     Text(label)
-                                        .font(.system(size: 10, weight: .medium))
+                                        .font(.dzenn(size: 10, weight: .medium))
                                         .foregroundColor(.primary.opacity(0.78))
                                         .fixedSize()  // <-- KUNCI: tidak terpotong
                                         .frame(width: self.cellSize, alignment: .leading)
@@ -80,7 +80,7 @@ struct AnalyticsHeatmapView: View {
     private var header: some View {
         HStack(alignment: .center, spacing: 12) {
             Text("Activity")
-                .font(.system(size: 17, weight: .medium))
+                .font(.dzenn(size: 17, weight: .medium))
                 .foregroundColor(.primary)
 
             Spacer(minLength: 16)
@@ -88,11 +88,11 @@ struct AnalyticsHeatmapView: View {
             if let selectedCell = self.selectedCell {
                 VStack(alignment: .trailing, spacing: 2) {
                     Text(Self.dayFormatter.string(from: selectedCell.date))
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(.dzenn(size: 12, weight: .semibold))
                         .foregroundColor(.primary.opacity(0.82))
 
                     Text(self.focusSummary(for: selectedCell))
-                        .font(.caption)
+                        .font(.dzennCaption)
                         .foregroundColor(.secondary)
                 }
             }
@@ -118,7 +118,7 @@ struct AnalyticsHeatmapView: View {
         HStack(alignment: .center, spacing: self.cellSpacing) {
             ForEach(Array(self.weekColumns.enumerated()), id: \.offset) { index, week in
                 Text(self.monthLabel(for: week, index: index) ?? "")
-                    .font(.system(size: 10, weight: .medium))
+                    .font(.dzenn(size: 10, weight: .medium))
                     .foregroundColor(.primary.opacity(0.78))
                     .lineLimit(1)
                     .frame(width: metrics.columnWidth, alignment: .leading)

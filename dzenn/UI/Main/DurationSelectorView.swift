@@ -104,6 +104,7 @@ struct DurationSelectorView: View {
                 }
             }
             .padding(24)
+            .padding(.top, 8)
             .frame(maxWidth: .infinity, alignment: .topLeading)
         }
         .onAppear {

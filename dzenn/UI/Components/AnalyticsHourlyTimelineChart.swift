@@ -41,7 +41,7 @@ struct AnalyticsHourlyTimelineChart: View {
             HStack {
                 ForEach(Array(stride(from: 0, through: 21, by: 3)), id: \.self) { hour in
                     Text("\(hour)")
-                        .font(.caption2)
+                        .font(.dzennCaption2)
                         .foregroundColor(.secondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }

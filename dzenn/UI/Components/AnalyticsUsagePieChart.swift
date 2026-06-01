@@ -27,7 +27,7 @@ struct AnalyticsUsagePieChart: View {
                             .fill(self.colors[index % self.colors.count].opacity(0.8))
                             .frame(width: 8, height: 8)
                         Text(app.name)
-                            .font(.caption2)
+                            .font(.dzennCaption2)
                             .lineLimit(1)
                         Spacer()
                     }

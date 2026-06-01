@@ -236,7 +236,8 @@ final class ActivityTracker: NSObject, ObservableObject {
 
             // Abort if a newer poll has started
             guard currentGeneration == self.websitePollGeneration else {
-                Logger.browser.debug("Skipped stale website poll (gen \(currentGeneration) != \(self.websitePollGeneration))")
+                Logger.browser.debug(
+                    "Skipped stale website poll (gen \(currentGeneration) != \(self.websitePollGeneration))")
                 return
             }
 
@@ -264,7 +265,8 @@ final class ActivityTracker: NSObject, ObservableObject {
         ) { [weak self] _ in
             self?.finalizeCurrentWebsiteSession()
         }
-        Logger.tracking.debug("Website grace period started (\(AppConstants.AnalyticsSettings.websitePollGracePeriod)s)")
+        Logger.tracking.debug(
+            "Website grace period started (\(AppConstants.AnalyticsSettings.websitePollGracePeriod)s)")
     }
 
     private func cancelWebsiteGracePeriod() {

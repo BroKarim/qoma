@@ -21,10 +21,10 @@ struct AnalyticsActiveTimeCard: View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     Text("Active Time")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.dzenn(size: 16, weight: .semibold))
                     Spacer()
                     Text(formatDuration(self.totalActiveTime))
-                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .font(.dzenn(size: 14, weight: .semibold))
                         .foregroundColor(.secondary)
                 }
 

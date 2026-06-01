@@ -17,7 +17,7 @@ struct MainView: View {
             self.detailSection
                 .padding(.trailing, self.outerSidePadding)
                 .padding(.top, self.columnTopPadding)
-                .padding(.bottom, self.columnBottomPadding)
+                .padding(.bottom, 0)
         }
         .frame(minWidth: 860, minHeight: 580)
         .background(self.mainBackground.ignoresSafeArea())
@@ -32,12 +32,8 @@ struct MainView: View {
             VStack(alignment: .leading, spacing: 6) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Settings")
-                        .font(.system(size: 18, weight: .semibold))
+                        .font(.dzenn(size: 18, weight: .semibold))
                         .foregroundColor(.white)
-
-                    Text("Tune focus flow and floating window.")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(Color.white.opacity(0.6))
                 }
                 .padding(.bottom, 10)
 
@@ -75,6 +71,7 @@ struct MainView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(self.mainBackground)
+        .ignoresSafeArea(.container, edges: .top)
     }
 
     private var selection: SidebarItem {
@@ -103,11 +100,19 @@ private struct SidebarClipShape: Shape {
         var p = Path()
         p.move(to: CGPoint(x: rect.minX, y: rect.minY))
         p.addLine(to: CGPoint(x: rect.maxX - r, y: rect.minY))
-        p.addArc(center: CGPoint(x: rect.maxX - r, y: rect.minY + r), radius: r,
-                 startAngle: .degrees(-90), endAngle: .degrees(0), clockwise: false)
+        p.addArc(
+            center: CGPoint(x: rect.maxX - r, y: rect.minY + r),
+            radius: r,
+            startAngle: .degrees(-90),
+            endAngle: .degrees(0),
+            clockwise: false)
         p.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY - r))
-        p.addArc(center: CGPoint(x: rect.maxX - r, y: rect.maxY - r), radius: r,
-                 startAngle: .degrees(0), endAngle: .degrees(90), clockwise: false)
+        p.addArc(
+            center: CGPoint(x: rect.maxX - r, y: rect.maxY - r),
+            radius: r,
+            startAngle: .degrees(0),
+            endAngle: .degrees(90),
+            clockwise: false)
         p.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
         p.closeSubpath()
         return p
@@ -121,12 +126,12 @@ private struct SidebarRow: View {
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: self.item.systemImage)
-                .font(.system(size: 14, weight: .medium))
+                .font(.dzenn(size: 14, weight: .medium))
                 .frame(width: 20)
                 .foregroundColor(self.isSelected ? .white : Color.white.opacity(0.68))
 
             Text(self.item.title)
-                .font(.system(size: 13, weight: self.isSelected ? .semibold : .regular))
+                .font(.dzenn(size: 13, weight: self.isSelected ? .semibold : .regular))
                 .foregroundColor(self.isSelected ? .white : Color.white.opacity(0.72))
 
             Spacer()
@@ -181,10 +186,10 @@ struct SettingsPageHeader: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(self.title)
-                .font(.system(size: 28, weight: .semibold))
+                .font(.dzenn(size: 28, weight: .semibold))
 
             Text(self.subtitle)
-                .font(.system(size: 13, weight: .medium))
+                .font(.dzenn(size: 13, weight: .medium))
                 .foregroundColor(.secondary)
         }
     }
@@ -197,10 +202,10 @@ struct SettingsSectionHeading: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(self.title)
-                .font(.system(size: 16, weight: .semibold))
+                .font(.dzenn(size: 16, weight: .semibold))
 
             Text(self.subtitle)
-                .font(.system(size: 12.5, weight: .medium))
+                .font(.dzenn(size: 12.5, weight: .medium))
                 .foregroundColor(.secondary)
         }
     }
@@ -242,11 +247,11 @@ struct SettingsRow<Content: View>: View {
         HStack(alignment: self.subtitle == nil ? .center : .top, spacing: 18) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(self.title)
-                    .font(.system(size: 13.5, weight: .medium))
+                    .font(.dzenn(size: 13.5, weight: .medium))
 
                 if let subtitle = self.subtitle {
                     Text(subtitle)
-                        .font(.system(size: 12, weight: .medium))
+                        .font(.dzenn(size: 12, weight: .medium))
                         .foregroundColor(.secondary)
                 }
             }
@@ -263,7 +268,7 @@ struct SettingsBadge: View {
 
     var body: some View {
         Text(self.title)
-            .font(.system(size: 11, weight: .semibold))
+            .font(.dzenn(size: 11, weight: .semibold))
             .foregroundColor(.secondary)
             .padding(.horizontal, 10)
             .padding(.vertical, 6)

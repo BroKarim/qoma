@@ -33,8 +33,8 @@ class FirefoxBrowser: BrowserInterface {
             return nil
         }
 
+        let axFocused = focusedElement as! AXUIElement // swiftlint:disable:this force_cast
         var valueRef: CFTypeRef?
-        let axFocused = focusedElement as! AXUIElement
         let valueResult = AXUIElementCopyAttributeValue(
             axFocused, kAXValueAttribute as CFString, &valueRef)
 

@@ -37,7 +37,8 @@ class BaseBrowser: BrowserInterface {
             Logger.browser.warning("\(self.displayName, privacy: .public) AppleScript timeout — transient error")
             return nil
         } else if scriptResult.errorCode == -1719 {
-            Logger.browser.warning("\(self.displayName, privacy: .public) AppleScript invalid index — tab may have changed")
+            Logger.browser.warning(
+                "\(self.displayName, privacy: .public) AppleScript invalid index — tab may have changed")
             return nil
         }
 

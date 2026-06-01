@@ -47,7 +47,7 @@ struct AnalyticsIconView: View {
             color.setFill()
             NSBezierPath(roundedRect: rect, xRadius: 4, yRadius: 4).fill()
             let attrs: [NSAttributedString.Key: Any] = [
-                .font: NSFont.systemFont(ofSize: 18, weight: .semibold),
+                .font: NSFont.monospacedSystemFont(ofSize: 18, weight: .semibold),
                 .foregroundColor: NSColor.white
             ]
             let size = (letter as NSString).size(withAttributes: attrs)

@@ -115,7 +115,8 @@ final class AnalyticsStore {
             do {
                 return try decoder.decode(T.self, from: data)
             } catch {
-                Logger.store.error("Decode error for \(filename, privacy: .public): \(error.localizedDescription, privacy: .public)")
+                Logger.store.error(
+                    "Decode error for \(filename, privacy: .public): \(error.localizedDescription, privacy: .public)")
                 return nil
             }
         }
@@ -128,7 +129,8 @@ final class AnalyticsStore {
                 let data = try self.encoder.encode(value)
                 try data.write(to: url, options: .atomic)
             } catch {
-                Logger.store.error("Save error for \(filename, privacy: .public): \(error.localizedDescription, privacy: .public)")
+                Logger.store.error(
+                    "Save error for \(filename, privacy: .public): \(error.localizedDescription, privacy: .public)")
             }
         }
     }

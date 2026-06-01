@@ -11,15 +11,15 @@ struct AnalyticsEmptyStateView: View {
         SettingsSurfaceCard {
             VStack(spacing: 16) {
                 Image(systemName: self.icon)
-                    .font(.system(size: 48))
+                    .font(.dzenn(size: 48))
                     .foregroundColor(.secondary)
 
                 Text(self.message)
-                    .font(.headline)
+                    .font(.dzennHeadline)
                     .foregroundColor(.primary)
 
                 Text(self.subtitle)
-                    .font(.subheadline)
+                    .font(.dzennSubheadline)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)

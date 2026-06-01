@@ -58,16 +58,23 @@ private struct BreakdownColumn: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Label(self.title, systemImage: self.icon)
-                .font(.system(size: 13, weight: .semibold))
+                .font(.dzenn(size: 13, weight: .semibold))
                 .foregroundColor(.primary)
 
             if self.items.isEmpty {
                 EmptyStateContent(message: self.emptyMessage)
             } else {
-                ItemsListContent(items: self.items)
+                ScrollView(.vertical, showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 10) {
+                        ForEach(self.items) { item in
+                            BreakdownRow(item: item)
+                        }
+                    }
+                }
+                .frame(maxHeight: 180)
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .frame(maxWidth: .infinity, alignment: .topLeading)
         .padding(16)
         .background(ColumnBackground())
     }
@@ -78,21 +85,9 @@ private struct EmptyStateContent: View {
     
     var body: some View {
         Text(self.message)
-            .font(.subheadline)
+            .font(.dzennSubheadline)
             .foregroundColor(.secondary)
-            .frame(maxWidth: .infinity, minHeight: 120, alignment: .topLeading)
-    }
-}
-
-private struct ItemsListContent: View {
-    let items: [AnalyticsBreakdownItem]
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            ForEach(self.items) { item in
-                BreakdownRow(item: item)
-            }
-        }
+            .frame(maxWidth: .infinity, minHeight: 100, alignment: .topLeading)
     }
 }
 
@@ -113,7 +108,7 @@ private struct WebsitePermissionColumn: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Label("Top Websites", systemImage: "network")
-                .font(.system(size: 13, weight: .semibold))
+                .font(.dzenn(size: 13, weight: .semibold))
                 .foregroundColor(.primary)
 
             Spacer(minLength: 0)
@@ -134,23 +129,23 @@ private struct PermissionAlert: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Image(systemName: "lock.shield")
-                .font(.system(size: 28))
+                .font(.dzenn(size: 28))
                 .foregroundColor(.orange)
 
             Text("Website tracking requires permission")
-                .font(.headline)
+                .font(.dzennHeadline)
 
             VStack(alignment: .leading, spacing: 6) {
                 Text("Dzenn needs Automation permission to read browser tabs.")
-                    .font(.subheadline)
+                    .font(.dzennSubheadline)
                     .foregroundColor(.secondary)
 
                 Text("Enable Dzenn in System Settings > Privacy & Security > Automation for each browser.")
-                    .font(.subheadline)
+                    .font(.dzennSubheadline)
                     .foregroundColor(.secondary)
 
                 Text("Top apps will still be tracked without this permission.")
-                    .font(.subheadline)
+                    .font(.dzennSubheadline)
                     .foregroundColor(.secondary)
             }
 
@@ -193,14 +188,14 @@ private struct BreakdownRow: View {
                 }
 
                 Text(self.item.name)
-                    .font(.system(size: 13, weight: .medium))
+                    .font(.dzenn(size: 13, weight: .medium))
                     .foregroundColor(.primary)
                     .lineLimit(1)
 
                 Spacer(minLength: 8)
 
                 Text(self.item.displayDuration)
-                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                    .font(.dzenn(size: 12, weight: .semibold))
                     .foregroundColor(.secondary)
             }
 
@@ -234,7 +229,7 @@ private struct PercentageLabel: View {
     
     var body: some View {
         Text("\(Int(self.percentage.rounded()))% of tracked time")
-            .font(.caption2)
+            .font(.dzennCaption2)
             .foregroundColor(.secondary)
     }
 }
