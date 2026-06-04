@@ -74,23 +74,16 @@ struct MenuBarView: View {
 
                 Spacer(minLength: 0)
 
-                Menu(content: {
-                    if #available(macOS 14.0, *) {
-                        SettingsLink {
-                            Text("Settings...")
-                        }
-                        .keyboardShortcut(",", modifiers: .command)
-                    } else {
+                    Menu(content: {
                         Button("Settings...") {
-                            MenuBarController.shared?.openLegacySettingsWindow()
+                            SettingsWindowController.show()
                         }
                         .keyboardShortcut(",", modifiers: .command)
-                    }
-                    Button("Contact Us") { self.openContact() }
-                    Divider()
-                    Button("Quit") { NSApp.terminate(nil) }
-                        .keyboardShortcut("q", modifiers: .command)
-                }, label: {
+                        Button("Contact Us") { self.openContact() }
+                        Divider()
+                        Button("Quit") { NSApp.terminate(nil) }
+                            .keyboardShortcut("q", modifiers: .command)
+                    }, label: {
                     Image(systemName: "ellipsis")
                         .font(.system(size: 16))
                         .foregroundColor(.secondary)

@@ -97,11 +97,7 @@ final class MenuBarController: NSObject {
     func openLegacySettingsWindow() {
         self.closePanel()
         DispatchQueue.main.async {
-            let selector = NSSelectorFromString("show" + "SettingsWindow:")
-            let openedSettings = NSApp.sendAction(selector, to: nil, from: nil)
-            if !openedSettings {
-                WindowManager.shared.showMainWindow()
-            }
+            SettingsWindowController.show()
         }
     }
 

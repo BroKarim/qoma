@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct FloatingAppSettingsView: View {
+struct AppearanceSettingsPane: View {
     @AppStorage(AppConstants.FloatingThemeSettings.opacityKey)
     private var floatingOpacity: Double = AppConstants.FloatingThemeSettings.defaultOpacity
     @AppStorage(AppConstants.FloatingThemeSettings.selectedThemeKey)
@@ -17,8 +17,8 @@ struct FloatingAppSettingsView: View {
                     title: "Appearance",
                     subtitle: "Shape floating panel look and visual mood.")
 
-                self.windowFeelSection
-                self.timerThemeSection
+                windowFeelSection
+                timerThemeSection
             }
             .padding(24)
             .padding(.top, 8)
@@ -26,15 +26,15 @@ struct FloatingAppSettingsView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .onAppear {
-            self.floatingOpacity = self.clampOpacity(self.floatingOpacity)
+            floatingOpacity = clampOpacity(floatingOpacity)
         }
-        .onChange(of: self.floatingOpacity) { newValue in
-            self.floatingOpacity = self.clampOpacity(newValue)
+        .onChange(of: floatingOpacity) { newValue in
+            floatingOpacity = clampOpacity(newValue)
         }
     }
 
     private var selectedTheme: FloatingTheme {
-        FloatingTheme.from(id: self.selectedThemeID)
+        FloatingTheme.from(id: selectedThemeID)
     }
 
     private var windowFeelSection: some View {
@@ -50,13 +50,13 @@ struct FloatingAppSettingsView: View {
                 {
                     HStack(spacing: 12) {
                         CustomSlider(
-                            value: self.$floatingOpacity,
+                            value: $floatingOpacity,
                             range: AppConstants.FloatingThemeSettings.minOpacity...AppConstants
                                 .FloatingThemeSettings.maxOpacity,
                             step: 0.01)
                             .frame(width: 220)
 
-                        Text("\(Int((self.floatingOpacity * 100).rounded()))%")
+                        Text("\(Int((floatingOpacity * 100).rounded()))%")
                             .font(.system(size: 13, weight: .semibold, design: .monospaced))
                             .foregroundColor(.secondary)
                             .frame(width: 44, alignment: .trailing)
@@ -73,14 +73,14 @@ struct FloatingAppSettingsView: View {
                     title: "Timer color",
                     subtitle: "Choose floating timer text color.")
 
-                LazyVGrid(columns: self.themeColumns, spacing: 12) {
+                LazyVGrid(columns: themeColumns, spacing: 12) {
                     ForEach(FloatingTheme.allCases) { theme in
                         Button {
-                            self.selectedThemeID = theme.id
+                            selectedThemeID = theme.id
                         } label: {
                             FloatingThemeOptionCard(
                                 theme: theme,
-                                isSelected: theme == self.selectedTheme)
+                                isSelected: theme == selectedTheme)
                         }
                         .buttonStyle(.plain)
                     }
@@ -105,26 +105,26 @@ private struct FloatingThemeOptionCard: View {
             RoundedRectangle(cornerRadius: 12, style: .continuous)
                 .fill(
                     LinearGradient(
-                        colors: [self.theme.swatchLeadingColor, self.theme.swatchTrailingColor],
+                        colors: [theme.swatchLeadingColor, theme.swatchTrailingColor],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing))
                 .overlay(
                     Text("25:00")
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
-                        .foregroundColor(self.theme.textColor))
+                        .foregroundColor(theme.textColor))
                 .overlay(
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .stroke(self.theme.borderColor, lineWidth: 1))
+                        .stroke(theme.borderColor, lineWidth: 1))
                 .frame(height: 64)
 
             HStack(spacing: 8) {
-                Text(self.theme.title)
+                Text(theme.title)
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(.primary)
 
                 Spacer(minLength: 8)
 
-                if self.isSelected {
+                if isSelected {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundColor(.white)
@@ -134,11 +134,11 @@ private struct FloatingThemeOptionCard: View {
         .padding(12)
         .background(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(Color.white.opacity(self.isSelected ? 0.08 : 0.035)))
+                .fill(Color.white.opacity(isSelected ? 0.08 : 0.035)))
         .overlay(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .stroke(
-                    self.isSelected ? Color.white.opacity(0.18) : Color.white.opacity(0.08),
+                    isSelected ? Color.white.opacity(0.18) : Color.white.opacity(0.08),
                     lineWidth: 1))
     }
 }
