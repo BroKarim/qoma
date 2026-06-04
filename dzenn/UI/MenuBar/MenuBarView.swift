@@ -79,6 +79,10 @@ struct MenuBarView: View {
                             SettingsWindowController.show()
                         }
                         .keyboardShortcut(",", modifiers: .command)
+                        Button("Check for Updates...") {
+                            UpdaterManager.shared.checkForUpdates()
+                        }
+                        .disabled(!UpdaterManager.shared.canCheckForUpdates)
                         Button("Contact Us") { self.openContact() }
                         Divider()
                         Button("Quit") { NSApp.terminate(nil) }
