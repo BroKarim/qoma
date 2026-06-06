@@ -122,7 +122,7 @@ struct GeneralSettingsPane: View {
             VStack(alignment: .leading, spacing: 16) {
                 SettingsSectionHeading(
                     title: "Menu bar",
-                    subtitle: "Control how Dzenn looks in compact top-bar mode.")
+                    subtitle: "Control how Qoma looks in compact top-bar mode.")
 
                 SettingsRow(
                     title: "Compact icon",

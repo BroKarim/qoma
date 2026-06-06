@@ -2,13 +2,13 @@ import SwiftUI
 
 extension Font {
     static func dzenn(size: CGFloat, weight: Weight = .regular) -> Font {
-        .system(size: size, weight: weight, design: .monospaced)
+        .custom("Poppins", size: size).weight(weight)
     }
 
-    static var dzennCaption: Font { .system(.caption, design: .monospaced) }
-    static var dzennCaption2: Font { .system(.caption2, design: .monospaced) }
-    static var dzennSubheadline: Font { .system(.subheadline, design: .monospaced) }
-    static var dzennHeadline: Font { .system(.headline, design: .monospaced) }
-    static var dzennTitle2: Font { .system(.title2, design: .monospaced) }
-    static var dzennBody: Font { .system(.body, design: .monospaced) }
+    static var dzennCaption: Font { .custom("Poppins", size: 11, relativeTo: .caption) }
+    static var dzennCaption2: Font { .custom("Poppins", size: 10, relativeTo: .caption2) }
+    static var dzennSubheadline: Font { .custom("Poppins", size: 14, relativeTo: .subheadline) }
+    static var dzennHeadline: Font { .custom("Poppins", size: 15, relativeTo: .headline) }
+    static var dzennTitle2: Font { .custom("Poppins", size: 22, relativeTo: .title2) }
+    static var dzennBody: Font { .custom("Poppins", size: 16, relativeTo: .body) }
 }
