@@ -258,7 +258,7 @@ final class MenuBarController: NSObject {
             return compactDzIcon
         }
 
-        let text = "dz"
+        let text = "Q"
         let targetSize = NSSize(width: 16, height: 16)
         let cornerRadius: CGFloat = 4
 
