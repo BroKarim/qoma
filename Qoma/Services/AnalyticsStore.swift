@@ -6,7 +6,7 @@ final class AnalyticsStore {
 
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
-    private let ioQueue = DispatchQueue(label: "com.personal.dzenn.analyticsstore.io")
+    private let ioQueue = DispatchQueue(label: "com.dzulkiram.qoma.analyticsstore.io")
     private let queueKey = DispatchSpecificKey<Void>()
 
     init() {

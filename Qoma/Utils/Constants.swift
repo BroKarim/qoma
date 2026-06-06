@@ -109,7 +109,7 @@ enum AnalyticsSettings {
 
         static var analyticsDirectoryURL: URL {
             let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-            return appSupport.appendingPathComponent("Dzenn").appendingPathComponent(analyticsDirectoryName)
+            return appSupport.appendingPathComponent("Qoma").appendingPathComponent(analyticsDirectoryName)
         }
 
         static var isAnalyticsEnabled: Bool {

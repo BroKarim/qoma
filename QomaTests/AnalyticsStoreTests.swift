@@ -1,6 +1,6 @@
 //
 //  AnalyticsStoreTests.swift
-//  dzennTest
+//  QomaTest
 //
 //  Unit Testing Bundle
 //  Tests for AnalyticsStore persistence and settings
@@ -8,7 +8,7 @@
 
 import Foundation
 import Testing
-@testable import dzenn
+@testable import Qoma
 
 struct AnalyticsStoreTests {
 
@@ -49,7 +49,7 @@ struct AnalyticsStoreTests {
     @Test func analyticsDirectoryURLHasCorrectParent() {
         let url = AppConstants.AnalyticsSettings.analyticsDirectoryURL
         #expect(url.lastPathComponent == "Analytics")
-        #expect(url.deletingLastPathComponent().lastPathComponent == "Dzenn")
+        #expect(url.deletingLastPathComponent().lastPathComponent == "Qoma")
     }
 
     // MARK: - FocusSessionRecord Model Tests (additional)

@@ -44,7 +44,7 @@ final class SettingsWindowController: NSWindowController, NSWindowDelegate {
         window.titleVisibility = .hidden
         window.titlebarAppearsTransparent = true
         window.isMovableByWindowBackground = true
-        window.setFrameAutosaveName("DzennSettingsWindow")
+        window.setFrameAutosaveName("QomaSettingsWindow")
         window.minSize = NSSize(width: 860, height: 580)
         window.center()
         window.delegate = self

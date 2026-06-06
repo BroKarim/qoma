@@ -62,7 +62,7 @@ enum AnalyticsPreviewFactory {
                 endedAt: calendar.date(byAdding: .minute, value: 45, to: h9)!,
                 kind: .app,
                 name: "Xcode",
-                detail: "Project dzenn",
+                detail: "Project Qoma",
                 seconds: 2700),
             AnalyticsTimelineEntry(
                 startedAt: h10,

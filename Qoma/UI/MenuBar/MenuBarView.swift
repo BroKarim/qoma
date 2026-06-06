@@ -138,7 +138,7 @@ struct MenuBarView: View {
     }
 
     private func openContact() {
-        if let url = URL(string: "mailto:support@dzenn.com") {
+        if let url = URL(string: "mailto:support@qoma.app") {
             NSWorkspace.shared.open(url)
         }
     }

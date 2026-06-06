@@ -1,6 +1,6 @@
 import Foundation
 
-enum DzennError: LocalizedError {
+enum QomaError: LocalizedError {
     case fileIOError(filename: String, underlying: Error)
     case decodeError(filename: String, underlying: Error)
     case trackingError(message: String)

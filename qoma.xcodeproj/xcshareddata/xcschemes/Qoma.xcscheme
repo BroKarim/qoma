@@ -47,8 +47,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "8F4D8B2F2FC704AA009BA817"
-               BuildableName = "dzennTests.xctest"
-               BlueprintName = "dzennTests"
+               BuildableName = "QomaTests.xctest"
+               BlueprintName = "QomaTests"
                ReferencedContainer = "container:qoma.xcodeproj">
             </BuildableReference>
          </TestableReference>

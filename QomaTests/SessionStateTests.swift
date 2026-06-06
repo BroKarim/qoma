@@ -1,6 +1,6 @@
 //
 //  SessionStateTests.swift
-//  dzennTest
+//  QomaTest
 //
 //  Unit Testing Bundle
 //  Tests for SessionState, SessionMode, SessionPhase, BreakType
@@ -8,7 +8,7 @@
 
 import Foundation
 import Testing
-@testable import dzenn
+@testable import Qoma
 
 struct SessionStateTests {
 

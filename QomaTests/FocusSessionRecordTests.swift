@@ -1,6 +1,6 @@
 //
 //  FocusSessionRecordTests.swift
-//  dzennTest
+//  QomaTest
 //
 //  Unit Testing Bundle
 //  Tests for FocusSessionRecord model
@@ -8,7 +8,7 @@
 
 import Foundation
 import Testing
-@testable import dzenn
+@testable import Qoma
 
 struct FocusSessionRecordTests {
 

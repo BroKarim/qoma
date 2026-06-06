@@ -1,6 +1,6 @@
 //
 //  AnalyticsEngineTests.swift
-//  dzennTest
+//  QomaTest
 //
 //  Unit Testing Bundle
 //  Tests for AnalyticsEngine aggregation and computation logic
@@ -8,7 +8,7 @@
 
 import Foundation
 import Testing
-@testable import dzenn
+@testable import Qoma
 
 struct AnalyticsEngineTests {
     let engine = AnalyticsEngine.shared

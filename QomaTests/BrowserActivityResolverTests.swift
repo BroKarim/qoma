@@ -1,6 +1,6 @@
 //
 //  BrowserActivityResolverTests.swift
-//  dzennTest
+//  QomaTest
 //
 //  Unit Testing Bundle
 //  Tests for BrowserActivityResolver browser detection and constants
@@ -8,7 +8,7 @@
 
 import Foundation
 import Testing
-@testable import dzenn
+@testable import Qoma
 
 struct BrowserActivityResolverTests {
     let resolver = BrowserActivityResolver.shared

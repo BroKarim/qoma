@@ -1,6 +1,6 @@
 //
 //  ConstantsTests.swift
-//  dzennTest
+//  QomaTest
 //
 //  Unit Testing Bundle
 //  Tests for AppConstants configuration values
@@ -8,7 +8,7 @@
 
 import Foundation
 import Testing
-@testable import dzenn
+@testable import Qoma
 
 struct ConstantsTests {
 
@@ -89,10 +89,10 @@ struct ConstantsTests {
 
     // MARK: - AnalyticsSettings
 
-    @Test func analyticsDirectoryURLContainsDzenn() {
+    @Test func analyticsDirectoryURLContainsQoma() {
         let url = AppConstants.AnalyticsSettings.analyticsDirectoryURL
         #expect(url.lastPathComponent == "Analytics")
-        #expect(url.path.contains("Dzenn"))
+        #expect(url.path.contains("Qoma"))
     }
 
     @Test func weeklySummaryDaysIs7() {

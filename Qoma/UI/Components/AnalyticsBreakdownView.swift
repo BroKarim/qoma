@@ -136,11 +136,11 @@ private struct PermissionAlert: View {
                 .font(.dzennHeadline)
 
             VStack(alignment: .leading, spacing: 6) {
-                Text("Dzenn needs Automation permission to read browser tabs.")
+                Text("Qoma needs Automation permission to read browser tabs.")
                     .font(.dzennSubheadline)
                     .foregroundColor(.secondary)
 
-                Text("Enable Dzenn in System Settings > Privacy & Security > Automation for each browser.")
+                Text("Enable Qoma in System Settings > Privacy & Security > Automation for each browser.")
                     .font(.dzennSubheadline)
                     .foregroundColor(.secondary)
 
