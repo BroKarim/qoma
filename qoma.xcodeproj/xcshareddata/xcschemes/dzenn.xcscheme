@@ -18,7 +18,7 @@
                BlueprintIdentifier = "8F0163152F332C8D000A6490"
                BuildableName = "Qoma.app"
                BlueprintName = "qoma"
-               ReferencedContainer = "container:dzenn.xcodeproj">
+               ReferencedContainer = "container:qoma.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -38,7 +38,7 @@
                BlueprintIdentifier = "8FB618BE2FC702C0009190B2"
                BuildableName = "AnalyticsStoreTests.xctest"
                BlueprintName = "AnalyticsStoreTests"
-               ReferencedContainer = "container:dzenn.xcodeproj">
+               ReferencedContainer = "container:qoma.xcodeproj">
             </BuildableReference>
          </TestableReference>
          <TestableReference
@@ -49,7 +49,7 @@
                BlueprintIdentifier = "8F4D8B2F2FC704AA009BA817"
                BuildableName = "dzennTests.xctest"
                BlueprintName = "dzennTests"
-               ReferencedContainer = "container:dzenn.xcodeproj">
+               ReferencedContainer = "container:qoma.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -71,7 +71,7 @@
             BlueprintIdentifier = "8F0163152F332C8D000A6490"
             BuildableName = "Qoma.app"
             BlueprintName = "qoma"
-            ReferencedContainer = "container:dzenn.xcodeproj">
+            ReferencedContainer = "container:qoma.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -88,7 +88,7 @@
             BlueprintIdentifier = "8F0163152F332C8D000A6490"
             BuildableName = "Qoma.app"
             BlueprintName = "qoma"
-            ReferencedContainer = "container:dzenn.xcodeproj">
+            ReferencedContainer = "container:qoma.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

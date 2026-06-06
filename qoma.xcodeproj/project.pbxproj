@@ -184,7 +184,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 8F0163112F332C8D000A6490 /* Build configuration list for PBXProject "dzenn" */;
+			buildConfigurationList = 8F0163112F332C8D000A6490 /* Build configuration list for PBXProject "qoma" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -534,7 +534,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		8F0163112F332C8D000A6490 /* Build configuration list for PBXProject "dzenn" */ = {
+		8F0163112F332C8D000A6490 /* Build configuration list for PBXProject "qoma" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				8F01631F2F332C8F000A6490 /* Debug */,
