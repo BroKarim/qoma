@@ -16,8 +16,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "8F0163152F332C8D000A6490"
-               BuildableName = "dzenn.app"
-               BlueprintName = "dzenn"
+               BuildableName = "Qoma.app"
+               BlueprintName = "qoma"
                ReferencedContainer = "container:dzenn.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -69,8 +69,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8F0163152F332C8D000A6490"
-            BuildableName = "dzenn.app"
-            BlueprintName = "dzenn"
+            BuildableName = "Qoma.app"
+            BlueprintName = "qoma"
             ReferencedContainer = "container:dzenn.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -86,8 +86,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8F0163152F332C8D000A6490"
-            BuildableName = "dzenn.app"
-            BlueprintName = "dzenn"
+            BuildableName = "Qoma.app"
+            BlueprintName = "qoma"
             ReferencedContainer = "container:dzenn.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

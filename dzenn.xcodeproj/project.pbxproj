@@ -37,17 +37,24 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		8F0163162F332C8D000A6490 /* dzenn.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = dzenn.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8F0163162F332C8D000A6490 /* Qoma.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Qoma.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8F4D8B302FC704AA009BA817 /* dzennTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = dzennTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		8F0D8A7A2F5D23DB004F61F5 /* Exceptions for "dzenn" folder in "dzenn" target */ = {
+		8F0D8A7A2F5D23DB004F61F5 /* Exceptions for "dzenn" folder in "qoma" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = 8F0163152F332C8D000A6490 /* dzenn */;
+			target = 8F0163152F332C8D000A6490 /* qoma */;
+		};
+		8FD3D8402FD3CAC70058EEF3 /* Exceptions for "dzenn" folder in "dzennTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				qoma.icon,
+			);
+			target = 8F4D8B2F2FC704AA009BA817 /* dzennTests */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -55,7 +62,8 @@
 		8F0163182F332C8D000A6490 /* dzenn */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				8F0D8A7A2F5D23DB004F61F5 /* Exceptions for "dzenn" folder in "dzenn" target */,
+				8F0D8A7A2F5D23DB004F61F5 /* Exceptions for "dzenn" folder in "qoma" target */,
+				8FD3D8402FD3CAC70058EEF3 /* Exceptions for "dzenn" folder in "dzennTests" target */,
 			);
 			path = dzenn;
 			sourceTree = "<group>";
@@ -98,7 +106,7 @@
 		8F0163172F332C8D000A6490 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8F0163162F332C8D000A6490 /* dzenn.app */,
+				8F0163162F332C8D000A6490 /* Qoma.app */,
 				8F4D8B302FC704AA009BA817 /* dzennTests.xctest */,
 			);
 			name = Products;
@@ -107,9 +115,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		8F0163152F332C8D000A6490 /* dzenn */ = {
+		8F0163152F332C8D000A6490 /* qoma */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 8F0163212F332C8F000A6490 /* Build configuration list for PBXNativeTarget "dzenn" */;
+			buildConfigurationList = 8F0163212F332C8F000A6490 /* Build configuration list for PBXNativeTarget "qoma" */;
 			buildPhases = (
 				8F0163122F332C8D000A6490 /* Sources */,
 				8F0163132F332C8D000A6490 /* Frameworks */,
@@ -123,12 +131,12 @@
 			fileSystemSynchronizedGroups = (
 				8F0163182F332C8D000A6490 /* dzenn */,
 			);
-			name = dzenn;
+			name = qoma;
 			packageProductDependencies = (
 				8F7F07F52F569E18007C346B /* Sparkle */,
 			);
 			productName = dzenn;
-			productReference = 8F0163162F332C8D000A6490 /* dzenn.app */;
+			productReference = 8F0163162F332C8D000A6490 /* Qoma.app */;
 			productType = "com.apple.product-type.application";
 		};
 		8F4D8B2F2FC704AA009BA817 /* dzennTests */ = {
@@ -194,7 +202,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				8F0163152F332C8D000A6490 /* dzenn */,
+				8F0163152F332C8D000A6490 /* qoma */,
 				8FC509702F627D8F00E852DA /* Periphery */,
 				8F4D8B2F2FC704AA009BA817 /* dzennTests */,
 			);
@@ -258,7 +266,7 @@
 /* Begin PBXTargetDependency section */
 		8F4D8B352FC704AA009BA817 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 8F0163152F332C8D000A6490 /* dzenn */;
+			target = 8F0163152F332C8D000A6490 /* qoma */;
 			targetProxy = 8F4D8B342FC704AA009BA817 /* PBXContainerItemProxy */;
 		};
 		8F7F07F22F569E18007C346B /* PBXTargetDependency */ = {
@@ -391,7 +399,7 @@
 		8F0163222F332C8F000A6490 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = dzenn;
+				ASSETCATALOG_COMPILER_APPICON_NAME = qoma;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -404,7 +412,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = dzenn/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Dzenn;
+				INFOPLIST_KEY_CFBundleDisplayName = Qoma;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -413,8 +421,8 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.5;
 				MARKETING_VERSION = 0.1.2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.personal.dzenn;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.personal.qoma;
+				PRODUCT_NAME = Qoma;
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -428,7 +436,7 @@
 		8F0163232F332C8F000A6490 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = dzenn;
+				ASSETCATALOG_COMPILER_APPICON_NAME = qoma;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -442,7 +450,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = dzenn/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Dzenn;
+				INFOPLIST_KEY_CFBundleDisplayName = Qoma;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -451,8 +459,8 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.5;
 				MARKETING_VERSION = 0.1.2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.personal.dzenn;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.personal.qoma;
+				PRODUCT_NAME = Qoma;
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -535,7 +543,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		8F0163212F332C8F000A6490 /* Build configuration list for PBXNativeTarget "dzenn" */ = {
+		8F0163212F332C8F000A6490 /* Build configuration list for PBXNativeTarget "qoma" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				8F0163222F332C8F000A6490 /* Debug */,
