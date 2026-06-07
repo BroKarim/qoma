@@ -11,15 +11,22 @@ as a gentle companion for focus or a simple visual reminder.
 
 ## Features
 
-- Floating timer: Qoma can pin a compact always-on-top timer window so countdown progress stays visible without keeping the main window open.
-- 3 display modes: the floating window supports `timer only`, `image with timer`, and `image only`, with layout switching handled at runtime.
-- Quick presets: menu bar presets let you jump to commonly used focus durations instantly, then start a session without opening full settings.
-- Completion sound customization: you can choose the alert sound used when a session finishes and control playback behavior through app settings.
-- Floating opacity control: the floating window appearance supports adjustable opacity so it can stay visible but less intrusive over other apps.
-- Image positioning: when using image layouts, image offset controls let you fine-tune placement so composition remains readable with timer overlay.
+- ⏱️ **Floating Timer** — Pin a compact always-on-top timer window so countdown progress stays visible without keeping the main window open.
+- 🎯 **Focus Sessions** — Start, pause, resume, and stop focus sessions with break mode support.
+- 🎨 **Theme & Opacity** — Adjustable floating window opacity and theme selection.
+- 📊 **App & Website Tracking** — Monitor time spent in applications and websites (Safari, Chrome, Edge, Arc, Brave, Vivaldi, Opera, Firefox experimental).
+- 📈 **Visual Analytics** — Charts showing daily/weekly activity patterns, heatmap, top apps, and top websites breakdown.
+
+## TODO
+
+- [ ] Analytics / website tracking not working yet
+- [ ] Add more pomodoro styles
+- [ ] Visual effect after 1 session done
+- [ ] More analytics features
+- [ ] Migrate from JSON to SwiftData
 
 ## Install
----
+
 ## Direct Download (Recomended)
 
 1. Go to Releases.
@@ -54,9 +61,51 @@ brew update
 brew upgrade --cask qoma-pomodoro
 ```
 
+## Permission Setup
+
+Qoma requires several macOS permissions to function properly.
+
+### Required Permissions
+
+**Automation Permission:** To track browser activity
+- System Settings → Privacy & Security → Automation
+- Enable Qoma for your browsers (Safari, Chrome, Edge, Arc, Brave, Vivaldi, Opera, Firefox)
+
+**System Events Permission:** For browser integration
+- System Settings → Privacy & Security → Automation
+- Enable Qoma for System Events
+
+**Accessibility Permission:** For Firefox browser integration
+- System Settings → Privacy & Security → Accessibility
+- Enable Qoma
+
+**Firefox Additional Setup:** Firefox does not expose tab URLs through its scripting interface, so Qoma reads the address bar via the macOS Accessibility API. This requires a one-time Firefox configuration change. Firefox website tracking is experimental and may stop working if Firefox changes its accessibility hierarchy, if the toolbar is customized, or while the browser UI is in a transient state:
+- Open Firefox and navigate to `about:config`
+- Accept the risk warning if prompted
+- Search for `accessibility.force_disabled`
+- Set the value to `-1`
+
+**Notifications (Optional):** For session completion and update notifications
+- System Settings → Notifications → Qoma
+- Enable notifications as desired
+
+### In-App Permission Prompts
+
+The app provides helpful banners and direct links to the appropriate system preference panes when permissions are needed.
+
+
+## Building from Source
+
+```sh
+git clone https://github.com/BroKarim/qoma.git
+cd qoma
+open qoma.xcodeproj
+```
+
+Then select your scheme (Qoma) and run from Xcode (Cmd+R).
+
 
 ## License
 
 This project is licensed under the BSD 3-Clause [License](LICENSE) - see the LICENSE file for details.
-
 
