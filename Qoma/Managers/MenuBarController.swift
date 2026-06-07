@@ -24,6 +24,7 @@ private final class EdgeToEdgeHostingController<Content: View>: NSHostingControl
     }
 }
 
+@MainActor
 final class MenuBarController: NSObject {
     static var shared: MenuBarController?
 
@@ -77,7 +78,9 @@ final class MenuBarController: NSObject {
     }
 
     deinit {
-        self.removeClickMonitors()
+        MainActor.assumeIsolated {
+            self.removeClickMonitors()
+        }
     }
 
     @objc private func togglePopover(_: Any?) {
@@ -172,7 +175,10 @@ final class MenuBarController: NSObject {
         }
 
         let clickInsidePanel = self.panel.frame.contains(screenPoint)
-        let clickInsideStatusItem = self.statusButtonFrameInScreen()?.contains(screenPoint) ?? false
+        guard let statusButtonFrame = self.statusButtonFrameInScreen() else {
+            return
+        }
+        let clickInsideStatusItem = statusButtonFrame.contains(screenPoint)
         if !clickInsidePanel, !clickInsideStatusItem {
             self.closePanel()
         }
