@@ -90,8 +90,7 @@ const FAQ_ITEMS = [
   },
   {
     question: "Is Qoma really free?",
-    answer:
-      "Yes. Every feature is free. No accounts, no subscriptions.",
+    answer: "Yes. Every feature is free. No accounts, no subscriptions.",
   },
   {
     question: "How do I install it?",
