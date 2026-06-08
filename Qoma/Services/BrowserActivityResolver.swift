@@ -27,7 +27,7 @@ final class BrowserActivityResolver {
         browsers[bundleId] != nil
     }
 
-    func resolveCurrentTab(for bundleId: String) -> (domain: String, title: String?)? {
+    func resolveCurrentTab(for bundleId: String) -> (domain: String, url: String?, title: String?)? {
         guard let browser = browsers[bundleId] else {
             return nil
         }
@@ -55,6 +55,6 @@ final class BrowserActivityResolver {
         }
 
         let domain = host.hasPrefix("www.") ? String(host.dropFirst(4)) : host
-        return (domain: domain, title: nil)
+        return (domain: domain, url: urlString, title: nil)
     }
 }

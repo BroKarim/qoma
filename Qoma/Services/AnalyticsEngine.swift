@@ -329,7 +329,16 @@ final class AnalyticsEngine {
                 let bundleID: String? = bundleIdKey.flatMap { key in
                     groupedItems.first?[keyPath: key]
                 }
-                let iconData: Data? = bundleID.flatMap { IconUtils.getAppIconAsPNG(for: $0) }
+
+                var iconData: Data?
+                if isWebsite {
+                    // For websites, try to get a favicon asynchronously later,
+                    // but for now return nil so the view shows the letter fallback.
+                    // A real favicon fetch can be done in the view layer or pre-warmed.
+                    iconData = nil
+                } else {
+                    iconData = bundleID.flatMap { IconUtils.getAppIconAsPNG(for: $0) }
+                }
 
                 return AnalyticsBreakdownItem(
                     name: name,

@@ -15,4 +15,23 @@ class EdgeBrowser: BaseBrowser {
             end tell
             """
     }
+
+    override func isInPrivateBrowsingMode() -> Bool? {
+        let script = """
+            tell application "Microsoft Edge"
+                if (count of windows) > 0 then
+                    return mode of window 1 is equal to "incognito"
+                end if
+            end tell
+            """
+
+        let scriptResult = executeAppleScript(script)
+
+        guard let result = scriptResult.result,
+              let isInPrivate = Bool(result.lowercased()) else {
+            return nil
+        }
+
+        return isInPrivate
+    }
 }

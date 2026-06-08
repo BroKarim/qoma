@@ -5,7 +5,7 @@ struct AnalyticsBreakdownView: View {
     let date: Date
     let apps: [AnalyticsBreakdownItem]
     let domains: [AnalyticsBreakdownItem]
-    @StateObject private var permissionsManager = AnalyticsPermissionsManager()
+    @ObservedObject private var permissionsManager = AnalyticsPermissionsManager.shared
 
     private static let dayFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -27,9 +27,9 @@ struct AnalyticsBreakdownView: View {
                         items: self.apps,
                         emptyMessage: "No app activity on this day.")
 
-                    if self.permissionsManager.needsAutomationPermission && self.domains.isEmpty {
+                    if self.permissionsManager.automationPermissionStatus == .denied && self.domains.isEmpty {
                         WebsitePermissionColumn(
-                            openSettings: { self.permissionsManager.openAutomationSettings() })
+                            openSettings: { self.permissionsManager.openSystemPreferences() })
                     } else {
                         BreakdownColumn(
                             title: "Top Websites",
@@ -39,12 +39,6 @@ struct AnalyticsBreakdownView: View {
                     }
                 }
             }
-        }
-        .onAppear {
-            self.permissionsManager.checkAutomation()
-        }
-        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
-            self.permissionsManager.checkAutomation()
         }
     }
 }
@@ -169,21 +163,22 @@ private struct PermissionAlert: View {
 
 private struct BreakdownRow: View {
     let item: AnalyticsBreakdownItem
+    @State private var fetchedIconData: Data?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 7) {
             HStack(alignment: .center, spacing: 10) {
                 if item.isWebsite {
                     AnalyticsIconView(
-                        type: .website(domain: item.name, iconData: item.iconData),
+                        type: .website(domain: item.name, iconData: effectiveIconData),
                         size: 22)
                 } else if let bundleID = item.bundleID {
                     AnalyticsIconView(
-                        type: .app(bundleID: bundleID, iconData: item.iconData),
+                        type: .app(bundleID: bundleID, iconData: effectiveIconData),
                         size: 22)
                 } else {
                     AnalyticsIconView(
-                        type: .app(bundleID: item.name, iconData: item.iconData),
+                        type: .app(bundleID: item.name, iconData: effectiveIconData),
                         size: 22)
                 }
 
@@ -202,6 +197,30 @@ private struct BreakdownRow: View {
             ProgressBar(percentage: self.item.percentage)
 
             PercentageLabel(percentage: self.item.percentage)
+        }
+        .onAppear {
+            Task {
+                await loadIconIfNeeded()
+            }
+        }
+    }
+
+    private var effectiveIconData: Data? {
+        item.iconData ?? fetchedIconData
+    }
+
+    @MainActor
+    private func loadIconIfNeeded() async {
+        guard item.iconData == nil else { return }
+
+        if item.isWebsite {
+            let data = await WebIconService.shared.favicon(for: item.name, sourceURL: nil)
+            if let data {
+                self.fetchedIconData = data
+            }
+        } else if let bundleID = item.bundleID {
+            let data = IconUtils.getAppIconAsPNG(for: bundleID)
+            self.fetchedIconData = data
         }
     }
 }

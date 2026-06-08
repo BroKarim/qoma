@@ -9,6 +9,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.setActivationPolicy(.accessory)
         updaterManager.start()
         self.menuBarController = MenuBarController()
-        _ = self.menuBarController 
+        _ = self.menuBarController
+
+        // Don't check permissions on init — let background tracking handle it
     }
 }

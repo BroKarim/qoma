@@ -11,15 +11,8 @@
 		<string>Poppins-SemiBold.ttf</string>
 		<string>Poppins-Bold.ttf</string>
 	</array>
-	<key>NSAppleEventsDefaultHandlingEnabled</key>
-	<true/>
-	<key>NSRequiredAppleEvents</key>
-	<array>
-		<string>OSAScriptingAccessControlEvent</string>
-		<string>ApplicationDefinedEvent</string>
-	</array>
-	<key>NSSystemAdministrationUsageDescription</key>
-	<string>Qoma needs automation permissions to read your active browser tab when tracking website activity during focus sessions.</string>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>Qoma needs access to control your web browsers to track which websites you visit for accurate time tracking and productivity insights.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Qoma monitors application activity during your focus sessions.</string>
 	<key>SUEnableInstallerLauncherService</key>

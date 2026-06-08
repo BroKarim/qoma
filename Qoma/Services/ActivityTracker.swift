@@ -21,6 +21,7 @@ final class ActivityTracker: NSObject, ObservableObject {
     private var activeWebsitePollTasks = 0
     private var websitePollGeneration = 0
     private var websiteGraceTimer: Timer?
+    private var websiteIconFetchesInFlight: Set<String> = []
 
     init(browserResolver: BrowserActivityResolver = .shared, iconCache: IconCacheActor = .init()) {
         self.browserResolver = browserResolver
@@ -250,9 +251,25 @@ final class ActivityTracker: NSObject, ObservableObject {
                     domain: tabInfo.domain,
                     title: tabInfo.title
                 )
+                self.scheduleWebsiteIconFetch(domain: tabInfo.domain, sourceURL: tabInfo.url)
             } else {
                 guard currentGeneration == self.websitePollGeneration else { return }
                 self.beginWebsiteGracePeriod()
+            }
+        }
+    }
+
+    private func scheduleWebsiteIconFetch(domain: String, sourceURL: String?) {
+        guard !websiteIconFetchesInFlight.contains(domain) else { return }
+
+        websiteIconFetchesInFlight.insert(domain)
+        Task {
+            let iconData = await WebIconService.shared.favicon(for: domain, sourceURL: sourceURL)
+            await MainActor.run {
+                self.websiteIconFetchesInFlight.remove(domain)
+                if let iconData {
+                    Task { await self.iconCache.set(domain, value: iconData) }
+                }
             }
         }
     }

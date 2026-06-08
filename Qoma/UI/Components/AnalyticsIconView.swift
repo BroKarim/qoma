@@ -15,12 +15,12 @@ struct AnalyticsIconView: View {
                 Image(nsImage: nsImage)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .clipShape(RoundedRectangle(cornerRadius: size * 0.12))
+                    .clipShape(iconShape)
             } else {
                 Image(nsImage: createLetterIcon())
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .clipShape(RoundedRectangle(cornerRadius: size * 0.12))
+                    .clipShape(iconShape)
             }
         }
         .frame(width: size, height: size)
@@ -40,12 +40,28 @@ struct AnalyticsIconView: View {
         }
     }
 
+    private var iconShape: some Shape {
+        switch type {
+        case .app:
+            return AnyShape(RoundedRectangle(cornerRadius: size * 0.12))
+        case .website:
+            return AnyShape(Circle())
+        }
+    }
+
     private func createLetterIcon() -> NSImage {
         let letter = String(identifier.prefix(1)).uppercased()
         let color = colorForString(identifier)
         let image = NSImage(size: NSSize(width: 32, height: 32), flipped: false) { rect in
             color.setFill()
-            NSBezierPath(roundedRect: rect, xRadius: 4, yRadius: 4).fill()
+
+            switch type {
+            case .app:
+                NSBezierPath(roundedRect: rect, xRadius: 4, yRadius: 4).fill()
+            case .website:
+                NSBezierPath(ovalIn: rect).fill()
+            }
+
             let attrs: [NSAttributedString.Key: Any] = [
                 .font: NSFont.monospacedSystemFont(ofSize: 18, weight: .semibold),
                 .foregroundColor: NSColor.white
@@ -68,5 +84,20 @@ struct AnalyticsIconView: View {
         ]
         let hash = abs(str.hashValue)
         return colors[hash % colors.count]
+    }
+}
+
+/// Type-erased shape wrapper for dynamic shape selection
+struct AnyShape: Shape {
+    private let _path: @Sendable (CGRect) -> Path
+
+    init<S: Shape>(_ shape: S) {
+        _path = { rect in
+            shape.path(in: rect)
+        }
+    }
+
+    func path(in rect: CGRect) -> Path {
+        _path(rect)
     }
 }

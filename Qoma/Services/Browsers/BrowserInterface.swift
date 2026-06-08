@@ -11,6 +11,7 @@ protocol BrowserInterface {
     var bundleId: String { get }
     var displayName: String { get }
     func getCurrentURL() -> String?
+    func isInPrivateBrowsingMode() -> Bool?
 }
 
 class BaseBrowser: BrowserInterface {
@@ -45,6 +46,11 @@ class BaseBrowser: BrowserInterface {
         AnalyticsPermissionsManager.shared.handleBrowserPermissionResult(
             success: scriptResult.result != nil, browserName: displayName)
         return scriptResult.result
+    }
+
+    func isInPrivateBrowsingMode() -> Bool? {
+        // Default: no private browsing detection
+        return nil
     }
 
     internal func executeAppleScript(_ script: String) -> AppleScriptResult {
