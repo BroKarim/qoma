@@ -11,6 +11,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         self.menuBarController = MenuBarController()
         _ = self.menuBarController
 
-        // Don't check permissions on init — let background tracking handle it
+        AnalyticsPermissionsManager.shared.requestPermissions()
     }
 }

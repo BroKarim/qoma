@@ -101,9 +101,117 @@ final class AnalyticsPermissionsManager: ObservableObject {
         }
     }
 
+    /// Proactively triggers macOS permission dialogs for Automation and Accessibility.
+    /// Sends a benign AppleScript to System Events to force the TCC Automation dialog
+    /// to appear. Also prompts for Accessibility if not yet granted.
+    ///
+    /// Should be called once at app startup. On first launch, this will cause macOS
+    /// to show "Qoma wants to control System Events" and prompt for Accessibility access.
+    func requestPermissions() {
+        checkAccessibilityPermission()
+        triggerSystemEventsAutomationPermissionCheck()
+        requestBrowserAutomationPermissionsForRunningBrowsers()
+    }
+
+    /// Sends a lightweight AppleScript to System Events to trigger the Automation TCC dialog.
+    /// This is the only way to force macOS to show the "Qoma wants to control System Events"
+    /// permission prompt — there is no explicit API to request Automation permission.
+    ///
+    /// After System Events permission is granted, individual browser Automation dialogs
+    /// will appear automatically when their AppleScripts are first executed.
+    private func triggerSystemEventsAutomationPermissionCheck() {
+        let script = """
+            tell application "System Events" to return "ok"
+            """
+
+        guard let appleScript = NSAppleScript(source: script) else {
+            logger.error("Failed to create Automation permission check script")
+            return
+        }
+
+        var error: NSDictionary?
+        let result = appleScript.executeAndReturnError(&error)
+
+        if let error = error {
+            let code = error[NSAppleScript.errorNumber] as? Int ?? 0
+            if code == -1743 || code == -1744 {
+                logger.warning("System Events Automation permission denied or not yet granted (code: \(code))")
+                Task { @MainActor in
+                    self.systemEventsPermissionStatus = .denied
+                }
+            } else {
+                logger.warning("System Events permission check failed with code: \(code)")
+            }
+        } else {
+            logger.info("System Events permission check succeeded")
+            Task { @MainActor in
+                self.systemEventsPermissionStatus = .granted
+            }
+        }
+    }
+
+    /// Sends lightweight Apple Events to supported browsers that are already running.
+    /// Automation entries only appear in System Settings after the app has actually
+    /// contacted each target app at least once.
+    func requestBrowserAutomationPermissionsForRunningBrowsers() {
+        let runningBrowserBundleIds = NSWorkspace.shared.runningApplications
+            .compactMap(\.bundleIdentifier)
+            .filter { AppConstants.AnalyticsSettings.supportedBrowsers[$0] != nil }
+
+        let uniqueBrowserBundleIds = Array(Set(runningBrowserBundleIds)).sorted {
+            let lhsName = AppConstants.AnalyticsSettings.supportedBrowsers[$0] ?? $0
+            let rhsName = AppConstants.AnalyticsSettings.supportedBrowsers[$1] ?? $1
+            return lhsName < rhsName
+        }
+
+        guard !uniqueBrowserBundleIds.isEmpty else {
+            logger.info("No supported browsers are running; browser Automation prompt deferred")
+            return
+        }
+
+        for bundleId in uniqueBrowserBundleIds {
+            let browserName = AppConstants.AnalyticsSettings.supportedBrowsers[bundleId] ?? bundleId
+            triggerBrowserAutomationPermissionCheck(bundleId: bundleId, browserName: browserName)
+        }
+    }
+
+    private func triggerBrowserAutomationPermissionCheck(bundleId: String, browserName: String) {
+        let script = """
+            tell application id "\(bundleId)" to return name
+            """
+
+        guard let appleScript = NSAppleScript(source: script) else {
+            logger.error("Failed to create browser Automation permission check script for \(browserName, privacy: .public)")
+            return
+        }
+
+        var error: NSDictionary?
+        let result = appleScript.executeAndReturnError(&error)
+
+        if let error = error {
+            let code = error[NSAppleScript.errorNumber] as? Int ?? 0
+            if code == -1743 || code == -1744 {
+                handleBrowserPermissionResult(success: false, browserName: browserName)
+            } else if code == -1712 {
+                logger.debug("\(browserName, privacy: .public) Automation permission check timed out")
+            } else {
+                logger.warning(
+                    "\(browserName, privacy: .public) Automation permission check failed with code: \(code)")
+            }
+            return
+        }
+
+        if result.stringValue != nil {
+            handleBrowserPermissionResult(success: true, browserName: browserName)
+        }
+    }
+
     /// Opens System Preferences to the Automation privacy settings.
     /// Allows users to grant AppleScript permissions for browser automation and System Events access.
     func openSystemPreferences() {
+        triggerSystemEventsAutomationPermissionCheck()
+        requestBrowserAutomationPermissionsForRunningBrowsers()
+
         let url = URL(
             string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation")!
         NSWorkspace.shared.open(url)

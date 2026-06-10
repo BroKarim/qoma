@@ -73,7 +73,7 @@ enum AnalyticsSettings {
             "com.microsoft.edgemac": "Microsoft Edge",
             "com.brave.Browser": "Brave Browser",
             "com.operasoftware.Opera": "Opera",
-            "company.com.Arc": "Arc",
+            "company.thebrowser.Browser": "Arc",
             "com.vivaldi.Vivaldi": "Vivaldi",
         ]
 
