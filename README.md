@@ -29,10 +29,8 @@ as a gentle companion for focus or a simple visual reminder.
 
 ## Direct Download (Recomended)
 
-1. Go to Releases.
-2. Download the appropriate DMG file:
-   - Apple Silicon (M1/M2/M3/M4/M5): `qoma_*_mac-arm64.dmg`
-   - Intel: `qoma_*_mac-intel.dmg`
+1. Go to [Releases](https://github.com/BroKarim/qoma/releases).
+2. Download `qoma-*-mac-universal.dmg` (works on any Mac).
 3. Open the DMG and drag qoma to Applications.
 4. First Launch - Choose one method (recommended):
    - Option A: Right-Click Method (Easiest)
@@ -50,15 +48,15 @@ as a gentle companion for focus or a simple visual reminder.
 ## Homebrew
 
 ```sh
-brew tap qoma-app/pomodoro
-brew install --cask qoma-pomodoro
+brew tap BroKarim/qoma
+brew install --cask qoma
 ```
 
 Update:
 
 ```sh
 brew update
-brew upgrade --cask qoma-pomodoro
+brew upgrade --cask qoma
 ```
 
 ## Permission Setup
