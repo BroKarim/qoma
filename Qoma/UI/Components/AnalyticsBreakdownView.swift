@@ -27,7 +27,7 @@ struct AnalyticsBreakdownView: View {
                         items: self.apps,
                         emptyMessage: "No app activity on this day.")
 
-                    if self.permissionsManager.automationPermissionStatus == .denied && self.domains.isEmpty {
+                    if self.permissionsManager.automationPermissionStatus != .granted && self.domains.isEmpty {
                         WebsitePermissionColumn(
                             openSettings: { self.permissionsManager.openSystemPreferences() })
                     } else {

@@ -74,7 +74,9 @@ final class AnalyticsStore {
     // MARK: - Website Visits
 
     func loadWebsiteVisits() -> [WebsiteVisitRecord] {
-        load(from: AppConstants.AnalyticsSettings.websiteVisitsFile) ?? []
+        let visits: [WebsiteVisitRecord] = load(from: AppConstants.AnalyticsSettings.websiteVisitsFile) ?? []
+        Logger.store.debug("loadWebsiteVisits — found \(visits.count) records")
+        return visits
     }
 
     func saveWebsiteVisits(_ records: [WebsiteVisitRecord]) {
@@ -82,9 +84,11 @@ final class AnalyticsStore {
     }
 
     func appendWebsiteVisits(_ records: [WebsiteVisitRecord]) {
+        Logger.store.debug("appendWebsiteVisits — saving \(records.count) new records")
         var existing = loadWebsiteVisits()
         existing.append(contentsOf: records)
         saveWebsiteVisits(existing)
+        Logger.store.debug("appendWebsiteVisits — total saved: \(existing.count) records")
     }
 
     // MARK: - Prune

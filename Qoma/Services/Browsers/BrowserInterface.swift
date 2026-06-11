@@ -30,31 +30,33 @@ class BaseBrowser: BrowserInterface {
     func getCurrentURL() -> String? {
         let scriptResult = executeAppleScript(currentURLScript)
 
-        if let error = scriptResult.error {
-            if scriptResult.errorCode == -1743 || scriptResult.errorCode == -1744 {
-                AnalyticsPermissionsManager.shared.handleBrowserPermissionResult(
-                    success: false, browserName: displayName)
-            } else if scriptResult.errorCode == -1712 {
-                Logger.browser.warning("\(self.displayName, privacy: .public) AppleScript timeout — transient error")
-            } else if scriptResult.errorCode == -1719 {
-                Logger.browser.warning(
-                    "\(self.displayName, privacy: .public) AppleScript invalid index — tab may have changed")
-            } else {
-                Logger.browser.error(
-                    "\(self.displayName, privacy: .public) AppleScript error: \(error.description, privacy: .public)")
-                AnalyticsPermissionsManager.shared.handleBrowserError(
-                    "\(displayName) communication error: \(error.description)")
-            }
+        if scriptResult.errorCode == -1743 || scriptResult.errorCode == -1744 {
+            Logger.browser.error("\(self.displayName, privacy: .public) Automation permission denied (code: \(scriptResult.errorCode))")
+            AnalyticsPermissionsManager.shared.handleBrowserPermissionResult(
+                success: false, browserName: displayName)
             return nil
         }
 
-        guard let result = scriptResult.result, !result.isEmpty else {
+        if scriptResult.errorCode == -1712 {
+            Logger.browser.warning("\(self.displayName, privacy: .public) AppleScript timeout — transient error")
             return nil
         }
 
-        AnalyticsPermissionsManager.shared.handleBrowserPermissionResult(
-            success: true, browserName: displayName)
-        return result
+        if scriptResult.errorCode == -1719 {
+            Logger.browser.warning(
+                "\(self.displayName, privacy: .public) AppleScript invalid index — tab may have changed")
+            return nil
+        }
+
+        if let urlString = scriptResult.result {
+            Logger.browser.debug("\(self.displayName, privacy: .public) AppleScript returned: \(urlString, privacy: .private)")
+            AnalyticsPermissionsManager.shared.handleBrowserPermissionResult(
+                success: true, browserName: displayName)
+            return urlString
+        }
+
+        Logger.browser.debug("\(self.displayName, privacy: .public) AppleScript returned no result (no windows open?)")
+        return nil
     }
 
     func isInPrivateBrowsingMode() -> Bool? {

@@ -76,6 +76,14 @@ final class ActivityTracker: NSObject, ObservableObject {
 
         Logger.tracking.info("Stopped tracking — Captured \(events.count) app events, \(visits.count) website visits")
 
+        if visits.isEmpty {
+            Logger.tracking.warning("No website visits recorded during this session")
+        } else {
+            for visit in visits {
+                Logger.tracking.debug("  Visit: \(visit.domain, privacy: .public) for \(visit.durationSeconds)s")
+            }
+        }
+
         pendingEvents = []
         pendingWebsiteVisits = []
         currentSessionID = nil
@@ -132,6 +140,7 @@ final class ActivityTracker: NSObject, ObservableObject {
 
         let idleTime = getSystemIdleTime()
         if idleTime >= AppConstants.AnalyticsSettings.idleThreshold {
+            Logger.tracking.debug("Idle threshold reached (\(idleTime)s) — finalizing sessions")
             finalizeCurrentAppSession()
             finalizeCurrentWebsiteSession()
             lastActivityTime = Date()
@@ -141,16 +150,21 @@ final class ActivityTracker: NSObject, ObservableObject {
         guard let frontmostApp = NSWorkspace.shared.frontmostApplication,
               let bundleId = frontmostApp.bundleIdentifier,
               let name = frontmostApp.localizedName else {
+            Logger.tracking.debug("No frontmost application detected")
             return
         }
 
         guard !AppConstants.AnalyticsSettings.excludedBundleIds.contains(bundleId) else {
+            Logger.tracking.debug("Excluded app frontmost: \(name, privacy: .public) (\(bundleId, privacy: .public))")
             return
         }
 
         if WindowDetectionService.shared.isFloatingWindow(app: frontmostApp) {
+            Logger.tracking.debug("Floating app skipped: \(name, privacy: .public) (\(bundleId, privacy: .public))")
             return
         }
+
+        Logger.tracking.debug("Tracking: \(name, privacy: .public) (\(bundleId, privacy: .public))")
 
         lastActivityTime = Date()
         cacheIcon(for: bundleId)
@@ -221,12 +235,16 @@ final class ActivityTracker: NSObject, ObservableObject {
 
     private func scheduleWebsitePoll(bundleId: String, appName: String) {
         guard browserResolver.isBrowserSupported(bundleId) else {
+            Logger.browser.debug("Unsupported browser: \(appName, privacy: .public) (\(bundleId, privacy: .public))")
             return
         }
 
         guard activeWebsitePollTasks < AppConstants.AnalyticsSettings.websitePollMaxConcurrent else {
+            Logger.browser.debug("Max concurrent polls reached — skipping \(appName, privacy: .public)")
             return
         }
+
+        Logger.browser.debug("Scheduling poll for \(appName, privacy: .public) (active tasks: \(self.activeWebsitePollTasks))")
 
         websitePollGeneration += 1
         let currentGeneration = websitePollGeneration
@@ -336,7 +354,7 @@ final class ActivityTracker: NSObject, ObservableObject {
             durationSeconds: 0
         )
         currentWebsiteSession = visit
-        Logger.tracking.info("Started website session: \(domain, privacy: .public)")
+        Logger.tracking.info("Started website session: \(domain, privacy: .public) on \(appName, privacy: .public)")
     }
 
     private func finalizeCurrentWebsiteSession() {

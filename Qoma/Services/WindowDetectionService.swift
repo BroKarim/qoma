@@ -22,6 +22,9 @@ final class WindowDetectionService {
             return false
         }
 
+        var hasFloatingWindow = false
+        var hasNormalWindow = false
+
         for window in infoList {
             guard let windowPid = window[kCGWindowOwnerPID as String] as? pid_t,
                   windowPid == pid,
@@ -31,10 +34,20 @@ final class WindowDetectionService {
                 continue
             }
 
-            if layer > CGWindowLevelKey.normalWindow.rawValue {
-                Logger.tracking.debug("Floating window detected: pid=\(pid) layer=\(layer)")
-                return true
+            if layer <= CGWindowLevelKey.normalWindow.rawValue {
+                hasNormalWindow = true
+                Logger.tracking.debug("Normal window found: pid=\(pid) — not floating")
+                break
             }
+
+            hasFloatingWindow = true
+            Logger.tracking.debug("Found elevated window: pid=\(pid) layer=\(layer)")
+        }
+
+        // Only floating if NO normal-level window exists
+        if hasFloatingWindow && !hasNormalWindow {
+            Logger.tracking.debug("Floating window confirmed: pid=\(pid)")
+            return true
         }
 
         return false
