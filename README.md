@@ -52,6 +52,19 @@ brew tap BroKarim/qoma
 brew install --cask qoma
 ```
 
+If you get an "untrusted tap" error, run:
+
+```sh
+brew trust BroKarim/qoma
+brew install --cask qoma
+```
+
+After install, remove the quarantine flag (unsigned app):
+
+```sh
+xattr -d com.apple.quarantine /Applications/Qoma.app
+```
+
 Update:
 
 ```sh
