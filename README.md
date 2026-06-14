@@ -1,28 +1,35 @@
 <p align="center">
-<img src="https://raw.githubusercontent.com/BroKarim/qoma/main/Qoma/Assets.xcassets/AppIcon.appiconset/qoma.png
-" width="128" height="128"/>
+<img src=".github/assets/qoma.png" width="128" height="128" alt="Qoma Logo"/>
 <p>
  
 <h1 align="center">Qoma</h1>
 <p align="center">
-<img src="https://img.shields.io/github/actions/workflow/status/ivoronin/TomatoBar/main.yml?branch=main"/> 
+<img src="https://img.shields.io/github/actions/workflow/status/ivoronin/TomatoBar/main.yml?branch=main"/>
 
-<!-- <img src="https://img.shields.io/github/downloads/ivoronin/TomatoBar/total"/> 
+<!-- <img src="https://img.shields.io/github/downloads/ivoronin/TomatoBar/total"/>
 <img src="https://img.shields.io/github/v/release/ivoronin/TomatoBar?display_name=tag"/> <img src="https://img.shields.io/homebrew/cask/v/tomatobar"/> -->
 </p>
 
 <img
-  src="https://github.com/ivoronin/TomatoBar/raw/main/screenshot.png?raw=true"
+  src=".github/assets/thumbnail.png?raw=true"
   alt="Screenshot"
   width="50%"
   align="right"
 />
 
 <!-- > An open-source floating timer with image support -->
+
 ## Overview
+
 We all know the Pomodoro technique works wonders for beating procrastination. But honestly, most timers out there are just... annoying to use.
 
 Qoma fixes this. It’s a clean, floating Pomodoro timer designed specifically for macOS that focuses entirely on simplicity and clean analytics.
+
+<img
+  src=".github/assets/screenshot.png?raw=true"
+  alt="Screenshot"
+  width="100%"
+/>
 
 Why you'll love it: It stays visible without getting in your way, automatically maps out your productivity trends, and doesn't hog your system resources. It’s the ultimate companion for devs, writers, and students who want to build a serious deep-work habit without the bloat.
 
