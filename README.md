@@ -1,13 +1,30 @@
-# Qoma - Pomodoro & Timer
+<p align="center">
+<img src="https://raw.githubusercontent.com/BroKarim/qoma/main/Qoma/Assets.xcassets/AppIcon.appiconset/qoma.png
+" width="128" height="128"/>
+<p>
+ 
+<h1 align="center">Qoma</h1>
+<p align="center">
+<img src="https://img.shields.io/github/actions/workflow/status/ivoronin/TomatoBar/main.yml?branch=main"/> 
 
-https://github.com/user-attachments/assets/05fb5ca5-ac03-46b5-92f8-f8cb84091960
-<!-- <video src="https://res.cloudinary.com/dctl5pihh/video/upload/v1773037353/qoma-final_ycbwue.mov" controls width="3600"></video> -->
+<!-- <img src="https://img.shields.io/github/downloads/ivoronin/TomatoBar/total"/> 
+<img src="https://img.shields.io/github/v/release/ivoronin/TomatoBar?display_name=tag"/> <img src="https://img.shields.io/homebrew/cask/v/tomatobar"/> -->
+</p>
 
-> An open-source floating timer with image support
+<img
+  src="https://github.com/ivoronin/TomatoBar/raw/main/screenshot.png?raw=true"
+  alt="Screenshot"
+  width="50%"
+  align="right"
+/>
 
-A minimal timer designed to stay out of your way. Set a duration with the slider
-or by typing minutes. You can also show an image in the floating timer, either
-as a gentle companion for focus or a simple visual reminder.
+<!-- > An open-source floating timer with image support -->
+## Overview
+We all know the Pomodoro technique works wonders for beating procrastination. But honestly, most timers out there are just... annoying to use.
+
+Qoma fixes this. It’s a clean, floating Pomodoro timer designed specifically for macOS that focuses entirely on simplicity and clean analytics.
+
+Why you'll love it: It stays visible without getting in your way, automatically maps out your productivity trends, and doesn't hog your system resources. It’s the ultimate companion for devs, writers, and students who want to build a serious deep-work habit without the bloat.
 
 ## Features
 
@@ -19,7 +36,7 @@ as a gentle companion for focus or a simple visual reminder.
 
 ## TODO
 
-- [ ] Analytics / website tracking not working yet
+- [x] Analytics / website tracking not working yet
 - [ ] Add more pomodoro styles
 - [ ] Visual effect after 1 session done
 - [ ] More analytics features
@@ -79,31 +96,35 @@ Qoma requires several macOS permissions to function properly.
 ### Required Permissions
 
 **Automation Permission:** To track browser activity
+
 - System Settings → Privacy & Security → Automation
 - Enable Qoma for your browsers (Safari, Chrome, Edge, Arc, Brave, Vivaldi, Opera, Firefox)
 
 **System Events Permission:** For browser integration
+
 - System Settings → Privacy & Security → Automation
 - Enable Qoma for System Events
 
 **Accessibility Permission:** For Firefox browser integration
+
 - System Settings → Privacy & Security → Accessibility
 - Enable Qoma
 
 **Firefox Additional Setup:** Firefox does not expose tab URLs through its scripting interface, so Qoma reads the address bar via the macOS Accessibility API. This requires a one-time Firefox configuration change. Firefox website tracking is experimental and may stop working if Firefox changes its accessibility hierarchy, if the toolbar is customized, or while the browser UI is in a transient state:
+
 - Open Firefox and navigate to `about:config`
 - Accept the risk warning if prompted
 - Search for `accessibility.force_disabled`
 - Set the value to `-1`
 
 **Notifications (Optional):** For session completion and update notifications
+
 - System Settings → Notifications → Qoma
 - Enable notifications as desired
 
 ### In-App Permission Prompts
 
 The app provides helpful banners and direct links to the appropriate system preference panes when permissions are needed.
-
 
 ## Building from Source
 
@@ -115,8 +136,6 @@ open qoma.xcodeproj
 
 Then select your scheme (Qoma) and run from Xcode (Cmd+R).
 
-
 ## License
 
 This project is licensed under the BSD 3-Clause [License](LICENSE) - see the LICENSE file for details.
-
