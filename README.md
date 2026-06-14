@@ -17,21 +17,15 @@
   align="right"
 />
 
-<!-- > An open-source floating timer with image support -->
-
 ## Overview
 
 We all know the Pomodoro technique works wonders for beating procrastination. But honestly, most timers out there are just... annoying to use.
 
 Qoma fixes this. It’s a clean, floating Pomodoro timer designed specifically for macOS that focuses entirely on simplicity and clean analytics.
 
-<img
-  src=".github/assets/screenshot.png?raw=true"
-  alt="Screenshot"
-  width="100%"
-/>
-
 Why you'll love it: It stays visible without getting in your way, automatically maps out your productivity trends, and doesn't hog your system resources. It’s the ultimate companion for devs, writers, and students who want to build a serious deep-work habit without the bloat.
+
+
 
 ## Features
 
@@ -40,6 +34,15 @@ Why you'll love it: It stays visible without getting in your way, automatically 
 - 🎨 **Theme & Opacity** — Adjustable floating window opacity and theme selection.
 - 📊 **App & Website Tracking** — Monitor time spent in applications and websites (Safari, Chrome, Edge, Arc, Brave, Vivaldi, Opera, Firefox experimental).
 - 📈 **Visual Analytics** — Charts showing daily/weekly activity patterns, heatmap, top apps, and top websites breakdown.
+
+
+<p align="center">
+<img
+  src=".github/assets/screenshot.png?raw=true"
+  alt="Screenshot"
+  width="80%"
+/>
+</p>
 
 ## TODO
 
@@ -51,7 +54,7 @@ Why you'll love it: It stays visible without getting in your way, automatically 
 
 ## Install
 
-## Direct Download (Recomended)
+### Direct Download (Recomended)
 
 1. Go to [Releases](https://github.com/BroKarim/qoma/releases).
 2. Download `qoma-*-mac-universal.dmg` (works on any Mac).
@@ -69,7 +72,7 @@ Why you'll love it: It stays visible without getting in your way, automatically 
 
 > Note: This is an ad-hoc signed indie app. macOS shows a warning for apps not notarized through Apple's $99/year developer program. The app is completely safe and open source.
 
-## Homebrew
+### Homebrew
 
 ```sh
 brew tap BroKarim/qoma
@@ -96,7 +99,7 @@ brew update
 brew upgrade --cask qoma
 ```
 
-## Permission Setup
+### Permission Setup
 
 Qoma requires several macOS permissions to function properly.
 
