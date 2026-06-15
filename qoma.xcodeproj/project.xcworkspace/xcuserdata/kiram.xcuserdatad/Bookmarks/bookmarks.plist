@@ -27,7 +27,7 @@
 					<key>payload</key>
 					<dict>
 						<key>relative-path</key>
-						<string>dzenn/UI/Floating/FloatingTheme.swift</string>
+						<string>qoma/UI/Floating/FloatingTheme.swift</string>
 					</dict>
 				</dict>
 			</dict>

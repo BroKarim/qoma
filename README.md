@@ -3,9 +3,19 @@
 <p>
  
 <h1 align="center">Qoma</h1>
-<p align="center">
-<img src="https://img.shields.io/github/actions/workflow/status/BroKarim/qoma/main.yml?branch=main"/>
-</p>
+<!-- <p align="center">
+<img src="https://img.shields.io/github/actions/workflow/status/ivoronin/TomatoBar/main.yml?branch=main"/>
+
+<img src="https://img.shields.io/github/downloads/ivoronin/TomatoBar/total"/>
+<img src="https://img.shields.io/github/v/release/ivoronin/TomatoBar?display_name=tag"/> <img src="https://img.shields.io/homebrew/cask/v/tomatobar"/>
+</p> -->
+
+<img
+  src=".github/assets/thumbnail.png?raw=true"
+  alt="Screenshot"
+  width="50%"
+  align="right"
+/>
 
 ## Overview
 
@@ -26,6 +36,14 @@ Why you'll love it: It stays visible without getting in your way, automatically 
 - 📈 **Visual Analytics** — Charts showing daily/weekly activity patterns, heatmap, top apps, and top websites breakdown.
 
 
+<p align="center">
+<img
+  src=".github/assets/screenshot.png?raw=true"
+  alt="Screenshot"
+  width="80%"
+/>
+</p>
+
 ## TODO
 
 - [x] Analytics / website tracking not working yet
@@ -36,7 +54,7 @@ Why you'll love it: It stays visible without getting in your way, automatically 
 
 ## Install
 
-### Direct Download (Recommended)
+### Direct Download (Recomended)
 
 1. Go to [Releases](https://github.com/BroKarim/qoma/releases).
 2. Download `qoma-*-mac-universal.dmg` (works on any Mac).
