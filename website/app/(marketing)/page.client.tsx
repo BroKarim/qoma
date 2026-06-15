@@ -167,15 +167,17 @@ export default function MarketingPageClient() {
       {/* Hero */}
       <AnimatedSection className="w-full">
         <section className="flex flex-col items-center px-4 pt-10 pb-6 text-center sm:pt-16 sm:pb-8">
-          <Badge
-            className="mb-4 rounded-full border border-white/15 bg-white/5 px-4 py-1 text-[10px] font-medium text-white/80 backdrop-blur-sm hover:bg-white/10 sm:mb-2"
-            style={{
-              boxShadow:
-                "0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
-            }}
-          >
-            Open Source & Free
-          </Badge>
+          <a href="https://github.com/BroKarim/qoma" target="_blank" rel="noopener noreferrer" className="inline-block">
+            <Badge
+              className="mb-4 cursor-pointer rounded-full border border-white/15 bg-white/5 px-4 py-1 text-[10px] font-medium text-white/80 backdrop-blur-sm hover:bg-white/10 sm:mb-2"
+              style={{
+                boxShadow:
+                  "0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+              }}
+            >
+              Open Source & Free
+            </Badge>
+          </a>
 
           <h1 className="mb-2 max-w-2xl font-sans text-3xl leading-tight font-normal text-white sm:text-5xl md:text-5xl">
             Focus, floating.

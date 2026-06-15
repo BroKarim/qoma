@@ -13,20 +13,21 @@ const fontMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "Dzenn - Not your ordinary linktree",
+  title: "Qoma - A minimalist floating timer with analytics",
+  metadataBase: new URL("https://qoma.app"),
   description:
-    "A nonchalant link-in-bio that hits different. No cap, just vibes. Your main character era starts here – slay your links, bestie. 💅✨",
+    "Qoma is a floating Pomodoro timer designed specifically for macOS that focuses entirely on simplicity and clean analytics.",
   openGraph: {
-    title: "Dzenn - Not your ordinary linktree",
+    title: "Qoma - A minimalist floating timer with analytics",
     description:
-      "A nonchalant link-in-bio that hits different. No cap, just vibes. Your main character era starts here – slay your links, bestie. 💅✨",
-    siteName: "Dzenn",
+      "Qoma is a floating Pomodoro timer designed specifically for macOS that focuses entirely on simplicity and clean analytics.",
+    siteName: "Qoma",
     images: [
       {
         url: "/og.png",
         width: 1200,
         height: 630,
-        alt: "Dzenn - Not your ordinary linktree",
+        alt: "Qoma - A minimalist floating timer with analytics",
       },
     ],
     locale: "en_US",
@@ -34,9 +35,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Dzenn - Not your ordinary linktree",
+    title: "Qoma - A minimalist floating timer with analytics",
     description:
-      "A nonchalant link-in-bio that hits different. No cap, just vibes. Your main character era starts here – slay your links, bestie.",
+      "Qoma is a floating Pomodoro timer designed specifically for macOS that focuses entirely on simplicity and clean analytics.",
     images: ["/og.png"],
   },
   robots: {

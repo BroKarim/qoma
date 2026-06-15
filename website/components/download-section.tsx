@@ -58,11 +58,11 @@ export function DownloadSection() {
         <div className="flex flex-col gap-4">
           <CopyableCode
             label="Install via Homebrew"
-            code="brew install --cask qoma"
+            code="brew tap BroKarim/qoma && brew install --cask qoma"
           />
           <CopyableCode
             label="Remove quarantine flag"
-            code="xattr -dr com.apple.quarantine /Applications/qoma.app"
+            code="xattr -d com.apple.quarantine /Applications/Qoma.app"
           />
         </div>
       </div>

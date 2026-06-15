@@ -52,7 +52,7 @@ private struct BreakdownColumn: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Label(self.title, systemImage: self.icon)
-                .font(.dzenn(size: 13, weight: .semibold))
+                .font(.qoma(size: 13, weight: .semibold))
                 .foregroundColor(.primary)
 
             if self.items.isEmpty {
@@ -79,7 +79,7 @@ private struct EmptyStateContent: View {
     
     var body: some View {
         Text(self.message)
-            .font(.dzennSubheadline)
+            .font(.qomaSubheadline)
             .foregroundColor(.secondary)
             .frame(maxWidth: .infinity, minHeight: 100, alignment: .topLeading)
     }
@@ -102,7 +102,7 @@ private struct WebsitePermissionColumn: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Label("Top Websites", systemImage: "network")
-                .font(.dzenn(size: 13, weight: .semibold))
+                .font(.qoma(size: 13, weight: .semibold))
                 .foregroundColor(.primary)
 
             Spacer(minLength: 0)
@@ -123,23 +123,23 @@ private struct PermissionAlert: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Image(systemName: "lock.shield")
-                .font(.dzenn(size: 28))
+                .font(.qoma(size: 28))
                 .foregroundColor(.orange)
 
             Text("Website tracking requires permission")
-                .font(.dzennHeadline)
+                .font(.qomaHeadline)
 
             VStack(alignment: .leading, spacing: 6) {
                 Text("Qoma needs Automation permission to read browser tabs.")
-                    .font(.dzennSubheadline)
+                    .font(.qomaSubheadline)
                     .foregroundColor(.secondary)
 
                 Text("Enable Qoma in System Settings > Privacy & Security > Automation for each browser.")
-                    .font(.dzennSubheadline)
+                    .font(.qomaSubheadline)
                     .foregroundColor(.secondary)
 
                 Text("Top apps will still be tracked without this permission.")
-                    .font(.dzennSubheadline)
+                    .font(.qomaSubheadline)
                     .foregroundColor(.secondary)
             }
 
@@ -183,14 +183,14 @@ private struct BreakdownRow: View {
                 }
 
                 Text(self.item.name)
-                    .font(.dzenn(size: 13, weight: .medium))
+                    .font(.qoma(size: 13, weight: .medium))
                     .foregroundColor(.primary)
                     .lineLimit(1)
 
                 Spacer(minLength: 8)
 
                 Text(self.item.displayDuration)
-                    .font(.dzenn(size: 12, weight: .semibold))
+                    .font(.qoma(size: 12, weight: .semibold))
                     .foregroundColor(.secondary)
             }
 
@@ -248,7 +248,7 @@ private struct PercentageLabel: View {
     
     var body: some View {
         Text("\(Int(self.percentage.rounded()))% of tracked time")
-            .font(.dzennCaption2)
+            .font(.qomaCaption2)
             .foregroundColor(.secondary)
     }
 }

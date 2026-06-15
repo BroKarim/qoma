@@ -41,7 +41,7 @@ struct AnalyticsDashboardView: View {
                 HStack(spacing: 12) {
                     ProgressView()
                     Text("Loading analytics...")
-                        .font(.dzennSubheadline)
+                        .font(.qomaSubheadline)
                         .foregroundColor(.secondary)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -95,7 +95,7 @@ struct AnalyticsDashboardView: View {
 
                 if sessions.isEmpty {
                     Text("No sessions recorded for this day.")
-                        .font(.dzennSubheadline)
+                        .font(.qomaSubheadline)
                         .foregroundColor(.secondary)
                 } else {
                     HStack(spacing: 16) {
@@ -142,7 +142,7 @@ struct AnalyticsDashboardView: View {
 
                 if sessions.isEmpty {
                     Text("No focus sessions on this day.")
-                        .font(.dzennSubheadline)
+                        .font(.qomaSubheadline)
                         .foregroundColor(.secondary)
                 } else {
                     VStack(alignment: .leading, spacing: 14) {
@@ -500,16 +500,16 @@ private struct OverviewStatCard: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 6) {
                 Image(systemName: self.icon)
-                    .font(.dzenn(size: 12, weight: .semibold))
+                    .font(.qoma(size: 12, weight: .semibold))
                     .foregroundColor(self.color)
 
                 Text(self.title)
-                    .font(.dzennCaption)
+                    .font(.qomaCaption)
                     .foregroundColor(.secondary)
             }
 
             Text(self.value)
-                .font(.dzennTitle2)
+                .font(.qomaTitle2)
                 .fontWeight(.bold)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -555,12 +555,12 @@ private struct AnalyticsSessionSummaryCard: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .firstTextBaseline, spacing: 12) {
                 Text(self.timeRange)
-                    .font(.dzenn(size: 14, weight: .semibold))
+                    .font(.qoma(size: 14, weight: .semibold))
 
                 Spacer(minLength: 12)
 
                 Text(self.statusLabel)
-                    .font(.dzenn(size: 11, weight: .semibold))
+                    .font(.qoma(size: 11, weight: .semibold))
                     .foregroundColor(self.statusColor)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
@@ -570,12 +570,12 @@ private struct AnalyticsSessionSummaryCard: View {
 
             if let taskTitle = self.session.taskTitle, !taskTitle.isEmpty {
                 Text(taskTitle)
-                    .font(.dzenn(size: 14, weight: .medium))
+                    .font(.qoma(size: 14, weight: .medium))
                     .foregroundColor(.primary)
             }
 
             Text(self.summaryText)
-                .font(.dzennSubheadline)
+                .font(.qomaSubheadline)
                 .foregroundColor(.secondary)
 
             HStack(spacing: 16) {
@@ -634,11 +634,11 @@ private struct AnalyticsSessionSummaryCard: View {
     private func metaPill(title: String, value: String) -> some View {
         HStack(spacing: 6) {
             Text(title)
-                .font(.dzennCaption2)
+                .font(.qomaCaption2)
                 .foregroundColor(.secondary)
 
             Text(value)
-                .font(.dzennCaption)
+                .font(.qomaCaption)
                 .foregroundColor(.primary)
         }
         .padding(.horizontal, 10)

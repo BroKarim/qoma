@@ -7,10 +7,10 @@ struct SettingsPageHeader: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(self.title)
-                .font(.dzenn(size: 28, weight: .semibold))
+                .font(.qoma(size: 28, weight: .semibold))
 
             Text(self.subtitle)
-                .font(.dzenn(size: 13, weight: .medium))
+                .font(.qoma(size: 13, weight: .medium))
                 .foregroundColor(.secondary)
         }
     }
@@ -23,10 +23,10 @@ struct SettingsSectionHeading: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(self.title)
-                .font(.dzenn(size: 16, weight: .semibold))
+                .font(.qoma(size: 16, weight: .semibold))
 
             Text(self.subtitle)
-                .font(.dzenn(size: 12.5, weight: .medium))
+                .font(.qoma(size: 12.5, weight: .medium))
                 .foregroundColor(.secondary)
         }
     }
@@ -68,11 +68,11 @@ struct SettingsRow<Content: View>: View {
         HStack(alignment: self.subtitle == nil ? .center : .top, spacing: 18) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(self.title)
-                    .font(.dzenn(size: 13.5, weight: .medium))
+                    .font(.qoma(size: 13.5, weight: .medium))
 
                 if let subtitle = self.subtitle {
                     Text(subtitle)
-                        .font(.dzenn(size: 12, weight: .medium))
+                        .font(.qoma(size: 12, weight: .medium))
                         .foregroundColor(.secondary)
                 }
             }
@@ -89,7 +89,7 @@ struct SettingsBadge: View {
 
     var body: some View {
         Text(self.title)
-            .font(.dzenn(size: 11, weight: .semibold))
+            .font(.qoma(size: 11, weight: .semibold))
             .foregroundColor(.secondary)
             .padding(.horizontal, 10)
             .padding(.vertical, 6)

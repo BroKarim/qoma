@@ -58,14 +58,14 @@ struct SettingsView: View {
         }
         .frame(minWidth: 860, minHeight: 580)
         // Gunakan satu warna background yang sama untuk seluruh view
-        .background(Color.dzennBackground.ignoresSafeArea())
+        .background(Color.qomaBackground.ignoresSafeArea())
         .ignoresSafeArea(.container, edges: .top)
     }
 
     // MARK: Sidebar
     // - Tidak pakai List agar tidak ada highlight biru bawaan & tidak lag
     // - Tidak pakai clip shape agar sidebar memenuhi tinggi penuh tanpa rounded
-    // - Warna background sama dengan dzennBackground agar konsisten
+    // - Warna background sama dengan qomaBackground agar konsisten
     private var sidebar: some View {
         VStack(spacing: 0) {
             // Spacer menggantikan titlebar area
@@ -75,7 +75,7 @@ struct SettingsView: View {
             // Header
             VStack(alignment: .leading, spacing: 4) {
                 Text("Settings")
-                    .font(.dzenn(size: 18, weight: .semibold))
+                    .font(.qoma(size: 18, weight: .semibold))
                     .foregroundColor(.white)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -102,9 +102,9 @@ struct SettingsView: View {
         }
         .frame(width: 220)
         .frame(maxHeight: .infinity)
-        // Samakan warna dengan dzennBackground, atau bisa pakai warna sedikit berbeda
-        // tapi tetap satu tone. Jika ingin persis sama, ganti ke Color.dzennBackground
-        .background(Color.dzennBackground)
+        // Samakan warna dengan qomaBackground, atau bisa pakai warna sedikit berbeda
+        // tapi tetap satu tone. Jika ingin persis sama, ganti ke Color.qomaBackground
+        .background(Color.qomaBackground)
     }
 
     // MARK: Detail Panel
@@ -118,11 +118,11 @@ struct SettingsView: View {
             case .analytics:
                 AnalyticsDashboardView()
             case nil:
-                Color.dzennBackground
+                Color.qomaBackground
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(Color.dzennBackground)
+        .background(Color.qomaBackground)
         .ignoresSafeArea(.container, edges: .top)
     }
 }
@@ -137,12 +137,12 @@ private struct SettingsSidebarRow: View {
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: tab.systemImage)
-                .font(.dzenn(size: 14, weight: .medium))
+                .font(.qoma(size: 14, weight: .medium))
                 .frame(width: 20)
                 .foregroundColor(isSelected ? .white : Color.white.opacity(0.55))
 
             Text(tab.title)
-                .font(.dzenn(size: 13, weight: isSelected ? .semibold : .regular))
+                .font(.qoma(size: 13, weight: isSelected ? .semibold : .regular))
                 .foregroundColor(isSelected ? .white : Color.white.opacity(0.65))
 
             Spacer()

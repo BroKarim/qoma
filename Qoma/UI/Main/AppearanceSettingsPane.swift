@@ -57,7 +57,7 @@ struct AppearanceSettingsPane: View {
                             .frame(width: 220)
 
                         Text("\(Int((floatingOpacity * 100).rounded()))%")
-                            .font(.dzenn(size: 13, weight: .semibold))
+                            .font(.qoma(size: 13, weight: .semibold))
                             .foregroundColor(.secondary)
                             .frame(width: 44, alignment: .trailing)
                     }
