@@ -5,20 +5,16 @@ struct FloatingTimerView: View {
     private static let timerFontName = "RobotoMono-VariableFont_wght"
 
     @ObservedObject private var timer = FocusSessionManager.shared.timerService
+    @ObservedObject private var extensionManager = ExtensionManager.shared
 
     @AppStorage(AppConstants.FloatingThemeSettings.opacityKey)
     private var floatingOpacity: Double = AppConstants.FloatingThemeSettings.defaultOpacity
     @AppStorage(AppConstants.FloatingThemeSettings.selectedThemeKey)
     private var selectedThemeID: String = AppConstants.FloatingThemeSettings.defaultThemeID
-    @AppStorage(AppConstants.ExtensionSettings.todolistEnabledKey)
-    private var todolistEnabled: Bool = AppConstants.ExtensionSettings.defaultTodolistEnabled
 
-    @State private var todoItems: [TodoItem] = []
     @State private var isExpanded: Bool = true
     @State private var collapseWorkItem: DispatchWorkItem?
     @State private var requestedSize: CGSize = FloatingLayoutMode.timerOnly.contentSize
-
-    private let store = AnalyticsStore.shared
 
     var body: some View {
         let theme = self.selectedTheme
@@ -36,16 +32,11 @@ struct FloatingTimerView: View {
             .onAppear { self.viewAppeared() }
             .onDisappear { self.collapseWorkItem?.cancel() }
             .onChange(of: self.isExpanded) { _ in self.scheduleCollapse() }
-            .onChange(of: self.todolistEnabled) { _ in
-                self.todoItems = store.loadTodoItems()
+            .onChange(of: self.extensionManager.activeExtension?.id) { _ in
+                self.collapseWorkItem?.cancel()
                 self.isExpanded = true
                 self.requestedSize = self.currentLayoutMode.contentSize
                 self.notifySizeChange()
-            }
-            .onReceive(
-                Timer.publish(every: 0.5, on: .main, in: .common).autoconnect()
-            ) { _ in
-                self.requestedSize = self.currentLayoutMode.contentSize
             }
             .onChange(of: self.requestedSize) { newSize in
                 DispatchQueue.main.async {
@@ -55,8 +46,8 @@ struct FloatingTimerView: View {
     }
 
     private var currentLayoutMode: FloatingLayoutMode {
-        guard todolistEnabled else { return .timerOnly }
-        return isExpanded ? .todolistExpanded : .todolistCollapsed
+        guard let ext = extensionManager.activeExtension else { return .timerOnly }
+        return isExpanded ? .featureExpanded(ext) : .featureCollapsed(ext)
     }
 
     @ViewBuilder
@@ -65,25 +56,19 @@ struct FloatingTimerView: View {
         case .timerOnly:
             self.timerOnlyContent(theme: theme)
 
-        case .todolistCollapsed:
-            TodolistCompactBar(
-                todoItems: $todoItems,
-                onAdd: { self.expandAndFocus() },
-                onShowCompleted: { self.expandAndShowCompleted() },
-                theme: theme,
-                onTap: { self.expand() }
-            )
+        case .featureCollapsed(let ext):
+            ext.collapsedView(theme: theme, onTap: { self.expand() })
+                .contentShape(Rectangle())
+                .simultaneousGesture(
+                    TapGesture().onEnded { self.resetCollapseTimer() }
+                )
 
-        case .todolistExpanded:
-            TodolistFullView(
-                todoItems: $todoItems,
-                onAdd: {},
-                theme: theme
-            )
-            .contentShape(Rectangle())
-            .simultaneousGesture(
-                TapGesture().onEnded { self.resetCollapseTimer() }
-            )
+        case .featureExpanded(let ext):
+            ext.expandedView(theme: theme)
+                .contentShape(Rectangle())
+                .simultaneousGesture(
+                    TapGesture().onEnded { self.resetCollapseTimer() }
+                )
         }
     }
 
@@ -141,10 +126,7 @@ struct FloatingTimerView: View {
         return String(format: "%02d:%02d", m, s)
     }
 
-    // MARK: - Collapse/Expand
-
     private func viewAppeared() {
-        todoItems = store.loadTodoItems()
         isExpanded = true
         requestedSize = currentLayoutMode.contentSize
         notifySizeChange()
@@ -154,11 +136,11 @@ struct FloatingTimerView: View {
     private func scheduleCollapse() {
         collapseWorkItem?.cancel()
 
-        guard todolistEnabled, isExpanded else { return }
+        guard extensionManager.activeExtension != nil, isExpanded else { return }
 
         let workItem = DispatchWorkItem { [self] in
             DispatchQueue.main.async {
-                guard self.todolistEnabled, self.isExpanded else { return }
+                guard self.extensionManager.activeExtension != nil, self.isExpanded else { return }
                 withAnimation(.easeInOut(duration: 0.25)) {
                     self.isExpanded = false
                     self.requestedSize = self.currentLayoutMode.contentSize
@@ -174,7 +156,7 @@ struct FloatingTimerView: View {
     }
 
     private func resetCollapseTimer() {
-        guard todolistEnabled else { return }
+        guard extensionManager.activeExtension != nil else { return }
         scheduleCollapse()
     }
 
@@ -187,22 +169,12 @@ struct FloatingTimerView: View {
         scheduleCollapse()
     }
 
-    private func expandAndFocus() {
-        expand()
-    }
-
-    private func expandAndShowCompleted() {
-        expand()
-    }
-
     private func notifySizeChange() {
         DispatchQueue.main.async {
             WindowManager.shared.updateFloatingSize(to: self.requestedSize)
         }
     }
 }
-
-// MARK: - Extensions
 
 extension FloatingTimerView {
     var selectedTheme: FloatingTheme {

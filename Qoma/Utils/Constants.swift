@@ -132,6 +132,5 @@ enum AnalyticsSettings {
         static let expandedStateMinHeight: CGFloat = 140
         static let extendedWidth: CGFloat = 340
         static let collapsedTimeout: TimeInterval = 3.0
-        static let maxVisibleInCollapsed = 10
     }
 }

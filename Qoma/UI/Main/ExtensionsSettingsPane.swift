@@ -1,8 +1,7 @@
 import SwiftUI
 
 struct ExtensionsSettingsPane: View {
-    @AppStorage(AppConstants.ExtensionSettings.todolistEnabledKey)
-    private var todolistEnabled: Bool = AppConstants.ExtensionSettings.defaultTodolistEnabled
+    @ObservedObject private var extensionManager = ExtensionManager.shared
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -29,14 +28,40 @@ struct ExtensionsSettingsPane: View {
                 title: "Feature Extensions",
                 subtitle: "Add interactive tools to the floating panel.")
 
-            SettingsSurfaceCard {
-                extensionCard(
-                    title: "Todolist",
-                    description: "Checklist inside the floating timer. "
-                        + "Add, complete, and reorder tasks during focus sessions.",
-                    icon: "checklist",
-                    isEnabled: self.$todolistEnabled
-                )
+            if extensionManager.registered.isEmpty {
+                SettingsSurfaceCard {
+                    VStack(spacing: 0) {
+                        HStack(spacing: 12) {
+                            Image(systemName: "puzzlepiece.extension")
+                                .font(.qoma(size: 18, weight: .regular))
+                                .foregroundColor(.secondary)
+                                .frame(width: 28)
+
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("No extensions registered")
+                                    .font(.qoma(size: 14, weight: .semibold))
+                                Text("Feature extensions will appear here when available.")
+                                    .font(.qomaSubheadline)
+                                    .foregroundColor(.secondary)
+                            }
+
+                            Spacer()
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 18)
+                    }
+                }
+            } else {
+                ForEach(extensionManager.registered, id: \.id) { ext in
+                    SettingsSurfaceCard {
+                        extensionCard(
+                            title: ext.title,
+                            description: ext.description,
+                            icon: ext.systemImage,
+                            isEnabled: extensionManager.binding(for: ext)
+                        )
+                    }
+                }
             }
         }
     }

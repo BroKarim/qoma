@@ -14,10 +14,10 @@ final class WindowManager: ObservableObject {
 
         self.objectWillChange.send()
 
-        let todolistEnabled = UserDefaults.standard.bool(forKey: AppConstants.ExtensionSettings.todolistEnabledKey)
-        let layout = todolistEnabled
-            ? FloatingLayoutMode.todolistExpanded
-            : FloatingLayoutMode.timerOnly
+        let ext = ExtensionManager.shared.activeExtension
+        let layout: FloatingLayoutMode = ext != nil
+            ? .featureExpanded(ext!)
+            : .timerOnly
         let contentSize = layout.contentSize
 
         let contentView = FloatingTimerView()
@@ -58,10 +58,10 @@ final class WindowManager: ObservableObject {
 
 
     func updateFloatingSize() {
-        let todolistEnabled = UserDefaults.standard.bool(forKey: AppConstants.ExtensionSettings.todolistEnabledKey)
-        let layout = todolistEnabled
-            ? FloatingLayoutMode.todolistExpanded
-            : FloatingLayoutMode.timerOnly
+        let ext = ExtensionManager.shared.activeExtension
+        let layout: FloatingLayoutMode = ext != nil
+            ? .featureExpanded(ext!)
+            : .timerOnly
         updateFloatingSize(to: layout.contentSize)
     }
 

@@ -125,10 +125,6 @@ final class AnalyticsStore {
         saveTodoItems(items)
     }
 
-    func reorderTodoItems(_ items: [TodoItem]) {
-        saveTodoItems(items)
-    }
-
     // MARK: - Prune
 
     func pruneOldData() {

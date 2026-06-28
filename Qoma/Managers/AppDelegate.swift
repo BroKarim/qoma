@@ -11,6 +11,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         self.menuBarController = MenuBarController()
         _ = self.menuBarController
 
+        ExtensionManager.shared.register(TodolistExtension())
+
         AnalyticsPermissionsManager.shared.requestPermissions()
     }
 }

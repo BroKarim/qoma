@@ -1,35 +1,53 @@
 import SwiftUI
 
-enum FloatingLayoutMode: String, CaseIterable, Identifiable {
+enum FloatingLayoutMode: Equatable {
     case timerOnly
-    case todolistCollapsed
-    case todolistExpanded
+    case featureCollapsed(any FeatureExtension)
+    case featureExpanded(any FeatureExtension)
 
-    var id: String {
-        rawValue
+    static func == (lhs: FloatingLayoutMode, rhs: FloatingLayoutMode) -> Bool {
+        switch (lhs, rhs) {
+        case (.timerOnly, .timerOnly):
+            return true
+        case (.featureCollapsed(let l), .featureCollapsed(let r)):
+            return l.id == r.id
+        case (.featureExpanded(let l), .featureExpanded(let r)):
+            return l.id == r.id
+        default:
+            return false
+        }
     }
 
     var title: String {
         switch self {
-        case .timerOnly: "Timer Only"
-        case .todolistCollapsed: "Todolist Collapsed"
-        case .todolistExpanded: "Todolist Expanded"
+        case .timerOnly:
+            return "Timer Only"
+        case .featureCollapsed(let ext):
+            return "\(ext.title) Collapsed"
+        case .featureExpanded(let ext):
+            return "\(ext.title) Expanded"
         }
     }
 
     var subtitle: String {
         switch self {
-        case .timerOnly: "Minimal floating countdown for deep focus."
-        case .todolistCollapsed: "Compact todolist with timer."
-        case .todolistExpanded: "Full todolist with timer."
+        case .timerOnly:
+            return "Minimal floating countdown for deep focus."
+        case .featureCollapsed(let ext):
+            return "Compact \(ext.title.lowercased()) with timer."
+        case .featureExpanded(let ext):
+            return "Full \(ext.title.lowercased()) with timer."
         }
     }
 
     var systemImage: String {
         switch self {
-        case .timerOnly: "timer"
-        case .todolistCollapsed: "list.bullet.rectangle"
-        case .todolistExpanded: "list.bullet.rectangle.fill"
+        case .timerOnly:
+            return "timer"
+        case .featureCollapsed(let ext):
+            return ext.systemImage
+        case .featureExpanded(let ext):
+            return ext.systemImage
         }
     }
 
@@ -47,18 +65,10 @@ enum FloatingLayoutMode: String, CaseIterable, Identifiable {
             return CGSize(
                 width: AppConstants.FloatingLayoutSettings.timerOnlyWidth,
                 height: AppConstants.FloatingLayoutSettings.timerOnlyHeight)
-        case .todolistCollapsed:
-            return CGSize(
-                width: AppConstants.ExtensionSettings.extendedWidth,
-                height: AppConstants.ExtensionSettings.collapsedStateHeight)
-        case .todolistExpanded:
-            return CGSize(
-                width: AppConstants.ExtensionSettings.extendedWidth,
-                height: AppConstants.ExtensionSettings.expandedStateMinHeight)
+        case .featureCollapsed(let ext):
+            return ext.collapsedSize()
+        case .featureExpanded(let ext):
+            return ext.expandedSize()
         }
-    }
-
-    static func from(id: String) -> FloatingLayoutMode {
-        FloatingLayoutMode(rawValue: id) ?? .timerOnly
     }
 }

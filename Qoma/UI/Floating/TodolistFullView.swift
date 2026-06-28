@@ -39,7 +39,7 @@ struct TodolistFullView: View {
 
             Spacer()
 
-            Button(action: { newItemText = "" }, label: {
+            Button(action: { clearCompleted() }, label: {
                 Image(systemName: "plus.circle.fill")
                     .font(.system(size: 18))
                     .foregroundColor(theme.textColor.opacity(0.7))
@@ -184,6 +184,14 @@ struct TodolistFullView: View {
     private func deleteItem(_ item: TodoItem) {
         todoItems.removeAll { $0.id == item.id }
         store.deleteTodoItem(item)
+    }
+
+    private func clearCompleted() {
+        let completed = todoItems.filter { $0.isCompleted }
+        for item in completed {
+            store.deleteTodoItem(item)
+        }
+        todoItems.removeAll { $0.isCompleted }
     }
 
     private func format(_ time: TimeInterval) -> String {
