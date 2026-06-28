@@ -15,9 +15,27 @@ struct TodolistExtension: FeatureExtension {
     }
 
     func expandedSize() -> CGSize {
-        CGSize(
-            width: AppConstants.ExtensionSettings.extendedWidth,
-            height: AppConstants.ExtensionSettings.expandedStateMinHeight)
+    // Hitung tinggi berdasarkan jumlah item, dengan batas min & max
+            let store = AnalyticsStore.shared
+            let items = store.loadTodoItems()
+            let pendingCount = items.filter { !$0.isCompleted }.count
+
+            let rowHeight: CGFloat = 36
+            let topBarHeight: CGFloat = 34    // topBar
+            let divider1: CGFloat = 1
+            let addFieldHeight: CGFloat = 37  // addField
+            let divider2: CGFloat = 1
+            let padding: CGFloat = 8
+
+            let visibleRows = max(1, min(5, pendingCount))  // minimal 1, maksimal 5
+            let listHeight = CGFloat(visibleRows) * rowHeight + padding
+
+            let totalHeight = topBarHeight + divider1 + addFieldHeight + divider2 + listHeight
+
+            return CGSize(
+                width: AppConstants.ExtensionSettings.extendedWidth,
+                height: max(AppConstants.ExtensionSettings.expandedStateMinHeight, totalHeight)
+            )
     }
 
     func collapsedView(
@@ -27,8 +45,11 @@ struct TodolistExtension: FeatureExtension {
         AnyView(TodolistExtensionCollapsedView(theme: theme, onTap: onTap))
     }
 
-    func expandedView(theme: FloatingTheme) -> AnyView {
-        AnyView(TodolistExtensionExpandedView(theme: theme))
+    func expandedView(
+        theme: FloatingTheme,
+        onCollapse: @escaping () -> Void
+    ) -> AnyView {
+        AnyView(TodolistExtensionExpandedView(theme: theme, onCollapse: onCollapse))
     }
 
     func analyticsSection() -> AnyView? {
@@ -46,7 +67,7 @@ private struct TodolistExtensionCollapsedView: View {
     var body: some View {
         TodolistCompactBar(
             todoItems: $todoItems,
-            onAdd: {},
+            onAdd: { onTap() },
             onShowCompleted: {},
             theme: theme,
             onTap: onTap
@@ -60,6 +81,7 @@ private struct TodolistExtensionCollapsedView: View {
 private struct TodolistExtensionExpandedView: View {
     @State private var todoItems: [TodoItem] = []
     let theme: FloatingTheme
+    let onCollapse: () -> Void
 
     private let store = AnalyticsStore.shared
 
@@ -67,7 +89,8 @@ private struct TodolistExtensionExpandedView: View {
         TodolistFullView(
             todoItems: $todoItems,
             onAdd: {},
-            theme: theme
+            theme: theme,
+            onCollapse: onCollapse
         )
         .onAppear {
             todoItems = store.loadTodoItems()

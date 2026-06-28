@@ -31,31 +31,39 @@ struct TodolistCompactBar: View {
 
     private var topRow: some View {
         HStack(spacing: 10) {
-            Spacer()
+           
 
-            Text(format(timer.remainingTime))
-                .font(.custom("RobotoMono-VariableFont_wght", size: 22))
-                .foregroundColor(theme.textColor)
-                .baselineOffset(-3)
+            // Text(format(timer.remainingTime))
+            //     .font(.custom("RobotoMono-VariableFont_wght", size: 22))
+            //     .foregroundColor(theme.textColor)
+            //     .baselineOffset(-3)
 
-            Spacer()
+            // Spacer()
 
             Button(action: onAdd) {
                 Image(systemName: "plus.circle.fill")
-                    .font(.system(size: 18))
+                    .font(.system(size: 16))
                     .foregroundColor(theme.textColor.opacity(0.7))
             }
             .buttonStyle(.plain)
 
             Button(action: onShowCompleted) {
                 Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 18))
+                    .font(.system(size: 16))
                     .foregroundColor(theme.textColor.opacity(0.7))
             }
             .buttonStyle(.plain)
+
+            Spacer()
+
+        // Timer rata KANAN
+            Text(format(timer.remainingTime))
+            .font(.custom("RobotoMono-VariableFont_wght", size: 20))  // ⬅ dari 22 → 20
+            .foregroundColor(theme.textColor)
+            .baselineOffset(-2)  // ⬅ dari -3 → -2
         }
         .padding(.horizontal, 12)
-        .padding(.top, 6)
+        .padding(.vertical, 6)
     }
 
     private func compactItemView(_ item: TodoItem) -> some View {

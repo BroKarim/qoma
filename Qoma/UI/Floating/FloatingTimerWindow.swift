@@ -64,7 +64,7 @@ struct FloatingTimerView: View {
                 )
 
         case .featureExpanded(let ext):
-            ext.expandedView(theme: theme)
+            ext.expandedView(theme: theme, onCollapse: { self.collapse() })
                 .contentShape(Rectangle())
                 .simultaneousGesture(
                     TapGesture().onEnded { self.resetCollapseTimer() }
@@ -167,6 +167,14 @@ struct FloatingTimerView: View {
             requestedSize = currentLayoutMode.contentSize
         }
         scheduleCollapse()
+    }
+
+    private func collapse() {
+        collapseWorkItem?.cancel()
+        withAnimation(.easeInOut(duration: 0.25)) {
+            isExpanded = false
+            requestedSize = currentLayoutMode.contentSize
+        }
     }
 
     private func notifySizeChange() {

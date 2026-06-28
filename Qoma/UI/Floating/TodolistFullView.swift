@@ -6,6 +6,7 @@ struct TodolistFullView: View {
     @Binding var todoItems: [TodoItem]
     let onAdd: () -> Void
     let theme: FloatingTheme
+    let onCollapse: () -> Void
 
     @State private var newItemText: String = ""
     @State private var showingCompleted: Bool = false
@@ -28,38 +29,40 @@ struct TodolistFullView: View {
         }
     }
 
-    private var topBar: some View {
-        HStack(spacing: 10) {
-            Spacer()
-
-            Text(format(timer.remainingTime))
-                .font(.custom("RobotoMono-VariableFont_wght", size: 22))
-                .foregroundColor(theme.textColor)
-                .baselineOffset(-3)
-
-            Spacer()
-
-            Button(action: { clearCompleted() }, label: {
-                Image(systemName: "plus.circle.fill")
-                    .font(.system(size: 18))
-                    .foregroundColor(theme.textColor.opacity(0.7))
-            })
-            .buttonStyle(.plain)
-
-            Button(action: { showingCompleted.toggle() }, label: {
-                Image(systemName: showingCompleted ? "checkmark.circle.fill" : "checkmark.circle")
-                    .font(.system(size: 18))
-                    .foregroundColor(
-                        showingCompleted
-                            ? .green
-                            : theme.textColor.opacity(0.7)
-                    )
-            })
-            .buttonStyle(.plain)
+   private var topBar: some View {
+    HStack(spacing: 10) {
+        // Icons rata KIRI
+        Button(action: { clearCompleted() }) {
+            Image(systemName: "plus.circle.fill")
+                .font(.system(size: 16))
+                .foregroundColor(theme.textColor.opacity(0.7))
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 6)
+        .buttonStyle(.plain)
+
+        Button(action: { showingCompleted.toggle() }) {
+            Image(systemName: showingCompleted ? "checkmark.circle.fill" : "checkmark.circle")
+                .font(.system(size: 16))
+                .foregroundColor(
+                    showingCompleted ? .green : theme.textColor.opacity(0.7)
+                )
+        }
+        .buttonStyle(.plain)
+
+        Spacer()
+
+        // Timer rata KANAN
+        Text(format(timer.remainingTime))
+            .font(.custom("RobotoMono-VariableFont_wght", size: 20))
+            .foregroundColor(theme.textColor)
+            .baselineOffset(-2)
     }
+    .padding(.horizontal, 12)
+    .padding(.vertical, 6)
+    .contentShape(Rectangle())
+    .onTapGesture {
+        onCollapse()
+    }
+}
 
     private var addField: some View {
         HStack(spacing: 8) {
@@ -67,6 +70,9 @@ struct TodolistFullView: View {
                 .textFieldStyle(.plain)
                 .font(.qoma(size: 13, weight: .regular))
                 .foregroundColor(theme.textColor)
+                .onSubmit {
+                    addItem()
+                }
 
             if !newItemText.isEmpty {
                 Button(action: addItem) {
@@ -82,25 +88,25 @@ struct TodolistFullView: View {
     }
 
     private var checklist: some View {
-        let visibleItems = showingCompleted
-            ? todoItems.filter { $0.isCompleted && $0.isCompletedToday }
-            : todoItems.filter { !$0.isCompleted }
+    let visibleItems = showingCompleted
+        ? todoItems.filter { $0.isCompleted && $0.isCompletedToday }
+        : todoItems.filter { !$0.isCompleted }
 
-        return ScrollView(showsIndicators: true) {
-            LazyVStack(spacing: 2) {
-                if visibleItems.isEmpty {
-                    emptyMessage
-                } else {
-                    ForEach(Array(visibleItems.enumerated()), id: \.element.id) { index, item in
-                        todoRow(item, at: index)
-                    }
+    return ScrollView(showsIndicators: false) {
+        LazyVStack(spacing: 2) {
+            if visibleItems.isEmpty {
+                emptyMessage
+            } else {
+                ForEach(Array(visibleItems.enumerated()), id: \.element.id) { index, item in
+                    todoRow(item, at: index)
                 }
             }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
         }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
         .frame(maxHeight: maxListHeight(visibleItems.count))
     }
+}
 
     private var emptyMessage: some View {
         Text(showingCompleted ? "No tasks completed today." : "No tasks. Tap + to add one.")

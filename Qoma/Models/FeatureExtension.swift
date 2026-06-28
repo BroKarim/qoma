@@ -18,7 +18,10 @@ protocol FeatureExtension: Identifiable {
     ) -> AnyView
 
     @ViewBuilder
-    func expandedView(theme: FloatingTheme) -> AnyView
+    func expandedView(
+        theme: FloatingTheme,
+        onCollapse: @escaping () -> Void
+    ) -> AnyView
 
     @ViewBuilder
     func analyticsSection() -> AnyView?
