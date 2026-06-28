@@ -15,6 +15,8 @@ struct FloatingTimerView: View {
     @State private var isExpanded: Bool = true
     @State private var collapseWorkItem: DispatchWorkItem?
     @State private var requestedSize: CGSize = FloatingLayoutMode.timerOnly.contentSize
+    @State private var isTextFieldFocused: Bool = false
+    @GestureState private var isPressed: Bool = false
 
     var body: some View {
         let theme = self.selectedTheme
@@ -27,11 +29,26 @@ struct FloatingTimerView: View {
             .frame(width: currentLayout.contentSize.width, height: currentLayout.contentSize.height)
             .background(self.panelBackground(theme: theme, opacity: clampedOpacity))
             .clipShape(RoundedRectangle(cornerRadius: 18))
+            .scaleEffect(self.isPressed ? 1.02 : 1.0)
+            .animation(.easeInOut(duration: 0.15), value: self.isPressed)
             .animation(.easeInOut(duration: 0.2), value: self.floatingOpacity)
             .animation(.easeInOut(duration: 0.25), value: self.isExpanded)
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 0)
+                    .updating(self.$isPressed) { _, state, _ in
+                        state = true
+                    }
+            )
             .onAppear { self.viewAppeared() }
             .onDisappear { self.collapseWorkItem?.cancel() }
             .onChange(of: self.isExpanded) { _ in self.scheduleCollapse() }
+            .onChange(of: self.isTextFieldFocused) { focused in
+                if focused {
+                    self.collapseWorkItem?.cancel()
+                } else {
+                    self.scheduleCollapse()
+                }
+            }
             .onChange(of: self.extensionManager.activeExtension?.id) { _ in
                 self.collapseWorkItem?.cancel()
                 self.isExpanded = true
@@ -64,7 +81,11 @@ struct FloatingTimerView: View {
                 )
 
         case .featureExpanded(let ext):
-            ext.expandedView(theme: theme, onCollapse: { self.collapse() })
+            ext.expandedView(
+                theme: theme,
+                onCollapse: { self.collapse() },
+                onFocusChange: { self.isTextFieldFocused = $0 }
+            )
                 .contentShape(Rectangle())
                 .simultaneousGesture(
                     TapGesture().onEnded { self.resetCollapseTimer() }

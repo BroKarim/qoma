@@ -47,9 +47,14 @@ struct TodolistExtension: FeatureExtension {
 
     func expandedView(
         theme: FloatingTheme,
-        onCollapse: @escaping () -> Void
+        onCollapse: @escaping () -> Void,
+        onFocusChange: @escaping (Bool) -> Void
     ) -> AnyView {
-        AnyView(TodolistExtensionExpandedView(theme: theme, onCollapse: onCollapse))
+        AnyView(TodolistExtensionExpandedView(
+            theme: theme,
+            onCollapse: onCollapse,
+            onFocusChange: onFocusChange
+        ))
     }
 
     func analyticsSection() -> AnyView? {
@@ -82,6 +87,7 @@ private struct TodolistExtensionExpandedView: View {
     @State private var todoItems: [TodoItem] = []
     let theme: FloatingTheme
     let onCollapse: () -> Void
+    let onFocusChange: (Bool) -> Void
 
     private let store = AnalyticsStore.shared
 
@@ -90,7 +96,8 @@ private struct TodolistExtensionExpandedView: View {
             todoItems: $todoItems,
             onAdd: {},
             theme: theme,
-            onCollapse: onCollapse
+            onCollapse: onCollapse,
+            onFocusChange: onFocusChange
         )
         .onAppear {
             todoItems = store.loadTodoItems()

@@ -20,7 +20,8 @@ protocol FeatureExtension: Identifiable {
     @ViewBuilder
     func expandedView(
         theme: FloatingTheme,
-        onCollapse: @escaping () -> Void
+        onCollapse: @escaping () -> Void,
+        onFocusChange: @escaping (Bool) -> Void
     ) -> AnyView
 
     @ViewBuilder

@@ -7,9 +7,11 @@ struct TodolistFullView: View {
     let onAdd: () -> Void
     let theme: FloatingTheme
     let onCollapse: () -> Void
+    let onFocusChange: (Bool) -> Void
 
     @State private var newItemText: String = ""
     @State private var showingCompleted: Bool = false
+    @FocusState private var isTextFieldFocused: Bool
 
     private let store = AnalyticsStore.shared
 
@@ -26,6 +28,9 @@ struct TodolistFullView: View {
                 .background(theme.borderColor)
 
             checklist
+        }
+        .onChange(of: isTextFieldFocused) { newValue in
+            onFocusChange(newValue)
         }
     }
 
@@ -67,6 +72,7 @@ struct TodolistFullView: View {
     private var addField: some View {
         HStack(spacing: 8) {
             TextField("Add a task...", text: $newItemText)
+                .focused($isTextFieldFocused)
                 .textFieldStyle(.plain)
                 .font(.qoma(size: 13, weight: .regular))
                 .foregroundColor(theme.textColor)
