@@ -7,6 +7,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
     case general
     case appearance
     case analytics
+    case extensions
 
     var id: Self { self }
 
@@ -15,6 +16,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
         case .general: "General"
         case .appearance: "Appearance"
         case .analytics: "Analytics"
+        case .extensions: "Extensions"
         }
     }
 
@@ -23,6 +25,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
         case .general: "gearshape"
         case .appearance: "swatchpalette"
         case .analytics: "chart.bar.xaxis"
+        case .extensions: "puzzlepiece.extension"
         }
     }
 }
@@ -117,6 +120,8 @@ struct SettingsView: View {
                 AppearanceSettingsPane()
             case .analytics:
                 AnalyticsDashboardView()
+            case .extensions:
+                ExtensionsSettingsPane()
             case nil:
                 Color.qomaBackground
             }

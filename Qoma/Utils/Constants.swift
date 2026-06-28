@@ -123,4 +123,15 @@ enum AnalyticsSettings {
             set { UserDefaults.standard.set(newValue, forKey: analyticsEnabledKey) }
         }
     }
+
+    enum ExtensionSettings {
+        static let todolistEnabledKey = "ext.todolist.enabled"
+        static let defaultTodolistEnabled = false
+
+        static let collapsedStateHeight: CGFloat = 62
+        static let expandedStateMinHeight: CGFloat = 140
+        static let extendedWidth: CGFloat = 340
+        static let collapsedTimeout: TimeInterval = 3.0
+        static let maxVisibleInCollapsed = 10
+    }
 }

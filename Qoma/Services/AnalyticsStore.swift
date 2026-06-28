@@ -91,6 +91,44 @@ final class AnalyticsStore {
         Logger.store.debug("appendWebsiteVisits — total saved: \(existing.count) records")
     }
 
+    // MARK: - Todo Items
+
+    private static let todoItemsFile = "todo-items.json"
+
+    func loadTodoItems() -> [TodoItem] {
+        load(from: Self.todoItemsFile) ?? []
+    }
+
+    func saveTodoItems(_ items: [TodoItem]) {
+        save(items, to: Self.todoItemsFile)
+    }
+
+    func appendTodoItem(_ item: TodoItem) {
+        var items = loadTodoItems()
+        items.append(item)
+        saveTodoItems(items)
+    }
+
+    func updateTodoItem(_ item: TodoItem) {
+        var items = loadTodoItems()
+        if let index = items.firstIndex(where: { $0.id == item.id }) {
+            items[index] = item
+        } else {
+            items.append(item)
+        }
+        saveTodoItems(items)
+    }
+
+    func deleteTodoItem(_ item: TodoItem) {
+        var items = loadTodoItems()
+        items.removeAll { $0.id == item.id }
+        saveTodoItems(items)
+    }
+
+    func reorderTodoItems(_ items: [TodoItem]) {
+        saveTodoItems(items)
+    }
+
     // MARK: - Prune
 
     func pruneOldData() {

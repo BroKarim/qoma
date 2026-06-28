@@ -7,6 +7,9 @@ struct AnalyticsDashboardView: View {
     @State private var dashboardState: DashboardState = .loading
     @State private var selectedDay = Calendar.current.startOfDay(for: Date())
 
+    @AppStorage(AppConstants.ExtensionSettings.todolistEnabledKey)
+    private var todolistEnabled: Bool = AppConstants.ExtensionSettings.defaultTodolistEnabled
+
     init(usePreviewData: Bool = false) {
         self.usePreviewData = usePreviewData
     }
@@ -64,6 +67,10 @@ struct AnalyticsDashboardView: View {
                 date: self.selectedDay,
                 apps: self.selectedDayApps(in: data),
                 domains: self.selectedDayDomains(in: data))
+
+            if self.todolistEnabled {
+                self.todoAnalyticsSection(data: data)
+            }
         }
     }
 
@@ -151,13 +158,88 @@ struct AnalyticsDashboardView: View {
                                 session: session,
                                 appHighlights: self.topApps(for: session, in: data),
                                 websiteHighlights: self.topDomains(for: session, in: data))
-                        }
                     }
                 }
             }
         }
     }
     */
+
+    @ViewBuilder
+    private func todoAnalyticsSection(data: AnalyticsDashboardData) -> some View {
+        let todoItems = AnalyticsStore.shared.loadTodoItems()
+        let completedToday = todoItems.filter { $0.isCompletedToday }
+        let pending = todoItems.filter { !$0.isCompleted }
+        let completionRate: Double = todoItems.isEmpty
+            ? 0
+            : Double(todoItems.filter(\.isCompleted).count) / Double(todoItems.count)
+
+        SettingsSurfaceCard {
+            VStack(alignment: .leading, spacing: 16) {
+                SettingsSectionHeading(
+                    title: "Todolist",
+                    subtitle: "Task completion and focus time by task for "
+                        + "\(Self.selectedDayFormatter.string(from: self.selectedDay)).")
+
+                if todoItems.isEmpty {
+                    Text("No tasks yet. Add tasks from the floating timer panel.")
+                        .font(.qomaSubheadline)
+                        .foregroundColor(.secondary)
+                } else {
+                    HStack(spacing: 16) {
+                        OverviewStatCard(
+                            title: "Completion",
+                            value: "\(Int(completionRate * 100))%",
+                            icon: "checkmark.circle.fill",
+                            color: .green)
+
+                        OverviewStatCard(
+                            title: "Done Today",
+                            value: "\(completedToday.count)",
+                            icon: "calendar.badge.checkmark",
+                            color: .blue)
+
+                        OverviewStatCard(
+                            title: "Pending",
+                            value: "\(pending.count)",
+                            icon: "circle",
+                            color: .orange)
+
+                        OverviewStatCard(
+                            title: "Total Tasks",
+                            value: "\(todoItems.count)",
+                            icon: "list.bullet",
+                            color: .purple)
+                    }
+
+                    if !completedToday.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Completed Today")
+                                .font(.qoma(size: 12, weight: .semibold))
+                                .foregroundColor(.secondary)
+
+                            let sorted = completedToday.sorted(by: {
+                                ($0.completedAt ?? .distantPast) > ($1.completedAt ?? .distantPast)
+                            })
+                            ForEach(sorted) { item in
+                                HStack(spacing: 8) {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.green)
+                                    Text(item.title)
+                                        .font(.qoma(size: 13, weight: .regular))
+                                        .foregroundColor(.primary)
+                                        .strikethrough()
+                                    Spacer()
+                                }
+                                .padding(.vertical, 4)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     private func loadData() {
         let data = self.usePreviewData ? self.makePreviewData() : self.makeStoredData()

@@ -14,9 +14,11 @@ final class WindowManager: ObservableObject {
 
         self.objectWillChange.send()
 
-        let contentSize = CGSize(
-            width: AppConstants.FloatingLayoutSettings.timerOnlyWidth,
-            height: AppConstants.FloatingLayoutSettings.timerOnlyHeight)
+        let todolistEnabled = UserDefaults.standard.bool(forKey: AppConstants.ExtensionSettings.todolistEnabledKey)
+        let layout = todolistEnabled
+            ? FloatingLayoutMode.todolistExpanded
+            : FloatingLayoutMode.timerOnly
+        let contentSize = layout.contentSize
 
         let contentView = FloatingTimerView()
 
@@ -56,14 +58,19 @@ final class WindowManager: ObservableObject {
 
 
     func updateFloatingSize() {
+        let todolistEnabled = UserDefaults.standard.bool(forKey: AppConstants.ExtensionSettings.todolistEnabledKey)
+        let layout = todolistEnabled
+            ? FloatingLayoutMode.todolistExpanded
+            : FloatingLayoutMode.timerOnly
+        updateFloatingSize(to: layout.contentSize)
+    }
+
+    func updateFloatingSize(to contentSize: CGSize) {
         guard let window = floatingWindow else { return }
-        let size = CGSize(
-            width: AppConstants.FloatingLayoutSettings.timerOnlyWidth,
-            height: AppConstants.FloatingLayoutSettings.timerOnlyHeight)
 
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.2
-            window.animator().setContentSize(size)
+            window.animator().setContentSize(contentSize)
         }
     }
 }
