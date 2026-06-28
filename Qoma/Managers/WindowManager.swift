@@ -2,6 +2,16 @@ import Cocoa
 import Combine
 import SwiftUI
 
+private final class FloatingPanel: NSPanel {
+    override var canBecomeKey: Bool {
+        true
+    }
+
+    override var canBecomeMain: Bool {
+        false
+    }
+}
+
 @MainActor
 final class WindowManager: ObservableObject {
     static let shared = WindowManager()
@@ -22,7 +32,7 @@ final class WindowManager: ObservableObject {
 
         let contentView = FloatingTimerView()
 
-        let window = NSPanel(
+        let window = FloatingPanel(
             contentRect: NSRect(x: 100, y: 600, width: contentSize.width, height: contentSize.height),
             styleMask: [.borderless, .nonactivatingPanel, .fullSizeContentView],
             backing: .buffered,
@@ -44,6 +54,7 @@ final class WindowManager: ObservableObject {
         // Hosting View
         window.contentView = NSHostingView(rootView: contentView)
         window.orderFrontRegardless()
+        window.makeKey()
 
         self.floatingWindow = window
     }
