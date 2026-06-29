@@ -66,7 +66,7 @@ struct AnalyticsDashboardView: View {
                 apps: self.selectedDayApps(in: data),
                 domains: self.selectedDayDomains(in: data))
 
-            if let ext = self.extensionManager.activeExtension, let analytics = ext.analyticsSection() {
+            if let ext = self.extensionManager.activeExtension, let analytics = ext.analyticsSection(selectedDay: self.selectedDay) {
                 analytics
             }
         }

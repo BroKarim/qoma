@@ -30,8 +30,12 @@ struct TodoItem: Identifiable, Codable, Hashable {
         self.sessionID = sessionID
     }
 
-    var isCompletedToday: Bool {
+    func isCompleted(on day: Date) -> Bool {
         guard isCompleted, let completedAt else { return false }
-        return Calendar.current.isDate(completedAt, inSameDayAs: Date())
+        return Calendar.current.isDate(completedAt, inSameDayAs: day)
+    }
+
+    var isCompletedToday: Bool {
+        isCompleted(on: Date())
     }
 }

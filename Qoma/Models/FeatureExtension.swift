@@ -25,5 +25,5 @@ protocol FeatureExtension: Identifiable {
     ) -> AnyView
 
     @ViewBuilder
-    func analyticsSection() -> AnyView?
+    func analyticsSection(selectedDay: Date) -> AnyView?
 }

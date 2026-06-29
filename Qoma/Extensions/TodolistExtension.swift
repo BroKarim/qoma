@@ -57,23 +57,21 @@ struct TodolistExtension: FeatureExtension {
         ))
     }
 
-    func analyticsSection() -> AnyView? {
-        AnyView(TodolistAnalyticsSection())
+    func analyticsSection(selectedDay: Date) -> AnyView? {
+        AnyView(TodolistAnalyticsSection(selectedDay: selectedDay))
     }
 }
 
 private struct TodolistExtensionCollapsedView: View {
-    @State private var todoItems: [TodoItem] = []
+    @ObservedObject private var todoStore = TodoStore.shared
     let theme: FloatingTheme
     let onTap: () -> Void
 
     @Environment(\.shouldStartDraft) private var shouldStartDraft
 
-    private let store = AnalyticsStore.shared
-
     var body: some View {
         TodolistCompactBar(
-            todoItems: $todoItems,
+            todoItems: $todoStore.items,
             onAdd: {
                 shouldStartDraft.wrappedValue = true
                 onTap()
@@ -82,42 +80,34 @@ private struct TodolistExtensionCollapsedView: View {
             theme: theme,
             onTap: onTap
         )
-        .onAppear {
-            todoItems = store.loadTodoItems()
-        }
     }
 }
 
 private struct TodolistExtensionExpandedView: View {
-    @State private var todoItems: [TodoItem] = []
+    @ObservedObject private var todoStore = TodoStore.shared
     let theme: FloatingTheme
     let onCollapse: () -> Void
     let onFocusChange: (Bool) -> Void
 
-    private let store = AnalyticsStore.shared
-
     var body: some View {
         TodolistFullView(
-            todoItems: $todoItems,
+            todoItems: $todoStore.items,
             onAdd: {},
             theme: theme,
             onCollapse: onCollapse,
             onFocusChange: onFocusChange
         )
-        .onAppear {
-            todoItems = store.loadTodoItems()
-        }
     }
 }
 
 private struct TodolistAnalyticsSection: View {
+    @ObservedObject private var todoStore = TodoStore.shared
+    let selectedDay: Date
+
     var body: some View {
-        let todoItems = AnalyticsStore.shared.loadTodoItems()
-        let completedToday = todoItems.filter { $0.isCompletedToday }
-        let pending = todoItems.filter { !$0.isCompleted }
-        let completionRate: Double = todoItems.isEmpty
-            ? 0
-            : Double(todoItems.filter(\.isCompleted).count) / Double(todoItems.count)
+        let items = todoStore.items
+        let doneToday = items.filter { $0.isCompleted(on: selectedDay) }
+        let totalToday = items.filter { Calendar.current.isDate($0.createdAt, inSameDayAs: selectedDay) }
 
         SettingsSurfaceCard {
             VStack(alignment: .leading, spacing: 16) {
@@ -125,44 +115,44 @@ private struct TodolistAnalyticsSection: View {
                     title: "Todolist",
                     subtitle: "Task completion and focus time by task for today.")
 
-                if todoItems.isEmpty {
-                    Text("No tasks yet. Add tasks from the floating timer panel.")
+                if totalToday.isEmpty {
+                    Text("No tasks created on this day.")
                         .font(.qomaSubheadline)
                         .foregroundColor(.secondary)
                 } else {
                     HStack(spacing: 16) {
                         OverviewStatCard(
                             title: "Completion",
-                            value: "\\(Int(completionRate * 100))%",
+                            value: "\(totalToday.isEmpty ? 0 : Int(min(1.0, Double(doneToday.count) / Double(totalToday.count)) * 100))%",
                             icon: "checkmark.circle.fill",
                             color: .green)
 
                         OverviewStatCard(
                             title: "Done Today",
-                            value: "\\(completedToday.count)",
+                            value: "\(doneToday.count)",
                             icon: "calendar.badge.checkmark",
                             color: .blue)
 
                         OverviewStatCard(
                             title: "Pending",
-                            value: "\\(pending.count)",
+                            value: "\(totalToday.filter { !$0.isCompleted }.count)",
                             icon: "circle",
                             color: .orange)
 
                         OverviewStatCard(
                             title: "Total Tasks",
-                            value: "\\(todoItems.count)",
+                            value: "\(totalToday.count)",
                             icon: "list.bullet",
                             color: .purple)
                     }
 
-                    if !completedToday.isEmpty {
+                    if !doneToday.isEmpty {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Completed Today")
                                 .font(.qoma(size: 12, weight: .semibold))
                                 .foregroundColor(.secondary)
 
-                            let sorted = completedToday.sorted(by: {
+                            let sorted = doneToday.sorted(by: {
                                 ($0.completedAt ?? .distantPast) > ($1.completedAt ?? .distantPast)
                             })
                             ForEach(sorted) { item in
