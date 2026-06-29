@@ -9,11 +9,12 @@ struct TodolistFullView: View {
     let onCollapse: () -> Void
     let onFocusChange: (Bool) -> Void
 
-    @State private var newItemText: String = ""
     @State private var showingCompleted: Bool = false
-    @FocusState private var isTextFieldFocused: Bool
-
     @State private var draggedItemID: UUID?
+    @State private var editingBackup: String?
+    @State private var draftItemID: UUID?
+    @State private var lastFocusedID: UUID?
+    @FocusState private var focusedField: UUID?
     @GestureState private var dragOffset: CGSize = .zero
 
     private let dragRowHeight: CGFloat = 38
@@ -27,22 +28,25 @@ struct TodolistFullView: View {
             Divider()
                 .background(theme.borderColor)
 
-            addField
-
-            Divider()
-                .background(theme.borderColor)
-
             checklist
         }
-        .onChange(of: isTextFieldFocused) { newValue in
-            onFocusChange(newValue)
+        .onChange(of: focusedField) { newValue in
+            if let prev = lastFocusedID, newValue == nil {
+                if editingBackup != nil {
+                    commitEdit(id: prev)
+                }
+                lastFocusedID = nil
+            } else if let id = newValue {
+                lastFocusedID = id
+            }
+            onFocusChange(newValue != nil)
         }
     }
 
    private var topBar: some View {
     HStack(spacing: 10) {
         // Icons rata KIRI
-        Button(action: { clearCompleted() }) {
+        Button(action: startNewDraft) {
             Image(systemName: "plus.circle.fill")
                 .font(.system(size: 16))
                 .foregroundColor(theme.textColor.opacity(0.7))
@@ -74,30 +78,6 @@ struct TodolistFullView: View {
     }
 }
 
-    private var addField: some View {
-        HStack(spacing: 8) {
-            TextField("Add a task...", text: $newItemText)
-                .focused($isTextFieldFocused)
-                .textFieldStyle(.plain)
-                .font(.qoma(size: 13, weight: .regular))
-                .foregroundColor(theme.textColor)
-                .onSubmit {
-                    addItem()
-                }
-
-            if !newItemText.isEmpty {
-                Button(action: addItem) {
-                    Text("Add")
-                        .font(.qoma(size: 12, weight: .semibold))
-                        .foregroundColor(.accentColor)
-                }
-                .buttonStyle(.plain)
-            }
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-    }
-
     private var checklist: some View {
     let visibleItems = showingCompleted
         ? todoItems.filter { $0.isCompleted && $0.isCompletedToday }
@@ -108,8 +88,8 @@ struct TodolistFullView: View {
             if visibleItems.isEmpty {
                 emptyMessage
             } else {
-                ForEach(Array(visibleItems.enumerated()), id: \.element.id) { index, item in
-                    todoRow(item, at: index)
+                ForEach(visibleItems, id: \.id) { item in
+                    todoRow(item)
                         .scaleEffect(draggedItemID == item.id ? 1.05 : 1.0)
                         .shadow(
                             color: Color.black.opacity(draggedItemID == item.id ? 0.35 : 0),
@@ -119,7 +99,7 @@ struct TodolistFullView: View {
                         )
                         .offset(y: verticalOffset(for: item))
                         .zIndex(draggedItemID == item.id ? 1 : 0)
-                        .gesture(dragGesture(for: item))
+                        .gesture(focusedField == item.id ? nil : dragGesture(for: item))
                         .animation(.spring(response: 0.3, dampingFraction: 0.75), value: draggedItemID)
                 }
             }
@@ -190,26 +170,42 @@ private func dragGesture(for item: TodoItem) -> some Gesture {
             .frame(maxWidth: .infinity)
     }
 
-    private func todoRow(_ item: TodoItem, at index: Int) -> some View {
+    private func todoRow(_ item: TodoItem) -> some View {
         HStack(spacing: 8) {
-            Button(action: { toggleComplete(item) }, label: {
+            Button(action: { toggleComplete(item) }) {
                 Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: 15))
                     .foregroundColor(item.isCompleted ? .green : theme.secondaryTextColor)
-            })
+            }
             .buttonStyle(.plain)
 
-            Text(item.title)
-                .font(.qoma(size: 13, weight: .medium))
-                .foregroundColor(
-                    item.isCompleted ? theme.secondaryTextColor.opacity(0.5) : theme.textColor
-                )
-                .strikethrough(item.isCompleted)
-                .lineLimit(2)
+            // ⬅ TextField selalu ada di view tree, visibility dikontrol opacity
+            ZStack(alignment: .leading) {
+                // Placeholder / display text saat tidak editing
+                if focusedField != item.id {
+                    Text(item.title.isEmpty ? " " : item.title)
+                        .font(.qoma(size: 13, weight: .medium))
+                        .foregroundColor(
+                            item.isCompleted ? theme.secondaryTextColor.opacity(0.5) : theme.textColor
+                        )
+                        .strikethrough(item.isCompleted)
+                        .lineLimit(2)
+                }
+
+                // TextField selalu ada agar .focused bisa bekerja
+                TextField("", text: bindingForTitle(item))
+                    .textFieldStyle(.plain)
+                    .font(.qoma(size: 13, weight: .medium))
+                    .foregroundColor(theme.textColor)
+                    .focused($focusedField, equals: item.id)
+                    .onSubmit { commitEdit() }
+                    .onExitCommand { cancelEdit() }
+                    .opacity(focusedField == item.id ? 1 : 0)  // ⬅ invisible tapi tetap di tree
+            }
 
             Spacer()
 
-            if !item.isCompleted {
+            if focusedField != item.id && !item.isCompleted {
                 Image(systemName: "line.3.horizontal")
                     .font(.system(size: 11))
                     .foregroundColor(theme.secondaryTextColor.opacity(0.4))
@@ -219,13 +215,28 @@ private func dragGesture(for item: TodoItem) -> some Gesture {
         .padding(.vertical, 6)
         .background(
             RoundedRectangle(cornerRadius: 6)
-                .fill(Color.white.opacity(0.03))
+                .fill(Color.white.opacity(focusedField == item.id ? 0.06 : 0.03))
         )
-        .contextMenu {
-            Button("Delete") {
-                deleteItem(item)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            if !item.isCompleted && focusedField != item.id {
+                startEdit(item)
             }
         }
+        .contextMenu {
+            Button("Delete") { deleteItem(item) }
+        }
+    }
+
+    private func bindingForTitle(_ item: TodoItem) -> Binding<String> {
+        Binding(
+            get: { item.title },
+            set: { newValue in
+                if let index = todoItems.firstIndex(where: { $0.id == item.id }) {
+                    todoItems[index].title = newValue
+                }
+            }
+        )
     }
 
     private func maxListHeight(_ itemCount: Int) -> CGFloat {
@@ -236,20 +247,91 @@ private func dragGesture(for item: TodoItem) -> some Gesture {
         return min(maxHeight, max(minHeight, calculated))
     }
 
-    private func addItem() {
-        let trimmed = newItemText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
+    private func startEdit(_ item: TodoItem) {
+        guard focusedField != item.id else { return }
+        editingBackup = item.title
+
+        // ⬅ delay agar TextField sudah ada di view tree
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            self.focusedField = item.id
+    }
+}
+
+    private func commitEdit() {
+        commitEdit(id: focusedField)
+    }
+
+    private func commitEdit(id targetID: UUID?) {
+        guard let id = targetID,
+              let index = todoItems.firstIndex(where: { $0.id == id }) else {
+            editingBackup = nil
+            focusedField = nil
+            return
+        }
+        let item = todoItems[index]
+        let trimmed = item.title.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if id == draftItemID {
+            if trimmed.isEmpty {
+                todoItems.remove(at: index)
+            } else {
+                var saved = item
+                saved.title = trimmed
+                todoItems[index] = saved
+                store.appendTodoItem(saved)
+            }
+            draftItemID = nil
+        } else {
+            if trimmed.isEmpty {
+                todoItems[index].title = editingBackup ?? ""
+            } else {
+                var updated = item
+                updated.title = trimmed
+                todoItems[index] = updated
+                store.updateTodoItem(updated)
+            }
+        }
+        editingBackup = nil
+        focusedField = nil
+    }
+
+    private func cancelEdit() {
+        guard let id = focusedField,
+              let index = todoItems.firstIndex(where: { $0.id == id }) else {
+            focusedField = nil
+            return
+        }
+
+        if id == draftItemID {
+            todoItems.remove(at: index)
+            draftItemID = nil
+        } else if let backup = editingBackup {
+            todoItems[index].title = backup
+        }
+        editingBackup = nil
+        focusedField = nil
+    }
+
+    private func startNewDraft() {
+        if let draftID = draftItemID,
+        todoItems.contains(where: { $0.id == draftID }) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                self.focusedField = draftID
+            }
+            return
+        }
 
         let maxOrder = todoItems.map(\.sortOrder).max() ?? 0
-        let item = TodoItem(
-            title: trimmed,
-            sortOrder: maxOrder + 1
-        )
+        let draft = TodoItem(title: "", sortOrder: maxOrder + 1)
+        todoItems.append(draft)
+        draftItemID = draft.id
+        editingBackup = ""
 
-        todoItems.append(item)
-        store.appendTodoItem(item)
-        newItemText = ""
-    }
+        // ⬅ delay agar SwiftUI sempat render row baru dulu
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            self.focusedField = draft.id
+        }
+}
 
     private func toggleComplete(_ item: TodoItem) {
         guard let index = todoItems.firstIndex(where: { $0.id == item.id }) else { return }
@@ -264,14 +346,6 @@ private func dragGesture(for item: TodoItem) -> some Gesture {
     private func deleteItem(_ item: TodoItem) {
         todoItems.removeAll { $0.id == item.id }
         store.deleteTodoItem(item)
-    }
-
-    private func clearCompleted() {
-        let completed = todoItems.filter { $0.isCompleted }
-        for item in completed {
-            store.deleteTodoItem(item)
-        }
-        todoItems.removeAll { $0.isCompleted }
     }
 
     private func format(_ time: TimeInterval) -> String {
