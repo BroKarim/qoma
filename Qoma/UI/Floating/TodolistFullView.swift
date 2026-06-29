@@ -14,7 +14,7 @@ struct TodolistFullView: View {
     @State private var editingBackup: String?
     @State private var draftItemID: UUID?
     @State private var lastFocusedID: UUID?
-    @State private var completingItemIDs: Set<UUID> = []
+    @State private var pendingExit: Set<UUID> = []
     @State private var reorderingItemID: UUID? = nil
     @FocusState private var focusedField: UUID?
     @GestureState private var dragOffset: CGSize = .zero
@@ -41,8 +41,18 @@ struct TodolistFullView: View {
             } else if let id = newValue {
                 lastFocusedID = id
             }
-            onFocusChange(newValue != nil)
+            onFocusChange(isEngaged)
         }
+        .onChange(of: draggedItemID) { _ in
+            onFocusChange(isEngaged)
+        }
+        .onChange(of: reorderingItemID) { _ in
+            onFocusChange(isEngaged)
+        }
+    }
+
+    private var isEngaged: Bool {
+        focusedField != nil || draggedItemID != nil || reorderingItemID != nil
     }
 
    private var topBar: some View {
@@ -82,8 +92,8 @@ struct TodolistFullView: View {
 
     private var checklist: some View {
         let visibleItems = showingCompleted
-            ? todoItems.filter { $0.isCompleted && $0.isCompletedToday }
-            : todoItems.filter { !$0.isCompleted }
+            ? todoItems.filter { $0.isCompleted && $0.isCompletedToday && !pendingExit.contains($0.id) }
+            : todoItems.filter { !$0.isCompleted || pendingExit.contains($0.id) }
 
         return ScrollView(showsIndicators: false) {
             LazyVStack(spacing: 2) {
@@ -101,7 +111,8 @@ struct TodolistFullView: View {
                             )
                             .offset(y: verticalOffset(for: item))
                             .zIndex(draggedItemID == item.id ? 1 : 0)
-                            .gesture(focusedField == item.id ? nil : dragGesture(for: item))
+                            .gesture((focusedField == item.id || item.isCompleted) ? nil : dragGesture(for: item))
+                            .transition(.opacity.combined(with: .move(edge: .trailing)))
                             .animation(.spring(response: 0.3, dampingFraction: 0.75), value: draggedItemID)
                     }
                 }
@@ -176,19 +187,14 @@ private func verticalOffset(for item: TodoItem) -> CGFloat {
 
 
     private func todoRow(_ item: TodoItem) -> some View {
-            let isCompleting = completingItemIDs.contains(item.id)
             let isReordering = reorderingItemID == item.id
 
             return HStack(spacing: 8) {
-                Button(action: { 
-                    if !completingItemIDs.contains(item.id) {
-                        toggleComplete(item) 
-                    }
-                }) {
-                    Image(systemName: isCompleting ? "checkmark.circle.fill" : "circle")
+                Button(action: { toggleComplete(item) }) {
+                    Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
                         .font(.system(size: 15))
-                        .foregroundColor(isCompleting ? .green : theme.secondaryTextColor)
-                        .animation(.easeInOut(duration: 0.2), value: isCompleting)
+                        .foregroundColor(item.isCompleted ? .green : theme.secondaryTextColor)
+                        .animation(.easeInOut(duration: 0.2), value: item.isCompleted)
                 }
                 .buttonStyle(.plain)
 
@@ -197,13 +203,13 @@ private func verticalOffset(for item: TodoItem) -> CGFloat {
                         Text(item.title.isEmpty ? " " : item.title)
                             .font(.qoma(size: 13, weight: .medium))
                             .foregroundColor(
-                                isCompleting 
-                                    ? theme.secondaryTextColor.opacity(0.5) 
+                                item.isCompleted
+                                    ? theme.secondaryTextColor.opacity(0.5)
                                     : theme.textColor
                             )
-                            .strikethrough(isCompleting)
+                            .strikethrough(item.isCompleted)
                             .lineLimit(2)
-                            .animation(.easeInOut(duration: 0.2), value: isCompleting)
+                            .animation(.easeInOut(duration: 0.2), value: item.isCompleted)
                     }
 
                     TextField("", text: bindingForTitle(item))
@@ -218,18 +224,17 @@ private func verticalOffset(for item: TodoItem) -> CGFloat {
 
                 Spacer()
 
-                if focusedField != item.id && !item.isCompleted && !isCompleting {
-                    Image(systemName: isReordering ? "line.3.horizontal" : "line.3.horizontal")
+                if focusedField != item.id && !item.isCompleted {
+                    Image(systemName: "line.3.horizontal")
                         .font(.system(size: 11))
                         .foregroundColor(
-                            isReordering 
-                                ? theme.textColor.opacity(0.8)  // lebih terang saat reorder mode
+                            isReordering
+                                ? theme.textColor.opacity(0.8)
                                 : theme.secondaryTextColor.opacity(0.4)
                         )
                         .scaleEffect(isReordering ? 1.2 : 1.0)
                         .animation(.easeInOut(duration: 0.15), value: isReordering)
                         .onLongPressGesture(minimumDuration: 0.4) {
-                            // Masuk reorder mode
                             withAnimation { reorderingItemID = item.id }
                         }
                         .gesture(
@@ -251,9 +256,8 @@ private func verticalOffset(for item: TodoItem) -> CGFloat {
             .contentShape(Rectangle())
             .onTapGesture {
                 if reorderingItemID != nil {
-                    // Tap di luar = keluar reorder mode
                     withAnimation { reorderingItemID = nil }
-                } else if !item.isCompleted && !isCompleting && focusedField != item.id {
+                } else if !item.isCompleted && focusedField != item.id {
                     startEdit(item)
                 }
             }
@@ -370,34 +374,30 @@ private func verticalOffset(for item: TodoItem) -> CGFloat {
     }
 
     private func toggleComplete(_ item: TodoItem) {
-    guard let index = todoItems.firstIndex(where: { $0.id == item.id }) else { return }
-    
-    if !item.isCompleted {
-        // Tandai completing — tampilkan animasi dulu
-        completingItemIDs.insert(item.id)
-        
+        guard let index = todoItems.firstIndex(where: { $0.id == item.id }) else { return }
+
         var updated = item
-        updated.isCompleted = true
-        updated.completedAt = Date()
-        todoItems[index] = updated
-        store.updateTodoItem(updated)
-        
-        // Hilangkan setelah 1.5 detik
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            withAnimation(.easeOut(duration: 0.3)) {
-                todoItems.removeAll { $0.id == item.id }
-                completingItemIDs.remove(item.id)
+        if !item.isCompleted {
+            updated.isCompleted = true
+            updated.completedAt = Date()
+            todoItems[index] = updated
+            store.updateTodoItem(updated)
+
+            let id = item.id
+            pendingExit.insert(id)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                withAnimation(.easeOut(duration: 0.3)) {
+                    _ = pendingExit.remove(id)
+                }
             }
+        } else {
+            updated.isCompleted = false
+            updated.completedAt = nil
+            todoItems[index] = updated
+            store.updateTodoItem(updated)
+            pendingExit.remove(item.id)
         }
-    } else {
-        // Uncomplete langsung
-        var updated = item
-        updated.isCompleted = false
-        updated.completedAt = nil
-        todoItems[index] = updated
-        store.updateTodoItem(updated)
     }
-}
 
     private func deleteItem(_ item: TodoItem) {
         todoItems.removeAll { $0.id == item.id }
