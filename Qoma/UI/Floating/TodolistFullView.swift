@@ -13,6 +13,11 @@ struct TodolistFullView: View {
     @State private var showingCompleted: Bool = false
     @FocusState private var isTextFieldFocused: Bool
 
+    @State private var draggedItemID: UUID?
+    @GestureState private var dragOffset: CGSize = .zero
+
+    private let dragRowHeight: CGFloat = 38
+
     private let store = AnalyticsStore.shared
 
     var body: some View {
@@ -105,6 +110,17 @@ struct TodolistFullView: View {
             } else {
                 ForEach(Array(visibleItems.enumerated()), id: \.element.id) { index, item in
                     todoRow(item, at: index)
+                        .scaleEffect(draggedItemID == item.id ? 1.05 : 1.0)
+                        .shadow(
+                            color: Color.black.opacity(draggedItemID == item.id ? 0.35 : 0),
+                            radius: draggedItemID == item.id ? 12 : 0,
+                            x: 0,
+                            y: 4
+                        )
+                        .offset(y: verticalOffset(for: item))
+                        .zIndex(draggedItemID == item.id ? 1 : 0)
+                        .gesture(dragGesture(for: item))
+                        .animation(.spring(response: 0.3, dampingFraction: 0.75), value: draggedItemID)
                 }
             }
         }
@@ -112,6 +128,58 @@ struct TodolistFullView: View {
         .padding(.vertical, 4)
         .frame(maxHeight: maxListHeight(visibleItems.count))
     }
+}
+
+private func verticalOffset(for item: TodoItem) -> CGFloat {
+    guard let draggedID = draggedItemID,
+          draggedID != item.id,
+          let fromIndex = todoItems.firstIndex(where: { $0.id == draggedID }),
+          let toIndex = todoItems.firstIndex(where: { $0.id == item.id }) else { return 0 }
+
+    let direction: CGFloat = fromIndex < toIndex ? 1 : -1
+    let isDraggingInShiftDirection = (direction > 0 && dragOffset.height > 0)
+        || (direction < 0 && dragOffset.height < 0)
+
+    if isDraggingInShiftDirection {
+        let progress = min(1.0, abs(dragOffset.height) / dragRowHeight)
+        return -direction * dragRowHeight * progress
+    }
+    return 0
+}
+
+private func dragGesture(for item: TodoItem) -> some Gesture {
+    DragGesture(minimumDistance: 4)
+        .updating($dragOffset) { value, state, _ in
+            state = value.translation
+        }
+        .onChanged { value in
+            if draggedItemID == nil {
+                draggedItemID = item.id
+            }
+        }
+        .onEnded { value in
+            defer {
+                draggedItemID = nil
+            }
+            guard let draggedID = draggedItemID,
+                  let fromIndex = todoItems.firstIndex(where: { $0.id == draggedID }) else { return }
+
+            let itemsMoved = Int((value.translation.height / dragRowHeight).rounded())
+            let toIndex = max(0, min(todoItems.count - 1, fromIndex + itemsMoved))
+
+            guard fromIndex != toIndex else { return }
+
+            var newItems = todoItems
+            let moved = newItems.remove(at: fromIndex)
+            newItems.insert(moved, at: toIndex)
+
+            for i in newItems.indices {
+                newItems[i].sortOrder = i
+            }
+
+            todoItems = newItems
+            store.saveTodoItems(newItems)
+        }
 }
 
     private var emptyMessage: some View {
