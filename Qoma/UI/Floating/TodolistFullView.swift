@@ -79,36 +79,36 @@ struct TodolistFullView: View {
 }
 
     private var checklist: some View {
-    let visibleItems = showingCompleted
-        ? todoItems.filter { $0.isCompleted && $0.isCompletedToday }
-        : todoItems.filter { !$0.isCompleted }
+        let visibleItems = showingCompleted
+            ? todoItems.filter { $0.isCompleted && $0.isCompletedToday }
+            : todoItems.filter { !$0.isCompleted }
 
-    return ScrollView(showsIndicators: false) {
-        LazyVStack(spacing: 2) {
-            if visibleItems.isEmpty {
-                emptyMessage
-            } else {
-                ForEach(visibleItems, id: \.id) { item in
-                    todoRow(item)
-                        .scaleEffect(draggedItemID == item.id ? 1.05 : 1.0)
-                        .shadow(
-                            color: Color.black.opacity(draggedItemID == item.id ? 0.35 : 0),
-                            radius: draggedItemID == item.id ? 12 : 0,
-                            x: 0,
-                            y: 4
-                        )
-                        .offset(y: verticalOffset(for: item))
-                        .zIndex(draggedItemID == item.id ? 1 : 0)
-                        .gesture(focusedField == item.id ? nil : dragGesture(for: item))
-                        .animation(.spring(response: 0.3, dampingFraction: 0.75), value: draggedItemID)
+        return ScrollView(showsIndicators: false) {
+            LazyVStack(spacing: 2) {
+                if visibleItems.isEmpty {
+                    emptyMessage
+                } else {
+                    ForEach(visibleItems, id: \.id) { item in
+                        todoRow(item)
+                            .scaleEffect(draggedItemID == item.id ? 1.05 : 1.0)
+                            .shadow(
+                                color: Color.black.opacity(draggedItemID == item.id ? 0.35 : 0),
+                                radius: draggedItemID == item.id ? 12 : 0,
+                                x: 0,
+                                y: 4
+                            )
+                            .offset(y: verticalOffset(for: item))
+                            .zIndex(draggedItemID == item.id ? 1 : 0)
+                            .gesture(focusedField == item.id ? nil : dragGesture(for: item))
+                            .animation(.spring(response: 0.3, dampingFraction: 0.75), value: draggedItemID)
+                    }
                 }
             }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .frame(maxHeight: maxListHeight(visibleItems.count))
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .frame(maxHeight: maxListHeight(visibleItems.count))
     }
-}
 
 private func verticalOffset(for item: TodoItem) -> CGFloat {
     guard let draggedID = draggedItemID,
