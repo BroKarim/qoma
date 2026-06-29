@@ -14,6 +14,8 @@ struct TodolistFullView: View {
     @State private var editingBackup: String?
     @State private var draftItemID: UUID?
     @State private var lastFocusedID: UUID?
+    @State private var completingItemIDs: Set<UUID> = []
+    @State private var reorderingItemID: UUID? = nil
     @FocusState private var focusedField: UUID?
     @GestureState private var dragOffset: CGSize = .zero
 
@@ -127,40 +129,41 @@ private func verticalOffset(for item: TodoItem) -> CGFloat {
     return 0
 }
 
-private func dragGesture(for item: TodoItem) -> some Gesture {
-    DragGesture(minimumDistance: 4)
-        .updating($dragOffset) { value, state, _ in
-            state = value.translation
-        }
-        .onChanged { value in
-            if draggedItemID == nil {
-                draggedItemID = item.id
+    private func dragGesture(for item: TodoItem) -> some Gesture {
+        DragGesture(minimumDistance: 4)
+            .updating($dragOffset) { value, state, _ in
+                state = value.translation
             }
-        }
-        .onEnded { value in
-            defer {
-                draggedItemID = nil
+            .onChanged { value in
+                if draggedItemID == nil {
+                    draggedItemID = item.id
+                }
             }
-            guard let draggedID = draggedItemID,
-                  let fromIndex = todoItems.firstIndex(where: { $0.id == draggedID }) else { return }
+            .onEnded { value in
+                defer {
+                    draggedItemID = nil
+                    withAnimation { reorderingItemID = nil }  // ⬅ keluar reorder mode setelah drop
+                }
+                guard let draggedID = draggedItemID,
+                    let fromIndex = todoItems.firstIndex(where: { $0.id == draggedID }) else { return }
 
-            let itemsMoved = Int((value.translation.height / dragRowHeight).rounded())
-            let toIndex = max(0, min(todoItems.count - 1, fromIndex + itemsMoved))
+                let itemsMoved = Int((value.translation.height / dragRowHeight).rounded())
+                let toIndex = max(0, min(todoItems.count - 1, fromIndex + itemsMoved))
 
-            guard fromIndex != toIndex else { return }
+                guard fromIndex != toIndex else { return }
 
-            var newItems = todoItems
-            let moved = newItems.remove(at: fromIndex)
-            newItems.insert(moved, at: toIndex)
+                var newItems = todoItems
+                let moved = newItems.remove(at: fromIndex)
+                newItems.insert(moved, at: toIndex)
 
-            for i in newItems.indices {
-                newItems[i].sortOrder = i
+                for i in newItems.indices {
+                    newItems[i].sortOrder = i
+                }
+
+                todoItems = newItems
+                store.saveTodoItems(newItems)
             }
-
-            todoItems = newItems
-            store.saveTodoItems(newItems)
-        }
-}
+    }
 
     private var emptyMessage: some View {
         Text(showingCompleted ? "No tasks completed today." : "No tasks. Tap + to add one.")
@@ -170,63 +173,94 @@ private func dragGesture(for item: TodoItem) -> some Gesture {
             .frame(maxWidth: .infinity)
     }
 
-    private func todoRow(_ item: TodoItem) -> some View {
-        HStack(spacing: 8) {
-            Button(action: { toggleComplete(item) }) {
-                Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 15))
-                    .foregroundColor(item.isCompleted ? .green : theme.secondaryTextColor)
-            }
-            .buttonStyle(.plain)
 
-            // ⬅ TextField selalu ada di view tree, visibility dikontrol opacity
-            ZStack(alignment: .leading) {
-                // Placeholder / display text saat tidak editing
-                if focusedField != item.id {
-                    Text(item.title.isEmpty ? " " : item.title)
+
+    private func todoRow(_ item: TodoItem) -> some View {
+            let isCompleting = completingItemIDs.contains(item.id)
+            let isReordering = reorderingItemID == item.id
+
+            return HStack(spacing: 8) {
+                Button(action: { 
+                    if !completingItemIDs.contains(item.id) {
+                        toggleComplete(item) 
+                    }
+                }) {
+                    Image(systemName: isCompleting ? "checkmark.circle.fill" : "circle")
+                        .font(.system(size: 15))
+                        .foregroundColor(isCompleting ? .green : theme.secondaryTextColor)
+                        .animation(.easeInOut(duration: 0.2), value: isCompleting)
+                }
+                .buttonStyle(.plain)
+
+                ZStack(alignment: .leading) {
+                    if focusedField != item.id {
+                        Text(item.title.isEmpty ? " " : item.title)
+                            .font(.qoma(size: 13, weight: .medium))
+                            .foregroundColor(
+                                isCompleting 
+                                    ? theme.secondaryTextColor.opacity(0.5) 
+                                    : theme.textColor
+                            )
+                            .strikethrough(isCompleting)
+                            .lineLimit(2)
+                            .animation(.easeInOut(duration: 0.2), value: isCompleting)
+                    }
+
+                    TextField("", text: bindingForTitle(item))
+                        .textFieldStyle(.plain)
                         .font(.qoma(size: 13, weight: .medium))
-                        .foregroundColor(
-                            item.isCompleted ? theme.secondaryTextColor.opacity(0.5) : theme.textColor
-                        )
-                        .strikethrough(item.isCompleted)
-                        .lineLimit(2)
+                        .foregroundColor(theme.textColor)
+                        .focused($focusedField, equals: item.id)
+                        .onSubmit { commitEdit() }
+                        .onExitCommand { cancelEdit() }
+                        .opacity(focusedField == item.id ? 1 : 0)
                 }
 
-                // TextField selalu ada agar .focused bisa bekerja
-                TextField("", text: bindingForTitle(item))
-                    .textFieldStyle(.plain)
-                    .font(.qoma(size: 13, weight: .medium))
-                    .foregroundColor(theme.textColor)
-                    .focused($focusedField, equals: item.id)
-                    .onSubmit { commitEdit() }
-                    .onExitCommand { cancelEdit() }
-                    .opacity(focusedField == item.id ? 1 : 0)  // ⬅ invisible tapi tetap di tree
-            }
+                Spacer()
 
-            Spacer()
-
-            if focusedField != item.id && !item.isCompleted {
-                Image(systemName: "line.3.horizontal")
-                    .font(.system(size: 11))
-                    .foregroundColor(theme.secondaryTextColor.opacity(0.4))
+                if focusedField != item.id && !item.isCompleted && !isCompleting {
+                    Image(systemName: isReordering ? "line.3.horizontal" : "line.3.horizontal")
+                        .font(.system(size: 11))
+                        .foregroundColor(
+                            isReordering 
+                                ? theme.textColor.opacity(0.8)  // lebih terang saat reorder mode
+                                : theme.secondaryTextColor.opacity(0.4)
+                        )
+                        .scaleEffect(isReordering ? 1.2 : 1.0)
+                        .animation(.easeInOut(duration: 0.15), value: isReordering)
+                        .onLongPressGesture(minimumDuration: 0.4) {
+                            // Masuk reorder mode
+                            withAnimation { reorderingItemID = item.id }
+                        }
+                        .gesture(
+                            reorderingItemID == item.id
+                                ? dragGesture(for: item)
+                                : nil
+                        )
+                }
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 6)
+            .background(
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(Color.white.opacity(
+                        isReordering ? 0.08 :
+                        focusedField == item.id ? 0.06 : 0.03
+                    ))
+            )
+            .contentShape(Rectangle())
+            .onTapGesture {
+                if reorderingItemID != nil {
+                    // Tap di luar = keluar reorder mode
+                    withAnimation { reorderingItemID = nil }
+                } else if !item.isCompleted && !isCompleting && focusedField != item.id {
+                    startEdit(item)
+                }
+            }
+            .contextMenu {
+                Button("Delete") { deleteItem(item) }
             }
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 6)
-        .background(
-            RoundedRectangle(cornerRadius: 6)
-                .fill(Color.white.opacity(focusedField == item.id ? 0.06 : 0.03))
-        )
-        .contentShape(Rectangle())
-        .onTapGesture {
-            if !item.isCompleted && focusedField != item.id {
-                startEdit(item)
-            }
-        }
-        .contextMenu {
-            Button("Delete") { deleteItem(item) }
-        }
-    }
 
     private func bindingForTitle(_ item: TodoItem) -> Binding<String> {
         Binding(
@@ -263,7 +297,7 @@ private func dragGesture(for item: TodoItem) -> some Gesture {
 
     private func commitEdit(id targetID: UUID?) {
         guard let id = targetID,
-              let index = todoItems.firstIndex(where: { $0.id == id }) else {
+            let index = todoItems.firstIndex(where: { $0.id == id }) else {
             editingBackup = nil
             focusedField = nil
             return
@@ -283,7 +317,9 @@ private func dragGesture(for item: TodoItem) -> some Gesture {
             draftItemID = nil
         } else {
             if trimmed.isEmpty {
-                todoItems[index].title = editingBackup ?? ""
+                // ⬅ hapus jika dikosongkan
+                todoItems.remove(at: index)
+                store.deleteTodoItem(item)
             } else {
                 var updated = item
                 updated.title = trimmed
@@ -313,35 +349,55 @@ private func dragGesture(for item: TodoItem) -> some Gesture {
     }
 
     private func startNewDraft() {
-        if let draftID = draftItemID,
-        todoItems.contains(where: { $0.id == draftID }) {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                self.focusedField = draftID
+            if let draftID = draftItemID,
+            todoItems.contains(where: { $0.id == draftID }) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    self.focusedField = draftID
+                }
+                return
             }
-            return
-        }
 
-        let maxOrder = todoItems.map(\.sortOrder).max() ?? 0
-        let draft = TodoItem(title: "", sortOrder: maxOrder + 1)
-        todoItems.append(draft)
-        draftItemID = draft.id
-        editingBackup = ""
+            let maxOrder = todoItems.map(\.sortOrder).max() ?? 0
+            let draft = TodoItem(title: "", sortOrder: maxOrder + 1)
+            todoItems.append(draft)
+            draftItemID = draft.id
+            editingBackup = ""
 
-        // ⬅ delay agar SwiftUI sempat render row baru dulu
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-            self.focusedField = draft.id
-        }
-}
+            // ⬅ delay agar SwiftUI sempat render row baru dulu
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                self.focusedField = draft.id
+            }
+    }
 
     private func toggleComplete(_ item: TodoItem) {
-        guard let index = todoItems.firstIndex(where: { $0.id == item.id }) else { return }
-
+    guard let index = todoItems.firstIndex(where: { $0.id == item.id }) else { return }
+    
+    if !item.isCompleted {
+        // Tandai completing — tampilkan animasi dulu
+        completingItemIDs.insert(item.id)
+        
         var updated = item
-        updated.isCompleted.toggle()
-        updated.completedAt = updated.isCompleted ? Date() : nil
+        updated.isCompleted = true
+        updated.completedAt = Date()
+        todoItems[index] = updated
+        store.updateTodoItem(updated)
+        
+        // Hilangkan setelah 1.5 detik
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            withAnimation(.easeOut(duration: 0.3)) {
+                todoItems.removeAll { $0.id == item.id }
+                completingItemIDs.remove(item.id)
+            }
+        }
+    } else {
+        // Uncomplete langsung
+        var updated = item
+        updated.isCompleted = false
+        updated.completedAt = nil
         todoItems[index] = updated
         store.updateTodoItem(updated)
     }
+}
 
     private func deleteItem(_ item: TodoItem) {
         todoItems.removeAll { $0.id == item.id }

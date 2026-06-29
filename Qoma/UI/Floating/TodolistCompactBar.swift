@@ -33,12 +33,7 @@ struct TodolistCompactBar: View {
         HStack(spacing: 10) {
            
 
-            // Text(format(timer.remainingTime))
-            //     .font(.custom("RobotoMono-VariableFont_wght", size: 22))
-            //     .foregroundColor(theme.textColor)
-            //     .baselineOffset(-3)
-
-            // Spacer()
+           
 
             Button(action: onAdd) {
                 Image(systemName: "plus.circle.fill")
