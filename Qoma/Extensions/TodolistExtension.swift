@@ -67,12 +67,17 @@ private struct TodolistExtensionCollapsedView: View {
     let theme: FloatingTheme
     let onTap: () -> Void
 
+    @Environment(\.shouldStartDraft) private var shouldStartDraft
+
     private let store = AnalyticsStore.shared
 
     var body: some View {
         TodolistCompactBar(
             todoItems: $todoItems,
-            onAdd: { onTap() },
+            onAdd: {
+                shouldStartDraft.wrappedValue = true
+                onTap()
+            },
             onShowCompleted: {},
             theme: theme,
             onTap: onTap

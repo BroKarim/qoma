@@ -19,6 +19,8 @@ struct TodolistFullView: View {
     @FocusState private var focusedField: UUID?
     @GestureState private var dragOffset: CGSize = .zero
 
+    @Environment(\.shouldStartDraft) private var shouldStartDraft
+
     private let dragRowHeight: CGFloat = 38
 
     private let store = AnalyticsStore.shared
@@ -48,6 +50,12 @@ struct TodolistFullView: View {
         }
         .onChange(of: reorderingItemID) { _ in
             onFocusChange(isEngaged)
+        }
+        .onAppear {
+            if shouldStartDraft.wrappedValue {
+                shouldStartDraft.wrappedValue = false
+                startNewDraft()
+            }
         }
     }
 

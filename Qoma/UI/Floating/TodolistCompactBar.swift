@@ -33,8 +33,6 @@ struct TodolistCompactBar: View {
         HStack(spacing: 10) {
            
 
-           
-
             Button(action: onAdd) {
                 Image(systemName: "plus.circle.fill")
                     .font(.system(size: 16))

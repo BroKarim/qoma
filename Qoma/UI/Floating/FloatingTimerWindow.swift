@@ -1,6 +1,17 @@
 import Combine
 import SwiftUI
 
+struct ShouldStartDraftKey: EnvironmentKey {
+    static let defaultValue: Binding<Bool> = .constant(false)
+}
+
+extension EnvironmentValues {
+    var shouldStartDraft: Binding<Bool> {
+        get { self[ShouldStartDraftKey.self] }
+        set { self[ShouldStartDraftKey.self] = newValue }
+    }
+}
+
 struct FloatingTimerView: View {
     private static let timerFontName = "RobotoMono-VariableFont_wght"
 
@@ -16,6 +27,7 @@ struct FloatingTimerView: View {
     @State private var collapseWorkItem: DispatchWorkItem?
     @State private var requestedSize: CGSize = FloatingLayoutMode.timerOnly.contentSize
     @State private var isTextFieldFocused: Bool = false
+    @State private var shouldStartDraftOnAppear: Bool = false
 
     var body: some View {
         let theme = self.selectedTheme
@@ -66,6 +78,7 @@ struct FloatingTimerView: View {
 
         case .featureCollapsed(let ext):
             ext.collapsedView(theme: theme, onTap: { self.expand() })
+                .environment(\.shouldStartDraft, $shouldStartDraftOnAppear)
                 .contentShape(Rectangle())
                 .simultaneousGesture(
                     TapGesture().onEnded { self.resetCollapseTimer() }
@@ -77,6 +90,7 @@ struct FloatingTimerView: View {
                 onCollapse: { self.collapse() },
                 onFocusChange: { self.isTextFieldFocused = $0 }
             )
+                .environment(\.shouldStartDraft, $shouldStartDraftOnAppear)
                 .contentShape(Rectangle())
                 .simultaneousGesture(
                     TapGesture().onEnded { self.resetCollapseTimer() }
