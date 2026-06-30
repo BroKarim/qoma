@@ -65,21 +65,29 @@ struct FloatingTimerView: View {
         case .timerOnly:
             self.timerOnlyContent(theme: theme)
 
-        case .featureCollapsed(let ext):
-            ext.collapsedView(theme: theme, onTap: { self.expand() })
-                .environment(\.shouldStartDraft, $shouldStartDraftOnAppear)
-                .contentShape(Rectangle())
+        case .featureCollapsed(let ext), .featureExpanded(let ext):
+            // ⬅ Satu container, kedua state co-exist untuk transisi morph yang smooth
+            ZStack(alignment: .topLeading) {
+                ext.collapsedView(theme: theme, onTap: { self.expand() })
+                    .environment(\.shouldStartDraft, $shouldStartDraftOnAppear)
+                    .opacity(isExpanded ? 0 : 1)
+                    .scaleEffect(isExpanded ? 0.96 : 1, anchor: .topLeading)
+                    .allowsHitTesting(!isExpanded)
 
-        case .featureExpanded(let ext):
-            ext.expandedView(
-                theme: theme,
-                onCollapse: { self.collapse() },
-                onFocusChange: { self.isTextFieldFocused = $0 }
-            )
-                .environment(\.shouldStartDraft, $shouldStartDraftOnAppear)
-                .contentShape(Rectangle())
+                ext.expandedView(
+                    theme: theme,
+                    onCollapse: { self.collapse() },
+                    onFocusChange: { self.isTextFieldFocused = $0 }
+                )
+                    .environment(\.shouldStartDraft, $shouldStartDraftOnAppear)
+                    .opacity(isExpanded ? 1 : 0)
+                    .scaleEffect(isExpanded ? 1 : 0.96, anchor: .topLeading)
+                    .allowsHitTesting(isExpanded)
+            }
+            .contentShape(Rectangle())
         }
     }
+
 
     private func timerOnlyContent(theme: FloatingTheme) -> some View {
         VStack(spacing: 0) {

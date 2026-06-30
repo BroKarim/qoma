@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct  : View {
+struct TodolistCompactBar: View {
     @ObservedObject private var timer = FocusSessionManager.shared.timerService
 
     @Binding var todoItems: [TodoItem]

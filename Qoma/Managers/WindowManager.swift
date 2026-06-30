@@ -18,6 +18,10 @@ final class WindowManager: ObservableObject {
     let objectWillChange = ObservableObjectPublisher()
 
     var floatingWindow: NSWindow?
+    var onClickOutside: (() -> Void)?
+
+    private var globalClickMonitor: Any?
+    private var localClickMonitor: Any?
 
     func showFloating() {
         if self.floatingWindow != nil { return }
@@ -51,22 +55,21 @@ final class WindowManager: ObservableObject {
             .fullScreenAuxiliary,
         ]
 
-        // Hosting View
         window.contentView = NSHostingView(rootView: contentView)
         window.orderFrontRegardless()
         window.makeKey()
 
         self.floatingWindow = window
+        self.startMonitoringClicksOutside()
     }
 
     func hideFloating() {
         guard self.floatingWindow != nil else { return }
         self.objectWillChange.send()
+        self.stopMonitoringClicksOutside()
         self.floatingWindow?.orderOut(nil)
         self.floatingWindow = nil
     }
-
-
 
     func updateFloatingSize() {
         let ext = ExtensionManager.shared.activeExtension
@@ -84,6 +87,8 @@ final class WindowManager: ObservableObject {
             window.animator().setContentSize(contentSize)
         }
     }
+
+    // MARK: - Click Outside Detection
 
     private func startMonitoringClicksOutside() {
         stopMonitoringClicksOutside()
