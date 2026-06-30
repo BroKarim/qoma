@@ -117,7 +117,10 @@ struct AnalyticsEngineTests {
             makeSession(startHour: 10, durationSeconds: 1800, dayOffset: -1),
         ]
         let cells = engine.buildHeatmapCells(from: sessions, days: 28)
-        #expect(cells.count % 7 == 0)
+        let calendar = Calendar.current
+        let firstWeekday = calendar.component(.weekday, from: cells.first!.date)
+        #expect(firstWeekday == 1)
+        #expect(cells.count >= 28)
     }
 
     @Test func buildHeatmapCellsIntensityLevels() {

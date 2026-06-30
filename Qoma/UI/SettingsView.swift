@@ -1,4 +1,3 @@
-import Combine
 import SwiftUI
 
 // MARK: - Tab Enum
@@ -30,15 +29,6 @@ enum SettingsTab: String, CaseIterable, Identifiable {
     }
 }
 
-// MARK: - Version Helper
-
-private enum AppVersion {
-    static let displayString: String = {
-        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.0"
-        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "0"
-        return "Version \(version) (\(build))"
-    }()
-}
 
 // MARK: - Settings View
 
@@ -65,17 +55,12 @@ struct SettingsView: View {
         .ignoresSafeArea(.container, edges: .top)
     }
 
-    // MARK: Sidebar
-    // - Tidak pakai List agar tidak ada highlight biru bawaan & tidak lag
-    // - Tidak pakai clip shape agar sidebar memenuhi tinggi penuh tanpa rounded
-    // - Warna background sama dengan qomaBackground agar konsisten
     private var sidebar: some View {
         VStack(spacing: 0) {
-            // Spacer menggantikan titlebar area
+
             Color.clear
                 .frame(height: 52)
 
-            // Header
             VStack(alignment: .leading, spacing: 4) {
                 Text("Settings")
                     .font(.qoma(size: 18, weight: .semibold))
@@ -97,16 +82,10 @@ struct SettingsView: View {
             .padding(.horizontal, 10)
 
             Spacer()
-
-            // Footer versi
-            SettingsSidebarFooter()
-                .padding(.horizontal, 16)
-                .padding(.bottom, 16)
         }
         .frame(width: 220)
         .frame(maxHeight: .infinity)
-        // Samakan warna dengan qomaBackground, atau bisa pakai warna sedikit berbeda
-        // tapi tetap satu tone. Jika ingin persis sama, ganti ke Color.qomaBackground
+
         .background(Color.qomaBackground)
     }
 
@@ -169,13 +148,3 @@ private struct SettingsSidebarRow: View {
     }
 }
 
-// MARK: - Sidebar Footer
-
-private struct SettingsSidebarFooter: View {
-    var body: some View {
-        Text(AppVersion.displayString)
-            .font(.system(size: 11, weight: .semibold))
-            .foregroundColor(.secondary)
-            .frame(maxWidth: .infinity, alignment: .leading)
-    }
-}

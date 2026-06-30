@@ -10,6 +10,7 @@ import Foundation
 import Testing
 @testable import Qoma
 
+@Suite(.serialized)
 struct AnalyticsStoreTests {
 
     // MARK: - Analytics Enabled Setting

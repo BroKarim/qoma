@@ -109,8 +109,9 @@ struct FocusSessionRecordTests {
 
     @Test func hashableConformance() {
         let id = UUID()
-        let s1 = FocusSessionRecord(id: id, plannedMinutes: 25, sessionMode: .quickSession)
-        let s2 = FocusSessionRecord(id: id, plannedMinutes: 25, sessionMode: .quickSession)
+        let started = Date(timeIntervalSince1970: 1000000)
+        let s1 = FocusSessionRecord(id: id, startedAt: started, plannedMinutes: 25, sessionMode: .quickSession)
+        let s2 = FocusSessionRecord(id: id, startedAt: started, plannedMinutes: 25, sessionMode: .quickSession)
         var set = Set<FocusSessionRecord>()
         set.insert(s1)
         set.insert(s2)
