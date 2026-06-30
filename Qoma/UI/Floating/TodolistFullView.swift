@@ -10,18 +10,13 @@ struct TodolistFullView: View {
     let onFocusChange: (Bool) -> Void
 
     @State private var showingCompleted: Bool = false
-    @State private var draggedItemID: UUID?
     @State private var editingBackup: String?
     @State private var draftItemID: UUID?
     @State private var lastFocusedID: UUID?
     @State private var pendingExit: Set<UUID> = []
-    @State private var reorderingItemID: UUID? = nil
     @FocusState private var focusedField: UUID?
-    @GestureState private var dragOffset: CGSize = .zero
 
     @Environment(\.shouldStartDraft) private var shouldStartDraft
-
-    private let dragRowHeight: CGFloat = 38
 
     private let store = AnalyticsStore.shared
 
@@ -45,12 +40,6 @@ struct TodolistFullView: View {
             }
             onFocusChange(isEngaged)
         }
-        .onChange(of: draggedItemID) { _ in
-            onFocusChange(isEngaged)
-        }
-        .onChange(of: reorderingItemID) { _ in
-            onFocusChange(isEngaged)
-        }
         .onAppear {
             if shouldStartDraft.wrappedValue {
                 shouldStartDraft.wrappedValue = false
@@ -60,11 +49,11 @@ struct TodolistFullView: View {
     }
 
     private var isEngaged: Bool {
-        focusedField != nil || draggedItemID != nil || reorderingItemID != nil
+        focusedField != nil
     }
 
    private var topBar: some View {
-    HStack(spacing: 10) {
+    HStack(spacing: 6) {
         // Icons rata KIRI
         Button(action: startNewDraft) {
             Image(systemName: "plus.circle.fill")
@@ -110,78 +99,15 @@ struct TodolistFullView: View {
                 } else {
                     ForEach(visibleItems, id: \.id) { item in
                         todoRow(item)
-                            .scaleEffect(draggedItemID == item.id ? 1.05 : 1.0)
-                            .shadow(
-                                color: Color.black.opacity(draggedItemID == item.id ? 0.35 : 0),
-                                radius: draggedItemID == item.id ? 12 : 0,
-                                x: 0,
-                                y: 4
-                            )
-                            .offset(y: verticalOffset(for: item))
-                            .zIndex(draggedItemID == item.id ? 1 : 0)
-                            .gesture((focusedField == item.id || item.isCompleted) ? nil : dragGesture(for: item))
                             .transition(.opacity.combined(with: .move(edge: .trailing)))
-                            .animation(.spring(response: 0.3, dampingFraction: 0.75), value: draggedItemID)
                     }
                 }
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .frame(maxHeight: maxListHeight(visibleItems.count))
         }
-    }
-
-private func verticalOffset(for item: TodoItem) -> CGFloat {
-    guard let draggedID = draggedItemID,
-          draggedID != item.id,
-          let fromIndex = todoItems.firstIndex(where: { $0.id == draggedID }),
-          let toIndex = todoItems.firstIndex(where: { $0.id == item.id }) else { return 0 }
-
-    let direction: CGFloat = fromIndex < toIndex ? 1 : -1
-    let isDraggingInShiftDirection = (direction > 0 && dragOffset.height > 0)
-        || (direction < 0 && dragOffset.height < 0)
-
-    if isDraggingInShiftDirection {
-        let progress = min(1.0, abs(dragOffset.height) / dragRowHeight)
-        return -direction * dragRowHeight * progress
-    }
-    return 0
-}
-
-    private func dragGesture(for item: TodoItem) -> some Gesture {
-        DragGesture(minimumDistance: 4)
-            .updating($dragOffset) { value, state, _ in
-                state = value.translation
-            }
-            .onChanged { value in
-                if draggedItemID == nil {
-                    draggedItemID = item.id
-                }
-            }
-            .onEnded { value in
-                defer {
-                    draggedItemID = nil
-                    withAnimation { reorderingItemID = nil }  // ⬅ keluar reorder mode setelah drop
-                }
-                guard let draggedID = draggedItemID,
-                    let fromIndex = todoItems.firstIndex(where: { $0.id == draggedID }) else { return }
-
-                let itemsMoved = Int((value.translation.height / dragRowHeight).rounded())
-                let toIndex = max(0, min(todoItems.count - 1, fromIndex + itemsMoved))
-
-                guard fromIndex != toIndex else { return }
-
-                var newItems = todoItems
-                let moved = newItems.remove(at: fromIndex)
-                newItems.insert(moved, at: toIndex)
-
-                for i in newItems.indices {
-                    newItems[i].sortOrder = i
-                }
-
-                todoItems = newItems
-                store.saveTodoItems(newItems)
-            }
+        .frame(maxHeight: maxListHeight(visibleItems.count))
+        .animation(.spring(response: 0.3, dampingFraction: 0.75), value: todoItems.map(\.id))
     }
 
     private var emptyMessage: some View {
@@ -195,8 +121,6 @@ private func verticalOffset(for item: TodoItem) -> CGFloat {
 
 
     private func todoRow(_ item: TodoItem) -> some View {
-            let isReordering = reorderingItemID == item.id
-
             return HStack(spacing: 8) {
                 Button(action: { toggleComplete(item) }) {
                     Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
@@ -233,23 +157,12 @@ private func verticalOffset(for item: TodoItem) -> CGFloat {
                 Spacer()
 
                 if focusedField != item.id && !item.isCompleted {
-                    Image(systemName: "line.3.horizontal")
-                        .font(.system(size: 11))
-                        .foregroundColor(
-                            isReordering
-                                ? theme.textColor.opacity(0.8)
-                                : theme.secondaryTextColor.opacity(0.4)
-                        )
-                        .scaleEffect(isReordering ? 1.2 : 1.0)
-                        .animation(.easeInOut(duration: 0.15), value: isReordering)
-                        .onLongPressGesture(minimumDuration: 0.4) {
-                            withAnimation { reorderingItemID = item.id }
-                        }
-                        .gesture(
-                            reorderingItemID == item.id
-                                ? dragGesture(for: item)
-                                : nil
-                        )
+                    Button(action: { moveItemUp(item) }) {
+                        Image(systemName: "arrow.up.circle")
+                            .font(.system(size: 11))
+                            .foregroundColor(theme.secondaryTextColor.opacity(0.4))
+                    }
+                    .buttonStyle(.plain)
                 }
             }
             .padding(.horizontal, 8)
@@ -257,15 +170,12 @@ private func verticalOffset(for item: TodoItem) -> CGFloat {
             .background(
                 RoundedRectangle(cornerRadius: 6)
                     .fill(Color.white.opacity(
-                        isReordering ? 0.08 :
                         focusedField == item.id ? 0.06 : 0.03
                     ))
             )
             .contentShape(Rectangle())
             .onTapGesture {
-                if reorderingItemID != nil {
-                    withAnimation { reorderingItemID = nil }
-                } else if !item.isCompleted && focusedField != item.id {
+                if !item.isCompleted && focusedField != item.id {
                     startEdit(item)
                 }
             }
@@ -405,6 +315,23 @@ private func verticalOffset(for item: TodoItem) -> CGFloat {
             store.updateTodoItem(updated)
             pendingExit.remove(item.id)
         }
+    }
+
+    private func moveItemUp(_ item: TodoItem) {
+        guard let index = todoItems.firstIndex(where: { $0.id == item.id }),
+              todoItems.count > 1 else { return }
+        let newIndex = index == 0 ? todoItems.count - 1 : index - 1
+
+        var newItems = todoItems
+        let moved = newItems.remove(at: index)
+        newItems.insert(moved, at: newIndex)
+
+        for i in newItems.indices {
+            newItems[i].sortOrder = i
+        }
+
+        todoItems = newItems
+        store.saveTodoItems(newItems)
     }
 
     private func deleteItem(_ item: TodoItem) {

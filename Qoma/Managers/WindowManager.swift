@@ -84,4 +84,41 @@ final class WindowManager: ObservableObject {
             window.animator().setContentSize(contentSize)
         }
     }
+
+    private func startMonitoringClicksOutside() {
+        stopMonitoringClicksOutside()
+
+        // Klik di app lain / di luar semua window app ini
+        globalClickMonitor = NSEvent.addGlobalMonitorForEvents(
+            matching: [.leftMouseDown, .rightMouseDown]
+        ) { [weak self] _ in
+            Task { @MainActor in
+                self?.onClickOutside?()
+            }
+        }
+
+        // Klik di window lain milik app ini sendiri (mis. settings window)
+        localClickMonitor = NSEvent.addLocalMonitorForEvents(
+            matching: [.leftMouseDown, .rightMouseDown]
+        ) { [weak self] event in
+            guard let self, let panel = self.floatingWindow else { return event }
+            if event.window !== panel {
+                Task { @MainActor in
+                    self.onClickOutside?()
+                }
+            }
+            return event
+        }
+    }
+
+    private func stopMonitoringClicksOutside() {
+        if let monitor = globalClickMonitor {
+            NSEvent.removeMonitor(monitor)
+            globalClickMonitor = nil
+        }
+        if let monitor = localClickMonitor {
+            NSEvent.removeMonitor(monitor)
+            localClickMonitor = nil
+        }
+    }
 }

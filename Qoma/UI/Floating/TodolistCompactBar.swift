@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct TodolistCompactBar: View {
+struct  : View {
     @ObservedObject private var timer = FocusSessionManager.shared.timerService
 
     @Binding var todoItems: [TodoItem]
@@ -30,8 +30,7 @@ struct TodolistCompactBar: View {
     }
 
     private var topRow: some View {
-        HStack(spacing: 10) {
-           
+        HStack(spacing: 6) {
 
             Button(action: onAdd) {
                 Image(systemName: "plus.circle.fill")

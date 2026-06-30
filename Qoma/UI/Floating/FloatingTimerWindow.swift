@@ -24,7 +24,6 @@ struct FloatingTimerView: View {
     private var selectedThemeID: String = AppConstants.FloatingThemeSettings.defaultThemeID
 
     @State private var isExpanded: Bool = true
-    @State private var collapseWorkItem: DispatchWorkItem?
     @State private var requestedSize: CGSize = FloatingLayoutMode.timerOnly.contentSize
     @State private var isTextFieldFocused: Bool = false
     @State private var shouldStartDraftOnAppear: Bool = false
@@ -43,17 +42,7 @@ struct FloatingTimerView: View {
             .animation(.easeInOut(duration: 0.2), value: self.floatingOpacity)
             .animation(.easeInOut(duration: 0.25), value: self.isExpanded)
             .onAppear { self.viewAppeared() }
-            .onDisappear { self.collapseWorkItem?.cancel() }
-            .onChange(of: self.isExpanded) { _ in self.scheduleCollapse() }
-            .onChange(of: self.isTextFieldFocused) { focused in
-                if focused {
-                    self.collapseWorkItem?.cancel()
-                } else {
-                    self.scheduleCollapse()
-                }
-            }
             .onChange(of: self.extensionManager.activeExtension?.id) { _ in
-                self.collapseWorkItem?.cancel()
                 self.isExpanded = true
                 self.requestedSize = self.currentLayoutMode.contentSize
                 self.notifySizeChange()
@@ -80,9 +69,6 @@ struct FloatingTimerView: View {
             ext.collapsedView(theme: theme, onTap: { self.expand() })
                 .environment(\.shouldStartDraft, $shouldStartDraftOnAppear)
                 .contentShape(Rectangle())
-                .simultaneousGesture(
-                    TapGesture().onEnded { self.resetCollapseTimer() }
-                )
 
         case .featureExpanded(let ext):
             ext.expandedView(
@@ -92,9 +78,6 @@ struct FloatingTimerView: View {
             )
                 .environment(\.shouldStartDraft, $shouldStartDraftOnAppear)
                 .contentShape(Rectangle())
-                .simultaneousGesture(
-                    TapGesture().onEnded { self.resetCollapseTimer() }
-                )
         }
     }
 
@@ -156,47 +139,16 @@ struct FloatingTimerView: View {
         isExpanded = true
         requestedSize = currentLayoutMode.contentSize
         notifySizeChange()
-        scheduleCollapse()
-    }
-
-    private func scheduleCollapse() {
-        collapseWorkItem?.cancel()
-
-        guard extensionManager.activeExtension != nil, isExpanded else { return }
-
-        let workItem = DispatchWorkItem { [self] in
-            DispatchQueue.main.async {
-                guard self.extensionManager.activeExtension != nil, self.isExpanded else { return }
-                withAnimation(.easeInOut(duration: 0.25)) {
-                    self.isExpanded = false
-                    self.requestedSize = self.currentLayoutMode.contentSize
-                }
-            }
-        }
-
-        collapseWorkItem = workItem
-        DispatchQueue.main.asyncAfter(
-            deadline: .now() + AppConstants.ExtensionSettings.collapsedTimeout,
-            execute: workItem
-        )
-    }
-
-    private func resetCollapseTimer() {
-        guard extensionManager.activeExtension != nil else { return }
-        scheduleCollapse()
     }
 
     private func expand() {
-        collapseWorkItem?.cancel()
         withAnimation(.easeInOut(duration: 0.25)) {
             isExpanded = true
             requestedSize = currentLayoutMode.contentSize
         }
-        scheduleCollapse()
     }
 
     private func collapse() {
-        collapseWorkItem?.cancel()
         withAnimation(.easeInOut(duration: 0.25)) {
             isExpanded = false
             requestedSize = currentLayoutMode.contentSize
