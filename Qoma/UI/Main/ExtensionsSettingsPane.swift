@@ -17,9 +17,7 @@ struct ExtensionsSettingsPane: View {
                 )
 
                 VStack(alignment: .leading, spacing: 12) {
-                    SettingsSectionHeading(
-                        title: "Extensions",
-                        subtitle: "Toggle extensions on or off to customize your floating timer.")
+                    
 
                     LazyVGrid(columns: self.columns, spacing: 12) {
                         if extensionManager.registered.isEmpty {
@@ -50,61 +48,79 @@ struct ExtensionsSettingsPane: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
-    private var comingSoonCard: some View {
-        SettingsSurfaceCard {
-            VStack(spacing: 0) {
-                HStack(spacing: 12) {
+private var comingSoonCard: some View {
+    SettingsSurfaceCard {
+        VStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 8) {
+                // Row 1: Icon + Title -> Flex-start (Justify Start)
+                HStack(alignment: .center, spacing: 10) {
                     Image(systemName: "puzzlepiece.extension")
-                        .font(.qoma(size: 18, weight: .regular))
+                        .font(.qoma(size: 15, weight: .regular))
                         .foregroundColor(.secondary)
-                        .frame(width: 28)
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Coming soon")
-                            .font(.qoma(size: 14, weight: .semibold))
-                        Text("More extensions coming in future updates.")
-                            .font(.qomaSubheadline)
-                            .foregroundColor(.secondary)
-                    }
-
+                        .frame(width: 22, height: 22)
+                    
+                    Text("Coming soon")
+                        .font(.qoma(size: 13, weight: .semibold))
+                        .foregroundColor(.primary)
+                    
                     Spacer()
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 18)
+                
+                // Row 2: Full-width Description (Memotong dengan ... jika kepanjangan)
+                Text("More extensions coming in future updates.")
+                    .font(.qomaSubheadline)
+                    .foregroundColor(.secondary)
+                    .lineLimit(2) // Batasi baris agar seragam (misal 2 atau 3 baris)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.leading, 20) 
             }
+            .padding(.horizontal, 4)
+            .padding(.vertical, 4)
+            .frame(maxHeight: .infinity, alignment: .topLeading) // Memaksa tinggi card mengisi ruang grid secara penuh
         }
     }
+}
 
-    private func extensionCard(
-        title: String,
-        description: String,
-        icon: String,
-        isEnabled: Binding<Bool>
-    ) -> some View {
-        VStack(spacing: 0) {
-            HStack(spacing: 12) {
-                Image(systemName: icon)
-                    .font(.qoma(size: 18, weight: .regular))
-                    .foregroundColor(isEnabled.wrappedValue ? .accentColor : .secondary)
-                    .frame(width: 28)
-
-                VStack(alignment: .leading, spacing: 4) {
+private func extensionCard(
+    title: String,
+    description: String,
+    icon: String,
+    isEnabled: Binding<Bool>
+) -> some View {
+    VStack(spacing: 0) {
+        VStack(alignment: .leading, spacing: 8) {
+            // Row 1: Icon + Title (Left) & Toggle (Right) -> Justify Between
+            HStack(alignment: .center, spacing: 10) {
+                HStack(spacing: 10) {
+                    Image(systemName: icon)
+                        .font(.qoma(size: 15, weight: .regular))
+                        .foregroundColor(isEnabled.wrappedValue ? .accentColor : .secondary)
+                        .frame(width: 22, height: 22)
+                    
                     Text(title)
-                        .font(.qoma(size: 14, weight: .semibold))
-                    Text(description)
-                        .font(.qomaSubheadline)
-                        .foregroundColor(.secondary)
-                        .lineLimit(2)
+                        .font(.qoma(size: 13, weight: .semibold))
+                        .foregroundColor(.primary)
                 }
-
+                
                 Spacer()
-
+                
                 Toggle("", isOn: isEnabled)
                     .toggleStyle(.switch)
+                    .controlSize(.small)
                     .labelsHidden()
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 18)
+            
+            // Row 2: Full-width Description (Memotong dengan ... jika kepanjangan)
+            Text(description)
+                .font(.qomaSubheadline)
+                .foregroundColor(.secondary)
+                .lineLimit(2) // Batasi baris agar seragam (misal 2 atau 3 baris)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.leading, 20) 
         }
+        .padding(.horizontal, 4)
+        .padding(.vertical, 4)
+        .frame(maxHeight: .infinity, alignment: .topLeading) // Memaksa tinggi card mengisi ruang grid secara penuh
     }
+}
 }
