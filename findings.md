@@ -57,3 +57,14 @@
 - Fishing should prioritize the readable catch sequence over visual complexity: idle fishing, bite cue, pull/reel, deposit, reset.
 - Aquarium should feel like a living display, not a placement game: top-down fish movement, gentle surface movement, and static/slow decor.
 - The user wants a cozy illustrated aesthetic, with original Dzenn assets rather than copied reference art.
+
+## qyube macOS Pivot — 2026-09-29
+
+- The product is renamed **qyube**. Its identity is a cute glasses-wearing penguin in a cozy Antarctic world: snow white first, ice/igloo blue second, penguin gray as an accent.
+- The core loop stays intact: the penguin fishes throughout the focus session; catches follow the existing provisional and five-minute banking rules; the Fishing Report reveals the haul when the user chooses Done.
+- The macOS session now begins from a main-app New Session flow: name one task, choose duration, then choose only the applications necessary for that task.
+- Once active, the main app yields to a separate remaining-time timer panel and a transparent penguin companion panel. Closing the timer does not dismiss the penguin; the menu-bar time restores the timer.
+- An application outside the allow-list stays usable. qyube provides click-through visual friction, with a growing fish interruption as the first concept, instead of blocking access.
+- Catalog and Insight remain first-class macOS surfaces. Aquarium is deferred from the first pivot phase.
+- Kiki validates the single-task and allowed-app interaction pattern, but qyube must retain its own illustrated Antarctic language, non-blocking response model, and fishing collection loop.
+- NSWorkspace can identify the frontmost macOS application. A qyube overlay can be mouse-transparent. Accurate positioning against another app's window may need Accessibility access; App Sandbox compatibility must be proven before making it a shipping commitment.

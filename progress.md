@@ -86,3 +86,26 @@
 | What’s the goal? | An implementation-ready Dzenn Release-1 product specification and roadmap. |
 | What have I learned? | See `findings.md` and `CONTEXT.md`. |
 | What have I done? | Authored and verified the product specification, 16-week roadmap, and persistent planning records. |
+
+## Session: 2026-09-29
+
+### Phase 1: Freeze macOS Pivot Contract
+
+- **Status:** complete
+- Actions taken:
+  - Replaced the former Dzenn documentation plan with a qyube macOS-first pivot plan.
+  - Recorded the New Session → task/duration/allow-list → independent timer and penguin companion session flow.
+  - Preserved fishing, the five-minute banking threshold, Catalog, Insight, and Fishing Report.
+  - Deferred Aquarium and iOS changes from the current prototype phase.
+  - Defined click-through fish-based visual friction for unallowed applications and recorded the sandbox/accessibility feasibility gate.
+- Files modified:
+  - task_plan.md
+  - findings.md
+  - progress.md
+
+## Error Log
+
+| Timestamp | Error | Attempt | Resolution |
+|---|---|---:|---|
+| 2026-09-29 | Git rejected a codex/ prefixed branch | 1 | Used qyube-macos-pivot-plan; the user allowed any branch name. |
+| 2026-09-29 | Sandbox could not write the Git ref | 1 | Created the branch with approved Git access. |

@@ -1,76 +1,201 @@
-# Task Plan: Dzenn Product Specification and Release-1 Roadmap
+# Task Plan: qyube macOS Pivot and Prototype
 
 ## Goal
 
-Produce a durable, implementation-ready product specification and a four-month Release-1 roadmap for the Dzenn focus-and-collection app, preserving every agreed product decision.
+Define the macOS-first product direction and prototype scope for **qyube**: a cozy, Antarctic focus companion where a glasses-wearing penguin fishes through a focus session, while gentle visual friction discourages unplanned app switching.
+
+This document replaces the previous Dzenn documentation plan for the macOS work. The iOS product plan is intentionally unchanged and will be revisited later.
 
 ## Current Phase
 
-Complete — Documentation delivered
+Ready for prototype iteration — the macOS pivot contract is recorded below.
+
+## Product Direction
+
+qyube is a focused-work companion, not a conventional Pomodoro app. A user names one concrete task, selects the apps they need, chooses a duration, and starts. The main app then gives way to two independent desktop companions:
+
+- a compact floating timer panel that shows remaining time only;
+- a transparent penguin fishing panel that remains on screen throughout the session.
+
+The penguin continuously fishes during a session. This fishing loop, the catch banking rules, and the post-session Fishing Report remain a defining part of qyube. They are not replaced by the app-selection pivot.
+
+The visual world is cozy Antarctic: snow white is dominant, igloo and ice blue are secondary, and penguin gray is an accent. The UI should have illustrated warmth and small tactile details rather than an austere minimalist productivity look.
+
+## macOS Session Flow
+
+```text
+Main app
+  → New Session
+  → Configure task, duration, and allowed apps
+  → Start
+  → Active focus session
+      ├─ floating timer panel
+      ├─ transparent penguin fishing companion
+      └─ gentle distraction response for unallowed apps
+  → Session end
+      ├─ Continue
+      └─ Done → Fishing Report → Main app
+```
+
+### 1. Main app
+
+- The main app is the only place to create a new session.
+- Its primary action is `New Session`.
+- It retains the two supporting product surfaces: **Insight** and **Catalog**.
+- Aquarium is deferred from the first macOS phase. Catalog replaces it as the collection surface and shows illustrated cards for every collectible.
+- During an active session, the user reaches the main app by ending that session. The main app does not stay open as a third active-session panel.
+
+### 2. New Session setup
+
+The setup page collects three required choices before `Start`:
+
+1. A clear task name or intention.
+2. A duration. The current product baseline remains a default 10-minute session, normal choices from 10 to 60 minutes, and a distinct 180-minute option.
+3. The applications needed for that task. This is an allow-list, not a list of apps to block.
+
+Tags and a longer optional note may remain available if they support the setup without competing with the three primary choices.
+
+### 3. Active focus session
+
+- Starting a session hides the setup and creates two independent floating surfaces.
+- The **timer panel** shows only the remaining time in qyube styling. It can be closed by the user.
+- The remaining time also appears in the menu bar. Clicking it restores the timer panel after it is closed.
+- The **penguin panel** remains visible even when the timer panel is closed. It has no rectangular background or window card; the penguin, fishing rod, bucket, ice floe, and animation are the visible content.
+- Both surfaces must be usable as lightweight desktop companions, including over other apps and across Spaces where macOS permits it.
+
+### 4. Allowed apps and visual friction
+
+- qyube observes when the frontmost application changes during a focus session and compares it with the session allow-list.
+- An allowed app receives no distraction effect.
+- An unallowed app remains usable. qyube must not block launch, hide its controls, capture its keyboard input, prevent clicks, or force the user to stop the session.
+- qyube responds with a temporary, click-through visual interruption above that app. The first prototype should explore an increasing school of fish that partially crosses the app window while leaving the user able to read and interact with it.
+- A secondary visual response can be tested, such as a brief dimming or an animated light change, only if it does not cause flicker, visual strain, or obscure important content.
+- The penguin can react with brief contextual animation. Its personality should be warm and playful, never shaming or hostile.
+- The response is intentional friction: it makes an unplanned detour less pleasant to linger in while preserving an emergency escape hatch for messaging, calls, and work exceptions.
+
+### 5. Fishing, catches, and ending a session
+
+- Fishing continues during the entire active session, independent of whether the user opens an allowed or unallowed app.
+- Preserve the approved loop: randomized idle wait, bite cue, reel/pull, deposit into bucket, then return to idle fishing.
+- Preserve the five-minute banking threshold. Catches are visible from the start but remain provisional until five active minutes. Stopping earlier removes provisional catches; eligible deposited catches bank as already specified.
+- At the time limit, present the user with `Continue` or `Done`.
+- `Done` leads to the Fishing Report, which shows the session’s catch result, discoveries, and relevant highlights, then returns the user to the main app.
+- The exact behavior of `Continue` (additional duration choice and how the result groups in the report) is a prototype question. It must preserve the existing banking and count rules.
+
+## Core Product Surfaces
+
+| Surface | Purpose in the macOS pivot |
+|---|---|
+| Main app | Start a session; view Insight and Catalog when no session is active. |
+| New Session | Name one task, choose duration, select allowed apps, then start. |
+| Timer panel | Show remaining time only; close and restore from the menu bar. |
+| Penguin panel | Transparent always-present fishing companion and catch animation. |
+| Distraction overlay | Click-through fish-based visual friction over an unallowed foreground app. |
+| Fishing Report | Reveal session catches when the user finishes. |
+| Catalog | Illustrated collectible cards; discovery state, rarity, details, and counts. |
+| Insight | Session history, focus time, completion/interruption data, task/tag distribution, and unallowed-app detours where permission and platform constraints allow. |
+
+## Collection Contract
+
+- Catalog is the phase-one collection experience.
+- It displays all available collectibles as illustrated cards. Undiscovered entries may use silhouettes; discovered entries show art, name, rarity, and total count.
+- The Catalog count increases only from banked deposited catches.
+- Existing collection content remains safe when a session is interrupted after the five-minute threshold.
+- Aquarium, manual decoration, and biome presentation are deferred from this macOS prototype and should not determine its navigation or core layout.
+
+## Insight Contract
+
+- Insight is supportive evidence of focus, never a punitive scorecard.
+- It records focus time, completed and interrupted sessions, session task, duration, and catch summaries.
+- It may record unallowed foreground-app detours only after the user gives the appropriate macOS permission and understands what is recorded.
+- For the first prototype, use representative data and focus on whether a user can understand their session outcome at a glance.
+
+## Technical Prototype Constraints
+
+- The user must opt into the macOS permission needed to observe other foreground apps. If permission is unavailable, qyube still runs focus sessions, fishing, timer, Catalog, and Insight without app-aware visual friction.
+- qyube can detect the frontmost app through macOS workspace notifications. Accurate window-relative overlay placement may require Accessibility access and must be proven in a small technical spike.
+- The overlay must be qyube-owned and mouse-transparent, so the foreground app keeps receiving normal input.
+- macOS App Sandbox restricts the use of Accessibility APIs. Before committing to a Mac App Store delivery promise for window-following effects, validate the exact capability and distribution path with a sandboxed build.
+- The prototype must provide Reduce Motion support: replace fish swarms and reactive motion with a restrained static cue.
+
+## Prototype Deliverables
+
+1. **Main app / New Session** — a high-fidelity flow from `New Session` to task, duration, and allowed-app selection.
+2. **Active-session companions** — timer-open, timer-closed, and menu-bar restoration states, with the transparent penguin panel unchanged across them.
+3. **Distraction response** — a visual state showing an allowed app uninterrupted and an unallowed app receiving click-through fish interference.
+4. **Session end** — `Continue`, `Done`, Fishing Report, and return to the main app.
+5. **Catalog and Insight** — enough screens and sample states to test their place in the home experience.
+6. **Technical spike** — a minimal macOS proof of frontmost-app detection, click-through overlay behavior, and permission fallback.
 
 ## Phases
 
-### Phase 1: Consolidate Approved Product Decisions
+### Phase 1: Freeze macOS Pivot Contract
 
-- [x] Capture the product direction, platform boundaries, and business model.
-- [x] Capture all decisions from the design interview.
-- [x] Record constraints, edge cases, and deferred scope.
+- [x] Rename the product direction to qyube and establish its Antarctic visual identity.
+- [x] Retain fishing, catch banking, Fishing Report, Insight, and Catalog.
+- [x] Defer Aquarium from phase one.
+- [x] Define the single-task, allowed-app session setup.
+- [x] Define the independent timer and penguin companion behavior.
+- [x] Define visual friction instead of total app blocking.
 - **Status:** complete
 
-### Phase 2: Verify Existing Product Baseline and External Constraints
+### Phase 2: Prototype the Session Journey
 
-- [x] Review the existing macOS project and its current documentation.
-- [x] Inspect the fishing-animation reference and aquarium reference.
-- [x] Verify Apple platform constraints, Deep Focus APIs, purchase model, and sync approach.
-- **Status:** complete
+- [ ] Create and review the New Session experience.
+- [ ] Create and review active companion states.
+- [ ] Create and review the unallowed-app visual interruption.
+- [ ] Create and review completion, Continue, Done, and Fishing Report states.
+- **Status:** in progress
 
-### Phase 3: Write Product and Technical Specification
+### Phase 3: Validate macOS Interaction Feasibility
 
-- [x] Define terminology, session rules, reward rules, collection rules, analytics, and platform behavior.
-- [x] Define the Deep Focus, data, sync, animation, accessibility, privacy, and monetization contracts.
-- [x] Review the specification against every approved decision and existing-code constraints.
-- **Status:** complete
+- [ ] Prove foreground-app detection and no-permission fallback.
+- [ ] Prove a mouse-transparent qyube overlay does not interfere with the underlying app.
+- [ ] Determine whether a window-relative overlay can ship under the intended sandbox/distribution constraints.
+- [ ] Record performance, accessibility, multi-display, full-screen, and Space behavior.
+- **Status:** pending
 
-### Phase 4: Build the Four-Month Release-1 Roadmap
+### Phase 4: Turn the Accepted Prototype into an Implementation Plan
 
-- [x] Divide Release 1 into achievable weekly milestones.
-- [x] Include validation gates and the Deep Focus entitlement contingency.
-- [x] Review sequencing and dependencies against the current codebase.
-- **Status:** complete
+- [ ] Update the macOS architecture and data plan from the accepted prototype.
+- [ ] Define the product state machine and persistence boundaries.
+- [ ] Sequence implementation milestones and validation gates.
+- **Status:** pending
 
-### Phase 5: Deliver and Verify Documentation
+### Phase 5: Revisit iOS Separately
 
-- [x] Confirm files are present, internally consistent, and readable.
-- [x] Update progress and close this documentation task.
-- **Status:** complete
-
-## Key Questions
-
-1. What product rules must remain invariant across macOS and iOS? Answered in `PRODUCT_SPEC.md`.
-2. What should be deferred so Release 1 remains achievable in four months? Answered in `ROADMAP.md`.
-3. How can iOS Deep Focus ship safely despite Apple entitlement risk? Release without it if approval is late.
-4. How can Universal Purchase remain true while the legacy Mac build used direct DMG/Sparkle? Make Mac App Store the primary Release-1 channel; validate retained Mac tracking under sandbox/review constraints in Week 1.
+- [ ] Review iOS only after the macOS prototype and implementation approach are accepted.
+- **Status:** deferred
 
 ## Decisions Made
 
 | Decision | Rationale |
 |---|---|
-| Dzenn is a focus session app, not a conventional Pomodoro/break app | The user selects an intentional timer; the core reward loop is fishing and collection. |
-| Release 1 targets macOS 14+ and iOS 17+ | Enables the selected SwiftUI, SwiftData, Metal, and Screen Time foundations. |
-| Rewards bank after five active minutes | Prevents very short farming while not punishing a legitimate interrupted focus session. |
-| Catalog counts species; Aquarium renders one instance per discovered species/item | Keeps the collection meaningful while keeping the aquarium performant. |
-| Use an append-only completed-session sync model | Avoids live-timer conflicts and duplicate collection totals across devices. |
-| Release without Deep Focus if Apple entitlement approval is late | One entitlement must not block the whole product. |
+| Product name is qyube | The name derives from “cube” and supports a cute Antarctic penguin identity. |
+| macOS pivots toward a single-task, allowed-app workflow | It gives the focus session a clearer intention and a useful desktop intervention point. |
+| Unallowed apps remain usable | Visual friction preserves access for legitimate exceptions and emergencies. |
+| Fish interference is the first distraction response | It fits the fishing collection world and can become gradually more distracting without blocking work. |
+| Penguin fishing remains the central reward loop | The animated catch and post-session result are qyube’s principal distinction from Kiki. |
+| Timer and penguin are separate surfaces | The user can remove the time panel without losing the companion. |
+| Catalog replaces Aquarium in phase one | It retains collection value while reducing visual-system scope. |
+| iOS is deferred | The current design work and technical uncertainty are specific to macOS. |
+
+## Open Prototype Questions
+
+1. What exact additional-duration interaction follows `Continue`?
+2. Does qyube show the fish effect around the whole app window, along its edge, or in a small companion cluster near the active area?
+3. How quickly should the interruption escalate before it becomes distracting enough to redirect attention but remains safe and accessible?
+4. How should a user temporarily mark an unallowed app as necessary without turning the allow-list into a loophole?
+5. Which Insight metrics are valuable enough to show on the main app without making the product feel like surveillance?
 
 ## Errors Encountered
 
 | Error | Attempt | Resolution |
 |---|---:|---|
-| Web-result formatter assumed an MCP content array | 1 | Used direct JSON output; no research data was lost. |
-| Markdown validation found metadata trailing whitespace | 1 | Removed the hard-break spaces; normal paragraph lines preserve the same content. |
-| Completion-log patch used an outdated line context | 1 | Read the current files and used a narrower patch. |
+| `codex/` branch prefix could not be created | 1 | The local Git reference layout rejected the nested branch name; created `qyube-macos-pivot-plan` instead. |
+| Sandbox could not write Git refs | 1 | Created the requested branch with approved Git access. |
 
 ## Notes
 
-- This plan governs documentation work only; it does not authorize implementation changes yet.
-- Existing unrelated working-tree changes remain untouched.
+- This plan governs macOS prototype and planning work. It does not authorize broad implementation changes yet.
+- Existing working-tree changes are user-owned and remain outside this documentation commit.
