@@ -57,6 +57,19 @@ Use the current qyube floating reference:
 
 Do not introduce blue into this floating companion artwork. Keep the hand-painted charcoal/watercolor texture, soft irregular edges, and small, friendly penguin proportions. The latest approved sleeping reference has no glasses; do not add glasses unless the art direction is deliberately revised.
 
+### Approved home and New Session prototype
+
+Use [01-home-floating-form.png](../qyube-concepts-v3/01-home-floating-form.png) as the approved visual baseline for the macOS home screen and New Session setup. It is the current reference for the app's system design, composition, and palette; later prototype screens should feel like part of this same product.
+
+- **Composition:** a narrow left sidebar; a large, warm-white work area; the penguin fishing illustration centered in the open area; and a distinct New Session card floating on the right. Keep generous breathing room while giving the form enough visual weight to read as the primary action.
+- **Navigation:** Focus, Catalog, and Insight in the sidebar, with Settings anchored at the bottom. Aquarium remains deferred.
+- **Form hierarchy:** task name, focus mode, relevant app selection, duration, then one clear Start session action. The app list is conditional on the selected mode; Timer only does not need app selection.
+- **Palette order:** warm/off-white is dominant, charcoal is used for text and primary controls, warm gray supports surfaces and secondary text, and muted terracotta is a small action accent. Do not add blue to this approved direction.
+- **Surface treatment:** use restrained macOS window chrome, fine neutral borders, softly elevated white cards, and rounded controls. Add warmth through illustration texture and small tactile details rather than decorative background imagery.
+- **Artwork boundary:** this home-screen illustration is a compositional reference. Its visible splash/ripple belongs to the home artwork only; it does not override the floating companion rule below, where the initial shared scene has no prominent ripple layer. Keep the floating companion transparent outside its foreground artwork.
+
+Treat the screenshot as the selected prototype baseline, not a pixel-perfect production spec. Preserve its visual hierarchy and theme while refining spacing, accessibility, and macOS-native interaction details in later prototype passes.
+
 ### Fixed scene layer
 
 The following scene elements are shared by all states and must use the same source assets and anchor coordinates:
@@ -232,6 +245,7 @@ Existing generated concepts are visual references, not final production layers. 
 
 ## 13. References
 
+- [Approved qyube home and New Session prototype](../qyube-concepts-v3/01-home-floating-form.png).
 - User-supplied macOS screenshot: Kiki timer and character placement/scale reference (2940 × 1912 px).
 - User-supplied qyube active-fishing art and sleeping-penguin pose references.
 - [Apple SpriteKit](https://developer.apple.com/documentation/spritekit)

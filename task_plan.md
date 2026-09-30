@@ -21,7 +21,9 @@ The penguin continuously fishes during a session. This fishing loop, the catch b
 
 The home UI and floating companion now use a calm neutral palette: white, charcoal, warm gray, and a small terracotta accent. Do not add blue to the latest floating companion artwork. The UI should have illustrated warmth and small tactile details rather than an austere minimalist productivity look.
 
-The floating companion's character states, art constraints, screenshot-derived size estimates, event timing, and permission fallback are specified in [design/qyube-floating/ART_DIRECTION.md](design/qyube-floating/ART_DIRECTION.md). That document is the implementation-facing source of truth for the companion renderer.
+The current approved home and New Session visual baseline is [01-home-floating-form.png](design/qyube-concepts-v3/01-home-floating-form.png): a warm-white workspace, compact left navigation, centered fishing illustration, and elevated New Session card on the right. Its palette and hierarchy should carry through the remaining macOS prototype screens.
+
+The floating companion's character states, art constraints, screenshot-derived size estimates, event timing, permission fallback, and the boundary between home artwork and transparent companion artwork are specified in [design/qyube-floating/ART_DIRECTION.md](design/qyube-floating/ART_DIRECTION.md). That document is the implementation-facing source of truth for the companion renderer.
 
 ## macOS Session Flow
 
