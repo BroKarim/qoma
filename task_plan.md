@@ -63,7 +63,7 @@ Tags and a longer optional note may remain available if they support the setup w
 
 - Starting a session hides the setup and creates two independent floating surfaces.
 - The **timer panel** shows only the remaining time in qyube styling. It can be closed by the user.
-- The remaining time also appears in the menu bar. Clicking it restores the timer panel after it is closed.
+- The remaining time also appears in the menu bar as text only, without a qyube logo or any accompanying icon. Clicking it restores the timer panel after it is closed. If the floating timer is already open, clicking the menu-bar time does nothing; it must not toggle, open a menu, or activate the main app.
 - The **penguin panel** remains visible even when the timer panel is closed. It has no rectangular background or window card; the penguin, fishing rod, bucket, ice floe, and animation are the visible content.
 - Both surfaces must be usable as lightweight desktop companions, including over other apps and across Spaces where macOS permits it.
 - Use the screenshot-derived starting footprints: timer about 210 × 143 pt; penguin artwork about 118 × 118 pt with a transparent companion canvas. These are estimates assuming a 2× Retina screenshot and must be checked on a target Mac.
@@ -151,6 +151,7 @@ Tags and a longer optional note may remain available if they support the setup w
 
 ### Phase 2: Prototype the Session Journey
 
+- Active-session open/closed visual drafts: [design/qyube-active-session-v1/README.md](design/qyube-active-session-v1/README.md). Generated for review; approval is pending.
 - [ ] Create and review the New Session experience.
 - [ ] Create and review active companion states.
 - [ ] Create and review the unallowed-app visual interruption.

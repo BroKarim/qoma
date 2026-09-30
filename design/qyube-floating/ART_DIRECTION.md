@@ -42,7 +42,15 @@ These are measurements from the user's screenshot, not official Kiki specificati
 
 The reference places the timer near the desktop's upper-left and the character near the lower-right. Treat these as initial placement cues only; persist each window's user-adjusted position and avoid covering the Dock, menu bar, or active controls.
 
-The timer and penguin are separate floating windows. Closing the timer hides only the timer. Its menu-bar item can restore it. The penguin companion stays visible while the session is active.
+The timer and penguin are separate floating windows. Closing the timer hides only the timer. The penguin companion stays visible while the session is active.
+
+### Menu-bar timer interaction (confirmed)
+
+- The qyube menu-bar item displays remaining time only, with no logo, clock icon, penguin icon, status dot, or app name.
+- Clicking the time when the floating timer is closed restores that same timer at its saved position with the current remaining time.
+- Clicking the time when the floating timer is already open does nothing. Do not toggle visibility, open a menu, activate the main app, move the panel, or restart the countdown.
+- Closing the floating timer does not pause/end the session or hide the penguin. Both time displays use the same session clock.
+- [Active-session visual drafts](../qyube-active-session-v1/README.md) show the open and closed states. These are awaiting user review.
 
 ## 4. Visual direction and fixed scene
 
@@ -231,6 +239,7 @@ Existing generated concepts are visual references, not final production layers. 
 
 ## 12. Acceptance criteria for the animation spike
 
+- [ ] Menu-bar item contains only remaining time; clicking restores a closed timer and is a no-op when the timer is open.
 - [ ] Timer panel target is approximately 210 × 143 pt on the reference Retina assumption; character artwork approximately 118 × 118 pt with a transparent canvas around it.
 - [ ] Floe and bucket remain pixel-registered while switching among all implemented states.
 - [ ] No prominent concentric water rings appear in the initial floating companion.
