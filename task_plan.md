@@ -83,6 +83,8 @@ Tags and a longer optional note may remain available if they support the setup w
 
 - Fishing continues during the entire active session, independent of whether the user opens an allowed or unallowed app.
 - Preserve the approved loop: randomized idle wait, bite cue, reel/pull, deposit into bucket, then return to idle fishing.
+- Catch visuals use one generic fish and one tree-shaped proxy for non-fish catches. After reeling, each goes directly into the bucket; no reveal, celebration, or post-deposit pause. Immediately resume casting/fishing, including for new or rare catches. Actual collectible art and identity appear in Catalog and Fishing Report; the proxy does not alter catch probabilities or banking rules.
+- Minimum artwork batch: [eight poses with and without glasses plus shared props](design/qyube-minimum-assets-v1/README.md). Both variants follow the watercolor charcoal reference and omit penguin shadows; final variant selection is pending review.
 - Preserve the five-minute banking threshold. Catches are visible from the start but remain provisional until five active minutes. Stopping earlier removes provisional catches; eligible deposited catches bank as already specified.
 - At the time limit, present the user with `Continue` or `Done`.
 - `Done` leads to the Fishing Report, which shows the session’s catch result, discoveries, and relevant highlights, then returns the user to the main app.

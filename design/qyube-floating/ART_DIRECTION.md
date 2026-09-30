@@ -22,6 +22,9 @@ The animation should support the focus loop without pulling attention away from 
 - **MUST NOT** add an arbitrary timer or debounce before reacting to an app-activation or session-state event.
 - **MUST NOT** change the ice floe, bucket, or overall companion layout to express a character state.
 - **MUST NOT** count a catch before it has been deposited in the bucket.
+- **MUST** move each reeled catch straight into the bucket, then immediately begin casting/fishing again. No reveal, proud hold, celebration, or post-deposit delay is added, including for new or rare catches.
+- **MUST** use one generic fish appearance for fish catches and one tree-shaped visual proxy for non-fish catches in the floating scene. Actual collectible identity remains separate from this rendering choice.
+- **MUST NOT** add a penguin cast-shadow layer.
 - **SHOULD** keep idle motion quiet and low-amplitude.
 - **SHOULD** prefer articulated watercolor/charcoal layers and property animation over full-canvas frame replacement.
 - **MAY** use a small number of authored image poses for expressive moments that do not deform well as a rig.
@@ -63,7 +66,9 @@ Use the current qyube floating reference:
 - graphite and warm gray;
 - very restrained muted terracotta for a small event accent.
 
-Do not introduce blue into this floating companion artwork. Keep the hand-painted charcoal/watercolor texture, soft irregular edges, and small, friendly penguin proportions. The latest approved sleeping reference has no glasses; do not add glasses unless the art direction is deliberately revised.
+Do not introduce blue into this floating companion artwork. Keep the hand-painted charcoal/watercolor texture, soft irregular edges, and small, friendly penguin proportions from [the no-ripple master reference](../qyube-floating-prototype/01-active-fishing-no-ripple.png). The user has requested two comparison variants: without glasses and with glasses. Both use the same character and scene; neither variant is selected as final yet. Do not add a separate penguin shadow.
+
+The first [minimum asset batch](../qyube-minimum-assets-v1/README.md) contains eight poses per variant and one shared property/effect sheet. It is a static artwork review batch; layered rigging and continuous animation remain a subsequent step.
 
 ### Approved home and New Session prototype
 
@@ -141,7 +146,7 @@ The animation is driven by explicit state events. The state controller changes s
 |---|---|---|---|
 | `sessionStarting` | User starts a valid session | Penguin hops onto the fixed floe with rod and bucket props; settles into fishing. | Setup animation completes, then `fishing`. |
 | `fishing` | Session active; allowed app active; no catch beat in progress | Quiet breathing and head/rod micro-movement. Run the existing fishing cadence. | Bite, pause, unallowed-app event, session completion, or stop. |
-| `catchCelebration` | A newly discovered or rare catch is deposited in the bucket | Penguin raises/presents the fish with a proud expression; hold briefly, then place it in the bucket. | Catch presentation completes, then `fishing`. |
+| `catchDeposit` | Reeling brings a generic fish or tree proxy out of the water | Guide the catch directly into the bucket with a continuous arc, without holding/presenting it. | On landing, apply existing catch eligibility rules and immediately resume casting/fishing. |
 | `sessionAlmostFinished` | Session enters its configured final interval | Keep fishing. Use one restrained cue such as a tiny bucket highlight or eye glance; no new pose and no repeated alerts. | Session reaches zero, is extended, or is stopped. |
 | `sessionCompleted` | Timer reaches zero | Stop the fishing loop, bring the rod in, stand/turn toward the bucket, and look satisfied. | User selects Continue or Done. |
 | `continue` | User selects Continue | Small upbeat reaction, cast the line again, and resume the same focus session according to the session contract. | Cast settles, then `fishing`. |
@@ -153,15 +158,17 @@ The animation is driven by explicit state events. The state controller changes s
 
 ### State precedence
 
-1. Session termination and `done` take precedence over catch celebration.
+1. Session termination and `done` take precedence over a catch sequence.
 2. Pausing cancels active character motion and enters sleep.
 3. A distraction event interrupts the current pose immediately. An in-flight catch that has not reached the bucket is not granted, consistent with the existing catch transaction rule.
-4. `catchCelebration` only begins after deposit and banking eligibility are satisfied.
+4. `catchDeposit` grants the catch only at bucket landing. New/rare catches have no separate celebration or hold; their actual identity is shown in Catalog and Fishing Report.
 5. `sessionAlmostFinished` is a low-priority modifier; it must not override sleep, distraction, a catch sequence, or completion.
 
 ## 7. Timing guidance
 
 The fishing cadence already defined for qyube remains authoritative: wait a randomized **6–10 seconds** for a bite; the reel/pull beat takes approximately **2–6 seconds**, followed by deposit. Keep the catch roll and banking transaction rules from the product plan unchanged.
+
+The user's no-pause requirement removes the reveal/celebration and post-deposit wait. Immediately start the next cast/fishing action when the item lands; the ordinary in-water wait for the next bite still applies. Fish and tree proxies follow the same path and timing. A tree proxy does not create a new collectible type or alter the catch roll.
 
 The values below are starting animation timings for prototype review, not product invariants. Tune them against the small floating size:
 
@@ -172,8 +179,8 @@ The values below are starting animation timings for prototype review, not produc
 | Session-start hop | 0.45–0.75 s | One compact hop and settle. |
 | Bite reaction | 0.12–0.25 s | Immediate snap/lean; begins on the event frame. |
 | Reeling body lean | 0.25–0.5 s | Strong readable lean with feet braced; rod bends. |
-| Fish reveal / celebration | 1.0–1.8 s | Lift fish; hold proud expression about 0.5–0.9 s. |
-| Deposit into bucket | 0.35–0.6 s | Fish arcs into bucket; deposit event fires on landing. |
+| Catch transfer into bucket | 0.35–0.6 s | Continuous arc from the reel directly to the bucket; no reveal hold. Deposit event fires on landing. |
+| Post-deposit pause | 0 s | Immediately start the next cast/fishing action for either catch proxy. |
 | Sleep transition | 0.6–1.0 s | Stop rod, yawn/curl, settle. |
 | Wake transition | 0.4–0.7 s | Open eyes, stretch, take up rod. |
 | Distraction reaction | 0.15–0.3 s to begin | Start immediately; hop burst lasts 0.8–1.5 s, then a quiet annoyed idle. |
@@ -226,10 +233,10 @@ Required to prototype the first state loop:
 
 - [ ] Fixed ice floe master asset (transparent PNG).
 - [ ] Fixed bucket master asset (transparent PNG).
-- [ ] Character sheet with locked proportions and neutral, fishing, curled sleeping, pulling, and presenting-catch poses.
+- [ ] Character sheet with locked proportions and neutral, fishing, casting, curled sleeping, pulling, direct-deposit, distraction-hop, and completed poses; compare glasses and no-glasses variants.
 - [ ] Separated character layers with documented pivot points for head, torso, flippers, feet, eyes, and beak.
 - [ ] Rod and line as separate controllable layers.
-- [ ] One small fish asset and one deposit effect.
+- [ ] One generic fish asset, one tree-shaped non-fish proxy, and one small splash/deposit effect.
 - [ ] Sleep `z z z` marks as a separate layer.
 - [ ] Distraction hop pose and a non-animated annoyed resting pose.
 - [ ] Reduce Motion static variants or supported transitions.
@@ -246,6 +253,7 @@ Existing generated concepts are visual references, not final production layers. 
 - [ ] Idle has subtle continuous breathing and at least one head/rod micro-movement without distracting loops.
 - [ ] App-policy and session-state triggers begin their visual response on the first rendered frame after event delivery.
 - [ ] Catch is awarded only after deposit; interruption before deposit does not grant it.
+- [ ] Both catch proxies travel directly to the bucket, then fishing resumes immediately; no catch-celebration hold or cooldown.
 - [ ] Pause enters sleep; resume returns to fishing on the same fixed scene.
 - [ ] Permission denial preserves the New Session form and offers retry or Timer only.
 - [ ] Permission denial does not disable timer/fishing behavior when the user chooses Timer only.
