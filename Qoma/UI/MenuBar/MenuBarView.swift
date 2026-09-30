@@ -84,6 +84,23 @@ struct MenuBarView: View {
                         }
                         .disabled(!UpdaterManager.shared.canCheckForUpdates)
                         Button("Contact Us") { self.openContact() }
+                        #if DEBUG
+                        Divider()
+                        Menu("Companion preview") {
+                            Button("Start fishing loop") { WindowManager.shared.preview(.start) }
+                            Button("Catch now (while fishing)") { WindowManager.shared.preview(.bite) }
+                            Button("Sleep") { WindowManager.shared.preview(.sleep) }
+                            Button("Resume fishing") { WindowManager.shared.preview(.resume) }
+                            Button("Distraction hop") { WindowManager.shared.preview(.distract) }
+                            Button("Session completed") { WindowManager.shared.preview(.complete) }
+                            Button("Stop before five minutes") { WindowManager.shared.preview(.stopEarly) }
+                            Divider()
+                            Button("Actual size · 118 pt artwork") { WindowManager.shared.preview(.actualSize) }
+                            Button("Inspect at 2× size") { WindowManager.shared.preview(.largeSize) }
+                            Button("Dismiss companion") { WindowManager.shared.preview(.dismiss) }
+                        }
+                        .disabled(self.session.isActive)
+                        #endif
                         Divider()
                         Button("Quit") { NSApp.terminate(nil) }
                             .keyboardShortcut("q", modifiers: .command)
@@ -163,7 +180,6 @@ struct MenuBarView: View {
 
     private func cancelSession() {
         self.session.stop()
-        WindowManager.shared.hideFloating()
     }
 
     private func clampMinutes(_ value: Int) -> Int {

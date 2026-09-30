@@ -66,9 +66,9 @@ Use the current qyube floating reference:
 - graphite and warm gray;
 - very restrained muted terracotta for a small event accent.
 
-Do not introduce blue into this floating companion artwork. Keep the hand-painted charcoal/watercolor texture, soft irregular edges, and small, friendly penguin proportions from [the no-ripple master reference](../qyube-floating-prototype/01-active-fishing-no-ripple.png). The user has requested two comparison variants: without glasses and with glasses. Both use the same character and scene; neither variant is selected as final yet. Do not add a separate penguin shadow.
+Do not introduce blue into this floating companion artwork. Keep the hand-painted charcoal/watercolor texture, soft irregular edges, and small, friendly penguin proportions from [the no-ripple master reference](../qyube-floating-prototype/01-active-fishing-no-ripple.png). The user selected the **no-glasses variant** as the primary candidate for the native prototype. Keep the glasses sheet as an alternative reference. Do not add a separate penguin shadow.
 
-The first [minimum asset batch](../qyube-minimum-assets-v1/README.md) contains eight poses per variant and one shared property/effect sheet. It is a static artwork review batch; layered rigging and continuous animation remain a subsequent step.
+The first [minimum asset batch](../qyube-minimum-assets-v1/README.md) contains eight poses per variant and one shared property/effect sheet. The [native companion UI prototype](../qyube-companion-animation/README.md) now extracts the selected sheet into registered poses and articulated layers, renders a continuous fishing loop in SpriteKit, and connects it to the existing menu-bar session controls.
 
 ### Approved home and New Session prototype
 

@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "CompanionTorso.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

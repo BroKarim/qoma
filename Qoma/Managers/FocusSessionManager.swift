@@ -72,10 +72,13 @@ final class FocusSessionManager: ObservableObject {
     }
 
     func stop() {
+        let activeSeconds = self.timerService.elapsedTime(totalDuration: self.duration)
         finalizeAnalyticsSession(completed: false, interruptedReason: "User stopped")
         self.soundAlertPlayer.stop()
-        self.timerService.stop()
+        // Suppress the synchronous zero-time publisher before intentionally stopping.
         self.completionHandled = true
+        self.timerService.stop()
+        WindowManager.shared.stopCompanion(activeSeconds: activeSeconds)
         self.resetSession()
         Logger.session.info("Stopped focus session")
     }
@@ -84,6 +87,7 @@ final class FocusSessionManager: ObservableObject {
         guard self.isActive, !self.isPaused else { return }
         self.timerService.pause()
         self.isPaused = true
+        WindowManager.shared.pauseCompanion(true)
         self.activityTracker.pauseTracking()
         Logger.session.info("Paused focus session")
     }
@@ -92,6 +96,7 @@ final class FocusSessionManager: ObservableObject {
         guard self.isActive, self.isPaused else { return }
         self.timerService.resume()
         self.isPaused = false
+        WindowManager.shared.pauseCompanion(false)
         if let sessionRecord = self.activeSessionRecord {
             self.activityTracker.resumeTracking(sessionID: sessionRecord.id)
         }
@@ -115,12 +120,12 @@ final class FocusSessionManager: ObservableObject {
                 finalizeAnalyticsSession(completed: true)
             }
             self.prepareBreak(type: .short)
-            WindowManager.shared.hideFloating()
+            WindowManager.shared.completeCompanion()
             MenuBarController.shared?.showPopover()
             Logger.session.info("Focus timer finished — showing break")
         case .shortBreak, .longBreak:
             self.completeSession(mode: self.state.mode ?? .quickSession)
-            WindowManager.shared.hideFloating()
+            WindowManager.shared.completeCompanion()
             MenuBarController.shared?.showPopover()
             Logger.session.info("Break timer finished — showing menu bar")
         case .completed, .none:

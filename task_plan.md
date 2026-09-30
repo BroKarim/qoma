@@ -10,6 +10,8 @@ This document replaces the previous Dzenn documentation plan for the macOS work.
 
 Ready for prototype iteration — the macOS pivot contract is recorded below.
 
+The native companion UI milestone is now implemented for review: [run instructions and validation](design/qyube-companion-animation/README.md). It uses the selected no-glasses rig and temporarily replaces the old floating timer content while retaining MenuBarView controls. Full home UI and production rewards remain separate work.
+
 ## Product Direction
 
 qyube is a focused-work companion, not a conventional Pomodoro app. A user names one concrete task, selects the apps they need, chooses a duration, and starts. The main app then gives way to two independent desktop companions:
@@ -84,7 +86,7 @@ Tags and a longer optional note may remain available if they support the setup w
 - Fishing continues during the entire active session, independent of whether the user opens an allowed or unallowed app.
 - Preserve the approved loop: randomized idle wait, bite cue, reel/pull, deposit into bucket, then return to idle fishing.
 - Catch visuals use one generic fish and one tree-shaped proxy for non-fish catches. After reeling, each goes directly into the bucket; no reveal, celebration, or post-deposit pause. Immediately resume casting/fishing, including for new or rare catches. Actual collectible art and identity appear in Catalog and Fishing Report; the proxy does not alter catch probabilities or banking rules.
-- Minimum artwork batch: [eight poses with and without glasses plus shared props](design/qyube-minimum-assets-v1/README.md). Both variants follow the watercolor charcoal reference and omit penguin shadows; final variant selection is pending review.
+- Minimum artwork batch: [eight poses with and without glasses plus shared props](design/qyube-minimum-assets-v1/README.md). The no-glasses variant is the selected candidate for the native companion UI prototype; both follow the watercolor charcoal reference and omit penguin shadows.
 - Preserve the five-minute banking threshold. Catches are visible from the start but remain provisional until five active minutes. Stopping earlier removes provisional catches; eligible deposited catches bank as already specified.
 - At the time limit, present the user with `Continue` or `Done`.
 - `Done` leads to the Fishing Report, which shows the session’s catch result, discoveries, and relevant highlights, then returns the user to the main app.

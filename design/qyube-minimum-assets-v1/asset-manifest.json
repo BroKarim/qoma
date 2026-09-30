@@ -1,0 +1,362 @@
+[
+  {
+    "canvas" : [
+      512,
+      512
+    ],
+    "groundAnchorTopLeft" : [
+      256,
+      450
+    ],
+    "name" : "CompanionPoseStanding",
+    "sourceRect" : [
+      46,
+      116,
+      320,
+      330
+    ]
+  },
+  {
+    "canvas" : [
+      512,
+      512
+    ],
+    "groundAnchorTopLeft" : [
+      256,
+      450
+    ],
+    "name" : "CompanionPoseFishing",
+    "sourceRect" : [
+      466,
+      133,
+      410,
+      316
+    ]
+  },
+  {
+    "canvas" : [
+      512,
+      512
+    ],
+    "groundAnchorTopLeft" : [
+      256,
+      450
+    ],
+    "name" : "CompanionPoseCasting",
+    "sourceRect" : [
+      839,
+      6,
+      497,
+      441
+    ]
+  },
+  {
+    "canvas" : [
+      512,
+      512
+    ],
+    "groundAnchorTopLeft" : [
+      256,
+      450
+    ],
+    "name" : "CompanionPosePulling",
+    "sourceRect" : [
+      1335,
+      8,
+      439,
+      440
+    ]
+  },
+  {
+    "canvas" : [
+      512,
+      512
+    ],
+    "groundAnchorTopLeft" : [
+      256,
+      450
+    ],
+    "name" : "CompanionPoseDeposit",
+    "sourceRect" : [
+      35,
+      513,
+      435,
+      325
+    ]
+  },
+  {
+    "canvas" : [
+      512,
+      512
+    ],
+    "groundAnchorTopLeft" : [
+      256,
+      450
+    ],
+    "name" : "CompanionPoseSleeping",
+    "sourceRect" : [
+      505,
+      578,
+      399,
+      249
+    ]
+  },
+  {
+    "canvas" : [
+      512,
+      512
+    ],
+    "groundAnchorTopLeft" : [
+      256,
+      450
+    ],
+    "name" : "CompanionPoseHop",
+    "sourceRect" : [
+      929,
+      478,
+      386,
+      335
+    ]
+  },
+  {
+    "canvas" : [
+      512,
+      512
+    ],
+    "groundAnchorTopLeft" : [
+      256,
+      450
+    ],
+    "name" : "CompanionPoseCompleted",
+    "sourceRect" : [
+      1380,
+      490,
+      350,
+      350
+    ]
+  },
+  {
+    "canvas" : [
+      217,
+      194
+    ],
+    "groundAnchorTopLeft" : [
+
+    ],
+    "name" : "CompanionHead",
+    "sourceRect" : [
+      104,
+      119,
+      217,
+      194
+    ]
+  },
+  {
+    "canvas" : [
+      220,
+      166
+    ],
+    "groundAnchorTopLeft" : [
+
+    ],
+    "name" : "CompanionTorso",
+    "sourceRect" : [
+      101,
+      254,
+      220,
+      166
+    ]
+  },
+  {
+    "canvas" : [
+      66,
+      129
+    ],
+    "groundAnchorTopLeft" : [
+
+    ],
+    "name" : "CompanionFlipperLeft",
+    "sourceRect" : [
+      64,
+      262,
+      66,
+      129
+    ]
+  },
+  {
+    "canvas" : [
+      69,
+      147
+    ],
+    "groundAnchorTopLeft" : [
+
+    ],
+    "name" : "CompanionFlipperRight",
+    "sourceRect" : [
+      288,
+      254,
+      69,
+      147
+    ]
+  },
+  {
+    "canvas" : [
+      220,
+      40
+    ],
+    "groundAnchorTopLeft" : [
+
+    ],
+    "name" : "CompanionFeet",
+    "sourceRect" : [
+      107,
+      405,
+      220,
+      40
+    ]
+  },
+  {
+    "canvas" : [
+      520,
+      230
+    ],
+    "groundAnchorTopLeft" : [
+
+    ],
+    "name" : "CompanionFloe",
+    "sourceRect" : [
+      29,
+      215,
+      520,
+      230
+    ]
+  },
+  {
+    "canvas" : [
+      255,
+      265
+    ],
+    "groundAnchorTopLeft" : [
+
+    ],
+    "name" : "CompanionBucket",
+    "sourceRect" : [
+      586,
+      180,
+      255,
+      265
+    ]
+  },
+  {
+    "canvas" : [
+      288,
+      144
+    ],
+    "groundAnchorTopLeft" : [
+
+    ],
+    "name" : "CompanionFish",
+    "sourceRect" : [
+      932,
+      265,
+      288,
+      144
+    ]
+  },
+  {
+    "canvas" : [
+      190,
+      238
+    ],
+    "groundAnchorTopLeft" : [
+
+    ],
+    "name" : "CompanionTree",
+    "sourceRect" : [
+      164,
+      618,
+      190,
+      238
+    ]
+  },
+  {
+    "canvas" : [
+      346,
+      322
+    ],
+    "groundAnchorTopLeft" : [
+
+    ],
+    "name" : "CompanionRod",
+    "sourceRect" : [
+      475,
+      521,
+      346,
+      322
+    ]
+  },
+  {
+    "canvas" : [
+      85,
+      328
+    ],
+    "groundAnchorTopLeft" : [
+
+    ],
+    "name" : "CompanionLine",
+    "sourceRect" : [
+      1025,
+      510,
+      85,
+      328
+    ]
+  },
+  {
+    "canvas" : [
+      244,
+      177
+    ],
+    "groundAnchorTopLeft" : [
+
+    ],
+    "name" : "CompanionSleepMarks",
+    "sourceRect" : [
+      150,
+      930,
+      244,
+      177
+    ]
+  },
+  {
+    "canvas" : [
+      234,
+      179
+    ],
+    "groundAnchorTopLeft" : [
+
+    ],
+    "name" : "CompanionSplash",
+    "sourceRect" : [
+      551,
+      968,
+      234,
+      179
+    ]
+  },
+  {
+    "canvas" : [
+      96,
+      244
+    ],
+    "groundAnchorTopLeft" : [
+
+    ],
+    "name" : "CompanionBite",
+    "sourceRect" : [
+      989,
+      926,
+      96,
+      244
+    ]
+  }
+]
