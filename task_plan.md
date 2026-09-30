@@ -2,7 +2,7 @@
 
 ## Goal
 
-Define the macOS-first product direction and prototype scope for **qyube**: a cozy, Antarctic focus companion where a glasses-wearing penguin fishes through a focus session, while gentle visual friction discourages unplanned app switching.
+Define the macOS-first product direction and prototype scope for **qyube**: a cozy, Antarctic focus companion where a watercolor penguin fishes through a focus session, while gentle visual friction discourages unplanned app switching.
 
 This document replaces the previous Dzenn documentation plan for the macOS work. The iOS product plan is intentionally unchanged and will be revisited later.
 
@@ -19,7 +19,9 @@ qyube is a focused-work companion, not a conventional Pomodoro app. A user names
 
 The penguin continuously fishes during a session. This fishing loop, the catch banking rules, and the post-session Fishing Report remain a defining part of qyube. They are not replaced by the app-selection pivot.
 
-The visual world is cozy Antarctic: snow white is dominant, igloo and ice blue are secondary, and penguin gray is an accent. The UI should have illustrated warmth and small tactile details rather than an austere minimalist productivity look.
+The home UI and floating companion now use a calm neutral palette: white, charcoal, warm gray, and a small terracotta accent. Do not add blue to the latest floating companion artwork. The UI should have illustrated warmth and small tactile details rather than an austere minimalist productivity look.
+
+The floating companion's character states, art constraints, screenshot-derived size estimates, event timing, and permission fallback are specified in [design/qyube-floating/ART_DIRECTION.md](design/qyube-floating/ART_DIRECTION.md). That document is the implementation-facing source of truth for the companion renderer.
 
 ## macOS Session Flow
 
@@ -62,6 +64,7 @@ Tags and a longer optional note may remain available if they support the setup w
 - The remaining time also appears in the menu bar. Clicking it restores the timer panel after it is closed.
 - The **penguin panel** remains visible even when the timer panel is closed. It has no rectangular background or window card; the penguin, fishing rod, bucket, ice floe, and animation are the visible content.
 - Both surfaces must be usable as lightweight desktop companions, including over other apps and across Spaces where macOS permits it.
+- Use the screenshot-derived starting footprints: timer about 210 × 143 pt; penguin artwork about 118 × 118 pt with a transparent companion canvas. These are estimates assuming a 2× Retina screenshot and must be checked on a target Mac.
 
 ### 4. Allowed apps and visual friction
 
@@ -71,6 +74,7 @@ Tags and a longer optional note may remain available if they support the setup w
 - qyube responds with a temporary, click-through visual interruption above that app. The first prototype should explore an increasing school of fish that partially crosses the app window while leaving the user able to read and interact with it.
 - A secondary visual response can be tested, such as a brief dimming or an animated light change, only if it does not cause flicker, visual strain, or obscure important content.
 - The penguin can react with brief contextual animation. Its personality should be warm and playful, never shaming or hostile.
+- The reaction begins on the first rendered frame after a foreground-app event. Do not add a debounce or artificial waiting interval.
 - The response is intentional friction: it makes an unplanned detour less pleasant to linger in while preserving an emergency escape hatch for messaging, calls, and work exceptions.
 
 ### 5. Fishing, catches, and ending a session
@@ -112,7 +116,9 @@ Tags and a longer optional note may remain available if they support the setup w
 
 ## Technical Prototype Constraints
 
-- The user must opt into the macOS permission needed to observe other foreground apps. If permission is unavailable, qyube still runs focus sessions, fishing, timer, Catalog, and Insight without app-aware visual friction.
+- Ask for app-monitoring permission in context, only when a selected mode needs it. If permission is denied during setup, return to the same New Session form with task, duration, and selections preserved; offer retry/Open System Settings or switch to Timer only. Do not start a partial session or show an error pose.
+- If permission is revoked during a session, keep the timer and fishing alive, stop app-aware behavior immediately, and show a small non-modal status message. Do not discard the session.
+- If permission is unavailable, qyube still runs focus sessions, fishing, timer, Catalog, and Insight without app-aware visual friction.
 - qyube can detect the frontmost app through macOS workspace notifications. Accurate window-relative overlay placement may require Accessibility access and must be proven in a small technical spike.
 - The overlay must be qyube-owned and mouse-transparent, so the foreground app keeps receiving normal input.
 - macOS App Sandbox restricts the use of Accessibility APIs. Before committing to a Mac App Store delivery promise for window-following effects, validate the exact capability and distribution path with a sandboxed build.
@@ -126,6 +132,7 @@ Tags and a longer optional note may remain available if they support the setup w
 4. **Session end** — `Continue`, `Done`, Fishing Report, and return to the main app.
 5. **Catalog and Insight** — enough screens and sample states to test their place in the home experience.
 6. **Technical spike** — a minimal macOS proof of frontmost-app detection, click-through overlay behavior, and permission fallback.
+7. **Floating art/animation contract** — fixed-scene rules, character identity, screenshot-derived window sizes, state table, timing guidance, and permission fallback in `design/qyube-floating/ART_DIRECTION.md`.
 
 ## Phases
 
@@ -137,6 +144,7 @@ Tags and a longer optional note may remain available if they support the setup w
 - [x] Define the single-task, allowed-app session setup.
 - [x] Define the independent timer and penguin companion behavior.
 - [x] Define visual friction instead of total app blocking.
+- [x] Record floating companion art and animation requirements in `design/qyube-floating/ART_DIRECTION.md`.
 - **Status:** complete
 
 ### Phase 2: Prototype the Session Journey
@@ -177,6 +185,10 @@ Tags and a longer optional note may remain available if they support the setup w
 | Fish interference is the first distraction response | It fits the fishing collection world and can become gradually more distracting without blocking work. |
 | Penguin fishing remains the central reward loop | The animated catch and post-session result are qyube’s principal distinction from Kiki. |
 | Timer and penguin are separate surfaces | The user can remove the time panel without losing the companion. |
+| Floating dimensions use the screenshot as a starting reference | The estimated 210 × 143 pt timer and 118 pt penguin preserve Kiki's approximate desktop footprint without treating it as a published specification. |
+| Every state reuses the fixed floe and bucket | Stable scene geometry keeps the penguin's states visually registered. |
+| App and session triggers change logical state immediately | The required zero-delay reaction stays responsive; a short animation transition is visual motion, not reaction delay. |
+| Permission denial keeps the New Session draft and offers Timer only | Graceful degradation lets the user complete focus without app monitoring and avoids losing setup input. |
 | Catalog replaces Aquarium in phase one | It retains collection value while reducing visual-system scope. |
 | iOS is deferred | The current design work and technical uncertainty are specific to macOS. |
 
@@ -199,3 +211,4 @@ Tags and a longer optional note may remain available if they support the setup w
 
 - This plan governs macOS prototype and planning work. It does not authorize broad implementation changes yet.
 - Existing working-tree changes are user-owned and remain outside this documentation commit.
+- Floating animation implementation details live in `design/qyube-floating/ART_DIRECTION.md`.

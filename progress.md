@@ -109,3 +109,22 @@
 |---|---|---:|---|
 | 2026-09-29 | Git rejected a codex/ prefixed branch | 1 | Used qyube-macos-pivot-plan; the user allowed any branch name. |
 | 2026-09-29 | Sandbox could not write the Git ref | 1 | Created the branch with approved Git access. |
+
+## Session: 2026-09-30
+
+### Floating companion art and animation contract
+
+- **Status:** complete
+- Actions taken:
+  - Analyzed the user-provided 2940 × 1912 macOS screenshot and recorded approximate Kiki timer and character footprints, with an explicit 2× Retina assumption.
+  - Wrote an implementation-facing art direction and animation contract covering fixed scene layers, penguin identity, states, state precedence, immediate event response, timing guidance, Reduce Motion, and permission fallback.
+  - Updated the root plan and findings to point to the floating companion contract and the latest neutral palette.
+  - Created and switched to the requested branch qyube-floating-art-spec.
+- Files modified:
+  - design/qyube-floating/ART_DIRECTION.md
+  - task_plan.md
+  - findings.md
+  - progress.md
+- Validation:
+  - `git diff --check` passed for all four documentation files.
+  - Confirmed the referenced product plan and spec paths exist.

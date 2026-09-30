@@ -68,3 +68,13 @@
 - Catalog and Insight remain first-class macOS surfaces. Aquarium is deferred from the first pivot phase.
 - Kiki validates the single-task and allowed-app interaction pattern, but qyube must retain its own illustrated Antarctic language, non-blocking response model, and fishing collection loop.
 - NSWorkspace can identify the frontmost macOS application. A qyube overlay can be mouse-transparent. Accurate positioning against another app's window may need Accessibility access; App Sandbox compatibility must be proven before making it a shipping commitment.
+
+## qyube Floating Companion Art Direction — 2026-09-30
+
+- Current floating artwork direction follows the user's latest sleeping-penguin reference: watercolor/charcoal penguin with no glasses, white/charcoal/warm-gray palette, and a restrained terracotta accent. Do not carry the earlier blue palette into the latest floating concept.
+- The prominent concentric ripple was removed from the active fishing concept because it looked too strong at widget size. The first floating animation can omit a shared ripple layer.
+- The Kiki reference screenshot is 2940 × 1912 px. Approximate timer bounds are 420 × 285 screenshot px and penguin art bounds around 235 × 235 screenshot px. Assuming 2× Retina, target about 210 × 143 pt for timer and 118 × 118 pt for art, with a roughly 140 pt transparent character canvas. These remain estimates to validate on the target Mac.
+- Ice floe and bucket are canonical fixed layers, reused at identical canvas coordinates in every state. Current generated active/sleep images are conceptually matched only; production should not use their separately regenerated floes as state backgrounds.
+- App activation and session events update logical state immediately. Animation can ease over a short span, but there is no timer/debounce before a reaction begins.
+- If app-monitoring permission is denied during setup, retain the New Session draft and return to that form with retry/Open System Settings or Timer only options. If revoked during an active session, preserve timer and fishing while disabling app-aware behavior.
+- Implementation-facing specification: design/qyube-floating/ART_DIRECTION.md.
