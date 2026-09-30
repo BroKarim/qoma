@@ -7,6 +7,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
     case general
     case appearance
     case analytics
+    case aquarium
 
     var id: Self { self }
 
@@ -15,6 +16,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
         case .general: "General"
         case .appearance: "Appearance"
         case .analytics: "Analytics"
+        case .aquarium: "Aquarium"
         }
     }
 
@@ -23,6 +25,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
         case .general: "gearshape"
         case .appearance: "swatchpalette"
         case .analytics: "chart.bar.xaxis"
+        case .aquarium: "water.waves"
         }
     }
 }
@@ -85,10 +88,13 @@ struct SettingsView: View {
             // Nav items — pakai VStack biasa, bukan List
             VStack(spacing: 2) {
                 ForEach(SettingsTab.allCases) { tab in
-                    SettingsSidebarRow(tab: tab, isSelected: selectedTab == tab)
-                        .onTapGesture {
-                            selectedTab = tab
-                        }
+                    Button {
+                        selectedTab = tab
+                    } label: {
+                        SettingsSidebarRow(tab: tab, isSelected: selectedTab == tab)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityAddTraits(selectedTab == tab ? .isSelected : [])
                 }
             }
             .padding(.horizontal, 10)
@@ -117,6 +123,13 @@ struct SettingsView: View {
                 AppearanceSettingsPane()
             case .analytics:
                 AnalyticsDashboardView()
+            case .aquarium:
+                if #available(macOS 14.0, *) {
+                    AquariumView()
+                } else {
+                    Text("Aquarium requires macOS 14 or later.")
+                        .padding(32)
+                }
             case nil:
                 Color.qomaBackground
             }
