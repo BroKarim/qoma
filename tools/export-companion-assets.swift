@@ -22,6 +22,7 @@ func export(
     image: CGImage,
     rect: CGRect,
     polygon: [CGPoint] = [],
+    polygons: [[CGPoint]] = [],
     ground: CGPoint? = nil,
     scale: CGFloat = 0.78) throws
 {
@@ -47,6 +48,14 @@ func export(
         context.beginPath()
         context.addLines(between: polygon)
         context.closePath()
+        context.clip()
+    }
+    if !polygons.isEmpty {
+        context.beginPath()
+        for shape in polygons {
+            context.addLines(between: shape)
+            context.closePath()
+        }
         context.clip()
     }
     // Compensate CGImage drawing for the top-left coordinate system.
@@ -167,7 +176,16 @@ try export(
         (298, 354),
         (301, 319),
     ]))
-try export("CompanionFeet", image: poses, rect: rect(107, 405, 220, 40))
+// The standing pose has a dark belly outline joining the two feet. Keep only
+// the separate toes so their tops tuck beneath the animated torso sprite.
+try export(
+    "CompanionFeet",
+    image: poses,
+    rect: rect(107, 405, 220, 40),
+    polygons: [
+        points([(108, 426), (117, 417), (129, 412), (148, 414), (166, 421), (180, 431), (178, 441), (155, 445), (124, 445), (109, 438)]),
+        points([(211, 427), (216, 416), (233, 410), (255, 412), (274, 417), (287, 426), (287, 438), (274, 445), (229, 445), (213, 438)]),
+    ])
 
 let propSpecs: [(String, CGRect)] = [
     ("Floe", rect(29, 215, 520, 230)), ("Bucket", rect(586, 180, 255, 265)),

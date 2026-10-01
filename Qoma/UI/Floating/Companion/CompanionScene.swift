@@ -122,7 +122,7 @@ final class CompanionScene: SKScene {
         self.configure(
             self.torso,
             size: CGSize(width: 45, height: 34),
-            position: CGPoint(x: 0, y: 21),
+            position: CGPoint(x: 0, y: 17.5),
             z: 1,
             parent: self.puppet)
         self.configure(
