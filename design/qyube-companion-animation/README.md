@@ -7,7 +7,7 @@ Status: implemented for macOS Debug review. Candidate: no glasses. This mileston
 Open `qoma.xcodeproj`, select scheme **Qoma**, choose **My Mac**, and Run the Debug configuration.
 
 1. Open the existing menu-bar popover, select a duration, and press **start**. A transparent 140 × 140 pt panel appears near the lower-right; the ice artwork occupies 118 pt horizontally.
-2. The penguin enters, casts, waits 6–10 seconds, reacts to a bite, reels for 2–6 seconds, and transfers the catch directly into the bucket in 0.48 seconds. The next cast begins immediately after landing.
+2. The penguin enters, casts, waits 6–10 seconds, reacts to a bite, reels for 0.9–1.5 seconds, and transfers the catch directly into the bucket in 0.48 seconds. The next cast begins immediately after landing.
 3. **pause** puts the penguin to sleep; **resume** begins casting again.
 4. **cancel** before five active minutes returns a representative catch to the water and clears the temporary visual count. If no catch has landed, no returned fish is invented. At/after five minutes, the panel dismisses without the return effect. No Catalog writes occur in this UI prototype.
 5. When the real timer expires, the companion keeps its completed stance and the existing popover returns. The legacy session/break flow otherwise remains in place.

@@ -22,7 +22,7 @@ struct CompanionPlayback {
 
     init(
         biteWait: @escaping () -> TimeInterval = { .random(in: 6...10) },
-        reelTime: @escaping () -> TimeInterval = { .random(in: 2...6) })
+        reelTime: @escaping () -> TimeInterval = { .random(in: 0.9...1.5) })
     {
         self.biteWait = biteWait
         self.reelTime = reelTime

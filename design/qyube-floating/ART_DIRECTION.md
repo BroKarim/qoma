@@ -166,7 +166,7 @@ The animation is driven by explicit state events. The state controller changes s
 
 ## 7. Timing guidance
 
-The fishing cadence already defined for qyube remains authoritative: wait a randomized **6–10 seconds** for a bite; the reel/pull beat takes approximately **2–6 seconds**, followed by deposit. Keep the catch roll and banking transaction rules from the product plan unchanged.
+The fishing cadence already defined for qyube remains authoritative: wait a randomized **6–10 seconds** for a bite; the reel/pull beat takes approximately **0.9–1.5 seconds**, followed by deposit. Keep the catch roll and banking transaction rules from the product plan unchanged.
 
 The user's no-pause requirement removes the reveal/celebration and post-deposit wait. Immediately start the next cast/fishing action when the item lands; the ordinary in-water wait for the next bite still applies. Fish and tree proxies follow the same path and timing. A tree proxy does not create a new collectible type or alter the catch roll.
 
