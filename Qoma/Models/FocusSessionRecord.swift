@@ -43,4 +43,12 @@ struct FocusSessionRecord: Identifiable, Codable, Hashable {
     var durationMinutes: Double {
         actualFocusSeconds / 60.0
     }
+
+    static func == (lhs: FocusSessionRecord, rhs: FocusSessionRecord) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
 }

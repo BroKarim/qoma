@@ -1,5 +1,29 @@
 # Findings & Decisions
 
+## Current macOS implementation-planning findings — 2026-10-01
+
+This section records the latest user decisions. Older Dzenn/Universal Purchase/Aquarium and earlier qyube notes below are historical where they conflict with this section; `task_plan.md` is being updated as the implementation authority.
+
+- macOS-first technical implementation is requested as a detailed handoff for another AI agent; no application code should be changed in this planning session.
+- The core interaction borrows Kiki's task/duration/three-mode session setup, but **Allowing** and **Blocking** create click-through visual friction, not an OS-level block. Timer Only has no app/site policy reaction.
+- Allowing a whole browser such as Chrome allows every site within that browser. Explicit domain rules remain optional advanced controls; browser-level choice takes precedence.
+- Tags are removed. The freeform session task is the sole work context; Insight may aggregate exact task titles without automatically merging similar names.
+- Two distinct floating windows: closeable timer and persistent transparent penguin during an active session. Menu-bar time restores a closed timer. Penguin click may also restore timer. A completed timer goes to Fishing Report and a repeat-session action; no break and no Continue extension.
+- Login is mandatory through a website using only Google or Apple identity providers. The seven-day trial requires card entry through Stripe before access; no trial charge up front. Expired access shows a subscription gate before the main app, instead of a read-only Catalog/Insight shell. Monthly/yearly/lifetime offerings remain planned, details later.
+- Aquarium is canceled. Catalog alone shows all collectible types including undiscovered entries. Daily focus goal is removed.
+- The approved home concept has a warm-white three-part composition: narrow sidebar, central penguin illustration, raised New Session form on the right. The active-state drafts show timer near upper left, penguin near lower right; closed-timer state leaves penguin visible. These are layout references, not production measurements.
+- The existing `WindowManager` manages only one companion `NSPanel`; `MenuBarController` still hosts `MenuBarView` with session controls. `FocusSessionManager` still has break-state logic and persists analytics only behind an analytics-enabled flag. A new session architecture must split these responsibilities.
+- Apple App Review Guidelines currently say unlocking app functionality requires IAP for App Store apps, with storefront/entitlement-specific external-purchase exceptions; multiplatform purchases made elsewhere generally must also be available as IAP in the app. A Stripe-only card-first flow must not be assumed shippable on iOS or Mac App Store without a distribution decision. Sources: https://developer.apple.com/app-store/review/guidelines/ and https://developer.apple.com/help/app-store-connect/configure-in-app-purchase-settings/overview-for-configuring-in-app-purchases/ .
+- Stripe documentation supports trial subscriptions with payment-method collection via Checkout. Source: https://docs.stripe.com/payments/checkout/pricing-table .
+- `Qoma/Managers/AppDelegate.swift` currently launches as an accessory menu-bar app and requests analytics/automation permissions at startup. The new login gate and context-specific permissions require changing this launch sequence.
+- `Qoma/Services/TimerService.swift` uses an absolute end time in memory but has no persisted snapshot/relaunch restore. `FocusSessionManager` still routes completion to a short break and opens the old menu-bar popover.
+- `Qoma/Services/ActivityTracker.swift` already observes foreground app changes, but its lifecycle is tied to analytics records; policy evaluation must become independent of the analytics-enabled flag. `BrowserActivityResolver` currently supports more browsers for analytics, though the new product can limit policy semantics to Chrome/Safari.
+- `Qoma/Models/SessionState.swift` encodes quickSession/taskPlan and break phases; replace with idle/active/paused/completed/interrupted and a separate policy mode enum. Existing `FocusSessionRecord` has a title field but no policy snapshot/catch IDs/status enum.
+- Current companion `CompanionPlayback` is a UI-only animation with deterministic demo fish/tree proxies; its counters must not be treated as durable Catalog events. Its current pause/distraction logic cancels in-flight catches, which may conflict with the user-approved rule that fishing continues during unallowed-app visual friction; resolve by decoupling policy reaction from catch transaction.
+- `Qoma/UI/SettingsView.swift` exposes a standalone Aquarium page and legacy dark settings shell; both must be removed/replaced during implementation, while retaining reusable settings logic as appropriate. The Xcode project uses file-system-synchronized source groups, easing new Swift files, but has an existing app deployment target of macOS 11.5; reconcile the new minimum explicitly rather than assuming macOS 14+ already set.
+- The selected no-ripple floating artwork is transparent, with a fixed floe and bucket, no glasses, charcoal watercolor penguin. The implementation contact sheet shows fishing, bite, pull, deposit, sleep, distraction, completion, and release poses at large and small scale. Preserve existing prototype as visual starting material, not production reward logic.
+- `design/qyube-active-session-v1/README.md` explicitly marks its timer-open/closed screenshots as draft mockups. It defines menu-bar restore as a no-op when the timer is already visible. `design/qyube-minimum-assets-v1/README.md` confirms generic fish/tree proxies; actual collectible identity belongs to Catalog/Fishing Report.
+
 ## Requirements
 
 - Preserve the existing macOS focus utility as the base, but replace the floating timer visual with a penguin fishing on an ice floe.

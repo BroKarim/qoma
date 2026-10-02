@@ -2,11 +2,10 @@ import Cocoa
 import SwiftUI
 
 class AppDelegate: NSObject, NSApplicationDelegate {
-    private var menuBarController: MenuBarController?
+    private var coordinator: QyubeAppCoordinator?
     private let updaterManager = UpdaterManager.shared
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        NSApp.setActivationPolicy(.accessory)
         #if DEBUG
         if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil { return }
         let arguments = ProcessInfo.processInfo.arguments
@@ -19,18 +18,29 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             NSApp.terminate(nil)
             return
         }
-        #endif
-        updaterManager.start()
-        self.menuBarController = MenuBarController()
-        _ = self.menuBarController
 
-        #if DEBUG
         // Isolated artwork review: no focus records, monitoring request, or timer session.
         if ProcessInfo.processInfo.arguments.contains("--companion-preview") {
+            NSApp.setActivationPolicy(.accessory)
             WindowManager.shared.showFloating()
             return
         }
         #endif
-        AnalyticsPermissionsManager.shared.requestPermissions()
+
+        NSApp.setActivationPolicy(.regular)
+        updaterManager.start()
+
+        // qyube runtime
+        coordinator = QyubeAppCoordinator()
+        coordinator?.showHomeWindow()
+    }
+
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        coordinator?.showHomeWindow()
+        return true
+    }
+
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+        return false
     }
 }

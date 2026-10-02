@@ -77,6 +77,21 @@ final class AnalyticsEngine {
                     intensityLevel: level))
             currentDate = calendar.date(byAdding: .day, value: 1, to: currentDate)!
         }
+
+        // Pad to complete weeks on the trailing edge (Saturday).
+        while cells.count % 7 != 0 {
+            let seconds = dayTotals[currentDate] ?? 0
+            let sessionCount = daySessionCounts[currentDate] ?? 0
+            let level = Self.intensityLevel(for: seconds)
+            cells.append(
+                AnalyticsHeatmapCell(
+                    date: currentDate,
+                    focusSeconds: seconds,
+                    sessionCount: sessionCount,
+                    intensityLevel: level))
+            currentDate = calendar.date(byAdding: .day, value: 1, to: currentDate)!
+        }
+
         return cells
     }
 

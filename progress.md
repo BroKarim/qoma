@@ -1,5 +1,76 @@
 # Progress Log
 
+## 2026-10-02 — Wiring Home, dual panel, menu bar, dan Insight (codex/kiki-flow-core)
+
+- Buat `QyubeAppCoordinator` untuk menyatukan Home window, `SessionCoordinator`, `FloatingTimerController`, `CompanionWindowController`, dan menu bar status.
+- `AppDelegate.swift` sekarang menjalankan qyube runtime sebagai regular app: membuka Home window saat launch dan saat Dock diklik.
+- `MenuBarController.swift` direduksi menjadi status icon only; klik icon restore timer panel (saat sesi aktif) atau buka Home window.
+- `FloatingTimerController.swift` ditambahkan kontrol pause/resume/stop dan close yang hanya menyembunyikan panel.
+- `CompanionWindowController.swift` diklik untuk restore timer panel.
+- `InsightView.swift` menampilkan ringkasan focus time, completed/interrupted, catches, dan recent sessions dari repository.
+- `CatalogView.swift` sekarang membaca count dari ledger banked dan menampilkan silhouette untuk item yang belum ditemukan.
+- `FishingReportView.swift` placeholder untuk report completed/interrupted.
+- Build dan semua test lulus.
+
+## 2026-10-01 — Implementasi fase 2–4 parsial (codex/kiki-flow-core)
+
+- Fase 2 — Policy & permission:
+  - `FocusPolicyEvaluator.swift`: pure function untuk tiga mode dengan aturan browser Chrome/Safari dan normalisasi domain.
+  - `ForegroundActivityMonitor.swift`: monitor app foreground terpisah dari analytics tracker, tanpa permission request saat launch.
+  - `PermissionManager.swift`: contextual permission status dan capability.
+  - `DistractionCoordinator.swift`: bridge activity → policy decision → cue, dengan detour interval.
+- Fase 3 — Home & dua panel:
+  - `QyubeHomeView.swift`: shell tiga panel dengan sidebar Focus/Catalog/Insight/Settings.
+  - `NewSessionView.swift`: form task, mode picker, durasi, dan pilihan app/domain.
+  - `FloatingTimerController.swift` dan `CompanionWindowController.swift`: panel terpisah (belum sepenuhnya tersambung ke `SessionCoordinator`).
+  - `AppDelegate.swift`: menambahkan mode debug `--qyube-home` untuk mempreview Home baru tanpa memutus alur lama.
+- Fase 4 — Catch ledger, Catalog, report:
+  - `CatalogDefinitions.swift`: delapan jenis tangkapan awal.
+  - `CatchEngine.swift`: roll identitas saat reel, deposit, batas bank 5 menit.
+  - `CatalogView.swift`: menampilkan semua item dengan silhouette untuk yang belum ditemukan; count dari ledger banked.
+  - `FishingReportView.swift`: placeholder report completed/interrupted.
+- Perbaikan test:
+  - `FocusSessionRecord.swift`: Hashable/Equatable berdasarkan `id` agar test `hashableConformance` lulus.
+  - `AnalyticsEngine.swift`: melengkapi minggu heatmap di trailing edge agar `buildHeatmapCellsReturnsCompleteWeeks` lulus.
+  - `AnalyticsStoreTests.swift`: serialisasi suite untuk menghindari race UserDefaults.
+  - `BrowserActivityResolverTests.swift`: perbaiki bundle ID Arc.
+- Build dan semua test lulus. UI Home dapat dipreview via `--qyube-home`; integrasi penuh panel dan menu bar masih terbuka.
+
+## 2026-10-01 — Implementasi fase 0–1 (codex/kiki-flow-core)
+
+- Updated `qoma.xcodeproj` app target deployment target dari 11.5 ke 14.0 untuk mengaktifkan SwiftData nanti.
+- Menambahkan domain model baru di `Qoma/Domain/Focus/`:
+  - `FocusModels.swift`: `FocusPolicyMode`, `SessionPolicy`, `ForegroundActivity`, `PolicyDecision`, `SessionDraft`, `ActiveSessionSnapshot`, `FocusSession`, `CatchEvent`, `AccessState`.
+  - `FocusPolicyEvaluator.swift`: pure evaluator untuk tiga mode (allowing/blocking/timerOnly) dengan aturan browser Chrome/Safari dan normalisasi domain.
+  - `SessionClock.swift`: clock injectable dengan deadline absolut, pause/resume, dan perhitungan active seconds.
+  - `SessionCoordinator.swift`: orkestrasi sesi, persistence atomik, restore, finalize idempotent, integrasi catch engine.
+- Menambahkan persistence layer di `Qoma/Persistence/`:
+  - `SessionRepository.swift`: JSON atomik untuk active snapshot dan history.
+  - `CatchRepository.swift`: ledger provisional dan banked.
+- Menambahkan catch engine dan definisi katalog di `Qoma/Domain/Catch/`:
+  - `CatalogDefinitions.swift`: delapan jenis tangkapan awal.
+  - `CatchEngine.swift`: urutan bite/reel/deposit, roll identitas saat reel, batas bank 5 menit.
+- Menambahkan stub `AccessCoordinator` di `Qoma/Auth/`.
+- Menambahkan unit test baru:
+  - `FocusPolicyEvaluatorTests.swift`
+  - `SessionClockTests.swift`
+  - `SessionCoordinatorTests.swift`
+  - `CatchEngineTests.swift`
+- Memperbaiki `BrowserActivityResolverTests.swift`: bundle ID Arc yang salah (`company.com.Arc` → `company.thebrowser.Browser`).
+- Build dan test baru lulus. Satu test lama (`AnalyticsEngineTests/buildHeatmapCellsReturnsCompleteWeeks`) masih gagal karena dependensi tanggal; tidak terkait pekerjaan fase 0–1.
+- Memperbarui checkbox fase 0–1 di `task_plan.md`.
+
+## 2026-10-01 — Kiki-flow technical planning (complete)
+
+- Created and switched to branch `codex/kiki-flow-core` earlier in the interview.
+- Collected the user's corrections for tags, dual panels, Stripe card-first trial, Google/Apple-only login, expired-access gate, Aquarium removal, and no daily goal.
+- Read current `task_plan.md`, planning skill instructions, source entry points, and selected qyube design references. No application implementation has started.
+- Reviewed current Apple and Stripe primary documentation for the distribution/billing constraint. This is a release gate, not a change to the user's desired web trial flow.
+- Observed unrelated pre-existing deletions under `design/qyube-concepts-v1/` and `design/qyube-concepts-v2/`; preserve them. `KIKI.md` remains untracked from the earlier task.
+- Rewrote `task_plan.md` as an agent-ready implementation contract with UI references, state machines, policy precedence, proposed Swift interfaces/files, migration sequence, test gates, and billing/distribution constraints. The canceled Aquarium and daily goal are not product features in this plan.
+- Verified the plan against inspected code/design references and ran `git diff --check`. No application code was changed.
+- Inspection detail: the actual app delegate path is `Qoma/Managers/AppDelegate.swift`; one read of `Qoma/AppDelegate.swift` failed because that path does not exist. Resolved by reading the correct path. No files were changed by that failed read.
+
 ## Session: 2026-09-27
 
 ### Phase 1: Consolidate Approved Product Decisions

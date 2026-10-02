@@ -22,7 +22,7 @@ struct BrowserActivityResolverTests {
             "com.microsoft.edgemac",
             "com.brave.Browser",
             "com.operasoftware.Opera",
-            "company.com.Arc",
+            "company.thebrowser.Browser",
             "com.vivaldi.Vivaldi",
             "org.mozilla.firefox",
         ]
