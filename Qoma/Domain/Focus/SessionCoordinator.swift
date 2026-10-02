@@ -6,18 +6,6 @@ import OSLog
 /// Replaces the legacy FocusSessionManager break/session mixing.
 @MainActor
 final class SessionCoordinator: ObservableObject {
-    enum Event: Equatable {
-        case started
-        case paused
-        case resumed
-        case taskUpdated(String)
-        case policyUpdated(SessionPolicy)
-        case completed
-        case interrupted(reason: String?)
-        case catchDeposited(CatchEvent, banked: Bool)
-        case distractionChanged(Bool)
-        case timeRemainingUpdated(TimeInterval)
-    }
 
     // MARK: - Dependencies
 
@@ -32,28 +20,41 @@ final class SessionCoordinator: ObservableObject {
     @Published private(set) var snapshot: ActiveSessionSnapshot?
     @Published private(set) var remainingTime: TimeInterval = 0
     @Published private(set) var isDistractionActive = false
+    @Published private(set) var lastCatchEvent: CatchEvent?
+    @Published private(set) var currentReelKindID: String?
+
     private var clock: SessionClock?
     private var catchEngine: CatchEngine?
     private var timerCancellable: AnyCancellable?
     private var finalizedSessionIDs = Set<UUID>()
+
+    // Catch timer state
+    private var catchTimer: Timer?
+    private var catchDeadline: Date?
+    private var catchPhase: CatchEngine.Phase = .waiting
+    private let autoCatchEnabled: Bool
 
     var isActive: Bool { snapshot?.status == .active }
     var isPaused: Bool { snapshot?.status == .paused }
     var currentTaskTitle: String { snapshot?.draft.displayTitle ?? "" }
     var currentPolicy: SessionPolicy { snapshot?.draft.policy ?? .timerOnly }
 
+    var onSessionEnded: ((FocusSession) -> Void)?
+
     init(
         accountID: String = "local",
         sessionRepository: any SessionRepositoryProtocol = SessionRepository.shared,
         catchRepository: any CatchRepositoryProtocol = CatchRepository.shared,
         canStartSession: @escaping () -> Bool = { true },
-        now: @escaping () -> Date = Date.init
+        now: @escaping () -> Date = Date.init,
+        autoCatchEnabled: Bool = true
     ) {
         self.accountID = accountID
         self.sessionRepository = sessionRepository
         self.catchRepository = catchRepository
         self.canStartSession = canStartSession
         self.now = now
+        self.autoCatchEnabled = autoCatchEnabled
     }
 
     // MARK: - Lifecycle
@@ -79,6 +80,7 @@ final class SessionCoordinator: ObservableObject {
             completeIfDue()
         } else {
             startTicking()
+            startCatchTimer(afterResume: false)
             Logger.session.info("Restored session \(stored.id, privacy: .public)")
         }
     }
@@ -112,6 +114,7 @@ final class SessionCoordinator: ObservableObject {
         self.catchEngine = CatchEngine()
         sessionRepository.saveActive(newSnapshot)
         startTicking()
+        startCatchTimer(afterResume: false)
         Logger.session.info("Started session \(id, privacy: .public)")
         return newSnapshot
     }
@@ -125,6 +128,7 @@ final class SessionCoordinator: ObservableObject {
         snapshot = snap
         sessionRepository.saveActive(snap)
         stopTicking()
+        pauseCatchTimer()
         Logger.session.info("Paused session \(snap.id, privacy: .public)")
     }
 
@@ -137,6 +141,7 @@ final class SessionCoordinator: ObservableObject {
         snapshot = snap
         sessionRepository.saveActive(snap)
         startTicking()
+        startCatchTimer(afterResume: true)
         Logger.session.info("Resumed session \(snap.id, privacy: .public)")
     }
 
@@ -146,6 +151,7 @@ final class SessionCoordinator: ObservableObject {
         guard var snap = snapshot else { return nil }
 
         stopTicking()
+        stopCatchTimer(discardInFlight: true)
 
         let activeSeconds = clock?.activeSeconds ?? snap.accumulatedActiveSeconds
         let endedAt = now()
@@ -176,6 +182,7 @@ final class SessionCoordinator: ObservableObject {
         finalizeOnce(session)
         reset()
         Logger.session.info("Stopped session \(snap.id, privacy: .public)")
+        onSessionEnded?(session)
         return session
     }
 
@@ -187,6 +194,7 @@ final class SessionCoordinator: ObservableObject {
         guard !finalizedSessionIDs.contains(snap.id) else { return nil }
 
         stopTicking()
+        stopCatchTimer(discardInFlight: true)
 
         let activeSeconds = clock.activeSeconds
         let endedAt = now()
@@ -212,6 +220,7 @@ final class SessionCoordinator: ObservableObject {
         finalizeOnce(session)
         reset()
         Logger.session.info("Completed session \(snap.id, privacy: .public)")
+        onSessionEnded?(session)
         return session
     }
 
@@ -253,12 +262,22 @@ final class SessionCoordinator: ObservableObject {
         sessionRepository.saveActive(snap)
     }
 
-    // MARK: - Catch integration
+    // MARK: - Policy / distraction
 
+    /// Consume a foreground activity decision. This only updates the distraction flag;
+    /// it never cancels an in-flight catch (fishing continues during visual friction).
+    func setDistractionActive(_ active: Bool) {
+        isDistractionActive = active
+    }
+
+    // MARK: - Catch (manual/test hooks)
+
+    @discardableResult
     func scheduleNextBite() -> TimeInterval {
         catchEngine?.scheduleNextBite() ?? 0
     }
 
+    @discardableResult
     func beginReel() -> (kindID: String, duration: TimeInterval)? {
         catchEngine?.beginReel()
     }
@@ -276,25 +295,89 @@ final class SessionCoordinator: ObservableObject {
         if result.banked {
             catchRepository.bank(result.event.id, accountID: accountID, at: now())
         }
+        lastCatchEvent = result.event
         return result
     }
 
-    func cancelInFlightCatch() {
-        catchEngine?.cancelInFlight()
+    // MARK: - Catch timer
+
+    private func startCatchTimer(afterResume: Bool) {
+        guard autoCatchEnabled else { return }
+        guard catchEngine != nil else { return }
+        guard snapshot?.status == .active else { return }
+
+        if afterResume, let deadline = catchDeadline {
+            let remaining = deadline.timeIntervalSince(now())
+            if remaining > 0 {
+                scheduleCatchTimer(after: remaining)
+                return
+            }
+        }
+
+        let wait = catchEngine?.scheduleNextBite() ?? 0
+        catchDeadline = now().addingTimeInterval(wait)
+        catchPhase = .waiting
+        scheduleCatchTimer(after: wait)
     }
 
-    // MARK: - Policy / distraction
-
-    func consume(activity: ForegroundActivity) {
-        guard let snap = snapshot, snap.status == .active else { return }
-        let decision = FocusPolicyEvaluator.evaluate(activity, against: snap.draft.policy)
-        let wasDistraction = isDistractionActive
-        isDistractionActive = decision.isDistraction
-        if decision.isDistraction {
-            cancelInFlightCatch()
+    private func scheduleCatchTimer(after interval: TimeInterval) {
+        catchTimer?.invalidate()
+        catchTimer = Timer.scheduledTimer(withTimeInterval: max(0.01, interval), repeats: false) { [weak self] _ in
+            self?.handleCatchTimerFired()
         }
-        if wasDistraction != isDistractionActive {
-            Logger.session.info("Distraction changed: \(self.isDistractionActive, privacy: .public)")
+    }
+
+    private func handleCatchTimerFired() {
+        guard snapshot?.status == .active else { return }
+
+        switch catchPhase {
+        case .waiting, .bite:
+            guard let result = catchEngine?.beginReel() else {
+                startCatchTimer(afterResume: false)
+                return
+            }
+            catchPhase = .reeling(kindID: result.kindID)
+            currentReelKindID = result.kindID
+            catchDeadline = now().addingTimeInterval(result.duration)
+            scheduleCatchTimer(after: result.duration)
+        case .reeling(let kindID):
+            depositCatch(kindID: kindID)
+            currentReelKindID = nil
+            startCatchTimer(afterResume: false)
+        case .depositing:
+            startCatchTimer(afterResume: false)
+        }
+    }
+
+    private func depositCatch(kindID: String) {
+        guard let snap = snapshot, let clock else { return }
+        guard let result = catchEngine?.deposit(
+            sessionID: snap.id,
+            accountID: accountID,
+            activeSeconds: clock.activeSeconds,
+            now: now()
+        ) else { return }
+
+        catchRepository.saveProvisional(result.event)
+        if result.banked {
+            catchRepository.bank(result.event.id, accountID: accountID, at: now())
+        }
+        lastCatchEvent = result.event
+        Logger.session.info("Deposited catch \(result.event.kindID) banked=\(result.banked, privacy: .public)")
+    }
+
+    private func pauseCatchTimer() {
+        catchTimer?.invalidate()
+        catchTimer = nil
+    }
+
+    private func stopCatchTimer(discardInFlight: Bool) {
+        catchTimer?.invalidate()
+        catchTimer = nil
+        catchDeadline = nil
+        currentReelKindID = nil
+        if discardInFlight {
+            catchEngine?.cancelInFlight()
         }
     }
 
@@ -332,5 +415,6 @@ final class SessionCoordinator: ObservableObject {
         catchEngine = nil
         isDistractionActive = false
         stopTicking()
+        stopCatchTimer(discardInFlight: false)
     }
 }

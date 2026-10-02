@@ -10,7 +10,8 @@ struct SessionCoordinatorTests {
             sessionRepository: SessionRepository.shared,
             catchRepository: CatchRepository.shared,
             canStartSession: { true },
-            now: now
+            now: now,
+            autoCatchEnabled: false
         )
     }
 

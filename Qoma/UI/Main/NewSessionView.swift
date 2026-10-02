@@ -12,6 +12,16 @@ struct NewSessionView: View {
     private let durationOptions: [Int] = [180, 10, 20, 30, 45, 60]
 
     var body: some View {
+        Group {
+            if let snapshot = coordinator.snapshot {
+                ActiveSessionCard(coordinator: coordinator, snapshot: snapshot)
+            } else {
+                startForm
+            }
+        }
+    }
+
+    private var startForm: some View {
         VStack(alignment: .leading, spacing: 20) {
             Text("New Session")
                 .font(.system(size: 24, weight: .semibold))
@@ -114,6 +124,90 @@ struct NewSessionView: View {
 
         let draft = SessionDraft(taskTitle: taskTitle, plannedMinutes: selectedMinutes, policy: policy)
         coordinator.startSession(draft: draft)
+    }
+}
+
+private struct ActiveSessionCard: View {
+    @ObservedObject var coordinator: SessionCoordinator
+    let snapshot: ActiveSessionSnapshot
+    @State private var editingTitle: String = ""
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            Text("Active Session")
+                .font(.system(size: 24, weight: .semibold))
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Task")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(.secondary)
+                TextField("Focus session", text: $editingTitle)
+                    .textFieldStyle(.roundedBorder)
+                    .onAppear { editingTitle = snapshot.draft.taskTitle }
+                    .onChange(of: snapshot.draft.taskTitle) { editingTitle = snapshot.draft.taskTitle }
+                    .onSubmit { coordinator.updateTask(title: editingTitle) }
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Mode")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(.secondary)
+                Text(modeName)
+                    .font(.system(size: 13))
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Time remaining")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(.secondary)
+                Text(formattedTime)
+                    .font(.system(size: 34, weight: .semibold, design: .rounded))
+            }
+
+            HStack(spacing: 12) {
+                if coordinator.isPaused {
+                    Button("Resume") { coordinator.resumeSession() }
+                        .buttonStyle(.borderedProminent)
+                } else {
+                    Button("Pause") { coordinator.pauseSession() }
+                        .buttonStyle(.bordered)
+                }
+
+                Button("Stop") { coordinator.stopSession() }
+                    .buttonStyle(.bordered)
+                    .tint(.qyubeAccent)
+            }
+
+            if coordinator.isDistractionActive, let activity = latestActivityDescription {
+                Text(activity)
+                    .font(.system(size: 11))
+                    .foregroundColor(.qyubeAccent)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Spacer(minLength: 0)
+        }
+    }
+
+    private var modeName: String {
+        switch snapshot.draft.policy.mode {
+        case .allowing: return "Allowing"
+        case .blocking: return "Blocking"
+        case .timerOnly: return "Timer Only"
+        }
+    }
+
+    private var formattedTime: String {
+        let totalSeconds = max(0, Int(coordinator.remainingTime.rounded(.down)))
+        let minutes = totalSeconds / 60
+        let seconds = totalSeconds % 60
+        return String(format: "%d:%02d", minutes, seconds)
+    }
+
+    private var latestActivityDescription: String? {
+        // Distraction state is maintained by the coordinator but activity details live in DistractionCoordinator.
+        // For now, show a generic cue in the Home card.
+        "Distraction detected — stay with your focus"
     }
 }
 

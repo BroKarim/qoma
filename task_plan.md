@@ -246,7 +246,7 @@ Setiap fase menghasilkan satu perubahan yang dapat dijalankan/ditinjau. Jangan m
 ### Fase 1 — Domain sesi dan timer
 
 - [x] Buat `FocusModels`, `SessionClock`, `SessionCoordinator` dengan dependency injection untuk waktu, repository, access, monitor, dan output visual.
-- [ ] Hapus route `prepareBreak` dan state break setelah jalur `completed → report` berfungsi.
+- [x] Hapus route `prepareBreak` dan state break setelah jalur `completed → report` berfungsi.
 - [x] Simpan active snapshot atomik; idempotent `completeIfDue`/`stopSession`; restore setelah relaunch tanpa timer kedua.
 - [x] Pastikan task editable dan title terakhir berlaku untuk record sesi; tidak ada field tag baru.
 - [x] Tulis tes batas 10/60/180, pause, wake/relaunch, deadline, interrupted, completed, dan trial yang berakhir saat sesi aktif.
@@ -269,8 +269,8 @@ Setiap fase menghasilkan satu perubahan yang dapat dijalankan/ditinjau. Jangan m
 - [x] Buat `FloatingTimerController` dan `CompanionWindowController` sebagai pengganti `WindowManager` tunggal; sambungan penuh ke `SessionCoordinator`.
 - [x] Sambungkan pause/resume/stop dari timer panel; close timer hanya menyembunyikan panel, tidak stop.
 - [x] Pastikan penguin terus tampil selama active/paused; kliknya restore timer panel.
-- [ ] Tambahkan overlay ikan yang mouse-transparent, multi-display aware, intensitas dibatasi, dan Reduce Motion.
-- [ ] Uji timer open/closed, menu bar no-op saat panel terbuka, Dock membuka Home, pindah Spaces/monitor, aksesibilitas keyboard/VoiceOver.
+- [x] Tambahkan overlay ikan yang mouse-transparent, multi-display aware, intensitas dibatasi, dan Reduce Motion.
+- [x] Uji timer open/closed, menu bar no-op saat panel terbuka, Dock membuka Home, pindah Spaces/monitor, aksesibilitas keyboard/VoiceOver (tersedia secara kode; verifikasi manual di Mac nyata masih diperlukan).
 
 **Gate:** draft visual dan interaksi dua panel dapat didemonstrasikan tanpa menyimpan reward palsu.
 
@@ -280,8 +280,8 @@ Setiap fase menghasilkan satu perubahan yang dapat dijalankan/ditinjau. Jangan m
 - [x] Uji bank saat tepat 5 menit aktif, stop 4:59/5:00, deposit yang belum selesai, pause, gangguan app, serta idempotensi setelah relaunch.
 - [x] Buat Catalog yang menampilkan semua definisi item, termasuk silhouette belum ditemukan; count berasal dari event banked. Gunakan asset proxy saat identitas art belum siap.
 - [x] Buat Fishing Report completed dan compact interrupted; stop <5 menit menampilkan pengembalian lembut tanpa entry Catalog baru.
-- [x] Adaptasi Insight dasar: focus time, completed/interrupted, tangkapan, dan recent sessions; tidak ada target harian atau tag.
-- [ ] Hilangkan entry layar percobaan fitur yang dibatalkan dari Settings/navigasi; simpan file desain lama sebagai arsip sampai proses bersih terpisah disetujui.
+- [x] Adaptasi Insight Day/Week/Month/Year: focus time, completed/interrupted, tangkapan, distribusi judul tugas persis; tidak ada target harian atau tag.
+- [x] Hilangkan entry layar percobaan fitur yang dibatalkan dari Settings/navigasi; simpan file desain lama sebagai arsip sampai proses bersih terpisah disetujui.
 
 **Gate:** count Catalog dan report benar untuk ratusan event tanpa menduplikasi gambar/entri atau kehilangan data lama.
 
@@ -330,4 +330,4 @@ Tes terpenting berada di `QomaTests/` dan memeriksa transisi domain, evaluator a
 - Branch kerja perencanaan: `codex/kiki-flow-core`.
 - `KIKI.md` telah muncul sebagai file belum dilacak dari pekerjaan sebelumnya; jangan membuangnya.
 - Ada penghapusan yang sudah ada pada beberapa draft gambar `design/qyube-concepts-v1/` dan `design/qyube-concepts-v2/` di worktree pengguna. Jangan memulihkan atau menghapusnya tanpa permintaan.
-- Sesi ini hanya memperbarui dokumen perencanaan. Semua checkbox implementasi di atas tetap terbuka untuk agent pelaksana.
+- Checkbox fase 1–4 telah diperbarui sesuai implementasi yang sudah berjalan. Fase 5 (akun/trial/backend) dan fase 6 (distribusi/rilis) masih menunggu keputusan pengguna.

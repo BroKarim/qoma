@@ -1,5 +1,20 @@
 # Progress Log
 
+## 2026-10-02 — End-to-end integration fase 1–4 (codex/kiki-flow-core)
+
+- Integrasi runtime qyube sepenuhnya:
+  - `QyubeAppCoordinator` sekarang juga memiliki `DistractionCoordinator` dan `DistractionOverlayController`.
+  - Session otomatis memulai/stop monitoring foreground activity saat aktif/berakhir.
+  - Overlay gangguan muncul saat policy dilanggar: mouse-transparent, non-activating, intensitas terbatas, menghormati Reduce Motion, dan tidak menghentikan timer/catch.
+- Catch engine terintegrasi ke `SessionCoordinator` dengan auto-timer (bite → reel → deposit). Pause/resume menangguhkan dan melanjutkan siklus tangkapan. Distraction tidak membatalkan catch yang sedang berlangsung.
+- `NewSessionView` menampilkan kartu sesi aktif dengan kontrol pause/resume/stop dan edit tugas saat sedang ada sesi.
+- `FloatingTimerController` menambahkan edit tugas langsung dari panel timer.
+- `FishingReportView` muncul sebagai jendela report saat sesi completed/interrupted, memakai data ledger sungguhan.
+- `InsightView` menambahkan Day/Week/Month/Year dengan `InsightAggregator` (tanpa tag atau target harian).
+- `CatalogView` memakai count dari ledger banked.
+- Tambah test otomatis: `SessionCoordinatorCatchTests`, `InsightAggregatorTests`.
+- Build dan semua test lulus.
+
 ## 2026-10-02 — Wiring Home, dual panel, menu bar, dan Insight (codex/kiki-flow-core)
 
 - Buat `QyubeAppCoordinator` untuk menyatukan Home window, `SessionCoordinator`, `FloatingTimerController`, `CompanionWindowController`, dan menu bar status.

@@ -84,12 +84,15 @@ struct FloatingTimerActions {
     var onPause: () -> Void = {}
     var onResume: () -> Void = {}
     var onStop: () -> Void = {}
+    var onTaskChange: (String) -> Void = { _ in }
 }
 
 struct FloatingTimerContentView: View {
     let remainingTime: TimeInterval
     let taskTitle: String
     let actions: FloatingTimerActions
+    @State private var editingTitle: String = ""
+    @FocusState private var isTitleFocused: Bool
 
     var body: some View {
         VStack(spacing: 10) {
@@ -107,10 +110,15 @@ struct FloatingTimerContentView: View {
                 .font(.system(size: 42, weight: .semibold, design: .rounded))
                 .foregroundColor(.primary)
 
-            Text(taskTitle.isEmpty ? "Focus session" : taskTitle)
+            TextField("Focus session", text: $editingTitle)
                 .font(.system(size: 12))
                 .foregroundColor(.secondary)
-                .lineLimit(1)
+                .multilineTextAlignment(.center)
+                .textFieldStyle(.plain)
+                .focused($isTitleFocused)
+                .onAppear { editingTitle = taskTitle }
+                .onChange(of: taskTitle) { editingTitle = taskTitle }
+                .onSubmit { actions.onTaskChange(editingTitle) }
 
             HStack(spacing: 12) {
                 Button(action: actions.onStop) {
