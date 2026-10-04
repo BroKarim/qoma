@@ -12,7 +12,8 @@ final class QyubeAppCoordinator {
     private let distractionCoordinator: DistractionCoordinator
     private let menuBarController: MenuBarController
     private var cancellables = Set<AnyCancellable>()
-    private var reportWindowController: NSWindowController?
+    private let navigation = QyubeNavigation()
+    private var visibleSessionID: UUID?
 
     init(sessionCoordinator: SessionCoordinator? = nil) {
         self.sessionCoordinator = sessionCoordinator ?? SessionCoordinator()
@@ -26,26 +27,44 @@ final class QyubeAppCoordinator {
         configurePanels()
         bindSessionCoordinator()
         bindDistractionCoordinator()
+        SettingsWindowController.compactSettingsAction = { [weak self] in
+            self?.navigation.page = .settings
+            self?.showHomeWindow()
+        }
+        self.sessionCoordinator.restore()
     }
 
     func showHomeWindow() {
-        if let existing = homeWindowController?.window, existing.isVisible {
+        if let existing = homeWindowController?.window {
             existing.makeKeyAndOrderFront(nil)
             NSApp.activate(ignoringOtherApps: true)
             return
         }
 
-        dismissReportWindow()
-        let contentView = QyubeHomeView(sessionCoordinator: sessionCoordinator)
+        let contentView = QyubeHomeView(
+            sessionCoordinator: sessionCoordinator, navigation: navigation,
+            onClose: { [weak self] in self?.homeWindowController?.window?.orderOut(nil) },
+            onShowTimer: { [weak self] in self?.restoreTimerPanel() },
+            onStarted: { [weak self] in self?.homeWindowController?.window?.orderOut(nil) }
+        )
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 960, height: 600),
-            styleMask: [.titled, .closable, .miniaturizable, .resizable],
+            contentRect: NSRect(x: 0, y: 0, width: 360, height: 610),
+            styleMask: [.titled, .closable, .miniaturizable, .fullSizeContentView],
             backing: .buffered,
             defer: false
         )
         window.title = "qyube"
+        window.appearance = NSAppearance(named: .aqua)
+        window.titleVisibility = .hidden
+        window.titlebarAppearsTransparent = true
+        window.standardWindowButton(.closeButton)?.isHidden = true
+        window.standardWindowButton(.miniaturizeButton)?.isHidden = true
+        window.standardWindowButton(.zoomButton)?.isHidden = true
+        window.isReleasedWhenClosed = false
+        window.isOpaque = false
+        window.backgroundColor = .clear
         window.center()
-        window.contentView = NSHostingView(rootView: contentView)
+        window.contentView = NSHostingView(rootView: contentView.ignoresSafeArea())
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
         self.homeWindowController = NSWindowController(window: window)
@@ -53,7 +72,8 @@ final class QyubeAppCoordinator {
 
     func restoreTimerPanel() {
         guard let snapshot = sessionCoordinator.snapshot else { return }
-        timerController.show(remainingTime: sessionCoordinator.remainingTime, taskTitle: snapshot.draft.displayTitle)
+        guard !timerController.isVisible else { return }
+        timerController.show(remainingTime: sessionCoordinator.remainingTime, taskTitle: snapshot.draft.displayTitle, isPaused: snapshot.status == .paused)
     }
 
     // MARK: - Private
@@ -61,6 +81,10 @@ final class QyubeAppCoordinator {
     private var homeWindowController: NSWindowController?
 
     private func configurePanels() {
+        overlayController.onVisualStateChanged = { [weak self] visual in
+            self?.companionController.setDistractionVisual(visual)
+        }
+
         timerController.configure(actions: FloatingTimerActions(
             onClose: { [weak self] in self?.timerController.hide() },
             onPause: { [weak self] in self?.sessionCoordinator.pauseSession() },
@@ -113,16 +137,28 @@ final class QyubeAppCoordinator {
     private func handleSnapshotChange(_ snapshot: ActiveSessionSnapshot?) {
         if let snapshot {
             if snapshot.status == .active || snapshot.status == .paused {
-                timerController.show(remainingTime: sessionCoordinator.remainingTime, taskTitle: snapshot.draft.displayTitle)
-                companionController.show()
-                distractionCoordinator.start(policy: snapshot.draft.policy)
+                companionController.show(sessionID: snapshot.id, paused: snapshot.status == .paused)
+                if visibleSessionID != snapshot.id {
+                    visibleSessionID = snapshot.id
+                    timerController.show(remainingTime: sessionCoordinator.remainingTime, taskTitle: snapshot.draft.displayTitle, isPaused: snapshot.status == .paused)
+                } else {
+                    timerController.update(remainingTime: sessionCoordinator.remainingTime, taskTitle: snapshot.draft.displayTitle, isPaused: snapshot.status == .paused)
+                }
+                if snapshot.status == .active, snapshot.draft.policy.mode != .timerOnly {
+                    distractionCoordinator.start(policy: snapshot.draft.policy)
+                } else {
+                    distractionCoordinator.stop()
+                    overlayController.hide()
+                }
             } else {
+                visibleSessionID = nil
                 timerController.hide()
                 companionController.hide()
                 distractionCoordinator.stop()
                 overlayController.hide()
             }
         } else {
+            visibleSessionID = nil
             timerController.hide()
             companionController.hide()
             distractionCoordinator.stop()
@@ -133,7 +169,7 @@ final class QyubeAppCoordinator {
 
     private func updateTimerPanel() {
         guard sessionCoordinator.snapshot != nil else { return }
-        timerController.update(remainingTime: sessionCoordinator.remainingTime, taskTitle: sessionCoordinator.currentTaskTitle)
+        timerController.update(remainingTime: sessionCoordinator.remainingTime, taskTitle: sessionCoordinator.currentTaskTitle, isPaused: sessionCoordinator.isPaused)
     }
 
     private func updateStatusItem() {
@@ -155,44 +191,8 @@ final class QyubeAppCoordinator {
     }
 
     private func onSessionEnded(_ session: FocusSession) {
-        showReportWindow(for: session)
-    }
-
-    private func showReportWindow(for session: FocusSession) {
-        dismissReportWindow()
-
-        let catches = CatchRepository.shared.listBanked(accountID: session.accountID)
-            .filter { $0.sessionID == session.id }
-        let contentView = FishingReportView(
-            session: session,
-            catches: catches,
-            onStartAgain: { [weak self] in
-                self?.dismissReportWindow()
-                self?.showHomeWindow()
-            },
-            onGoHome: { [weak self] in
-                self?.dismissReportWindow()
-                self?.showHomeWindow()
-            }
-        )
-
-        let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 460, height: 420),
-            styleMask: [.titled, .closable],
-            backing: .buffered,
-            defer: false
-        )
-        window.title = session.status == .completed ? "Fishing Report" : "Session Ended"
-        window.center()
-        window.contentView = NSHostingView(rootView: contentView)
-        window.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
-        self.reportWindowController = NSWindowController(window: window)
-    }
-
-    private func dismissReportWindow() {
-        reportWindowController?.close()
-        reportWindowController = nil
+        navigation.showReport(session)
+        showHomeWindow()
     }
 
     private func formatTime(_ time: TimeInterval) -> String {

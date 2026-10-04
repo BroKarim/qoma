@@ -1,5 +1,15 @@
 # Progress Log
 
+## 2026-10-02 — Audit visual dan dual-panel di `codex/qyube-ui-rework`
+
+- Membuat branch baru dari `codex/kiki-flow-core` tanpa mengubah file `KIKI.md` milik pengguna.
+- Menelusuri panel penguin yang tidak terlihat: `CompanionWindowController` membuat scene dalam fase `.hidden` dan tidak pernah memanggil `startSession()`. Memperbaiki start, pause, dan cleanup scene; menyimpan posisi timer/penguin secara lokal.
+- Memperbaiki timer yang sempat terbuka kembali pada setiap perubahan snapshot; close sekarang menyembunyikan timer saja. Timer memakai ukuran dan hierarki visual draft, menu aksi sesi, serta konfirmasi stop.
+- Membangun ulang Home sesuai `design/qyube-concepts-v3/`, memisahkan Catalog/Insight ke area penuh, memperbaiki kontras di dark-mode Mac, dan membuat Settings native terpisah dengan `NavigationSplitView` serta grouped Form menurut skill `macos-settings-ui`.
+- Menambah riwayat keputusan ke `task_plan.md` agar revisi lama yang sempat terganti tetap bisa diaudit dan keputusan superseded tidak tersamar sebagai instruksi baru.
+- Build Xcode lulus, termasuk sesudah handler klik/drag penguin dirapikan; test Xcode lulus sebelum perubahan kecil handler itu. Uji native membuktikan penguin tampil, pose tidur ketika pause, dan tetap ada ketika timer ditutup. Klik penguin/menu bar untuk memulihkan timer belum terverifikasi lewat otomasi panel nonactivating.
+- Dua sesi uji singkat tersimpan sebagai `interrupted` pada akun lokal. Tidak menghapusnya tanpa persetujuan pengguna.
+
 ## 2026-10-02 — End-to-end integration fase 1–4 (codex/kiki-flow-core)
 
 - Integrasi runtime qyube sepenuhnya:
@@ -213,4 +223,13 @@
   - progress.md
 - Validation:
   - `git diff --check` passed for all four documentation files.
-  - Confirmed the referenced product plan and spec paths exist.
+- Confirmed the referenced product plan and spec paths exist.
+
+## 2026-10-02 — Compact white prototype package
+
+- Created `codex/qyube-compact-prototypes` from the current branch, preserving existing code changes, untracked KIKI.md and prior design deletions.
+- Copied the two selected Home mockups into `design/qyube-compact-v1/` and generated seven new screens with built-in image_gen.
+- Visually inspected the results and applied targeted corrections to Catalog's total count and Settings' label placement.
+- Added the image index, reproduction prompts, visual contract and implementation caveats in the new design folder.
+- Appended task_plan §12 and ART_DIRECTION §14, keeping all previous sections. Added findings here without replacing historical entries.
+- Scope: image artifacts and documentation only; no new Swift edits, application build or runtime-test claims for this batch.

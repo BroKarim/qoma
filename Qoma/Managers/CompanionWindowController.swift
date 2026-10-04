@@ -3,8 +3,10 @@ import SwiftUI
 
 /// Persistent transparent penguin panel during active sessions.
 @MainActor
-final class CompanionWindowController {
+final class CompanionWindowController: NSObject, NSWindowDelegate {
     private var window: NSPanel?
+    private var scene: CompanionScene?
+    private var sessionID: UUID?
     private let positionKey = "qyube.companion.origin"
     private var onTap: (() -> Void)?
 
@@ -14,9 +16,14 @@ final class CompanionWindowController {
         self.onTap = onTap
     }
 
-    func show() {
+    func show(sessionID: UUID, paused: Bool) {
         if let window = window {
-            window.orderFrontRegardless()
+            if self.sessionID != sessionID {
+                scene?.startSession()
+                self.sessionID = sessionID
+            }
+            scene?.setSessionPaused(paused)
+            if !window.isVisible { window.orderFrontRegardless() }
             return
         }
 
@@ -36,27 +43,45 @@ final class CompanionWindowController {
         panel.isMovableByWindowBackground = true
         panel.isReleasedWhenClosed = false
         panel.isRestorable = false
+        panel.delegate = self
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
 
         let scene = CompanionScene()
-        let contentView = FloatingCompanionView(scene: scene)
-            .onTapGesture { [weak self] in
-                self?.onTap?()
-            }
+        scene.startSession()
+        scene.setSessionPaused(paused)
+        let contentView = FloatingCompanionView(scene: scene, onTap: { [weak self] in
+            self?.onTap?()
+        })
         panel.contentView = NSHostingView(rootView: contentView)
+        panel.contentView?.wantsLayer = true
+        panel.contentView?.layer?.backgroundColor = NSColor.clear.cgColor
 
+        self.scene = scene
+        self.sessionID = sessionID
         window = panel
         panel.orderFrontRegardless()
     }
 
     func hide() {
         window?.orderOut(nil)
+        scene?.shutDown()
+        scene = nil
+        sessionID = nil
+        window?.contentView = nil
+        window = nil
     }
 
     func close() {
         hide()
-        window?.contentView = nil
-        window = nil
+    }
+
+    func setDistractionVisual(_ visual: DistractionVisualState?) {
+        scene?.setDistractionVisual(visual)
+    }
+
+    func windowDidMove(_ notification: Notification) {
+        guard let window else { return }
+        UserDefaults.standard.set(NSStringFromPoint(window.frame.origin), forKey: positionKey)
     }
 
     private func initialOrigin(size: CGSize) -> CGPoint {

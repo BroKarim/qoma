@@ -1,12 +1,14 @@
 import Cocoa
+import Combine
 import SwiftUI
 
 /// Standalone timer panel. Can be closed without stopping the session.
 @MainActor
-final class FloatingTimerController {
+final class FloatingTimerController: NSObject, NSWindowDelegate {
     private var window: NSPanel?
     private let positionKey = "qyube.timer.origin"
     private var actions: FloatingTimerActions?
+    private let readout = TimerReadoutModel()
 
     var isVisible: Bool { window?.isVisible ?? false }
 
@@ -14,15 +16,16 @@ final class FloatingTimerController {
         self.actions = actions
     }
 
-    func show(remainingTime: TimeInterval, taskTitle: String) {
+    func show(remainingTime: TimeInterval, taskTitle: String, isPaused: Bool) {
+        readout.remainingTime = remainingTime
         if let window = window {
             window.orderFrontRegardless()
-            updateContent(remainingTime: remainingTime, taskTitle: taskTitle)
+            updateContent(remainingTime: remainingTime, taskTitle: taskTitle, isPaused: isPaused)
             return
         }
 
-        let contentSize = CGSize(width: 210, height: 160)
-        let panel = NSPanel(
+        let contentSize = CGSize(width: 210, height: 143)
+        let panel = QyubeTimerPanel(
             contentRect: NSRect(origin: initialOrigin(size: contentSize), size: contentSize),
             styleMask: [.borderless, .nonactivatingPanel, .fullSizeContentView],
             backing: .buffered,
@@ -31,17 +34,20 @@ final class FloatingTimerController {
 
         panel.isOpaque = false
         panel.backgroundColor = .clear
+        panel.appearance = NSAppearance(named: .aqua)
         panel.hasShadow = true
         panel.level = .floating
         panel.hidesOnDeactivate = false
         panel.isMovableByWindowBackground = true
         panel.isReleasedWhenClosed = false
         panel.isRestorable = false
+        panel.delegate = self
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
 
         let contentView = FloatingTimerContentView(
-            remainingTime: remainingTime,
+            readout: readout,
             taskTitle: taskTitle,
+            isPaused: isPaused,
             actions: actions ?? FloatingTimerActions()
         )
         panel.contentView = NSHostingView(rootView: contentView)
@@ -54,15 +60,24 @@ final class FloatingTimerController {
         window?.orderOut(nil)
     }
 
-    func update(remainingTime: TimeInterval, taskTitle: String) {
-        updateContent(remainingTime: remainingTime, taskTitle: taskTitle)
+    func windowDidMove(_ notification: Notification) {
+        guard let window else { return }
+        UserDefaults.standard.set(NSStringFromPoint(window.frame.origin), forKey: positionKey)
     }
 
-    private func updateContent(remainingTime: TimeInterval, taskTitle: String) {
+    func update(remainingTime: TimeInterval, taskTitle: String, isPaused: Bool) {
+        updateContent(remainingTime: remainingTime, taskTitle: taskTitle, isPaused: isPaused)
+    }
+
+    private func updateContent(remainingTime: TimeInterval, taskTitle: String, isPaused: Bool) {
+        readout.remainingTime = remainingTime
         guard let hostingView = window?.contentView as? NSHostingView<FloatingTimerContentView> else { return }
+        // Updating only the readout keeps an open actions menu or editor stable across ticks.
+        guard hostingView.rootView.taskTitle != taskTitle || hostingView.rootView.isPaused != isPaused else { return }
         hostingView.rootView = FloatingTimerContentView(
-            remainingTime: remainingTime,
+            readout: readout,
             taskTitle: taskTitle,
+            isPaused: isPaused,
             actions: actions ?? FloatingTimerActions()
         )
     }
@@ -79,6 +94,11 @@ final class FloatingTimerController {
     }
 }
 
+private final class QyubeTimerPanel: NSPanel {
+    override var canBecomeKey: Bool { true }
+    override var canBecomeMain: Bool { false }
+}
+
 struct FloatingTimerActions {
     var onClose: () -> Void = {}
     var onPause: () -> Void = {}
@@ -88,79 +108,94 @@ struct FloatingTimerActions {
 }
 
 struct FloatingTimerContentView: View {
-    let remainingTime: TimeInterval
+    let readout: TimerReadoutModel
     let taskTitle: String
+    let isPaused: Bool
     let actions: FloatingTimerActions
     @State private var editingTitle: String = ""
+    @State private var confirmingStop = false
+    @State private var editingTask = false
     @FocusState private var isTitleFocused: Bool
 
     var body: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 4) {
             HStack {
-                Spacer()
                 Button(action: actions.onClose) {
                     Image(systemName: "xmark")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundColor(.secondary)
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(.secondary)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Hide timer panel")
+                Spacer()
+                Menu {
+                    Button(isPaused ? "Resume" : "Pause") {
+                        if isPaused { actions.onResume() } else { actions.onPause() }
+                    }
+                    Button("Stop session", role: .destructive) { confirmingStop = true }
+                    Divider()
+                    Button("Edit task…") {
+                        editingTitle = taskTitle
+                        editingTask = true
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                }
+                .menuStyle(.borderlessButton)
+                .menuIndicator(.hidden)
+                .fixedSize()
+                .accessibilityLabel("Session actions")
             }
 
-            Text(formattedTime)
-                .font(.system(size: 42, weight: .semibold, design: .rounded))
-                .foregroundColor(.primary)
+            TimerReadout(model: readout)
 
-            TextField("Focus session", text: $editingTitle)
-                .font(.system(size: 12))
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .textFieldStyle(.plain)
-                .focused($isTitleFocused)
-                .onAppear { editingTitle = taskTitle }
-                .onChange(of: taskTitle) { editingTitle = taskTitle }
-                .onSubmit { actions.onTaskChange(editingTitle) }
-
-            HStack(spacing: 12) {
-                Button(action: actions.onStop) {
-                    Image(systemName: "stop.fill")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.white)
-                        .frame(width: 28, height: 28)
-                        .background(Circle().fill(Color.qyubeAccent))
-                }
-                .buttonStyle(.plain)
-
-                Button(action: actions.onPause) {
-                    Image(systemName: "pause.fill")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.primary)
-                        .frame(width: 28, height: 28)
-                        .background(Circle().fill(Color.secondary.opacity(0.12)))
-                }
-                .buttonStyle(.plain)
-
-                Button(action: actions.onResume) {
-                    Image(systemName: "play.fill")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(.primary)
-                        .frame(width: 28, height: 28)
-                        .background(Circle().fill(Color.secondary.opacity(0.12)))
-                }
-                .buttonStyle(.plain)
+            if isPaused {
+                Text("Paused")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(Color.qyubeAccent)
             }
         }
-        .padding(16)
+        .padding(14)
+        .frame(width: 210, height: 143)
         .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color.white.opacity(0.92))
-                .shadow(color: Color.black.opacity(0.08), radius: 16, x: 0, y: 6)
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(Color.white.opacity(0.96))
+                .shadow(color: Color.black.opacity(0.10), radius: 18, x: 0, y: 8)
         )
+        .popover(isPresented: $editingTask) {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("What are you working on?").font(.headline)
+                TextField("Focus session", text: $editingTitle).textFieldStyle(.roundedBorder)
+                    .focused($isTitleFocused)
+                    .onSubmit { actions.onTaskChange(editingTitle); editingTask = false }
+                Button("Save") { actions.onTaskChange(editingTitle); editingTask = false }
+                    .keyboardShortcut(.defaultAction)
+            }.padding(18).frame(width: 230)
+        }
+        .confirmationDialog("Stop this session?", isPresented: $confirmingStop) {
+            Button("Stop session", role: .destructive, action: actions.onStop)
+            Button("Keep focusing", role: .cancel) {}
+        } message: {
+            Text("Catches are returned to the sea if you have focused for less than five minutes.")
+        }
     }
 
-    private var formattedTime: String {
-        let totalSeconds = max(0, Int(remainingTime.rounded(.down)))
-        let minutes = totalSeconds / 60
-        let seconds = totalSeconds % 60
-        return String(format: "%d:%02d", minutes, seconds)
+}
+
+@MainActor
+final class TimerReadoutModel: ObservableObject {
+    @Published var remainingTime: TimeInterval = 0
+}
+
+private struct TimerReadout: View {
+    @ObservedObject var model: TimerReadoutModel
+    var body: some View {
+        Text(QyubeFormat.countdown(model.remainingTime))
+            .font(.system(size: 42, weight: .medium, design: .rounded))
+            .monospacedDigit().foregroundStyle(Color.qyubeInk)
+            .frame(maxWidth: .infinity)
+            .accessibilityLabel("Time remaining \(QyubeFormat.countdown(model.remainingTime))")
     }
 }

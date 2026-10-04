@@ -19,6 +19,7 @@ final class CompanionScene: SKScene {
     private let rightFlipper = SKSpriteNode(imageNamed: "CompanionFlipperRight")
     private let rod = SKSpriteNode(imageNamed: "CompanionRod")
     private let restingPose = SKSpriteNode(imageNamed: "CompanionPoseSleeping")
+    private let bowPose = SKSpriteNode(imageNamed: "CompanionPoseLightsBow")
     private let floe = SKSpriteNode(imageNamed: "CompanionFloe")
     private let bucket = SKSpriteNode(imageNamed: "CompanionBucket")
     private let catchSprite = SKSpriteNode(imageNamed: "CompanionFish")
@@ -27,10 +28,13 @@ final class CompanionScene: SKScene {
     private let splash = SKSpriteNode(imageNamed: "CompanionSplash")
     private let line = SKShapeNode()
     private let fishTexture = SKTexture(imageNamed: "CompanionFish")
-    private let treeTexture = SKTexture(imageNamed: "CompanionTree")
     private let sleepTexture = SKTexture(imageNamed: "CompanionPoseSleeping")
     private let hopTexture = SKTexture(imageNamed: "CompanionPoseHop")
+    private let lightsUpTexture = SKTexture(imageNamed: "CompanionPoseLightsUp")
+    private let lightsBowTexture = SKTexture(imageNamed: "CompanionPoseLightsBow")
     private let completeTexture = SKTexture(imageNamed: "CompanionPoseCompleted")
+    private var steamPuffs: [SKShapeNode] = []
+    private var distractionVisual: DistractionVisualState?
     private var lastTime: TimeInterval?
     private var motionTime: TimeInterval = 0
     private var built = false
@@ -48,6 +52,7 @@ final class CompanionScene: SKScene {
 
     func startSession() {
         self.playback.start()
+        self.distractionVisual = nil
         self.lastTime = nil
         self.motionTime = 0
         isPaused = false
@@ -59,7 +64,14 @@ final class CompanionScene: SKScene {
     }
 
     func setDistracted(_ value: Bool) {
+        if !value { self.distractionVisual = nil }
         self.playback.setDistracted(value); self.render()
+    }
+
+    func setDistractionVisual(_ visual: DistractionVisualState?) {
+        self.distractionVisual = visual
+        self.playback.setDistracted(visual != nil)
+        self.render()
     }
 
     func completeSession() {
@@ -76,6 +88,7 @@ final class CompanionScene: SKScene {
 
     func shutDown() {
         self.onHidden = nil
+        self.distractionVisual = nil
         self.playback.dismiss()
         isPaused = true
         self.lastTime = nil
@@ -155,6 +168,20 @@ final class CompanionScene: SKScene {
         self.rod.anchorPoint = CGPoint(x: 0.95, y: 0.05)
         self.configure(self.restingPose, size: CGSize(width: 130, height: 130), position: CGPoint(x: 65, y: 47), z: 4)
         self.restingPose.anchorPoint = CGPoint(x: 0.5, y: 62.0 / 512)
+        self.configure(self.bowPose, size: CGSize(width: 130, height: 130), position: CGPoint(x: 65, y: 47), z: 5)
+        self.bowPose.anchorPoint = self.restingPose.anchorPoint
+        self.bowPose.texture = self.lightsBowTexture
+        self.bowPose.isHidden = true
+        for index in 0..<3 {
+            let puff = SKShapeNode(ellipseOf: CGSize(width: 5 + CGFloat(index), height: 4 + CGFloat(index)))
+            puff.fillColor = NSColor(white: 0.36, alpha: 0.65)
+            puff.strokeColor = NSColor(white: 0.24, alpha: 0.7)
+            puff.lineWidth = 0.6
+            puff.zPosition = 11
+            puff.isHidden = true
+            addChild(puff)
+            self.steamPuffs.append(puff)
+        }
         self.configure(self.catchSprite, size: CGSize(width: 10, height: 6), position: .zero, z: 10)
         self.configure(self.sleepMarks, size: CGSize(width: 16, height: 12), position: CGPoint(x: 103, y: 66), z: 10)
         self.configure(self.biteMark, size: CGSize(width: 4, height: 10), position: CGPoint(x: 82, y: 122), z: 10)
@@ -188,7 +215,13 @@ final class CompanionScene: SKScene {
         self.rod.isHidden = false
         self.restingPose.isHidden = true
         self.restingPose.position = CGPoint(x: 65, y: 47)
+        self.restingPose.zRotation = 0
+        self.restingPose.alpha = 1
         self.restingPose.setScale(1)
+        self.bowPose.isHidden = true
+        self.bowPose.position = self.restingPose.position
+        self.bowPose.alpha = 0
+        self.steamPuffs.forEach { $0.isHidden = true }
         self.sleepMarks.isHidden = true
         self.biteMark.isHidden = phase != .bite
         self.splash.isHidden = true
@@ -196,8 +229,8 @@ final class CompanionScene: SKScene {
         self.catchSprite.alpha = 1
         self.catchSprite.zRotation = 0
         self.catchSprite.setScale(1)
-        self.catchSprite.texture = self.playback.catchIsTree ? self.treeTexture : self.fishTexture
-        self.catchSprite.size = self.playback.catchIsTree ? CGSize(width: 7, height: 10) : CGSize(width: 11, height: 6)
+        self.catchSprite.texture = self.fishTexture
+        self.catchSprite.size = CGSize(width: 11, height: 6)
         var waterPoint = CGPoint(x: 20, y: 31)
         self.line.isHidden = !active
 
@@ -236,11 +269,7 @@ final class CompanionScene: SKScene {
             self.sleepMarks.position = CGPoint(x: 101, y: 65 + (self.reduceMotion ? 0 : sin(time * 1.4) * 1.4))
             self.sleepMarks.alpha = self.reduceMotion ? 0.7 : 0.65 + 0.2 * sin(time * 1.4)
         case .distracted:
-            self.showPose(self.hopTexture)
-            // One brief burst, followed by a quiet annoyed stance. No endless bouncing.
-            if !self.reduceMotion, time < 1.2 {
-                self.restingPose.position.y += abs(sin(time * .pi * 2.5)) * 7 * (1 - time / 1.2)
-            }
+            self.renderDistraction(time: time)
         case .completed:
             self.showPose(self.completeTexture)
             if !self.reduceMotion { self.restingPose.yScale = 1 + breath * 0.006 }
@@ -272,6 +301,35 @@ final class CompanionScene: SKScene {
         self.catchSprite.position = point
         if self.reduceMotion { self.catchSprite.alpha = rise }
         return point
+    }
+
+    private func renderDistraction(time: CGFloat) {
+        switch self.distractionVisual?.effect ?? .iceFlower {
+        case .iceFlower:
+            self.showPose(self.hopTexture)
+            if !self.reduceMotion {
+                let hop = max(0, sin(time * .pi * 1.7))
+                self.restingPose.position.y += hop * 8
+                self.restingPose.zRotation = sin(time * 3.1) * 0.025
+            }
+            for (index, puff) in self.steamPuffs.enumerated() {
+                let travel = self.reduceMotion
+                    ? 0 : (time * 15 + CGFloat(index) * 5).truncatingRemainder(dividingBy: 17)
+                puff.position = CGPoint(
+                    x: 58 + CGFloat(index) * 10 + (self.reduceMotion ? 0 : sin(time * 2 + CGFloat(index)) * 2),
+                    y: 113 + travel)
+                puff.alpha = self.reduceMotion ? 0.55 : 0.72 * (1 - travel / 19)
+                puff.isHidden = false
+            }
+        case .dimBright:
+            self.showPose(self.lightsUpTexture)
+            let elapsed = Date().timeIntervalSince(self.distractionVisual?.startedAt ?? Date())
+            let strength: CGFloat = self.reduceMotion
+                ? 0.55 : CGFloat(DistractionMotion.dimStrength(elapsed: elapsed))
+            self.restingPose.alpha = 1 - strength
+            self.bowPose.alpha = strength
+            self.bowPose.isHidden = false
+        }
     }
 
     private func renderDeposit(progress: CGFloat) -> CGPoint {

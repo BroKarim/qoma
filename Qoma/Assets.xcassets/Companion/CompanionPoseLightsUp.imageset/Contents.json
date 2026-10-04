@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "CompanionPoseLightsUp.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

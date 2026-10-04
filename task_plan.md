@@ -500,3 +500,17 @@ Bagian ini memperbarui desain efek distraction dari §8 dan art direction §16. 
 - [ ] QA window bounds/layer/Spaces/fullscreen/multidisplay selesai sebelum menyebut dukungan produksi; keterbatasan sistem didokumentasikan.
 
 Tidak ada implementasi, build, atau test yang dilakukan untuk section rencana ini. Setelah rencana dan commit dokumentasi ditinjau, implementasi Swift dan produksi aset animasi menjadi fase berikutnya.
+
+### Implementasi awal — 4 Oktober 2026
+
+Permintaan berikutnya memulai implementasi pada branch yang sama. Catatan perencanaan di atas dipertahankan sebagai riwayat keputusan; status berikut menjelaskan pekerjaan kode yang sudah dilakukan, bukan menghapus rencana semula.
+
+- [x] `DistractionTargetWindowLocator` mencari window on-screen milik PID aplikasi frontmost, membaca bounds WindowServer, dan menolak target yang tidak valid. Tidak ada fallback panel sebesar layar.
+- [x] `DistractionOverlayController` memakai panel transparan click-through sebesar window sasaran, dipesan tepat di atas nomor window tersebut dan diperbarui setiap 0,2 detik. Episode efek menyimpan PID, waktu awal, seed snowflake, dan varian acak; pergantian aplikasi menutup episode lama dan dapat mengundi varian baru.
+- [x] Ice flower dirender dengan vektor bercabang di `Canvas`: 6 awal, bertambah 4 setiap 10 detik, batas 24. Dim/bright memakai veil hitam maksimal 35% dan siklus halus 8→3 detik. Keduanya menggunakan clock episode yang sama dengan panel penguin.
+- [x] Dua pose penguin transparan diproduksi untuk tangan terangkat dan membungkuk; animasi karakter berpindah pose selaras dengan veil. Varian ice flower memakai pose hop marah dan puff/asap. Reduce Motion mempertahankan cue statis.
+- [x] Integrasi coordinator mengaktifkan monitoring hanya pada sesi aktif dengan mode Allowing/Blocking, membersihkan overlay saat pause/stop/safe app, dan menjaga jendela qyube sendiri aman agar kontrol sesi tetap dapat diakses.
+- [x] Build Debug macOS arm64 berhasil. Tiga tes `DistractionMotionTests` lulus untuk eskalasi snowflake dan fase redup–terang.
+- [ ] QA visual/input langsung pada window aplikasi lain, banyak window, minimize/restore, fullscreen, Spaces, monitor kedua, skala berbeda dan Reduce Motion pada Mac nyata. Urutan window lintas-proses dan full-screen tidak dianggap terverifikasi hanya karena build berhasil.
+
+Aset pose ada di `Qoma/Assets.xcassets/Companion/CompanionPoseLightsUp.imageset` dan `CompanionPoseLightsBow.imageset`. Prompt produksi terdokumentasi di `design/qyube-distraction-v1/PRODUCTION_ASSET_PROMPTS.md`. Perubahan code/data lokal lain pada branch ini tidak dibersihkan atau dimasukkan sebagai bagian dari pekerjaan efek.

@@ -102,3 +102,11 @@ This section records the latest user decisions. Older Dzenn/Universal Purchase/A
 - App activation and session events update logical state immediately. Animation can ease over a short span, but there is no timer/debounce before a reaction begins.
 - If app-monitoring permission is denied during setup, retain the New Session draft and return to that form with retry/Open System Settings or Timer only options. If revoked during an active session, preserve timer and fishing while disabling app-aware behavior.
 - Implementation-facing specification: design/qyube-floating/ART_DIRECTION.md.
+
+## 2026-10-02 — Compact white main UI revision
+
+- User selected compact Kiki-style navigation with no sidebar, followed by a pure-white/minimal visual refinement. Earlier warm-white sidebar mockups remain historical; latest main-UI direction is in task_plan §12 and ART_DIRECTION §14.
+- Main-page fishing penguin omits ice/bucket/water; this does not revise desktop companion props. Two session panels remain required.
+- Nine prototype PNGs are now local to `design/qyube-compact-v1/`: two prior Home images plus seven new page proposals. Built-in image_gen was used, with prompts and image limitations recorded next to the assets.
+- Native implementation must correct illustrative discrepancies: continuous minute ruler, fixed-size viewport with scroll for Insight, computed graph/count values, and overlay-only Settings menu. See the package README for full details.
+- Seven new screens await user review. No runtime UI was implemented in this prototype pass.

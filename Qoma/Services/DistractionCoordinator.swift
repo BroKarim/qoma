@@ -10,6 +10,7 @@ final class DistractionCoordinator: ObservableObject {
 
     private let monitor: ForegroundActivityMonitor
     private var cancellables = Set<AnyCancellable>()
+    private var monitoredPolicy: SessionPolicy?
     private var detourStartTime: Date?
     private var totalDetourSeconds: TimeInterval = 0
     var onDecision: ((PolicyDecision) -> Void)?
@@ -19,20 +20,28 @@ final class DistractionCoordinator: ObservableObject {
     }
 
     func start(policy: SessionPolicy) {
-        monitor.startMonitoring()
+        guard monitoredPolicy != policy || !monitor.isMonitoring else { return }
+        cancellables.removeAll()
+        monitor.stopMonitoring()
+        monitoredPolicy = policy
         monitor.$currentActivity
-            .compactMap { $0 }
             .sink { [weak self] activity in
-                self?.evaluate(activity, against: policy)
+                if let activity {
+                    self?.evaluate(activity, against: policy)
+                } else {
+                    self?.clearCurrentActivity()
+                }
             }
             .store(in: &cancellables)
+        monitor.startMonitoring()
     }
 
     func stop() {
-        monitor.stopMonitoring()
         cancellables.removeAll()
-        isDistractionActive = false
+        monitor.stopMonitoring()
+        monitoredPolicy = nil
         currentDecision = nil
+        isDistractionActive = false
         detourStartTime = nil
     }
 
@@ -47,10 +56,13 @@ final class DistractionCoordinator: ObservableObject {
     }
 
     private func evaluate(_ activity: ForegroundActivity, against policy: SessionPolicy) {
-        let decision = FocusPolicyEvaluator.evaluate(activity, against: policy)
+        // qyube itself must stay available for pausing and ending a session.
+        let decision = activity.bundleID == Bundle.main.bundleIdentifier
+            ? PolicyDecision(isDistraction: false, reason: .safeByDefault)
+            : FocusPolicyEvaluator.evaluate(activity, against: policy)
         let wasDistraction = isDistractionActive
-        isDistractionActive = decision.isDistraction
         currentDecision = decision
+        isDistractionActive = decision.isDistraction
 
         if decision.isDistraction {
             if detourStartTime == nil {
@@ -66,5 +78,17 @@ final class DistractionCoordinator: ObservableObject {
         if wasDistraction != decision.isDistraction {
             onDecision?(decision)
         }
+    }
+
+    private func clearCurrentActivity() {
+        guard isDistractionActive else { return }
+        let decision = PolicyDecision(isDistraction: false, reason: .safeByDefault)
+        if let start = detourStartTime {
+            totalDetourSeconds += Date().timeIntervalSince(start)
+        }
+        detourStartTime = nil
+        currentDecision = decision
+        isDistractionActive = false
+        onDecision?(decision)
     }
 }

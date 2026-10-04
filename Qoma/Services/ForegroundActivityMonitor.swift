@@ -73,6 +73,8 @@ final class ForegroundActivityMonitor: ObservableObject {
         guard let frontmostApp = NSWorkspace.shared.frontmostApplication,
               let bundleID = frontmostApp.bundleIdentifier,
               let appName = frontmostApp.localizedName else {
+            currentActivity = nil
+            lastBundleID = nil
             return
         }
 

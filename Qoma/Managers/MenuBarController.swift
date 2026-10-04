@@ -33,6 +33,10 @@ final class MenuBarController: NSObject {
 
     func updateTitle(_ title: String) {
         statusItem.button?.title = title
+        statusItem.button?.image = title.isEmpty ? makeStatusIcon() : nil
+        statusItem.button?.imagePosition = title.isEmpty ? .imageOnly : .noImage
+        statusItem.button?.font = .monospacedDigitSystemFont(ofSize: 13, weight: .regular)
+        statusItem.button?.setAccessibilityLabel(title.isEmpty ? "Open qyube" : "Show timer, \(title) remaining")
         statusItem.length = title.isEmpty ? NSStatusItem.squareLength : NSStatusItem.variableLength
     }
 

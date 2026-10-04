@@ -1,0 +1,11 @@
+# Production companion poses
+
+Generated with the built-in image generation tool on 2026-10-04. Inputs were the existing `CompanionPoseStanding.png`, `CompanionPoseHop.png`, and approved dim/bright storyboard. Both final PNGs have an alpha channel and are installed in `Qoma/Assets.xcassets/Companion/`.
+
+## CompanionPoseLightsUp
+
+Use case: illustration-story. Asset type: SINGLE transparent production sprite for native macOS 2D animation, qyube CompanionPoseLightsUp. Input image 1: exact existing baby penguin identity/illustration reference; image 2: same penguin identity and scale, reference for flipper width; image 3: storyboard reference for BOTH ARMS-UP/bright pose on left. Generate ONE small no-glasses watercolor/charcoal baby penguin, front-facing, BOTH flippers lifted high overhead symmetrically, standing upright on two feet, looking focused and slightly annoyed, exactly same head-body/face/eye/beak ratios, same textured hand-painted charcoal and white brush strokes as image1. Match light direction and outline. Centered on a 1024 square truly transparent canvas with feet baseline near 88% height, ample transparent margin. No ice floe, no bucket, no rod, no shadow, no extra body, no text, no border. Full body fully visible. Sprite must read at 90 px.
+
+## CompanionPoseLightsBow
+
+Use case: illustration-story. Asset type: SINGLE transparent production sprite for native macOS 2D animation, qyube CompanionPoseLightsBow. Input image 1: exact existing baby penguin identity/illustration reference; image 2: same penguin identity and scale, reference for flipper width; image 3: storyboard reference for BOW/DIM pose on right. Generate ONE small no-glasses watercolor/charcoal baby penguin, full body in a pronounced forward BOW from the hips, head lowered, BOTH flippers stretched straight forward in front of the body, palms facing down, alert slightly annoyed eyes, not sleeping, not sitting. The gesture should plainly read as 'raising hands then bowing to dim the app'. Exactly same character shape, charcoal/white watercolor brush texture, proportions, outline, apparent size and fixed feet baseline as image1/other qyube poses. Centered on a 1024 square truly transparent canvas with feet baseline near 88% height, ample transparent margin. No ice floe, bucket, rod, shadow, text, border. Full body visible. Sprite must read at 90 px.

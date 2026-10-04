@@ -15,5 +15,11 @@ struct QomaApp: App {
         Settings {
             EmptyView()
         }
+        .commands {
+            CommandGroup(replacing: .appSettings) {
+                Button("Settings…") { SettingsWindowController.show() }
+                    .keyboardShortcut(",", modifiers: .command)
+            }
+        }
     }
 }

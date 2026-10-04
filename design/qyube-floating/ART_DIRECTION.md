@@ -269,3 +269,80 @@ Existing generated concepts are visual references, not final production layers. 
 - [Apple SKTextureAtlas](https://developer.apple.com/documentation/spritekit/sktextureatlas)
 - [Apple SwiftUI Canvas](https://developer.apple.com/documentation/swiftui/canvas)
 - Existing product rules: [task_plan.md](../../task_plan.md) and [PRODUCT_SPEC.md](../../PRODUCT_SPEC.md)
+
+## 14. Compact pure-white main UI revision — 2026-10-02
+
+This dated section preserves all earlier art direction as history. It supersedes the **main-window** composition and palette in §4's approved Home subsection: the user now prefers a small Kiki-like window without a sidebar, then refined it toward neutral white and fewer visible containers. See [compact prototype index](../qyube-compact-v1/README.md).
+
+- Main UI surface: pure white `#FFFFFF`; primary ink/button approximately `#222222`; neutral gray text/control hierarchy. No cream tint or decorative gradient. Existing charcoal/watercolor character texture stays inside the artwork. Colorful collection art and app icons do not become UI accent colors.
+- One compact window, initially about 420 × 700 pt, with header icons for Insight, Catalog and gear menu. Home has Today summary and penguin above session history, with New session below. During an active session the main action is Show timer.
+- Group primarily through whitespace. Keep borders only where needed for fields, selection or small collection cells. Header/footer framing and vertical Home divider are removed.
+- Home/setup/report illustration uses the no-glasses penguin and rod only: **no ice floe, bucket, water, ripple or ground shadow**. Reuse pose identity from `qyube-minimum-assets-v1/01-poses-no-glasses.png`; generated UI images are not new production sprite sources.
+- This artwork exception is scoped to the main UI. The separate desktop companion's fixed floe/bucket rules remain unchanged until an explicit desktop-art revision. Two floating panels remain part of session behavior.
+- Main UI should use the existing pose vocabulary for fishing/pulling/sleep transitions when appropriate. These PNGs demonstrate static layouts only; they do not prove animation or rig alignment.
+- Catalog: small adaptive grid, colored discovered entries with counts and dark undiscovered silhouettes. Catch illustrations in this batch are provisional references, not the final species roster.
+- Insight: Day uses individual polaroid-style catch cards, including duplicates; longer periods use small bordered thumbnails, roughly five columns at compact width. Content scrolls; View all expands rather than capping history.
+- Settings: small gear menu and compact grouped rows are proposed in image 09. Use native accessible controls; popover overlays without changing the underlying layout. New screens remain pending user review.
+
+The current session/product rules in task_plan override obsolete animation descriptions elsewhere in this historical document: no Continue/Done fork or automatic break; completion opens a report and offers another session. Distraction must not discard ledger catches merely because an old visual-state paragraph says to interrupt an animation. Keep catch accounting in the engine.
+
+For implementation limits, ruler details, responsive layout and illustrative data caveats, read [the prototype notes](../qyube-compact-v1/README.md#agent-implementation-notes-and-image-limitations). Do not erase earlier sections when recording the next revision.
+
+## 15. Native compact implementation — 2026-10-03
+
+User approved the compact direction and corrected the earlier size suggestion: follow Kiki and the compact prototypes. The first native content window is 360 × 610 pt with scrolling, not the 420 × 700 pt recommendation in §14. Settings now uses the same main window. Pure-white surfaces, charcoal controls, sparse borders and header navigation remain the visual contract.
+
+For this stage there is one shared catch illustration: existing `CompanionFish`, also used by the desktop fishing sprite. Repeat this exact art in Catalog, Insight and Fishing Report; keep species IDs/counts distinct. Undiscovered entries use the image's alpha silhouette in charcoal. Do not generate a new illustration per species yet.
+
+Both desktop panels continue to follow `qyube-active-session-v1`: 210 × 143 pt timer, transparent 140 pt character stage with the existing floe/bucket. Main-page penguin remains prop-free except for the rod. Timer task editing is in its small actions menu so the visible face remains focused on the countdown.
+
+## 16. App-window distraction effects — 2026-10-04
+
+User confirmed two alternating distraction variations: ice flowers and dim/bright animation. The affected app stays usable. This section extends the distraction reaction in §§6–8 and is the current authority for overlay scope. Earlier global-screen interpretations are superseded; previous documentation remains as history.
+
+### Trigger and affected area
+
+- **Allowing:** react when the foreground app is absent from the allowed list.
+- **Blocking:** react when the foreground app is present in the blocked list.
+- **Timer only:** neither effect is active. Policy operates at app level: allowing Chrome permits its sites; these effects do not add domain rules.
+- Affect only the currently focused offending application's window. Do not decorate every open window belonging to that app. Clip the effect to that window's visible bounds, including its rounded corners. Follow window movement/resizing and remove the old overlay when the focused window changes.
+- Desktop, menu bar, Dock, other app windows, qyube's timer, and the independent penguin companion remain unaffected. Overlay must not cover an unrelated window that occludes the target. A fullscreen target may visually occupy most of a display; it still follows that target window rather than becoming a global display overlay.
+- The overlay is click-through and must not steal keyboard focus. The user can click, type, scroll, close, move, and switch applications normally. It does not change physical display brightness.
+- Start the penguin reaction immediately on the app-policy event. The timer continues. Returning to a permitted app removes the effect promptly and resumes the appropriate companion state. Pause/end clears the overlay; catch accounting remains governed by the existing session engine.
+- If a valid target-window boundary cannot be resolved, hide the overlay and retain the companion reaction; never substitute a full-desktop effect. Native implementation must validate window tracking, occlusion, fullscreen/Spaces, multiple displays, and permission loss before claiming support.
+
+### Variation 1 — Ice flower
+
+Reference: [01-ice-flower.png](../qyube-distraction-v1/01-ice-flower.png).
+
+White and graphite branching frost flowers grow inward from the target window's edges/corners. Increase density as uninterrupted distraction lasts longer, with a bounded maximum and a readable center. Match the existing charcoal/watercolor illustration; avoid introducing a blue UI palette. Penguin performs small angry hops with gray steam puffs above its head. Keep the same fixed floe, bucket, character identity, and stage position; only character/effect layers move. Put the rod aside during the gesture.
+
+### Variation 2 — Dim and bright
+
+Reference: [02-dim-bright.png](../qyube-distraction-v1/02-dim-bright.png).
+
+The paired desktop views are successive moments of one loop, not simultaneous application windows. Standing upright with both flippers raised corresponds to normal brightness. Bowing with both flippers extended straight forward corresponds to a translucent charcoal veil over the target window. Rising restores normal brightness. Drive pose and opacity from the same animation phase so the gesture visibly controls the light. Keep app content discernible at the darkest point; do not turn the window fully black.
+
+### Alternation, escalation, and accessibility
+
+- Show one variation at a time; alternate between them, clearing the previous effect during the transition. Do not stack frost and dimming as escalating punishment. Exact first-variation selection and switching interval are still animation-tuning parameters, not approved numeric requirements.
+- Longer continuous distraction increases frost density or dim/bright cadence, with hard caps. Changing variation must not accidentally reset accumulated distraction intensity. Returning to a permitted app ends that episode; start the next episode gently.
+- Use smooth brightness transitions, never rapid flashes/strobing. Initial tuning proposal: a full dim/bright cycle gradually moves from about 8 seconds toward a minimum of 3 seconds, and dark opacity caps around 40%. These values require prototype review and are not a safety certification.
+- Reduce Motion uses static frost and/or a steady dim veil with a restrained annoyed pose; no hops or pulsing brightness. Preserve immediate policy feedback and access to timer controls.
+
+### Prototype boundaries and next assets
+
+These two PNGs communicate composition and gesture only. Generated browser text/chrome and penguin registration are illustrative. Image 01 places frost mainly around page-content edges; production masking must use the actual target-window bounds described above. Image 02 shows the intended bow direction; final authored poses must make the forward bend and both extended flippers clear at floating size. Do not extract these whole desktop mockups as animation sprites.
+
+Later asset work needs a registered angry hop pose, steam puff layer, flippers-up pose, forward-bow pose, and tileable/instanced frost clusters. Reuse the existing fixed floe and bucket. This revision generates design artifacts only; native overlay behavior has not been implemented or tested by this prototype task. Exact generation prompts are recorded in [PROMPTS.md](../qyube-distraction-v1/PROMPTS.md).
+
+### 2026-10-04 correction — scattered ice flowers (v2)
+
+The user approved the dim/bright prototype, including its penguin poses, and approved the angry hopping penguin in the ice-flower prototype. The continuous frost border in image 01 was rejected. This correction supersedes the edge-growth and connected frost descriptions above.
+
+- Current ice-flower reference: [01-ice-flower-v2.png](../qyube-distraction-v1/01-ice-flower-v2.png). Keep v1 as design history.
+- Ice flowers are individual branching snowflake sprites scattered across the entire offending window, including its center and chrome. They are not a frozen border or an opaque frost layer.
+- Increase the number of sprites over time, retaining gaps and click-through behavior so the app remains usable. Limit rendering to the target window; other windows and desktop stay unaffected.
+- The user's new visual reference uses light icy-blue snowflakes. V2 adopts that color for this effect only; the penguin and main UI retain their existing palette.
+- Preserve the approved angry hop and steam puffs, fixed floe and bucket. The dim/bright prototype remains the approved reference for the other variation.
+- V2 is a static medium-density example; actual spawn timing and maximum density still need animation tuning. No native behavior is changed by this image revision.
