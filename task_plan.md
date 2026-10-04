@@ -2,7 +2,9 @@
 
 **Status:** kontrak implementasi untuk AI agent; belum ada perubahan kode pada sesi perencanaan ini.
 
-**Branch:** `codex/kiki-flow-core`.
+**Branch implementasi awal:** `codex/kiki-flow-core`.
+
+**Branch audit dan perbaikan UI:** `codex/qyube-ui-rework`.
 
 **Diperbarui:** 1 Oktober 2026.
 
@@ -331,3 +333,170 @@ Tes terpenting berada di `QomaTests/` dan memeriksa transisi domain, evaluator a
 - `KIKI.md` telah muncul sebagai file belum dilacak dari pekerjaan sebelumnya; jangan membuangnya.
 - Ada penghapusan yang sudah ada pada beberapa draft gambar `design/qyube-concepts-v1/` dan `design/qyube-concepts-v2/` di worktree pengguna. Jangan memulihkan atau menghapusnya tanpa permintaan.
 - Checkbox fase 1–4 telah diperbarui sesuai implementasi yang sudah berjalan. Fase 5 (akun/trial/backend) dan fase 6 (distribusi/rilis) masih menunggu keputusan pengguna.
+
+## 10. Riwayat keputusan yang sempat hilang saat rencana ditulis ulang
+
+Bagian ini sengaja **dipertahankan sebagai sejarah**, bukan instruksi implementasi baru. Pada 1 Oktober, dokumen rencana lama ditimpa oleh kontrak teknis terkini; itu menghilangkan jejak mengapa arah produk berubah. Revisi selanjutnya harus **menambah catatan perubahan di bagian bawah**, bukan mengganti isi lama tanpa arsip. Untuk teks asli yang persis, Git menyimpan snapshot sebelum penulisan ulang pada `6eb2476:task_plan.md` (221 baris), pivot awal pada `1b33802:task_plan.md`, dan rencana awal pada `4c22775:task_plan.md`. Gunakan `git show <commit>:task_plan.md` untuk audit; jangan menganggap keputusan yang diberi status *superseded* di bawah masih berlaku.
+
+| Tahap | Keputusan/cakupan yang terdokumentasi saat itu | Status sekarang |
+|---|---|---|
+| Rencana awal | Pomodoro, tangkapan penguin, Catalog, Aquarium, Insight, harga, sinkronisasi, dan kemungkinan iOS/Deep Focus dirancang dalam spesifikasi produk dan roadmap. | Rencana makro tetap arsip. Kontrak macOS pada §1 lebih baru. Aquarium dibatalkan, Deep Focus iOS terpisah. |
+| Pivot macOS `1b33802` | Produk menjadi **qyube**, companion fokus Antartika dengan satu tugas, durasi, pilihan aplikasi, penguin yang memancing, dan visual friction alih-alih pemblokiran total. | Berlaku; rincian mode dan tugas mengikuti §1–3. |
+| Konsep Home `b6c41e1` | Referensi `design/qyube-concepts-v3/01-home-floating-form.png` dipilih: latar putih hangat, sidebar, ilustrasi penguin di tengah, kartu New Session di kanan, aksen terracotta. | Berlaku; harus dicek pada app nyata, bukan hanya mockup. |
+| Arah seni `13ad567` | `design/qyube-floating/ART_DIRECTION.md` menetapkan penguin watercolor tanpa kacamata, floe dan ember tetap pada anchor yang sama, transparansi panel, pose dan transisi. | Berlaku kecuali aturan `Continue`, tag, atau catch yang batal akibat distraksi. |
+| Draft sesi aktif `96deb43` | Dua permukaan independen: timer sekitar 210 × 143 pt dapat ditutup; penguin sekitar 118 pt tetap hadir. Menu bar menampilkan waktu dan memulihkan timer tanpa popover. | Berlaku. Referensi `design/qyube-active-session-v1/`. |
+| Asset dan animasi `1258029`–`6eb2476` | Asset pose/prop minimum dan prototipe SpriteKit dipakai sebagai representasi awal. Fish/tree hanyalah proxy visual; identitas asli tangkapan milik engine dan ledger. | Berlaku; jangan menghitung tangkapan dari frame/loop visual. |
+| Kontrak prototype lama `6eb2476` | Saat itu task diwajibkan, app allow-list utama, tag masih opsional, Aquarium *deferred*, Home tidak bisa dibuka saat sesi, dan akhir timer menawarkan `Continue`/`Done`. | **Superseded**: task boleh kosong, tanpa tag, 3 mode, Aquarium dibatalkan, Home bisa dibuka dari Dock, akhir timer langsung report lalu `Mulai sesi lagi`. |
+| Wawancara alur Kiki sesudah prototype | Dua panel tetap; timer bisa disembunyikan, penguin tidak; tidak ada break otomatis; trial 7 hari membutuhkan Google/Apple login dan kartu Stripe; setelah akses habis gate sebelum Home. | Berlaku sesuai §1–4. |
+| Implementasi fase 0–4 pada `codex/kiki-flow-core` | Model sesi/policy/catch, Home awal, panel timer dan penguin, Catalog/Insight/report, serta test dasar masuk bertahap. | Harus dievaluasi berdasarkan **perilaku nyata**, bukan hanya checkbox/build. UI dan companion visibility memerlukan audit cabang ini. |
+
+Catatan sejarah ini juga menjelaskan mengapa `PRODUCT_SPEC.md`, `ROADMAP.md`, dan sebagian teks desain tampak bertentangan. Jangan menghapusnya untuk menyembunyikan perubahan arah; tandai keputusan lama sebagai superseded dan arahkan agent ke §1 untuk perilaku terbaru.
+
+## 11. Audit dan perbaikan UI macOS — 2 Oktober 2026
+
+Keluhan pengguna: implementasi visual belum setara referensi, dan saat sesi dimulai hanya panel timer terlihat. Audit kode menemukan `CompanionWindowController.show()` membuat `CompanionScene` baru tetapi tidak memanggil `startSession()`. `CompanionScene` dimulai pada phase `.hidden`, sehingga panel transparan benar-benar ada namun semua sprite disembunyikan. Ini bukan masalah aset atau level window semata.
+
+Kontrak UI untuk cabang `codex/qyube-ui-rework`:
+
+- [x] Start scene saat panel penguin dibuat; simpan scene selama sesi, set pose tidur saat pause, jangan reset animasi pada setiap perubahan snapshot, dan buat cleanup jelas saat sesi selesai. Pisahkan klik untuk restore timer dari drag panel dengan ambang gerak kecil.
+- [x] Pertahankan timer yang telah ditutup saat snapshot sesi berubah; menu bar/penguin hanya memulihkannya bila tersembunyi.
+- [x] Ganti Home tiga kolom sempit yang tidak sesuai mockup: sidebar ±188 pt, ilustrasi di tengah, kartu kanan; jangan gunakan pose tunggal tanpa floe/ember sebagai gambar utama.
+- [x] Buat Settings sebagai window native terpisah dengan `NavigationSplitView`, sidebar, toolbar, dan grouped Form. Hilangkan Aquarium dari navigasi baru; tetap simpan kode/desain prototype lama sebagai arsip hingga cleanup terpisah.
+- [x] Buat timer panel ringkas seperti draft: close kecil, waktu dominan, task subtil, aksi pause/stop di menu, konfirmasi stop.
+- [ ] Verifikasi pada build nyata: kedua panel terlihat saat Start; pause → penguin tidur; close timer → penguin tetap; klik menu bar → timer kembali; sesi selesai → kedua panel hilang dan report muncul.
+- [ ] Bandingkan screenshot Home, Settings, dan panel dengan referensi desain pada ukuran window minimum dan normal; koreksi proporsi, clipping, kontras, serta VoiceOver.
+- [ ] Jalankan build/test; catat hasil dan keterbatasan lingkungan bila pemeriksaan visual macOS tidak tersedia.
+
+Skill `macos-settings-ui` memengaruhi Settings secara langsung: alur Settings tidak lagi placeholder di kartu kanan, melainkan `NSWindowController` dengan `NavigationSplitView` dan Form berkelompok. Skill ini tidak mengubah dua companion `NSPanel` menjadi window Settings.
+
+**Verifikasi sementara:** build dan test Xcode lulus pada 2 Oktober. Pemeriksaan aplikasi native memperlihatkan Home dan Catalog dengan kontras terang, panel timer, serta panel penguin sebagai jendela terpisah. Ketika sesi di-pause, penguin memakai pose tidur; setelah timer ditutup, penguin tetap terlihat. Pemeriksaan klik penguin → timer dan klik menu bar → timer belum dapat dikonfirmasi secara visual melalui alat otomasi window nonactivating, sehingga checkbox integrasi di atas tetap terbuka. Uji UI juga membuat dua record sesi singkat `interrupted` pada akun lokal; jangan menyalahartikannya sebagai data pengguna sungguhan.
+
+## 12. Pivot UI ringkas putih dan paket prototype — 2 Oktober 2026
+
+Branch: `codex/qyube-compact-prototypes`, dibuat dari `codex/qyube-ui-rework` dengan perubahan lokal yang sudah ada tetap dipertahankan. Cakupan sesi ini adalah gambar prototype dan dokumentasi, bukan implementasi Swift.
+
+**Aturan riwayat:** seluruh §1–11 di atas dipertahankan. Tambahkan keputusan baru sebagai bagian bertanggal; jangan mengganti task_plan dengan ringkasan fitur terkini. Bila ada konflik, gunakan keputusan terbaru yang secara eksplisit menggantikan keputusan lama dan tetap simpan alasan/perubahan arah sebelumnya.
+
+### Keputusan visual terbaru
+
+- Pengguna memilih alur jendela kecil seperti Kiki: Home langsung, tanpa sidebar, tombol New session membuka form; Insight, Catalog, dan gear berada di header.
+- Setelah versi putih hangat, pengguna memilih putih netral yang lebih sederhana. Home kosong dan Home berisi riwayat menjadi referensi baru; lihat gambar 01 dan 02 pada [indeks prototype](design/qyube-compact-v1/README.md).
+- Layout sidebar + kartu kanan dari §10/§11 dan `qyube-concepts-v3` kini **superseded untuk main UI**. Dokumen serta gambar lama tetap menjadi sejarah.
+- Ilustrasi penguin di dalam main UI hanya penguin dan joran, tanpa es, ember, air, atau bayangan lantai. Gunakan identitas no-glasses dan variasi pose yang sudah ada. Perubahan ini tidak otomatis membuang props pada companion desktop.
+- Dua panel sesi tetap: timer dapat ditutup, penguin tetap hadir. Tidak ada perubahan pada aturan sesi, tugas opsional, mode, catch banking, trial, atau entitlement karena mockup baru.
+- Ukuran awal yang direkomendasikan sekitar 420 × 700 pt, dapat diubah ukurannya dan memiliki konten scroll. Ukuran final perlu uji native; jangan menafsirkan ukuran PNG sebagai point.
+
+### Deliverable sesi ini
+
+- [x] Simpan Home kosong dan Home berisi riwayat dari generasi sebelumnya.
+- [x] Generate New Session, Home active, Fishing Report, Catalog, Insight Day, Insight Week sebagai pola Week/Month/Year, serta Settings dengan menu gear terbuka.
+- [x] Simpan sembilan PNG di `design/qyube-compact-v1/`, berikut README dan PROMPTS.
+- [x] Periksa visual; koreksi subtitle jumlah Catalog dan penempatan label Settings.
+- [x] Tambahkan revisi arah seni ke `ART_DIRECTION.md` tanpa menghapus bagian lama.
+- [ ] Review pengguna atas tujuh layar baru; jangan menandainya final-approved hanya karena generasi selesai.
+- [ ] Implementasikan navigasi/window kompak sesudah review, lalu verifikasi ukuran nyata, keyboard, VoiceOver, Reduce Motion, dan kedua panel.
+
+### Ketentuan untuk agent berikutnya
+
+Mulai dari [README paket](design/qyube-compact-v1/README.md), terutama batas mockup: ruler harus mendukung 180 lalu 10–60 setiap menit, Day adalah halaman scroll, data grafik/count hanyalah contoh, dan menu Settings tidak boleh menggeser konten di bawahnya. Jangan hardcode 25 spesies, sample catch counts, durasi, atau status dari gambar. Rare/legendary tetap acak dan dapat muncul sejak awal; koleksi banked tetap milik pengguna. Report merangkum hasil, bukan memberi reward tambahan hanya karena completed. Catalog tetap satu entry per spesies, sedangkan kartu tangkapan Insight mempertahankan duplikat.
+
+Settings dalam paket merupakan proposal halaman ringkas; menu gear dan struktur kontennya adalah referensi visual, bukan bukti bahwa billing/account actions sudah aktif. Scope macOS tetap berlaku. Layar login/trial/payment, state error, dan variasi paused/interrupted belum merupakan gambar tambahan dalam paket tujuh layar ini.
+
+## 13. Implementasi UI compact macOS — 3 Oktober 2026
+
+Branch: `codex/qyube-compact-ui`, dibuat dari `codex/qyube-compact-prototypes`. Perubahan lokal sebelumnya dibawa tetap utuh; penghapusan historis pada folder konsep v1/v2 sudah ada sebelum pekerjaan ini. Tidak ada reset, penghapusan dokumentasi lama, atau commit otomatis pada sesi ini. Section ini ditulis manual sesuai instruksi pengguna, tanpa workflow planning-with-files.
+
+### Keputusan terbaru dan precedence
+
+- Pengguna menyetujui rancangan halaman dan interaksi dari wawancara 12 poin, dengan satu koreksi: ukuran mengikuti Kiki dan proporsi prototype `design/qyube-compact-v1/`, bukan rekomendasi 420 × 700 pt. Implementasi awal memakai content window **360 × 610 pt**, kompak dengan konten scroll; resize tidak diaktifkan pada tahap ini. PNG bukan ukuran point. Ukuran native tetap dapat diperbaiki sesudah review visual.
+- Settings berada dalam main window yang sama, termasuk akses `⌘,`. Ini menggantikan keputusan Settings window/sidebar terpisah pada §11, yang tetap disimpan sebagai sejarah.
+- Main window: putih netral, header Close/qyube/Insight/Catalog/gear, Back untuk kembali ke Home, tanpa sidebar. Gear memakai menu overlay, tidak menggeser halaman.
+- Gunakan **satu ilustrasi tangkapan bersama**, yaitu asset watercolor `CompanionFish` yang sudah dipakai animasi penguin. Catalog, report, kartu Insight, dan catch sprite desktop memakai gambar yang sama. Identitas spesies dan count tetap berbeda; art ini placeholder bersama, bukan perubahan daftar spesies atau peluang tangkapan.
+- Floating timer dan penguin mengikuti `design/qyube-active-session-v1/`: timer 210 × 143 pt, stage companion 140 × 140 pt dengan floe/ember transparan; posisi masing-masing independen. Art main window hanya penguin dan joran, tanpa floe/ember.
+
+### Implementasi dan peta kode
+
+| Bagian | File / fungsi | Perilaku |
+|---|---|---|
+| Navigasi / cache tampilan | `Qoma/UI/Main/QyubeHomeView.swift`: `QyubeNavigation`, `refresh()`, `showReport(_:)`, `repeatSession(_:)` | Route Home/New Session/Catalog/Insight/Settings/Report. History dan catches dimuat saat perubahan data/navigasi, bukan setiap tick timer. Repeat mengisi draft sebelumnya dengan nama tugas terakhir; tidak auto-start. |
+| Home | `CompactTodayView` dalam file Home | Today dari sesi tersimpan plus durasi aktif berjalan, tanpa menghitung ID aktif dua kali. Baris riwayat membuka report. Footer New session atau Show timer. |
+| Shell native | `Qoma/Managers/QyubeAppCoordinator.swift`: `showHomeWindow()`, `onSessionEnded(_:)` | Satu main window dipertahankan ketika ditutup/dibuka kembali. Start menyembunyikan main window; akhir sesi membuka report di window yang sama. Kedua floating panel tetap terpisah. |
+| Komponen bersama | `Qoma/UI/Main/QyubeCompactComponents.swift` | Tombol utama, format durasi, `QyubeCatchArt`, `QyubePenguinArt`, area drag header. Motion penguin mengikuti Reduce Motion sistem/pengaturan app. |
+| Setup | `Qoma/UI/Main/NewSessionView.swift` | Tugas opsional, mode tiga pilihan, ruler 180 kemudian 10–60 setiap menit. Pemilihan aplikasi membuka sheet dengan pencarian daftar aplikasi terpasang; domain ada pada disclosure lanjutan. Draft dipertahankan saat berpindah halaman. |
+| Catalog | `Qoma/UI/Main/CatalogView.swift` | Grid lima kolom pada lebar awal, urutan definisi stabil, filter All/Fish/Ocean finds, detail sheet. Undiscovered berupa siluet tanpa nama/rarity; discovered memperlihatkan nama/rarity/count. |
+| Report | `Qoma/UI/Main/FishingReportView.swift` | Status, durasi nyata, total banked, jumlah spesies, paling banyak tiga kelompok highlight. Interrupted <5 menit menjelaskan pengembalian tangkapan. Melihat report lama ketika sesi aktif menawarkan Show timer. |
+| Insight | `Qoma/UI/Main/InsightView.swift` | Day/Week/Month/Year, tanggal sebelumnya/berikutnya, kartu tangkapan individual Day, thumbnail individual untuk periode panjang, expanded list tanpa batas data, grabber/drag plus View all. Statistik completed/interrupted, perbandingan periode sebelumnya, distribusi tugas, daftar sesi, ringkasan tangkapan. |
+| Settings | `Qoma/UI/Main/QyubeCompactSettingsView.swift`, `SettingsWindowController.compactSettingsAction`, commands di `QomaApp.swift` | Pengaturan sound/volume/auto-mute/Reduce Motion menggunakan key yang sudah ada. Settings route inline; account/billing belum terhubung. |
+| Floating timer | `Qoma/Managers/FloatingTimerController.swift` | Tampilan dominan waktu; close hanya hide. Menu kecil pause/resume/stop/edit tugas; edit dalam popover. Panel dapat menerima keyboard untuk edit tanpa menjadi main window. |
+| Menu bar | `Qoma/Managers/MenuBarController.swift`: `updateTitle(_:)` | Memperbaiki konfigurasi lama `imageOnly` yang menyembunyikan countdown: aktif memakai teks waktu tanpa ikon, idle kembali ke ikon. |
+| Catch sprite | `Qoma/UI/Floating/Companion/CompanionScene.swift` | Semua catch memakai texture ikan yang sama; floe, ember, ukuran stage dan gerak utama tetap. |
+
+### Ketentuan data dan batas tahap ini
+
+- Riwayat/ledger asli tetap menjadi sumber data. Tidak mengisi database dengan contoh angka/species dari PNG. Roster masih definisi delapan item yang sudah ada; ekspansi aset menyusul.
+- Grafik fokus mengelompokkan durasi nyata berdasarkan **waktu mulai sesi** (jam untuk Day, hari untuk Week/Month, bulan untuk Year). Ini bukan rekonstruksi interval aktif/pause per jam; label aksesibilitas menjelaskan basis pengelompokan.
+- Satu kartu Day per catch ID; list paling bawah merangkum satu hari penuh. Grid periode panjang juga mempertahankan duplikat dan satu thumbnail per catch ID, hanya lebih kecil tanpa caption; agregasi spesies ada di ringkasan bawah. Render menggunakan lazy containers.
+- Billing/login/trial/backend tetap fase terpisah. Menu Manage subscription/Sign out belum aktif; tidak dibuat endpoint atau alur pembayaran palsu. Help/feedback produksi belum memiliki tujuan yang dikonfigurasi.
+- App rule editor membaca aplikasi terpasang. Perilaku monitoring/permission dan ledger mengikuti engine yang ada; pekerjaan ini tidak mengubah odds, pricing, sync, atau memulai iOS/Aquarium.
+
+### Validasi
+
+- [x] Xcode scheme `Qoma` diverifikasi; build Debug macOS arm64 berhasil dengan `CODE_SIGNING_ALLOWED=NO`.
+- [x] Suite Xcode `QomaTests` berhasil pada 3 Oktober 2026: 143 tes, termasuk clock, coordinator, policy, catch banking, analytics dan companion playback.
+- [x] Home, New Session, Catalog, Insight, dan Settings dibuka pada app native; `⌘,` menuju Settings dalam main window.
+- [x] Pemeriksaan native Start → dua panel → pause (penguin tidur) → hide timer (penguin tetap) → klik penguin untuk restore timer → resume → stop → report → repeat dengan draft sebelumnya. Snapshot aktif juga pulih setelah app diluncurkan ulang selama uji.
+- [x] Stop singkat menampilkan pengembalian tangkapan; stop setelah lima menit menampilkan banked catches. Catalog/Insight membaca hasil yang sama, View all Day memperluas dari enam menjadi seluruh dua belas event uji.
+- [ ] Klik status menu bar secara langsung serta drag grabber, edit task via popover, dan report countdown-completed masih memerlukan pemeriksaan native terpisah; source/tes domain tidak menggantikan verifikasi interaksi tersebut.
+- [ ] QA lintas Spaces/full screen/multi-display serta VoiceOver menyeluruh pada Mac nyata tetap perlu sebelum rilis.
+
+Build pertama mengalami pembatasan cache Xcode oleh sandbox; dijalankan ulang dengan izin Xcode. Dua perbaikan compile/lint: tambahkan import Combine untuk model navigasi dan ganti nama scalar `count` menjadi `catchCount` agar tidak terkena rule collection `empty_count`. Warning historis lint/Copy Bundle Resources Info.plist masih ada; keberhasilan build bukan klaim seluruh warning sudah dibersihkan.
+
+Smoke test membuat dua record lokal `UI verification — compact` dan `UI verification — panels` (keduanya interrupted), serta 12 banked catches dari sesi panel yang lebih panjang. Data uji ini tidak dihapus otomatis dan bukan data contoh yang disisipkan ke database. Tidak ada sesi uji yang dibiarkan aktif pada akhir pemeriksaan. Readout timer kini mempunyai observable model sendiri agar pembaruan angka tidak mengganti root view/menu setiap detik; companion yang sudah terlihat tidak diangkat ulang pada setiap snapshot.
+
+## 14. Perencanaan efek visual aplikasi yang melanggar aturan — 4 Oktober 2026
+
+Branch dokumentasi/perencanaan: `codex/distraction-effects-plan`, dibuat dari `codex/qyube-compact-ui` dengan perubahan lokal yang sudah ada tetap dipertahankan. Cakupan turn ini hanya memperbarui rencana; tidak ada kode aplikasi yang diubah atau dijalankan. Perubahan dokumentasi ini boleh di-commit sendiri tanpa memasukkan perubahan kode lokal lainnya.
+
+Bagian ini memperbarui desain efek distraction dari §8 dan art direction §16. Catatan historis tetap dipertahankan. Prototype revisi: [ice flower v2](design/qyube-distraction-v1/01-ice-flower-v2.png), [dim/bright storyboard](design/qyube-distraction-v1/02-dim-bright.png), dan [art direction §16](design/qyube-floating/ART_DIRECTION.md#16-app-window-distraction-effects--2026-10-04) beserta koreksi v2 di bagian bawahnya.
+
+### Keputusan yang dikonfirmasi
+
+- Efek berlaku untuk **Allowing dan Blocking** saat aplikasi aktif melanggar policy sesi. Timer only tidak menampilkan efek.
+- Sasaran visual adalah **jendela aktif di depan** dari aplikasi yang melanggar. Jika aplikasi memiliki banyak jendela dan fokus berpindah, efek mengikuti jendela aktif. Efek hanya dirender di batas jendela tersebut; desktop, menu bar, Dock, aplikasi lain, timer qyube, dan panel penguin tidak berubah.
+- Aplikasi tetap dapat dipakai: panel efek nonaktif untuk mouse dan keyboard. Pengguna dapat mengetik, klik, scroll, menutup jendela, serta berpindah aplikasi.
+- Pilih satu variasi acak ketika aplikasi/jendela yang melanggar menjadi aktif. Variasi **tidak berubah selama target yang sama tetap di depan**. Saat aplikasi pelanggar lain menjadi aktif, pilih variasi baru secara acak; ia boleh sama atau berbeda. Tidak ada pergantian efek berdasarkan timer ketika pengguna masih berada pada aplikasi/jendela yang sama. Rekomendasi probabilitas awal 50:50, dapat dituning setelah evaluasi.
+- Saat target kehilangan fokus ke aplikasi yang diizinkan, jendela diminimalkan/tidak terlihat, sesi pause/selesai, atau policy tidak lagi menandainya sebagai distraction, overlay disembunyikan segera. Episode baru dimulai lagi dengan kepadatan/intensitas awal.
+- **Ice flower:** kepingan snowflake biru muda bercabang, tersebar di seluruh jendela dengan celah yang menjaga keterbacaan dan klik. Mulai 6; tambah 4 setiap 10 detik; batas 24. Kepadatan hanya bertambah selama episode target aktif.
+- **Dim/bright:** pose berdiri dengan kedua flipper terangkat berarti terang; pose membungkuk dengan kedua flipper lurus ke depan selaras dengan lapisan gelap transparan pada jendela sasaran. Opasitas gelap maksimal sekitar 35%; siklus awal sekitar 8 detik, semakin cepat hingga batas 3 detik. Perubahan halus, tidak berkedip/strobe, konten tetap terbaca.
+- Respect Reduce Motion: pose marah statis, snowflake statis, atau veil redup statis; tanpa lompatan dan siklus terang/redup bergerak. Feedback logis tetap muncul.
+- Jika batas jendela sasaran tidak dapat ditentukan dengan aman, sembunyikan overlay. Jangan pernah jatuh kembali ke overlay seluruh layar.
+
+### Fakta kode saat ini
+
+- `Qoma/Services/ForegroundActivityMonitor.swift` saat ini memantau `NSWorkspace.didActivateApplicationNotification` dan polling 1 detik, lalu mengirim bundle ID/nama/domain aplikasi aktif. Belum membawa identitas window aktif atau bounds.
+- `Qoma/Services/DistractionCoordinator.swift` mengevaluasi policy dan menerbitkan `isDistractionActive`/`currentDecision`.
+- `Qoma/Managers/QyubeAppCoordinator.swift` mengikat status tersebut ke overlay controller.
+- `Qoma/Managers/DistractionOverlayController.swift` saat ini membuat satu `NSPanel` sebesar `NSScreen.main.frame`, berada di level floating, menutup sendiri setelah 2,5 detik, dan merender cue ikan. Ini perlu diganti; sifat click-through dan Reduce Motion yang sudah ada dipertahankan.
+
+### Rencana implementasi bertahap — belum dieksekusi
+
+1. **Spike identifikasi jendela dan urutan layer.** Tambah representasi target window dengan PID, window ID, bounds, screen/space, visibility dan waktu observasi. Evaluasi `CGWindowListCopyWindowInfo` untuk menemukan jendela on-screen teratas milik PID frontmost serta pembaruan bounds saat resize/move. Pastikan panel transparan dapat berada tepat di atas target window dan tetap di bawah jendela yang menutupinya, tanpa mengambil fokus/input. Verifikasi implikasi aksesibilitas/permission sebelum menambah permission baru. Jika tracking gagal/ambigu, sembunyikan efek; fallback global dilarang.
+2. **Model episode distraction.** Ubah event aplikasi foreground menjadi episode yang punya identitas target window dan policy decision. Ketika target berubah, akhiri episode lama dan buat episode baru; untuk target yang sama pertahankan `selectedEffect` acak dan `startedAt` sehingga variasi serta eskalasi stabil. Resolusi policy atau hilangnya target menutup episode dan membersihkan overlay. Timer, catch ledger, dan status completed/interrupted tetap tidak disentuh.
+3. **Renderer window-scoped.** Refactor `DistractionOverlayController` dari panel satu layar menjadi panel transparan click-through yang mengikuti frame target dan screen backing scale. Gunakan level/order relatif terhadap target (bukan `.floating` global); hitung clipping sesuai rounded window shape bila dapat dilakukan tanpa menangkap isi aplikasi. Perbarui frame pada perubahan target, posisi, ukuran, screen, Space/fullscreen; jangan tampil di depan window tak terkait. Hide saat minimization/occlusion atau batas tidak valid.
+4. **Efek Ice flower.** Buat sprite transparan snowflake biru muda (beberapa bentuk ringan) sebagai layer tiled/instanced. Seed/random placement per episode untuk komposisi stabil; spawn 6 awal, tambah 4/10s sampai24. Pakai alpha/ukuran bervariasi, jangan menutupi satu area terlalu rapat; Reduce Motion mempertahankan posisi statis. Jangan memakai keseluruhan mockup atau screenshot sebagai texture.
+5. **Efek Dim/bright dan karakter.** Buat aset transparan penguin untuk pose flipper-up, bow-forward, marah-hop dan steam puff, dengan anchor karakter, floe, dan bucket tetap registrasi. Controller timeline bersama menggerakkan pose flipper-up → bow-forward → flipper-up dan opasitas veil pada target window. Durasi siklus turun bertahap dari8 ke3s selama episode; cap veil35%, transisi mulus. Reduce Motion mengganti timeline dengan pose dan veil statis.
+6. **Integrasi policy dan cleanup.** Update binding `QyubeAppCoordinator` agar meneruskan episode/target, bukan memunculkan pulse 2,5 detik. Mode Allowing/Blocking mengikuti `FocusPolicyEvaluator`; Timer only tidak membuat episode. Hapus efek segera saat app/window berubah ke keadaan aman, pause/stop/session end, app tutup/minimize atau izin monitoring hilang. Jangan mengganggu aktivitas tracker, analytics consent, maupun timer.
+7. **Tuning visual, performa dan QA.** Verifikasi target window normal/resizable, app dengan banyak window, window tertutup window lain, minimize/restore, fullscreen, berpindah Spaces, dua monitor berbeda scale, perubahan ukuran/posisi, pergantian offending app, kembali ke app yang diizinkan, mode Allowing dan Blocking, pause/end, Reduce Motion serta input keyboard/mouse. Uji bahwa efek tidak terlihat pada menu bar/desktop/window lain/timer/companion. Ukur jumlah sprite dan pembaruan frame; hentikan animasi yang tak perlu saat episode hilang.
+
+### Kriteria penerimaan
+
+- [ ] Saat app yang melanggar menjadi frontmost, overlay muncul di atas jendela aktif yang benar; jendela lain dan desktop tetap bersih.
+- [ ] Snowflake tersebar seperti referensi user, meningkat 6 → +4 tiap10 detik → max24; aplikasi tetap dapat digunakan.
+- [ ] Varian dipilih acak per aktivasi target, tetap sama selama target itu aktif, dan undian baru terjadi saat target offending berubah. Tidak ada timer yang mengganti variasi pada target sama.
+- [ ] Dim/bright menyelaraskan pose dengan veil; siklus 8→3 detik dan veil sampai35%, tanpa strobe.
+- [ ] Allowing/Blocking memberi efek hanya pada activity yang dievaluasi melanggar; Timer only tidak menampilkannya.
+- [ ] Reduce Motion menghilangkan hop/pulse tetapi tetap memberi cue; efek menghilang segera setelah kondisi distraction berakhir.
+- [ ] Overlay click-through, tidak mengambil key/main focus, tidak mengubah layar eksternal secara global dan tidak pernah fallback ke seluruh display.
+- [ ] QA window bounds/layer/Spaces/fullscreen/multidisplay selesai sebelum menyebut dukungan produksi; keterbatasan sistem didokumentasikan.
+
+Tidak ada implementasi, build, atau test yang dilakukan untuk section rencana ini. Setelah rencana dan commit dokumentasi ditinjau, implementasi Swift dan produksi aset animasi menjadi fase berikutnya.
