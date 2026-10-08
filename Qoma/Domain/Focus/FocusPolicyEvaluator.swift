@@ -55,6 +55,8 @@ enum FocusPolicyEvaluator {
                 if policy.blockedDomains.contains(normalizeDomain(domain)) {
                     return PolicyDecision(isDistraction: true, reason: .blockedDomain)
                 }
+            } else if !policy.blockedDomains.isEmpty {
+                return PolicyDecision(isDistraction: true, reason: .noDomainRead)
             }
             return PolicyDecision(isDistraction: false, reason: .allowedBrowser)
         }

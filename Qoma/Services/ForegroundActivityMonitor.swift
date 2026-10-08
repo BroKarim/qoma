@@ -14,6 +14,11 @@ final class ForegroundActivityMonitor: ObservableObject {
     private var pollingTimer: Timer?
     private var lastBundleID: String?
     private var policy: SessionPolicy?
+    private var selectedDomainBrowserID = "com.apple.Safari"
+    private let lookupQueue = DispatchQueue(label: "com.dzulkiram.qoma.domain-lookup")
+    private var lookupInFlight = false
+    private var lastLookupAt = Date.distantPast
+    private var activityGeneration = 0
 
     init(browserResolver: BrowserActivityResolver? = nil) {
         self.browserResolver = browserResolver ?? .shared
@@ -21,9 +26,11 @@ final class ForegroundActivityMonitor: ObservableObject {
 
     var isMonitoring: Bool { workspaceObserver != nil }
 
-    func startMonitoring(policy: SessionPolicy) {
+    func startMonitoring(policy: SessionPolicy, selectedDomainBrowserID: String = "com.apple.Safari") {
         stopMonitoring()
         self.policy = policy
+        self.selectedDomainBrowserID = selectedDomainBrowserID
+        lastLookupAt = .distantPast
         installWorkspaceObserver()
         startPolling()
         tick()
@@ -35,6 +42,8 @@ final class ForegroundActivityMonitor: ObservableObject {
         currentActivity = nil
         lastBundleID = nil
         policy = nil
+        activityGeneration += 1
+        lookupInFlight = false
     }
 
     // MARK: - Workspace
@@ -78,10 +87,14 @@ final class ForegroundActivityMonitor: ObservableObject {
               let appName = frontmostApp.localizedName else {
             currentActivity = nil
             lastBundleID = nil
+            activityGeneration += 1
             return
         }
 
-        let domain: String? = resolveDomainIfNeeded(bundleID: bundleID)
+        let previousBundleID = lastBundleID
+        activityGeneration += previousBundleID == bundleID ? 0 : 1
+        let generation = activityGeneration
+        let domain = currentActivity?.bundleID == bundleID ? currentActivity?.domain : nil
         let activity = ForegroundActivity(
             bundleID: bundleID,
             appName: appName,
@@ -91,13 +104,33 @@ final class ForegroundActivityMonitor: ObservableObject {
 
         currentActivity = activity
         lastBundleID = bundleID
-    }
-
-    private func resolveDomainIfNeeded(bundleID: String) -> String? {
-        guard let policy, Self.requiresDomainLookup(bundleID: bundleID, policy: policy) else { return nil }
-        guard FocusPolicyEvaluator.isBrowserCapableOfDomainPolicy(bundleID) else { return nil }
-        guard let tabInfo = browserResolver.resolveCurrentTab(for: bundleID) else { return nil }
-        return FocusPolicyEvaluator.normalizeDomain(tabInfo.domain)
+        guard PermissionManager.shared.canReadDomains(for: policy ?? .timerOnly, browserBundleID: selectedDomainBrowserID) else { return }
+        guard let policy, Self.requiresDomainLookup(bundleID: bundleID, policy: policy),
+              bundleID == selectedDomainBrowserID,
+              FocusPolicyEvaluator.isBrowserCapableOfDomainPolicy(bundleID),
+              !lookupInFlight, Date().timeIntervalSince(lastLookupAt) >= 1 else { return }
+        lookupInFlight = true
+        lastLookupAt = Date()
+        lookupQueue.async { [weak self] in
+            let domain = self?.browserResolver.resolveCurrentTab(for: bundleID).map {
+                FocusPolicyEvaluator.normalizeDomain($0.domain)
+            }
+            DispatchQueue.main.async {
+                MainActor.assumeIsolated {
+                    guard let self else { return }
+                    self.lookupInFlight = false
+                    guard self.activityGeneration == generation,
+                          self.lastBundleID == bundleID,
+                          let current = self.currentActivity else { return }
+                    self.currentActivity = ForegroundActivity(
+                        bundleID: current.bundleID,
+                        appName: current.appName,
+                        domain: domain,
+                        browserBundleID: current.browserBundleID
+                    )
+                }
+            }
+        }
     }
 
     static func requiresDomainLookup(bundleID: String, policy: SessionPolicy) -> Bool {

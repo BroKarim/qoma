@@ -17,6 +17,7 @@ final class QyubeAppCoordinator {
 
     init(sessionCoordinator: SessionCoordinator? = nil) {
         self.sessionCoordinator = sessionCoordinator ?? SessionCoordinator()
+        LegacySessionMigrator.migrateIfNeeded()
         self.distractionCoordinator = DistractionCoordinator(monitor: ForegroundActivityMonitor())
         self.menuBarController = MenuBarController()
 
@@ -32,6 +33,7 @@ final class QyubeAppCoordinator {
             self?.showHomeWindow()
         }
         self.sessionCoordinator.restore()
+        navigation.refresh()
     }
 
     func showHomeWindow() {
@@ -110,6 +112,12 @@ final class QyubeAppCoordinator {
             }
             .store(in: &cancellables)
 
+        sessionCoordinator.$lastCatchEvent
+            .compactMap { $0 }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] event in self?.companionController.recordCatch(kindID: event.kindID) }
+            .store(in: &cancellables)
+
         sessionCoordinator.$remainingTime
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
@@ -145,7 +153,10 @@ final class QyubeAppCoordinator {
                     timerController.update(remainingTime: sessionCoordinator.remainingTime, taskTitle: snapshot.draft.displayTitle, isPaused: snapshot.status == .paused)
                 }
                 if snapshot.status == .active, snapshot.draft.policy.mode != .timerOnly {
-                    distractionCoordinator.start(policy: snapshot.draft.policy)
+                    distractionCoordinator.start(
+                        policy: snapshot.draft.policy,
+                        selectedDomainBrowserID: snapshot.draft.domainBrowserBundleID
+                    )
                 } else {
                     distractionCoordinator.stop()
                     overlayController.hide()

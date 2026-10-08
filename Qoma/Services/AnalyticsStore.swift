@@ -35,6 +35,18 @@ final class AnalyticsStore {
         load(from: AppConstants.AnalyticsSettings.focusSessionsFile) ?? []
     }
 
+    func readFocusSessionsForMigration() throws -> [FocusSessionRecord]? {
+        let url = fileURL(for: AppConstants.AnalyticsSettings.focusSessionsFile)
+        guard FileManager.default.fileExists(atPath: url.path) else { return nil }
+        do {
+            let data = try Data(contentsOf: url)
+            return try decoder.decode([FocusSessionRecord].self, from: data)
+        } catch {
+            Logger.store.error("Read legacy focus sessions failed: \(error.localizedDescription, privacy: .public)")
+            throw error
+        }
+    }
+
     func saveFocusSessions(_ records: [FocusSessionRecord]) {
         save(records, to: AppConstants.AnalyticsSettings.focusSessionsFile)
     }

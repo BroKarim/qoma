@@ -11,15 +11,23 @@ struct CompanionPlaybackTests {
         return model
     }
 
-    @Test func grantsOnlyOnLandingAndCastsWithoutCooldown() {
+    @Test func visualLandingDoesNotAwardAnUnpersistedCatch() {
         var model = self.fishing()
         model.biteNow()
         model.advance(by: 0.22 + 2 + 0.47)
         #expect(model.phase == .deposit)
         #expect(model.depositedCatches == 0)
         model.advance(by: 0.02)
-        #expect(model.depositedCatches == 1)
+        #expect(model.depositedCatches == 0)
         #expect(model.phase == .casting)
+    }
+
+    @Test func onlyPersistedCatchEventsUpdateCompanionRewardCount() {
+        var model = self.fishing()
+        model.advance(by: 0.1)
+        model.recordCatch(kindID: "stick")
+        #expect(model.depositedCatches == 1)
+        #expect(model.catchIsTree)
     }
 
     @Test func distractionCancelsAnInflightCatchImmediately() {
@@ -48,10 +56,10 @@ struct CompanionPlaybackTests {
         #expect(model.phase == .casting)
     }
 
-    @Test func earlyStopReturnsOnlyDepositedCatchesAndEventuallyHides() {
+    @Test func earlyStopReturnsOnlyPersistedCatchesAndEventuallyHides() {
         var model = self.fishing()
-        model.biteNow()
-        model.advance(by: 2.71)
+        model.recordCatch(kindID: "anchovy")
+        model.advance(by: 0.01)
         #expect(model.depositedCatches == 1)
         model.stop(activeSeconds: 299.9)
         #expect(model.phase == .releasing)

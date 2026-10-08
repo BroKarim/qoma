@@ -11,6 +11,7 @@ final class DistractionCoordinator: ObservableObject {
     private let monitor: ForegroundActivityMonitor
     private var cancellables = Set<AnyCancellable>()
     private var monitoredPolicy: SessionPolicy?
+    private var selectedDomainBrowserID = "com.apple.Safari"
     private var detourStartTime: Date?
     private var totalDetourSeconds: TimeInterval = 0
     var onDecision: ((PolicyDecision) -> Void)?
@@ -19,11 +20,12 @@ final class DistractionCoordinator: ObservableObject {
         self.monitor = monitor
     }
 
-    func start(policy: SessionPolicy) {
-        guard monitoredPolicy != policy || !monitor.isMonitoring else { return }
+    func start(policy: SessionPolicy, selectedDomainBrowserID: String = "com.apple.Safari") {
+        guard monitoredPolicy != policy || self.selectedDomainBrowserID != selectedDomainBrowserID || !monitor.isMonitoring else { return }
         cancellables.removeAll()
         monitor.stopMonitoring()
         monitoredPolicy = policy
+        self.selectedDomainBrowserID = selectedDomainBrowserID
         monitor.$currentActivity
             .sink { [weak self] activity in
                 if let activity {
@@ -33,7 +35,7 @@ final class DistractionCoordinator: ObservableObject {
                 }
             }
             .store(in: &cancellables)
-        monitor.startMonitoring(policy: policy)
+        monitor.startMonitoring(policy: policy, selectedDomainBrowserID: selectedDomainBrowserID)
     }
 
     func stop() {

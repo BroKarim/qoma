@@ -54,4 +54,11 @@ struct SessionClockTests {
         let clock = SessionClock(plannedMinutes: 1, startTime: start) { start.addingTimeInterval(120) }
         #expect(clock.remaining == 0)
     }
+
+    @Test
+    func activeSecondsAreCappedAtPlannedDurationAfterWake() {
+        let start = Date()
+        let clock = SessionClock(plannedMinutes: 1, startTime: start) { start.addingTimeInterval(300) }
+        #expect(clock.activeSeconds == 60)
+    }
 }

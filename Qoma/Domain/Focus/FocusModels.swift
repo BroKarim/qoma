@@ -55,11 +55,18 @@ struct SessionDraft: Codable, Equatable, Sendable {
     var taskTitle: String
     var plannedMinutes: Int
     var policy: SessionPolicy
+    var domainBrowserBundleID: String
 
-    init(taskTitle: String = "", plannedMinutes: Int = 10, policy: SessionPolicy = .timerOnly) {
+    init(
+        taskTitle: String = "",
+        plannedMinutes: Int = 10,
+        policy: SessionPolicy = .timerOnly,
+        domainBrowserBundleID: String = "com.apple.Safari"
+    ) {
         self.taskTitle = taskTitle
         self.plannedMinutes = plannedMinutes
         self.policy = policy
+        self.domainBrowserBundleID = domainBrowserBundleID
     }
 
     var displayTitle: String {
@@ -76,8 +83,11 @@ struct ActiveSessionSnapshot: Codable, Equatable, Identifiable, Sendable {
     var deadline: Date
     var pausedAt: Date?
     var accumulatedActiveSeconds: TimeInterval
+    var activeSegmentStartedAt: Date?
     var draft: SessionDraft
     var status: SessionStatus
+    var endedAt: Date?
+    var interruptedReason: String?
 
     init(
         id: UUID = UUID(),
@@ -86,8 +96,11 @@ struct ActiveSessionSnapshot: Codable, Equatable, Identifiable, Sendable {
         deadline: Date,
         pausedAt: Date? = nil,
         accumulatedActiveSeconds: TimeInterval = 0,
+        activeSegmentStartedAt: Date? = nil,
         draft: SessionDraft,
-        status: SessionStatus = .active
+        status: SessionStatus = .active,
+        endedAt: Date? = nil,
+        interruptedReason: String? = nil
     ) {
         self.id = id
         self.accountID = accountID
@@ -95,8 +108,13 @@ struct ActiveSessionSnapshot: Codable, Equatable, Identifiable, Sendable {
         self.deadline = deadline
         self.pausedAt = pausedAt
         self.accumulatedActiveSeconds = accumulatedActiveSeconds
+        self.activeSegmentStartedAt = status == .active
+            ? (activeSegmentStartedAt ?? startedAt)
+            : activeSegmentStartedAt
         self.draft = draft
         self.status = status
+        self.endedAt = endedAt
+        self.interruptedReason = interruptedReason
     }
 }
 

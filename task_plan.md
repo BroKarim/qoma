@@ -540,3 +540,28 @@ User menguji implementasi §14 dan melaporkan gerak penguin kurang halus, snowfl
 - Render native penguin serta contoh 6/10/18/24 snowflake dan bright/mid/dark/bright disimpan di `design/qyube-distraction-v1/native-polish-check/`. Gambar ini berasal dari renderer aplikasi, bukan gambar AI baru.
 - Mode Debug `--companion-snapshots <directory>` dan `--distraction-snapshots <directory>` membuat pemeriksaan ulang tanpa membuat focus session atau catch ledger. Tes fixture tidak menggantikan QA semua aplikasi, Spaces, fullscreen dan dua monitor nyata.
 - Hasil akhir: build Debug arm64 berhasil; 30 tes unik dari `DistractionIntegrationTests`, `DistractionMotionTests`, `CompanionPlaybackTests`, dan `FocusPolicyEvaluatorTests` lulus. Pemeriksaan native menghasilkan `overlayAboveTarget=true`, `clickThrough=true`, count6/10/18/24 dan opacity0/0,175/0,35/0. Warning historis di area lain masih ada.
+
+## 16. Perbaikan hasil audit flow — 8 Oktober 2026
+
+### Urutan dan cakupan
+
+- Semua perubahan yang sudah ada sebelum audit disimpan terlebih dahulu pada branch sebelumnya melalui commit `32a3665` (`chore: save existing distraction polish work`). Implementasi audit dikerjakan pada branch baru `codex/fix-session-ledger-audit`.
+- Temuan audit website poin 15 dan 16 sengaja dilewati sesuai arahan pengguna; tidak ada source/copy website yang diubah.
+- Login/trial/backend (temuan 9) belum dapat diimplementasikan dari repo macOS ini: tidak ditemukan website auth, service backend, OAuth callback, Keychain token flow, atau entitlement API. Jangan membuat gate lokal palsu; lanjutkan setelah backend/kontrak auth tersedia.
+
+### Perubahan yang diterapkan
+
+- Sesi kini menyimpan active segment, terminal timestamp, dan interrupted reason. Restore sesi pause/resume tidak lagi menghitung segmen aktif lama dua kali; active seconds dibatasi pada planned duration agar sleep/wake setelah deadline tidak menggelembungkan durasi.
+- Start/pause/resume/edit/stop/completion hanya memperbarui state UI setelah snapshot berhasil ditulis. History finalization memeriksa decode/write, deduplikasi ID, dan membiarkan terminal snapshot tetap ada untuk recovery bila finalisasi gagal. Recovery menyelesaikan record terminal dan menerapkan aturan bank/discard yang sama.
+- Ledger catch sekarang menyimpan event banked per ID (idempotent dan biaya tulis tetap per event), tetap membaca file aggregate lama, mencari provisional hanya pada session ID terkait, dan menghapus event provisional setelah bank. Hasil catch baru diumumkan ke companion setelah persistence berhasil.
+- Loop visual companion tetap dekoratif; hitungan/reward hanya bertambah dari event catch yang tersimpan. Semua delapan item di katalog kini punya peluang roll; peluang ocean-find dibagi ke stick, pebble, dan shell.
+- Riwayat `AnalyticsStore` lama dimigrasikan satu kali secara idempotent ke history sesi baru, mempertahankan UUID dan file sumber lama. Kegagalan baca/tulis tidak menandai migrasi selesai dan dapat dicoba ulang.
+- Quit saat active/paused meminta konfirmasi dan finalisasi interrupted harus sukses sebelum aplikasi ditutup.
+- Browser-domain lookup dipindahkan dari main thread ke antrean serial; hasil stale dibuang. Safari/Chrome dipilih eksplisit pada aturan website; permission Apple Events diminta saat Start, bukan saat launch. Domain blocking gagal tertutup (`noDomainRead`) jika aturan blocked domain aktif tetapi URL tidak terbaca.
+- Tes coordinator memakai folder temporary unik dan menghapusnya setelah tes, bukan singleton/Application Support. Ditambah regresi untuk timer overshoot, fail-closed domain, katalog, terminal recovery, dan catch companion.
+
+### Ditunda / batas verifikasi
+
+- Temuan 14 (membersihkan flow legacy) belum dihapus: `--companion-preview`, menu debug, dan pemeriksaan visual masih memanggil `WindowManager`/flow lama. Hapus setelah preview dipindah ke controller baru dan dites agar developer tooling tidak ikut rusak.
+- Rules berbasis website hanya dijamin untuk Safari/Chrome; browser lain tetap dinilai sebagai aplikasi keseluruhan. Verifikasi prompt Apple Events dan pencabutan izin secara manual pada macOS masih diperlukan.
+- `xcodebuild -project Qoma.xcodeproj -scheme Qoma -configuration Debug -destination 'platform=macOS' build` berhasil. Test suite tidak dijalankan pada turn ini; perubahan tes sudah diisolasi untuk run berikutnya.

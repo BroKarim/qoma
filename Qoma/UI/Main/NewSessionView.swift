@@ -7,6 +7,8 @@ struct NewSessionView: View {
   let onStarted: () -> Void
   @State private var editingApps = false
   @State private var startFailed = false
+  @State private var permissionFailed = false
+  @State private var requestingPermission = false
 
   var body: some View {
     VStack(spacing: 0) {
@@ -60,14 +62,31 @@ struct NewSessionView: View {
             Text("This session could not start. Check your access and try again.")
               .font(.caption).foregroundStyle(.secondary)
           }
+          if permissionFailed {
+            Text("Browser access is needed to apply domain rules. Allow qyube in System Settings → Privacy & Security → Automation, then try again.")
+              .font(.caption).foregroundStyle(.secondary)
+          }
         }.padding(.horizontal, 22).padding(.bottom, 8)
       }
       QyubePrimaryButton(title: "Start session") {
         guard coordinator.snapshot == nil else { return }
-        if coordinator.startSession(draft: draft) != nil { onStarted() } else { startFailed = true }
-      }.keyboardShortcut(.defaultAction).disabled(coordinator.snapshot != nil).padding(22)
+        Task {
+          requestingPermission = true
+          defer { requestingPermission = false }
+          let permission = await PermissionManager.shared.requestPermissionIfNeeded(
+            for: draft.policy, browserBundleID: draft.domainBrowserBundleID)
+          guard permission == .granted else {
+            permissionFailed = true
+            return
+          }
+          permissionFailed = false
+          if coordinator.startSession(draft: draft) != nil { onStarted() } else { startFailed = true }
+        }
+      }.keyboardShortcut(.defaultAction).disabled(coordinator.snapshot != nil || requestingPermission).padding(22)
     }
-    .sheet(isPresented: $editingApps) { QyubeAppRuleEditor(policy: $draft.policy) }
+    .sheet(isPresented: $editingApps) {
+      QyubeAppRuleEditor(policy: $draft.policy, selectedDomainBrowser: $draft.domainBrowserBundleID)
+    }
   }
 
   private var apps: Set<String> {
@@ -132,6 +151,7 @@ struct AppIcon: View {
 
 struct QyubeAppRuleEditor: View {
   @Binding var policy: SessionPolicy
+  @Binding var selectedDomainBrowser: String
   @Environment(\.dismiss) private var dismiss
   @State private var domain = ""
   @State private var installedApps: [AppChoice] = []
@@ -179,6 +199,12 @@ struct QyubeAppRuleEditor: View {
       }
       DisclosureGroup("Websites (advanced)") {
         VStack(alignment: .leading, spacing: 8) {
+          Picker("Browser for website rules", selection: $selectedDomainBrowser) {
+            Text("Safari").tag("com.apple.Safari")
+            Text("Google Chrome").tag("com.google.Chrome")
+          }.pickerStyle(.segmented)
+          Text("Website rules read the active domain in the selected browser; app rules still work in other browsers.")
+            .font(.caption).foregroundStyle(.secondary)
           HStack {
             TextField("example.com", text: $domain).textFieldStyle(.roundedBorder)
             Button("Add", action: addDomain).disabled(

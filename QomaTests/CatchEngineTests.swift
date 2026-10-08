@@ -41,4 +41,16 @@ struct CatchEngineTests {
         let reel = engine.beginReel()
         #expect(reel.kindID == "narwhal")
     }
+
+    @Test
+    func everyCatalogKindCanBeRolled() {
+        #expect(CatchEngine.kind(for: 0.1) == "anchovy")
+        #expect(CatchEngine.kind(for: 0.6) == "perch")
+        #expect(CatchEngine.kind(for: 0.85) == "trout")
+        #expect(CatchEngine.kind(for: 0.95) == "salmon")
+        #expect(CatchEngine.kind(for: 0.98) == "narwhal")
+        #expect(CatchEngine.kind(for: 0.995, oceanFindIndex: 0) == "stick")
+        #expect(CatchEngine.kind(for: 0.995, oceanFindIndex: 1) == "pebble")
+        #expect(CatchEngine.kind(for: 0.995, oceanFindIndex: 2) == "shell")
+    }
 }

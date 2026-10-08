@@ -97,6 +97,24 @@ struct FocusPolicyEvaluatorTests {
     }
 
     @Test
+    func blockingDomainFailsClosedWhenBrowserDomainCannotBeRead() {
+        var policy = SessionPolicy(mode: .blocking)
+        policy.blockedDomains.insert("youtube.com")
+        let activity = ForegroundActivity(bundleID: safari, appName: "Safari", domain: nil, browserBundleID: safari)
+        let decision = FocusPolicyEvaluator.evaluate(activity, against: policy)
+        #expect(decision.isDistraction)
+        #expect(decision.reason == .noDomainRead)
+    }
+
+    @Test
+    func unconfiguredDomainPolicyDoesNotRequireAutomation() async {
+        let capability = await MainActor.run {
+            PermissionManager.shared.permissionRequirement(for: SessionPolicy(mode: .allowing))
+        }
+        #expect(capability == .available)
+    }
+
+    @Test
     func blockingSafeByDefault() {
         let policy = SessionPolicy(mode: .blocking)
         let activity = ForegroundActivity(bundleID: xcode, appName: "Xcode", domain: nil, browserBundleID: nil)

@@ -79,6 +79,10 @@ final class CompanionWindowController: NSObject, NSWindowDelegate {
         scene?.setDistractionVisual(visual)
     }
 
+    func recordCatch(kindID: String) {
+        scene?.recordCatch(kindID: kindID)
+    }
+
     func windowDidMove(_ notification: Notification) {
         guard let window else { return }
         UserDefaults.standard.set(NSStringFromPoint(window.frame.origin), forKey: positionKey)

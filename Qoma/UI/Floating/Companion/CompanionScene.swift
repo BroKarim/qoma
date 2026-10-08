@@ -76,6 +76,11 @@ final class CompanionScene: SKScene {
         self.playback.complete(); self.render()
     }
 
+    func recordCatch(kindID: String) {
+        playback.recordCatch(kindID: kindID)
+        render()
+    }
+
     func stopSession(activeSeconds: TimeInterval) {
         self.playback.stop(activeSeconds: activeSeconds); self.render()
     }

@@ -83,8 +83,7 @@ final class CatchEngine {
 
     static let bankThresholdSeconds: TimeInterval = 300 // 5 minutes
 
-    static let defaultRoll: () -> String = {
-        let roll = Double.random(in: 0...1)
+    static func kind(for roll: Double, oceanFindIndex: Int = 0) -> String {
         switch roll {
         case 0..<0.55:
             return "anchovy"
@@ -92,10 +91,16 @@ final class CatchEngine {
             return "perch"
         case 0.80..<0.92:
             return "trout"
-        case 0.92..<0.98:
+        case 0.92..<0.97:
             return "salmon"
-        default:
+        case 0.97..<0.99:
             return "narwhal"
+        default:
+            return ["stick", "pebble", "shell"][abs(oceanFindIndex) % 3]
         }
+    }
+
+    static let defaultRoll: () -> String = {
+        kind(for: Double.random(in: 0...1), oceanFindIndex: Int.random(in: 0..<3))
     }
 }

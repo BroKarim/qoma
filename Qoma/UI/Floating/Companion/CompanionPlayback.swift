@@ -81,6 +81,13 @@ struct CompanionPlayback {
         self.enter(.hidden)
     }
 
+    mutating func recordCatch(kindID: String) {
+        guard isSessionActive else { return }
+        depositedCatches += 1
+        cycle += 1
+        catchIsTree = CatalogDefinitions.kind(id: kindID)?.isFish == false
+    }
+
     /// Debug preview only: shorten the current idle wait without awarding a catch.
     mutating func biteNow() {
         guard self.phase == .fishing else { return }
@@ -109,10 +116,7 @@ struct CompanionPlayback {
             case .bite: self.enter(.pulling, duration: max(0.1, self.reelTime()))
             case .pulling: self.enter(.deposit, duration: 0.48)
             case .deposit:
-                // The only grant point is the instant the catch lands in the bucket.
-                self.depositedCatches += 1
-                self.cycle += 1
-                self.catchIsTree = self.cycle.isMultiple(of: 4)
+                // Visual cycle only; rewards arrive from persisted catch events.
                 self.enter(.casting, duration: 0.55)
             case .releasing: self.enter(.hidden)
             default: return

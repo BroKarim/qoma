@@ -22,6 +22,43 @@ final class PermissionManager: ObservableObject {
         }
     }
 
+    func permissionRequirement(
+        for policy: SessionPolicy,
+        browserBundleID: String
+    ) -> AppMonitoringCapability {
+        guard needsDomainMonitoring(policy) else { return .available }
+        return FocusPolicyEvaluator.isBrowserCapableOfDomainPolicy(browserBundleID) ? .needsPermission : .unsupported
+    }
+
+    func requestPermissionIfNeeded(
+        for policy: SessionPolicy,
+        browserBundleID: String
+    ) async -> MonitoringPermissionStatus {
+        if permissionRequirement(for: policy, browserBundleID: browserBundleID) == .available {
+            automationStatus = .granted
+            return automationStatus
+        }
+        guard permissionRequirement(for: policy, browserBundleID: browserBundleID) == .needsPermission else {
+            automationStatus = .restricted
+            return automationStatus
+        }
+        let browserName = browserBundleID == "com.apple.Safari" ? "Safari" : "Google Chrome"
+        let source = "with timeout of 10 seconds\ntell application \"\(browserName)\" to get name\nend timeout"
+        let result = await Task.detached(priority: .userInitiated) {
+            guard let script = NSAppleScript(source: source) else { return false }
+            var error: NSDictionary?
+            _ = script.executeAndReturnError(&error)
+            return error == nil
+        }.value
+        automationStatus = result ? .granted : .denied
+        return automationStatus
+    }
+
+    func canReadDomains(for policy: SessionPolicy, browserBundleID: String) -> Bool {
+        permissionRequirement(for: policy, browserBundleID: browserBundleID) == .available
+            || automationStatus == .granted
+    }
+
     private func needsDomainMonitoring(_ policy: SessionPolicy) -> Bool {
         !policy.allowedDomains.isEmpty || !policy.blockedDomains.isEmpty
     }
@@ -29,16 +66,8 @@ final class PermissionManager: ObservableObject {
     /// Request Automation permission if the policy requires browser domain lookup.
     /// Does nothing for Timer Only or app-only policies.
     func requestPermissionIfNeeded(for policy: SessionPolicy) async -> MonitoringPermissionStatus {
-        guard permissionRequirement(for: policy) == .needsPermission else {
-            return .granted
-        }
-
-        // macOS has no direct API to request Automation permission ahead of use.
-        // In production, perform a harmless AppleScript targeting Safari/Chrome here,
-        // which triggers the system prompt and sets the status.
-        // For now, mark as granted so development can continue; gate this behind
-        // an actual prompt before shipping.
-        automationStatus = .granted
+        guard needsDomainMonitoring(policy) else { return .granted }
+        automationStatus = .restricted
         return automationStatus
     }
 

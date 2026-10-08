@@ -4,15 +4,35 @@ import Testing
 
 @MainActor
 struct SessionCoordinatorCatchTests {
+    private struct Repositories {
+        let sessions: SessionRepository
+        let catches: CatchRepository
+        let directory: URL
+    }
+
+    private func makeRepositories() -> Repositories {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        return Repositories(
+            sessions: SessionRepository(storageDirectory: directory.appendingPathComponent("sessions")),
+            catches: CatchRepository(storageDirectory: directory.appendingPathComponent("catches")),
+            directory: directory
+        )
+    }
+
+    private func cleanup(_ repositories: Repositories) {
+        try? FileManager.default.removeItem(at: repositories.directory)
+    }
+
     private func makeCoordinator(
         accountID: String = "test",
+        repositories: Repositories = makeRepositories(),
         now: @escaping () -> Date = Date.init,
         autoCatchEnabled: Bool = false
     ) -> SessionCoordinator {
         SessionCoordinator(
             accountID: accountID,
-            sessionRepository: SessionRepository.shared,
-            catchRepository: CatchRepository.shared,
+            sessionRepository: repositories.sessions,
+            catchRepository: repositories.catches,
             canStartSession: { true },
             now: now,
             autoCatchEnabled: autoCatchEnabled
@@ -22,7 +42,8 @@ struct SessionCoordinatorCatchTests {
     @Test
     func depositedCatchBelowThresholdIsProvisional() {
         let accountID = UUID().uuidString
-        let coordinator = makeCoordinator(accountID: accountID)
+        let repositories = makeRepositories()
+        let coordinator = makeCoordinator(accountID: accountID, repositories: repositories)
         coordinator.startSession(draft: SessionDraft(plannedMinutes: 10, policy: .timerOnly))
         coordinator.scheduleNextBite()
         coordinator.beginReel()
@@ -30,16 +51,18 @@ struct SessionCoordinatorCatchTests {
 
         #expect(result != nil)
         #expect(result?.banked == false)
-        #expect(CatchRepository.shared.listBanked(accountID: accountID).isEmpty)
-        #expect(!CatchRepository.shared.listProvisional(sessionID: result!.event.sessionID, accountID: accountID).isEmpty)
+        #expect(repositories.catches.listBanked(accountID: accountID).isEmpty)
+        #expect(!repositories.catches.listProvisional(sessionID: result!.event.sessionID, accountID: accountID).isEmpty)
+        cleanup(repositories)
     }
 
     @Test
     func depositedCatchAtThresholdIsBanked() {
         let accountID = UUID().uuidString
+        let repositories = makeRepositories()
         let start = Date()
         var current = start
-        let coordinator = makeCoordinator(accountID: accountID, now: { current })
+        let coordinator = makeCoordinator(accountID: accountID, repositories: repositories, now: { current })
         coordinator.startSession(draft: SessionDraft(plannedMinutes: 10, policy: .timerOnly))
 
         current = start.addingTimeInterval(300)
@@ -48,13 +71,14 @@ struct SessionCoordinatorCatchTests {
         let result = coordinator.depositCatch()
 
         #expect(result?.banked == true)
-        #expect(CatchRepository.shared.listBanked(accountID: accountID).count == 1)
+        #expect(repositories.catches.listBanked(accountID: accountID).count == 1)
+        cleanup(repositories)
     }
 
     @Test
     func distractionDoesNotCancelInFlightCatch() {
         let accountID = UUID().uuidString
-        let coordinator = makeCoordinator(accountID: accountID)
+        let coordinator = makeCoordinator(accountID: accountID, repositories: makeRepositories())
         coordinator.startSession(draft: SessionDraft(plannedMinutes: 10, policy: .timerOnly))
         coordinator.scheduleNextBite()
         coordinator.beginReel()
@@ -62,14 +86,16 @@ struct SessionCoordinatorCatchTests {
         let result = coordinator.depositCatch()
 
         #expect(result != nil)
+        cleanup(repositories)
     }
 
     @Test
     func stopAfterThresholdKeepsBankedCatches() {
         let accountID = UUID().uuidString
+        let repositories = makeRepositories()
         let start = Date()
         var current = start
-        let coordinator = makeCoordinator(accountID: accountID, now: { current })
+        let coordinator = makeCoordinator(accountID: accountID, repositories: repositories, now: { current })
         coordinator.startSession(draft: SessionDraft(plannedMinutes: 10, policy: .timerOnly))
 
         current = start.addingTimeInterval(300)
@@ -79,15 +105,17 @@ struct SessionCoordinatorCatchTests {
 
         let session = coordinator.stopSession()
         #expect(session?.status == .interrupted)
-        #expect(CatchRepository.shared.listBanked(accountID: accountID).count == 1)
+        #expect(repositories.catches.listBanked(accountID: accountID).count == 1)
+        cleanup(repositories)
     }
 
     @Test
     func sessionEndCallbackReceivesCompletedSession() {
         let accountID = UUID().uuidString
+        let repositories = makeRepositories()
         let start = Date()
         var current = start
-        let coordinator = makeCoordinator(accountID: accountID, now: { current })
+        let coordinator = makeCoordinator(accountID: accountID, repositories: repositories, now: { current })
         var endedSession: FocusSession?
         coordinator.onSessionEnded = { endedSession = $0 }
 
@@ -97,5 +125,6 @@ struct SessionCoordinatorCatchTests {
 
         #expect(endedSession != nil)
         #expect(endedSession?.status == .completed)
+        cleanup(repositories)
     }
 }

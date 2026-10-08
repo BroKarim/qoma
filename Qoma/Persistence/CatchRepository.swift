@@ -3,8 +3,9 @@ import OSLog
 
 /// Abstract repository for catch ledger persistence.
 protocol CatchRepositoryProtocol: Sendable {
-    func saveProvisional(_ event: CatchEvent)
-    func bank(_ eventID: UUID, accountID: String, at: Date)
+    func saveProvisional(_ event: CatchEvent) -> Bool
+    func bank(_ eventID: UUID, sessionID: UUID, accountID: String, at: Date) -> Bool
+    func bankProvisional(sessionID: UUID, accountID: String, at: Date) -> Bool
     func listBanked(accountID: String) -> [CatchEvent]
     func listProvisional(sessionID: UUID, accountID: String) -> [CatchEvent]
     func countByKind(accountID: String) -> [String: Int]
@@ -19,8 +20,10 @@ final class CatchRepository: CatchRepositoryProtocol, @unchecked Sendable {
     private let decoder = JSONDecoder()
     private let ioQueue = DispatchQueue(label: "com.dzulkiram.qoma.catchrepository.io")
     private let queueKey = DispatchSpecificKey<Void>()
+    private let storageDirectory: URL?
 
-    init() {
+    init(storageDirectory: URL? = nil) {
+        self.storageDirectory = storageDirectory
         encoder.dateEncodingStrategy = .iso8601
         decoder.dateDecodingStrategy = .iso8601
         ioQueue.setSpecific(key: queueKey, value: ())
@@ -37,6 +40,7 @@ final class CatchRepository: CatchRepositoryProtocol, @unchecked Sendable {
     }
 
     private func directoryURL() -> URL {
+        if let storageDirectory { return storageDirectory }
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
         return appSupport.appendingPathComponent("Qoma").appendingPathComponent("Catches")
     }
@@ -61,7 +65,7 @@ final class CatchRepository: CatchRepositoryProtocol, @unchecked Sendable {
 
     // MARK: - Provisional
 
-    func saveProvisional(_ event: CatchEvent) {
+    func saveProvisional(_ event: CatchEvent) -> Bool {
         syncIO {
             var events = loadProvisionalSync(sessionID: event.sessionID, accountID: event.accountID)
             events.removeAll { $0.id == event.id }
@@ -71,8 +75,10 @@ final class CatchRepository: CatchRepositoryProtocol, @unchecked Sendable {
             do {
                 let data = try encoder.encode(events)
                 try data.write(to: url, options: .atomic)
+                return true
             } catch {
                 Logger.store.error("Save provisional catch failed: \(error.localizedDescription, privacy: .public)")
+                return false
             }
         }
     }
@@ -103,26 +109,36 @@ final class CatchRepository: CatchRepositoryProtocol, @unchecked Sendable {
 
     // MARK: - Banked
 
-    func bank(_ eventID: UUID, accountID: String, at: Date) {
+    func bank(_ eventID: UUID, sessionID: UUID, accountID: String, at: Date) -> Bool {
         syncIO {
-            guard var event = findProvisionalSync(eventID: eventID, accountID: accountID) else {
+            guard var event = findProvisionalSync(eventID: eventID, sessionID: sessionID, accountID: accountID) else {
                 Logger.store.warning("bank called for unknown provisional \(eventID, privacy: .public)")
-                return
+                return false
             }
 
             event.bankedAt = at
+            guard writeBankedEvent(event) else { return false }
+            removeProvisionalEvent(eventID, sessionID: sessionID, accountID: accountID)
+            Logger.store.info("Banked catch \(eventID, privacy: .public)")
+            return true
+        }
+    }
 
-            var banked = loadBankedSync(accountID: accountID)
-            banked.removeAll { $0.id == event.id }
-            banked.append(event)
-
-            let url = bankedFileURL(accountID: accountID)
+    func bankProvisional(sessionID: UUID, accountID: String, at: Date) -> Bool {
+        syncIO {
+            let events = loadProvisionalSync(sessionID: sessionID, accountID: accountID)
+            guard !events.isEmpty else { return true }
+            for var event in events {
+                event.bankedAt = at
+                guard writeBankedEvent(event) else { return false }
+            }
+            let url = provisionalFileURL(sessionID: sessionID, accountID: accountID)
             do {
-                let data = try encoder.encode(banked)
-                try data.write(to: url, options: .atomic)
-                Logger.store.info("Banked catch \(eventID, privacy: .public)")
+                try FileManager.default.removeItem(at: url)
+                return true
             } catch {
-                Logger.store.error("Bank catch failed: \(error.localizedDescription, privacy: .public)")
+                Logger.store.error("Clear banked provisional catches failed: \(error.localizedDescription, privacy: .public)")
+                return false
             }
         }
     }
@@ -134,14 +150,20 @@ final class CatchRepository: CatchRepositoryProtocol, @unchecked Sendable {
     }
 
     private func loadBankedSync(accountID: String) -> [CatchEvent] {
-        let url = bankedFileURL(accountID: accountID)
-        guard let data = try? Data(contentsOf: url) else { return [] }
-        do {
-            return try decoder.decode([CatchEvent].self, from: data)
-        } catch {
-            Logger.store.error("Decode banked catch failed: \(error.localizedDescription, privacy: .public)")
-            return []
+        var events: [UUID: CatchEvent] = [:]
+        if let data = try? Data(contentsOf: bankedFileURL(accountID: accountID)),
+           let legacyEvents = try? decoder.decode([CatchEvent].self, from: data) {
+            for event in legacyEvents { events[event.id] = event }
         }
+        let prefix = "banked-event-\(sanitized(accountID))-"
+        guard let files = try? FileManager.default.contentsOfDirectory(at: directoryURL(), includingPropertiesForKeys: nil)
+        else { return Array(events.values) }
+        for url in files where url.lastPathComponent.hasPrefix(prefix) && url.pathExtension == "json" {
+            guard let data = try? Data(contentsOf: url),
+                  let event = try? decoder.decode(CatchEvent.self, from: data) else { continue }
+            events[event.id] = event
+        }
+        return Array(events.values)
     }
 
     func countByKind(accountID: String) -> [String: Int] {
@@ -155,23 +177,32 @@ final class CatchRepository: CatchRepositoryProtocol, @unchecked Sendable {
 
     // MARK: - Helpers
 
-    private func findProvisionalSync(eventID: UUID, accountID: String) -> CatchEvent? {
-        let directory = directoryURL()
-        guard let enumerator = FileManager.default.enumerator(
-            at: directory,
-            includingPropertiesForKeys: nil,
-            options: [.skipsHiddenFiles]
-        ) else { return nil }
+    private func findProvisionalSync(eventID: UUID, sessionID: UUID, accountID: String) -> CatchEvent? {
+        loadProvisionalSync(sessionID: sessionID, accountID: accountID).first { $0.id == eventID }
+    }
 
-        for case let url as URL in enumerator {
-            guard url.lastPathComponent.hasPrefix("provisional-\(sanitized(accountID))-") else { continue }
-            guard let data = try? Data(contentsOf: url) else { continue }
-            guard let events = try? decoder.decode([CatchEvent].self, from: data) else { continue }
-            if let event = events.first(where: { $0.id == eventID }) {
-                return event
-            }
+    private func writeBankedEvent(_ event: CatchEvent) -> Bool {
+        do {
+            let url = directoryURL().appendingPathComponent(
+                "banked-event-\(sanitized(event.accountID))-\(event.id.uuidString).json")
+            let data = try encoder.encode(event)
+            try data.write(to: url, options: .atomic)
+            return true
+        } catch {
+            Logger.store.error("Bank catch failed: \(error.localizedDescription, privacy: .public)")
+            return false
         }
-        return nil
+    }
+
+    private func removeProvisionalEvent(_ eventID: UUID, sessionID: UUID, accountID: String) {
+        let url = provisionalFileURL(sessionID: sessionID, accountID: accountID)
+        var events = loadProvisionalSync(sessionID: sessionID, accountID: accountID)
+        events.removeAll { $0.id == eventID }
+        if events.isEmpty {
+            try? FileManager.default.removeItem(at: url)
+        } else if let data = try? encoder.encode(events) {
+            try? data.write(to: url, options: .atomic)
+        }
     }
 
     private func syncIO<T>(_ work: () -> T) -> T {

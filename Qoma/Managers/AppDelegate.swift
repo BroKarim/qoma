@@ -52,4 +52,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         return false
     }
+
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        guard let session = coordinator?.sessionCoordinator.snapshot,
+              session.status == .active || session.status == .paused else { return .terminateNow }
+        let alert = NSAlert()
+        alert.messageText = "End this focus session and quit?"
+        alert.informativeText = "The session will be saved as interrupted."
+        alert.addButton(withTitle: "Stop and Quit")
+        alert.addButton(withTitle: "Keep Focusing")
+        guard alert.runModal() == .alertFirstButtonReturn else { return .terminateCancel }
+        guard coordinator?.sessionCoordinator.stopSession(reason: "Quit application") != nil else {
+            let failure = NSAlert()
+            failure.messageText = "The session could not be saved"
+            failure.informativeText = "Keep qyube open and try quitting again so your session can be recorded safely."
+            failure.runModal()
+            return .terminateCancel
+        }
+        return .terminateNow
+    }
 }

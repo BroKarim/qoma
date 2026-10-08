@@ -4,9 +4,9 @@ import OSLog
 /// Abstract repository for session persistence.
 protocol SessionRepositoryProtocol: Sendable {
     func loadActive(accountID: String) -> ActiveSessionSnapshot?
-    func saveActive(_ snapshot: ActiveSessionSnapshot)
-    func deleteActive(accountID: String)
-    func finalizeOnce(_ session: FocusSession)
+    func saveActive(_ snapshot: ActiveSessionSnapshot) -> Bool
+    func deleteActive(accountID: String) -> Bool
+    func finalizeOnce(_ session: FocusSession) -> Bool
     func loadHistory(accountID: String) -> [FocusSession]
 }
 
@@ -20,8 +20,12 @@ final class SessionRepository: SessionRepositoryProtocol, @unchecked Sendable {
     private let ioQueue = DispatchQueue(label: "com.dzulkiram.qoma.sessionrepository.io")
     private let queueKey = DispatchSpecificKey<Void>()
     private var finalizedIDs: Set<UUID> = []
+    private let storageDirectory: URL?
+    private let historyDirectoryURL: URL?
 
-    init() {
+    init(storageDirectory: URL? = nil, historyDirectoryURL: URL? = nil) {
+        self.storageDirectory = storageDirectory
+        self.historyDirectoryURL = historyDirectoryURL
         encoder.dateEncodingStrategy = .iso8601
         decoder.dateDecodingStrategy = .iso8601
         ioQueue.setSpecific(key: queueKey, value: ())
@@ -38,6 +42,7 @@ final class SessionRepository: SessionRepositoryProtocol, @unchecked Sendable {
     }
 
     private func directoryURL() -> URL {
+        if let storageDirectory { return storageDirectory }
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
         return appSupport.appendingPathComponent("Qoma").appendingPathComponent("Sessions")
     }
@@ -47,7 +52,7 @@ final class SessionRepository: SessionRepositoryProtocol, @unchecked Sendable {
     }
 
     private func historyFileURL(accountID: String) -> URL {
-        directoryURL().appendingPathComponent("history-\(sanitized(accountID)).json")
+        (historyDirectoryURL ?? directoryURL()).appendingPathComponent("history-\(sanitized(accountID)).json")
     }
 
     private func sanitized(_ accountID: String) -> String {
@@ -75,22 +80,32 @@ final class SessionRepository: SessionRepositoryProtocol, @unchecked Sendable {
         }
     }
 
-    func saveActive(_ snapshot: ActiveSessionSnapshot) {
+    func saveActive(_ snapshot: ActiveSessionSnapshot) -> Bool {
         syncIO {
             let url = activeFileURL(accountID: snapshot.accountID)
             do {
                 let data = try encoder.encode(snapshot)
                 try data.write(to: url, options: .atomic)
+                return true
             } catch {
                 Logger.store.error("Save active snapshot failed: \(error.localizedDescription, privacy: .public)")
+                return false
             }
         }
     }
 
-    func deleteActive(accountID: String) {
+    func deleteActive(accountID: String) -> Bool {
         syncIO {
             let url = activeFileURL(accountID: accountID)
-            try? FileManager.default.removeItem(at: url)
+            do {
+                if FileManager.default.fileExists(atPath: url.path) {
+                    try FileManager.default.removeItem(at: url)
+                }
+                return true
+            } catch {
+                Logger.store.error("Delete active snapshot failed: \(error.localizedDescription, privacy: .public)")
+                return false
+            }
         }
     }
 
@@ -109,19 +124,56 @@ final class SessionRepository: SessionRepositoryProtocol, @unchecked Sendable {
         }
     }
 
-    func finalizeOnce(_ session: FocusSession) {
+    func importHistory(_ sessions: [FocusSession]) -> Bool {
+        syncIO {
+            let groupedSessions = Dictionary(grouping: sessions, by: \.accountID)
+            for (accountID, importedSessions) in groupedSessions {
+                let url = historyFileURL(accountID: accountID)
+                var history: [FocusSession] = []
+                if FileManager.default.fileExists(atPath: url.path) {
+                    do {
+                        history = try decoder.decode([FocusSession].self, from: Data(contentsOf: url))
+                    } catch {
+                        Logger.store.error("Read history before import failed: \(error.localizedDescription, privacy: .public)")
+                        return false
+                    }
+                }
+                let knownIDs = Set(history.map(\.id))
+                history.append(contentsOf: importedSessions.filter { !knownIDs.contains($0.id) })
+                do {
+                    try encoder.encode(history).write(to: url, options: .atomic)
+                } catch {
+                    Logger.store.error("Import session history failed: \(error.localizedDescription, privacy: .public)")
+                    return false
+                }
+            }
+            return true
+        }
+    }
+
+    func finalizeOnce(_ session: FocusSession) -> Bool {
         syncIO {
             guard !finalizedIDs.contains(session.id) else {
                 Logger.store.info("finalizeOnce skipped duplicate \(session.id, privacy: .public)")
-                return
+                return true
             }
 
             let url = historyFileURL(accountID: session.accountID)
-            var history = (try? Data(contentsOf: url)).flatMap {
-                try? decoder.decode([FocusSession].self, from: $0)
-            } ?? []
+            var history: [FocusSession] = []
+            if FileManager.default.fileExists(atPath: url.path) {
+                do {
+                    history = try decoder.decode([FocusSession].self, from: Data(contentsOf: url))
+                } catch {
+                    Logger.store.error("Read history before finalize failed: \(error.localizedDescription, privacy: .public)")
+                    return false
+                }
+            }
 
-            history.removeAll { $0.id == session.id }
+            if history.contains(where: { $0.id == session.id }) {
+                finalizedIDs.insert(session.id)
+                return true
+            }
+
             history.append(session)
 
             do {
@@ -129,8 +181,10 @@ final class SessionRepository: SessionRepositoryProtocol, @unchecked Sendable {
                 try data.write(to: url, options: .atomic)
                 finalizedIDs.insert(session.id)
                 Logger.store.info("Finalized session \(session.id, privacy: .public)")
+                return true
             } catch {
                 Logger.store.error("Finalize session failed: \(error.localizedDescription, privacy: .public)")
+                return false
             }
         }
     }

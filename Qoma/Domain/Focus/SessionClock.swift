@@ -6,6 +6,7 @@ final class SessionClock {
     typealias Now = () -> Date
 
     private let now: Now
+    private let plannedDuration: TimeInterval
     private(set) var startTime: Date
     private(set) var deadline: Date
     private(set) var accumulatedActiveSeconds: TimeInterval
@@ -16,11 +17,13 @@ final class SessionClock {
         startTime: Date = Date(),
         accumulatedActiveSeconds: TimeInterval = 0,
         pausedAt: Date? = nil,
+        deadline: Date? = nil,
         now: @escaping Now = Date.init
     ) {
         self.now = now
+        self.plannedDuration = plannedDuration
         self.startTime = startTime
-        self.deadline = startTime.addingTimeInterval(plannedDuration)
+        self.deadline = deadline ?? startTime.addingTimeInterval(plannedDuration)
         self.accumulatedActiveSeconds = accumulatedActiveSeconds
         self.pausedAt = pausedAt
     }
@@ -30,6 +33,7 @@ final class SessionClock {
         startTime: Date = Date(),
         accumulatedActiveSeconds: TimeInterval = 0,
         pausedAt: Date? = nil,
+        deadline: Date? = nil,
         now: @escaping Now = Date.init
     ) {
         self.init(
@@ -37,6 +41,7 @@ final class SessionClock {
             startTime: startTime,
             accumulatedActiveSeconds: accumulatedActiveSeconds,
             pausedAt: pausedAt,
+            deadline: deadline,
             now: now
         )
     }
@@ -61,7 +66,9 @@ final class SessionClock {
         if pausedAt != nil {
             return accumulatedActiveSeconds
         }
-        return accumulatedActiveSeconds + max(0, current.timeIntervalSince(startTime))
+        return min(
+            plannedDuration,
+            accumulatedActiveSeconds + max(0, current.timeIntervalSince(startTime)))
     }
 
     /// Elapsed wall-clock seconds since start.
