@@ -6,6 +6,7 @@ struct DistractionTargetWindow: Equatable {
     let ownerPID: pid_t
     let level: Int
     let frame: CGRect
+    var occludedRegions: [CGRect] = []
 }
 
 /// Reads window geometry only. It never captures another app's pixels.
@@ -21,7 +22,7 @@ struct DistractionTargetWindowLocator {
                 [.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]]
         else { return nil }
 
-        for info in windows {
+        for (index, info) in windows.enumerated() {
             guard let windowPID = (info[kCGWindowOwnerPID as String] as? NSNumber)?.int32Value,
                 windowPID == pid,
                 let number = (info[kCGWindowNumber as String] as? NSNumber)?.intValue,
@@ -43,7 +44,22 @@ struct DistractionTargetWindowLocator {
                 width: width,
                 height: height)
             guard NSScreen.screens.contains(where: { $0.frame.intersects(frame) }) else { continue }
-            return DistractionTargetWindow(number: number, ownerPID: pid, level: level, frame: frame)
+            let occlusions: [CGRect] = windows.prefix(index).compactMap { other in
+                guard let owner = (other[kCGWindowOwnerPID as String] as? NSNumber)?.int32Value,
+                    owner != ProcessInfo.processInfo.processIdentifier,
+                    let layer = (other[kCGWindowLayer as String] as? NSNumber)?.intValue,
+                    layer >= 0, layer <= level + 1,
+                    ((other[kCGWindowAlpha as String] as? NSNumber)?.doubleValue ?? 1) > 0.01,
+                    let b = other[kCGWindowBounds as String] as? [String: NSNumber],
+                    let ox = b["X"]?.doubleValue, let oy = b["Y"]?.doubleValue,
+                    let ow = b["Width"]?.doubleValue, let oh = b["Height"]?.doubleValue else { return nil }
+                let rect = CGRect(x: ox, y: mainScreen.frame.maxY - oy - oh, width: ow, height: oh)
+                    .intersection(frame)
+                guard !rect.isNull, !rect.isEmpty else { return nil }
+                return rect.offsetBy(dx: -frame.minX, dy: -frame.minY)
+            }
+            return DistractionTargetWindow(
+                number: number, ownerPID: pid, level: level, frame: frame, occludedRegions: occlusions)
         }
         return nil
     }

@@ -16,7 +16,7 @@ struct FloatingCompanionView: NSViewRepresentable {
         let view = CompanionSpriteView()
         view.onTap = onTap
         view.allowsTransparency = true
-        view.preferredFramesPerSecond = 30
+        view.preferredFramesPerSecond = 60
         view.ignoresSiblingOrder = false
         view.setAccessibilityElement(true)
         view.setAccessibilityRole(.button)

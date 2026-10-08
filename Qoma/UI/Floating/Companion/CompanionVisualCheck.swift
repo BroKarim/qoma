@@ -27,7 +27,22 @@ enum CompanionVisualCheck {
                 $0.advanceAnimation(by: 0.2)
             }),
             ("05-sleeping", { $0.setSessionPaused(true) }),
-            ("06-distracted", { $0.setSessionPaused(false); $0.setDistracted(true); $0.advanceAnimation(by: 0.18) }),
+            ("06-ice-ready", {
+                $0.setSessionPaused(false)
+                $0.setDistractionVisual(.init(effect: .iceFlower, startedAt: Date(), seed: 1, ownerPID: 1))
+            }),
+            ("07-ice-hop", { $0.advanceAnimation(by: 0.7) }),
+            ("08-light-up", {
+                $0.visualNow = { Date(timeIntervalSince1970: 100) }
+                $0.setDistractionVisual(.init(
+                    effect: .dimBright, startedAt: Date(timeIntervalSince1970: 100), seed: 1, ownerPID: 1))
+            }),
+            ("09-light-middle", {
+                $0.visualNow = { Date(timeIntervalSince1970: 102) }; $0.advanceAnimation(by: 0.01)
+            }),
+            ("10-light-bow", {
+                $0.visualNow = { Date(timeIntervalSince1970: 104) }; $0.advanceAnimation(by: 0.01)
+            }),
             ("07-completed", { $0.completeSession() }),
             ("08-releasing", {
                 $0.startSession(); $0.advanceAnimation(by: 1.21); $0.biteNow()
@@ -37,10 +52,10 @@ enum CompanionVisualCheck {
                 $0.stopSession(activeSeconds: 60); $0.advanceAnimation(by: 0.6)
             }),
         ]
-        let board = NSImage(size: CGSize(width: 800, height: 540))
+        let board = NSImage(size: CGSize(width: 800, height: 810))
         board.lockFocus()
         NSColor(white: 0.93, alpha: 1).setFill()
-        NSRect(x: 0, y: 0, width: 800, height: 540).fill()
+        NSRect(x: 0, y: 0, width: 800, height: 810).fill()
         for (index, sample) in samples.enumerated() {
             sample.1(scene)
             guard let texture = view.texture(from: scene, crop: CGRect(origin: .zero, size: CompanionScene.stageSize))
@@ -55,7 +70,7 @@ enum CompanionVisualCheck {
             try bitmap.representation(using: .png, properties: [:])!
                 .write(to: directory.appendingPathComponent("\(sample.0).png"))
             let x = CGFloat(index % 4) * 200
-            let y = CGFloat(1 - index / 4) * 270
+            let y = CGFloat(2 - index / 4) * 270
             let rendered = NSImage(cgImage: image, size: CompanionScene.stageSize)
             rendered.draw(in: CGRect(x: x + 30, y: y + 110, width: 140, height: 140))
             // A second miniature on a dark background catches alpha fringes.

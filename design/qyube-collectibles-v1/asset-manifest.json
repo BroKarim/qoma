@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "batch": "01",
+  "generator": "Built-in image_gen",
+  "reference": "../qyube-compact-v1/06-catalog.png",
+  "items": [
+    {
+      "id": "anchovy",
+      "name": "Anchovy",
+      "category": "Fish",
+      "existingCatalogID": "anchovy",
+      "path": "assets/anchovy.png",
+      "prompt": "Use case: stylized-concept. Create ONE production collectible asset for qyube, not a UI screen. Attached image is STYLE REFERENCE ONLY: match the small watercolor collectible illustrations in its grid. Hand-painted semi-realistic watercolor, soft fine charcoal contours, delicate pigment texture confined to the object, muted yet distinct natural colors, restrained highlights, readable silhouette at 48 px. Square canvas, isolated single object fully visible, optically centered, longest object dimension occupies approximately 78% of canvas, generous transparent margins. Strict side view; creatures face RIGHT. Genuine transparent alpha background. No white paper rectangle, no scenery, no ground, no cast shadow, no text, labels, badges, frame, water, bubbles, floating particles, duplicate views, or extra objects. No 3D render or glossy cartoon treatment. Subject: Slender silver anchovy, muted blue-gray back, small natural eye, forked tail."
+    },
+    {
+      "id": "perch",
+      "name": "Perch",
+      "category": "Fish",
+      "existingCatalogID": "perch",
+      "path": "assets/perch.png",
+      "prompt": "Use case: stylized-concept. Create ONE production collectible asset for qyube, not a UI screen. Attached image is STYLE REFERENCE ONLY: match the small watercolor collectible illustrations in its grid. Hand-painted semi-realistic watercolor, soft fine charcoal contours, delicate pigment texture confined to the object, muted yet distinct natural colors, restrained highlights, readable silhouette at 48 px. Square canvas, isolated single object fully visible, optically centered, longest object dimension occupies approximately 78% of canvas, generous transparent margins. Strict side view; creatures face RIGHT. Genuine transparent alpha background. No white paper rectangle, no scenery, no ground, no cast shadow, no text, labels, badges, frame, water, bubbles, floating particles, duplicate views, or extra objects. No 3D render or glossy cartoon treatment. Subject: Olive green perch with distinctive dark vertical bars and muted orange lower fins, raised spiny dorsal fin."
+    },
+    {
+      "id": "trout",
+      "name": "Trout",
+      "category": "Fish",
+      "existingCatalogID": "trout",
+      "path": "assets/trout.png",
+      "prompt": "Use case: stylized-concept. Create ONE production collectible asset for qyube, not a UI screen. Attached image is STYLE REFERENCE ONLY: match the small watercolor collectible illustrations in its grid. Hand-painted semi-realistic watercolor, soft fine charcoal contours, delicate pigment texture confined to the object, muted yet distinct natural colors, restrained highlights, readable silhouette at 48 px. Square canvas, isolated single object fully visible, optically centered, longest object dimension occupies approximately 78% of canvas, generous transparent margins. Strict side view; creatures face RIGHT. Genuine transparent alpha background. No white paper rectangle, no scenery, no ground, no cast shadow, no text, labels, badges, frame, water, bubbles, floating particles, duplicate views, or extra objects. No 3D render or glossy cartoon treatment. Subject: Rainbow trout, sage-gray back, soft pink lateral stripe and fine dark spots."
+    },
+    {
+      "id": "salmon",
+      "name": "Salmon",
+      "category": "Fish",
+      "existingCatalogID": "salmon",
+      "path": "assets/salmon.png",
+      "prompt": "Use case: stylized-concept. Create ONE production collectible asset for qyube, not a UI screen. Attached image is STYLE REFERENCE ONLY: match the small watercolor collectible illustrations in its grid. Hand-painted semi-realistic watercolor, soft fine charcoal contours, delicate pigment texture confined to the object, muted yet distinct natural colors, restrained highlights, readable silhouette at 48 px. Square canvas, isolated single object fully visible, optically centered, longest object dimension occupies approximately 78% of canvas, generous transparent margins. Strict side view; creatures face RIGHT. Genuine transparent alpha background. No white paper rectangle, no scenery, no ground, no cast shadow, no text, labels, badges, frame, water, bubbles, floating particles, duplicate views, or extra objects. No 3D render or glossy cartoon treatment. Subject: Atlantic salmon, silver-blue body, fine sparse dark spots, distinctive adipose fin and powerful forked tail."
+    },
+    {
+      "id": "narwhal",
+      "name": "Narwhal",
+      "category": "Fish",
+      "existingCatalogID": "narwhal",
+      "path": "assets/narwhal.png",
+      "prompt": "Use case: stylized-concept. Create ONE production collectible asset for qyube, not a UI screen. Attached image is STYLE REFERENCE ONLY: match the small watercolor collectible illustrations in its grid. Hand-painted semi-realistic watercolor, soft fine charcoal contours, delicate pigment texture confined to the object, muted yet distinct natural colors, restrained highlights, readable silhouette at 48 px. Square canvas, isolated single object fully visible, optically centered, longest object dimension occupies approximately 78% of canvas, generous transparent margins. Strict side view; creatures face RIGHT. Genuine transparent alpha background. No white paper rectangle, no scenery, no ground, no cast shadow, no text, labels, badges, frame, water, bubbles, floating particles, duplicate views, or extra objects. No 3D render or glossy cartoon treatment. Subject: Small charming gray mottled narwhal with rounded forehead and one long straight ivory spiral tusk pointing right, compact whale body."
+    },
+    {
+      "id": "stick",
+      "name": "Driftwood Stick",
+      "category": "Ocean finds",
+      "existingCatalogID": "stick",
+      "path": "assets/stick.png",
+      "prompt": "Use case: stylized-concept. Create ONE production collectible asset for qyube, not a UI screen. Attached image is STYLE REFERENCE ONLY: match the small watercolor collectible illustrations in its grid. Hand-painted semi-realistic watercolor, soft fine charcoal contours, delicate pigment texture confined to the object, muted yet distinct natural colors, restrained highlights, readable silhouette at 48 px. Square canvas, isolated single object fully visible, optically centered, longest object dimension occupies approximately 78% of canvas, generous transparent margins. Strict side view; creatures face RIGHT. Genuine transparent alpha background. No white paper rectangle, no scenery, no ground, no cast shadow, no text, labels, badges, frame, water, bubbles, floating particles, duplicate views, or extra objects. No 3D render or glossy cartoon treatment. Subject: One weathered warm gray-brown driftwood stick, gently crooked horizontal silhouette with one short branch and soft worn wood grain."
+    },
+    {
+      "id": "pebble",
+      "name": "Smooth Pebble",
+      "category": "Ocean finds",
+      "existingCatalogID": "pebble",
+      "path": "assets/pebble.png",
+      "prompt": "Use case: stylized-concept. Create ONE production collectible asset for qyube, not a UI screen. Attached image is STYLE REFERENCE ONLY: match the small watercolor collectible illustrations in its grid. Hand-painted semi-realistic watercolor, soft fine charcoal contours, delicate pigment texture confined to the object, muted yet distinct natural colors, restrained highlights, readable silhouette at 48 px. Square canvas, isolated single object fully visible, optically centered, longest object dimension occupies approximately 78% of canvas, generous transparent margins. Strict side view; creatures face RIGHT. Genuine transparent alpha background. No white paper rectangle, no scenery, no ground, no cast shadow, no text, labels, badges, frame, water, bubbles, floating particles, duplicate views, or extra objects. No 3D render or glossy cartoon treatment. Subject: One smooth rounded asymmetrical sea pebble, muted slate gray with two subtle pale mineral veins, shown from the side."
+    },
+    {
+      "id": "shell",
+      "name": "Seashell",
+      "category": "Ocean finds",
+      "existingCatalogID": "shell",
+      "path": "assets/shell.png",
+      "prompt": "Use case: stylized-concept. Create ONE production collectible asset for qyube, not a UI screen. Attached image is STYLE REFERENCE ONLY: match the small watercolor collectible illustrations in its grid. Hand-painted semi-realistic watercolor, soft fine charcoal contours, delicate pigment texture confined to the object, muted yet distinct natural colors, restrained highlights, readable silhouette at 48 px. Square canvas, isolated single object fully visible, optically centered, longest object dimension occupies approximately 78% of canvas, generous transparent margins. Strict side view; creatures face RIGHT. Genuine transparent alpha background. No white paper rectangle, no scenery, no ground, no cast shadow, no text, labels, badges, frame, water, bubbles, floating particles, duplicate views, or extra objects. No 3D render or glossy cartoon treatment. Subject: One peach and ivory spiral conch seashell resting horizontally in side profile, small spiral tip left and curved lip right."
+    },
+    {
+      "id": "clownfish",
+      "name": "Clownfish",
+      "category": "Fish",
+      "existingCatalogID": null,
+      "path": "assets/clownfish.png",
+      "prompt": "Use case: stylized-concept. Create ONE production collectible asset for qyube, not a UI screen. Attached image is STYLE REFERENCE ONLY: match the small watercolor collectible illustrations in its grid. Hand-painted semi-realistic watercolor, soft fine charcoal contours, delicate pigment texture confined to the object, muted yet distinct natural colors, restrained highlights, readable silhouette at 48 px. Square canvas, isolated single object fully visible, optically centered, longest object dimension occupies approximately 78% of canvas, generous transparent margins. Strict side view; creatures face RIGHT. Genuine transparent alpha background. No white paper rectangle, no scenery, no ground, no cast shadow, no text, labels, badges, frame, water, bubbles, floating particles, duplicate views, or extra objects. No 3D render or glossy cartoon treatment. Subject: Orange clownfish with three ivory white bands edged in charcoal, rounded fins, match clownfish reference closely."
+    },
+    {
+      "id": "pufferfish",
+      "name": "Pufferfish",
+      "category": "Fish",
+      "existingCatalogID": null,
+      "path": "assets/pufferfish.png",
+      "prompt": "Use case: stylized-concept. Create ONE production collectible asset for qyube, not a UI screen. Attached image is STYLE REFERENCE ONLY: match the small watercolor collectible illustrations in its grid. Hand-painted semi-realistic watercolor, soft fine charcoal contours, delicate pigment texture confined to the object, muted yet distinct natural colors, restrained highlights, readable silhouette at 48 px. Square canvas, isolated single object fully visible, optically centered, longest object dimension occupies approximately 78% of canvas, generous transparent margins. Strict side view; creatures face RIGHT. Genuine transparent alpha background. No white paper rectangle, no scenery, no ground, no cast shadow, no text, labels, badges, frame, water, bubbles, floating particles, duplicate views, or extra objects. No 3D render or glossy cartoon treatment. Subject: Round golden tan pufferfish in strict side profile facing right, cream belly, tiny short spines, one visible natural dark eye and small side fin."
+    },
+    {
+      "id": "seahorse",
+      "name": "Seahorse",
+      "category": "Fish",
+      "existingCatalogID": null,
+      "path": "assets/seahorse.png",
+      "prompt": "Use case: stylized-concept. Create ONE production collectible asset for qyube, not a UI screen. Attached image is STYLE REFERENCE ONLY: match the small watercolor collectible illustrations in its grid. Hand-painted semi-realistic watercolor, soft fine charcoal contours, delicate pigment texture confined to the object, muted yet distinct natural colors, restrained highlights, readable silhouette at 48 px. Square canvas, isolated single object fully visible, optically centered, longest object dimension occupies approximately 78% of canvas, generous transparent margins. Strict side view; creatures face RIGHT. Genuine transparent alpha background. No white paper rectangle, no scenery, no ground, no cast shadow, no text, labels, badges, frame, water, bubbles, floating particles, duplicate views, or extra objects. No 3D render or glossy cartoon treatment. Subject: Warm ochre orange seahorse in side profile facing right, upright curved neck, delicately ridged back and curled tail."
+    },
+    {
+      "id": "seaweed",
+      "name": "Seaweed",
+      "category": "Ocean finds",
+      "existingCatalogID": null,
+      "path": "assets/seaweed.png",
+      "prompt": "Use case: stylized-concept. Create ONE production collectible asset for qyube, not a UI screen. Attached image is STYLE REFERENCE ONLY: match the small watercolor collectible illustrations in its grid. Hand-painted semi-realistic watercolor, soft fine charcoal contours, delicate pigment texture confined to the object, muted yet distinct natural colors, restrained highlights, readable silhouette at 48 px. Square canvas, isolated single object fully visible, optically centered, longest object dimension occupies approximately 78% of canvas, generous transparent margins. Strict side view; creatures face RIGHT. Genuine transparent alpha background. No white paper rectangle, no scenery, no ground, no cast shadow, no text, labels, badges, frame, water, bubbles, floating particles, duplicate views, or extra objects. No 3D render or glossy cartoon treatment. Subject: One small coherent tuft of olive and sage green seaweed with 5 to 7 gently curved branching fronds, upright side elevation, no rock or ground."
+    },
+    {
+      "id": "yellow-submarine",
+      "name": "Yellow Submarine",
+      "category": "Ocean finds",
+      "existingCatalogID": null,
+      "path": "assets/yellow-submarine.png",
+      "prompt": "Use case: stylized-concept. Create ONE production collectible asset for qyube, not a UI screen. Attached image is STYLE REFERENCE ONLY: match the small watercolor collectible illustrations in its grid. Hand-painted semi-realistic watercolor, soft fine charcoal contours, delicate pigment texture confined to the object, muted yet distinct natural colors, restrained highlights, readable silhouette at 48 px. Square canvas, isolated single object fully visible, optically centered, longest object dimension occupies approximately 78% of canvas, generous transparent margins. Strict side view; creatures face RIGHT. Genuine transparent alpha background. No white paper rectangle, no scenery, no ground, no cast shadow, no text, labels, badges, frame, water, bubbles, floating particles, duplicate views, or extra objects. No 3D render or glossy cartoon treatment. Subject: One little vintage mustard yellow submarine in side profile with rounded bow right, three circular blue-gray portholes, short curved periscope and small propeller left."
+    },
+    {
+      "id": "moonfin",
+      "name": "Moonfin",
+      "category": "Fantasy",
+      "existingCatalogID": null,
+      "path": "assets/moonfin.png",
+      "prompt": "Use case: stylized-concept. Create ONE production collectible asset for qyube, not a UI screen. Attached image is STYLE REFERENCE ONLY: match the small watercolor collectible illustrations in its grid. Hand-painted semi-realistic watercolor, soft fine charcoal contours, delicate pigment texture confined to the object, muted yet distinct natural colors, restrained highlights, readable silhouette at 48 px. Square canvas, isolated single object fully visible, optically centered, longest object dimension occupies approximately 78% of canvas, generous transparent margins. Strict side view; creatures face RIGHT. Genuine transparent alpha background. No white paper rectangle, no scenery, no ground, no cast shadow, no text, labels, badges, frame, water, bubbles, floating particles, duplicate views, or extra objects. No 3D render or glossy cartoon treatment. Subject: One original fantasy fish facing right: dusty indigo and pearl silver body with a distinctive crescent-shaped upright dorsal fin and long flowing forked tail, small pale lunar marking on flank. Organic watercolor, restrained magical appearance, no external glow or stars."
+    },
+    {
+      "id": "crystal-coral",
+      "name": "Crystal Coral",
+      "category": "Fantasy",
+      "existingCatalogID": null,
+      "path": "assets/crystal-coral.png",
+      "prompt": "Use case: stylized-concept. Create ONE production collectible asset for qyube, not a UI screen. Attached image is STYLE REFERENCE ONLY: match the small watercolor collectible illustrations in its grid. Hand-painted semi-realistic watercolor, soft fine charcoal contours, delicate pigment texture confined to the object, muted yet distinct natural colors, restrained highlights, readable silhouette at 48 px. Square canvas, isolated single object fully visible, optically centered, longest object dimension occupies approximately 78% of canvas, generous transparent margins. Strict side view; creatures face RIGHT. Genuine transparent alpha background. No white paper rectangle, no scenery, no ground, no cast shadow, no text, labels, badges, frame, water, bubbles, floating particles, duplicate views, or extra objects. No 3D render or glossy cartoon treatment. Subject: One original fantasy ocean find: a small branching coral grown from translucent pale lavender and muted teal crystal, 5 chunky tapered mineral branches with softly faceted tips, connected single object, side elevation, no external glow or particles."
+    }
+  ]
+}

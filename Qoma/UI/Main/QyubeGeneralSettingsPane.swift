@@ -7,6 +7,7 @@ struct QyubeGeneralSettingsPane: View {
     private var volume = AppConstants.SoundSettings.defaultVolume
     @AppStorage(AppConstants.SoundSettings.autoMuteAfter5SecondsKey)
     private var autoMute = true
+    @AppStorage(DistractionAudioPlayer.enabledKey) private var distractionSounds = true
 
     var body: some View {
         Form {
@@ -33,6 +34,7 @@ struct QyubeGeneralSettingsPane: View {
             }
 
             Section("While focusing") {
+                Toggle("Distraction sound effects", isOn: $distractionSounds)
                 LabeledContent("Floating companion") {
                     Text("Stays visible while a session is active or paused")
                         .foregroundStyle(.secondary)

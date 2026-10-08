@@ -33,7 +33,7 @@ final class DistractionCoordinator: ObservableObject {
                 }
             }
             .store(in: &cancellables)
-        monitor.startMonitoring()
+        monitor.startMonitoring(policy: policy)
     }
 
     func stop() {

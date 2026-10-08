@@ -19,7 +19,6 @@ final class CompanionScene: SKScene {
     private let rightFlipper = SKSpriteNode(imageNamed: "CompanionFlipperRight")
     private let rod = SKSpriteNode(imageNamed: "CompanionRod")
     private let restingPose = SKSpriteNode(imageNamed: "CompanionPoseSleeping")
-    private let bowPose = SKSpriteNode(imageNamed: "CompanionPoseLightsBow")
     private let floe = SKSpriteNode(imageNamed: "CompanionFloe")
     private let bucket = SKSpriteNode(imageNamed: "CompanionBucket")
     private let catchSprite = SKSpriteNode(imageNamed: "CompanionFish")
@@ -30,14 +29,13 @@ final class CompanionScene: SKScene {
     private let fishTexture = SKTexture(imageNamed: "CompanionFish")
     private let sleepTexture = SKTexture(imageNamed: "CompanionPoseSleeping")
     private let hopTexture = SKTexture(imageNamed: "CompanionPoseHop")
-    private let lightsUpTexture = SKTexture(imageNamed: "CompanionPoseLightsUp")
-    private let lightsBowTexture = SKTexture(imageNamed: "CompanionPoseLightsBow")
     private let completeTexture = SKTexture(imageNamed: "CompanionPoseCompleted")
     private var steamPuffs: [SKShapeNode] = []
     private var distractionVisual: DistractionVisualState?
     private var lastTime: TimeInterval?
     private var motionTime: TimeInterval = 0
     private var built = false
+    var visualNow: () -> Date = Date.init
 
     override init() {
         super.init(size: Self.stageSize)
@@ -168,15 +166,19 @@ final class CompanionScene: SKScene {
         self.rod.anchorPoint = CGPoint(x: 0.95, y: 0.05)
         self.configure(self.restingPose, size: CGSize(width: 130, height: 130), position: CGPoint(x: 65, y: 47), z: 4)
         self.restingPose.anchorPoint = CGPoint(x: 0.5, y: 62.0 / 512)
-        self.configure(self.bowPose, size: CGSize(width: 130, height: 130), position: CGPoint(x: 65, y: 47), z: 5)
-        self.bowPose.anchorPoint = self.restingPose.anchorPoint
-        self.bowPose.texture = self.lightsBowTexture
-        self.bowPose.isHidden = true
-        for index in 0..<3 {
-            let puff = SKShapeNode(ellipseOf: CGSize(width: 5 + CGFloat(index), height: 4 + CGFloat(index)))
-            puff.fillColor = NSColor(white: 0.36, alpha: 0.65)
-            puff.strokeColor = NSColor(white: 0.24, alpha: 0.7)
-            puff.lineWidth = 0.6
+        for _ in 0..<3 {
+            let path = CGMutablePath()
+            path.move(to: CGPoint(x: -2, y: -2))
+            path.addCurve(to: CGPoint(x: -5, y: 3), control1: CGPoint(x: -9, y: -1), control2: CGPoint(x: -9, y: 5))
+            path.addCurve(to: CGPoint(x: 1, y: 7), control1: CGPoint(x: -7, y: 10), control2: CGPoint(x: 0, y: 12))
+            path.addCurve(to: CGPoint(x: 6, y: 2), control1: CGPoint(x: 7, y: 10), control2: CGPoint(x: 10, y: 4))
+            path.addCurve(to: CGPoint(x: 2, y: -2), control1: CGPoint(x: 10, y: -3), control2: CGPoint(x: 5, y: -5))
+            path.addLine(to: CGPoint(x: -1, y: -8))
+            path.closeSubpath()
+            let puff = SKShapeNode(path: path)
+            puff.fillColor = NSColor(white: 0.72, alpha: 0.8)
+            puff.strokeColor = NSColor(white: 0.28, alpha: 0.85)
+            puff.lineWidth = 0.8
             puff.zPosition = 11
             puff.isHidden = true
             addChild(puff)
@@ -207,8 +209,18 @@ final class CompanionScene: SKScene {
         self.puppet.zRotation = 0
         self.puppet.setScale(1)
         self.torso.yScale = 1 + breath * 0.012
+        self.torso.xScale = 1
+        self.torso.zRotation = 0
+        self.torso.position = CGPoint(x: 0, y: 17.5)
         self.head.position = CGPoint(x: 0, y: 31 + breath * 0.35)
         self.head.zRotation = breath * 0.012
+        self.head.xScale = 1
+        self.head.yScale = 1
+        self.leftFlipper.position = CGPoint(x: -19, y: 33)
+        self.rightFlipper.position = CGPoint(x: 19, y: 33)
+        self.leftFlipper.setScale(1)
+        self.rightFlipper.setScale(1)
+        self.feet.position = .zero
         self.leftFlipper.zRotation = -0.7 + breath * 0.018
         self.rightFlipper.zRotation = -0.95 + breath * 0.022
         self.rod.zRotation = 0.35 + breath * 0.013
@@ -218,9 +230,6 @@ final class CompanionScene: SKScene {
         self.restingPose.zRotation = 0
         self.restingPose.alpha = 1
         self.restingPose.setScale(1)
-        self.bowPose.isHidden = true
-        self.bowPose.position = self.restingPose.position
-        self.bowPose.alpha = 0
         self.steamPuffs.forEach { $0.isHidden = true }
         self.sleepMarks.isHidden = true
         self.biteMark.isHidden = phase != .bite
@@ -304,31 +313,56 @@ final class CompanionScene: SKScene {
     }
 
     private func renderDistraction(time: CGFloat) {
+        // A single articulated penguin keeps its silhouette and texture through the
+        // entire motion. Crossfading two complete poses creates a double image.
+        self.rod.isHidden = true
+        self.line.isHidden = true
         switch self.distractionVisual?.effect ?? .iceFlower {
         case .iceFlower:
             self.showPose(self.hopTexture)
             if !self.reduceMotion {
-                let hop = max(0, sin(time * .pi * 1.7))
-                self.restingPose.position.y += hop * 8
-                self.restingPose.zRotation = sin(time * 3.1) * 0.025
+                let phase = time.truncatingRemainder(dividingBy: 1.45) / 1.45
+                if phase < 0.18 {
+                    let squash = sin(phase / 0.18 * .pi)
+                    self.restingPose.yScale = 1 - 0.08 * squash
+                    self.restingPose.xScale = 1 + 0.04 * squash
+                } else if phase < 0.8 {
+                    let flight = (phase - 0.18) / 0.62
+                    self.restingPose.position.y += 13 * sin(flight * .pi)
+                    self.restingPose.zRotation = sin(flight * 2 * .pi) * 0.035
+                } else {
+                    let settle = sin((phase - 0.8) / 0.2 * .pi)
+                    self.restingPose.yScale = 1 - 0.06 * settle
+                    self.restingPose.xScale = 1 + 0.03 * settle
+                }
             }
             for (index, puff) in self.steamPuffs.enumerated() {
-                let travel = self.reduceMotion
-                    ? 0 : (time * 15 + CGFloat(index) * 5).truncatingRemainder(dividingBy: 17)
+                let travel = self.reduceMotion ? 0.45
+                    : (time / 1.7 + CGFloat(index) / 3).truncatingRemainder(dividingBy: 1)
                 puff.position = CGPoint(
-                    x: 58 + CGFloat(index) * 10 + (self.reduceMotion ? 0 : sin(time * 2 + CGFloat(index)) * 2),
-                    y: 113 + travel)
-                puff.alpha = self.reduceMotion ? 0.55 : 0.72 * (1 - travel / 19)
+                    x: 46 + CGFloat(index) * 19 + sin(CGFloat(index) + travel * 2) * 3,
+                    y: 108 + travel * 17)
+                puff.setScale(0.65 + travel * 0.3)
+                puff.alpha = self.reduceMotion ? 0.75 : sin(travel * .pi) * 0.85
                 puff.isHidden = false
             }
         case .dimBright:
-            self.showPose(self.lightsUpTexture)
-            let elapsed = Date().timeIntervalSince(self.distractionVisual?.startedAt ?? Date())
+            let elapsed = visualNow().timeIntervalSince(self.distractionVisual?.startedAt ?? visualNow())
             let strength: CGFloat = self.reduceMotion
-                ? 0.55 : CGFloat(DistractionMotion.dimStrength(elapsed: elapsed))
-            self.restingPose.alpha = 1 - strength
-            self.bowPose.alpha = strength
-            self.bowPose.isHidden = false
+                ? 0.8 : CGFloat(DistractionMotion.dimStrength(elapsed: elapsed))
+            self.torso.position.x = -3 * strength
+            self.torso.yScale = 1 - 0.2 * strength
+            self.torso.xScale = 1 - 0.15 * strength
+            self.head.position = CGPoint(x: -5 * strength, y: 31 - 10 * strength)
+            self.head.zRotation = 0.15 * strength
+            self.head.yScale = 1 - 0.04 * strength
+            // Shoulder anchors stay attached; both flippers swing forward as the head bows.
+            self.leftFlipper.position = CGPoint(x: -19 - strength, y: 39 - 11 * strength)
+            self.rightFlipper.position = CGPoint(x: 19 - 5 * strength, y: 39 - 12 * strength)
+            self.leftFlipper.zRotation = -2.65 + 1.15 * strength
+            self.rightFlipper.zRotation = 2.65 + 2.23 * strength
+            self.leftFlipper.yScale = 1.35 - 0.25 * strength
+            self.rightFlipper.yScale = 1.25 - 0.05 * strength
         }
     }
 

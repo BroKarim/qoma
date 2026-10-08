@@ -346,3 +346,13 @@ The user approved the dim/bright prototype, including its penguin poses, and app
 - The user's new visual reference uses light icy-blue snowflakes. V2 adopts that color for this effect only; the penguin and main UI retain their existing palette.
 - Preserve the approved angry hop and steam puffs, fixed floe and bucket. The dim/bright prototype remains the approved reference for the other variation.
 - V2 is a static medium-density example; actual spawn timing and maximum density still need animation tuning. No native behavior is changed by this image revision.
+
+## 17. Native distraction animation and sound polish — 2026-10-04
+
+The user rejected the first native motion quality. Preserve the approved v2 scattered snowflake reference and dim/bright gesture. Native implementation now uses larger, multi-branch light-blue snowflakes distributed across shuffled cells, growing in batches of 6 initially, then four every ten seconds to24. Leave readable gaps. No continuous frost border.
+
+Do not dissolve between complete penguin drawings: that creates a ghosted double silhouette. The light gesture uses the existing watercolor body parts with continuous shoulder/head/torso transforms. Flippers rise above the head, then swing forward while the body bows. The ice reaction retains the approved hop texture with anticipation, lift, landing and soft cloud-shaped steam; fixed floe and bucket do not jump. Keep 60fps companion playback and Reduce Motion alternatives.
+
+One `ice-freezing.mp3` cue accompanies each newly appearing batch, with a short fade-out. One `light-switch.mp3` cue accompanies each bright/dim transition. Tie audio to episode events rather than render frames. Honor the sound toggle and volume, stop immediately when the effect ends, and do not loop switch audio for a static Reduce Motion veil.
+
+The selected variation stays fixed while the offending app remains active. A new activation may draw the same or another variation. This supersedes the old interval-based alternation wording in §16. The effect is confined to the target window, with occluding windows and qyube's floating controls protected. Native review output lives in `../qyube-distraction-v1/native-polish-check/`; these are renderer snapshots rather than new generated illustrations.

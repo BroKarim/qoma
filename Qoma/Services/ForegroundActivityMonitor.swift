@@ -13,15 +13,17 @@ final class ForegroundActivityMonitor: ObservableObject {
     private var workspaceObserver: NSObjectProtocol?
     private var pollingTimer: Timer?
     private var lastBundleID: String?
+    private var policy: SessionPolicy?
 
-    init(browserResolver: BrowserActivityResolver = .shared) {
-        self.browserResolver = browserResolver
+    init(browserResolver: BrowserActivityResolver? = nil) {
+        self.browserResolver = browserResolver ?? .shared
     }
 
     var isMonitoring: Bool { workspaceObserver != nil }
 
-    func startMonitoring() {
+    func startMonitoring(policy: SessionPolicy) {
         stopMonitoring()
+        self.policy = policy
         installWorkspaceObserver()
         startPolling()
         tick()
@@ -32,6 +34,7 @@ final class ForegroundActivityMonitor: ObservableObject {
         stopPolling()
         currentActivity = nil
         lastBundleID = nil
+        policy = nil
     }
 
     // MARK: - Workspace
@@ -42,7 +45,7 @@ final class ForegroundActivityMonitor: ObservableObject {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            self?.tick()
+            MainActor.assumeIsolated { self?.tick() }
         }
     }
 
@@ -58,7 +61,7 @@ final class ForegroundActivityMonitor: ObservableObject {
     private func startPolling() {
         pollingTimer?.invalidate()
         pollingTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
-            self?.tick()
+            MainActor.assumeIsolated { self?.tick() }
         }
     }
 
@@ -91,8 +94,17 @@ final class ForegroundActivityMonitor: ObservableObject {
     }
 
     private func resolveDomainIfNeeded(bundleID: String) -> String? {
+        guard let policy, Self.requiresDomainLookup(bundleID: bundleID, policy: policy) else { return nil }
         guard FocusPolicyEvaluator.isBrowserCapableOfDomainPolicy(bundleID) else { return nil }
         guard let tabInfo = browserResolver.resolveCurrentTab(for: bundleID) else { return nil }
         return FocusPolicyEvaluator.normalizeDomain(tabInfo.domain)
+    }
+
+    static func requiresDomainLookup(bundleID: String, policy: SessionPolicy) -> Bool {
+        switch policy.mode {
+        case .timerOnly: return false
+        case .allowing: return !policy.allowedApps.contains(bundleID) && !policy.allowedDomains.isEmpty
+        case .blocking: return !policy.blockedApps.contains(bundleID) && !policy.blockedDomains.isEmpty
+        }
     }
 }

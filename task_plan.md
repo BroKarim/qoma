@@ -514,3 +514,29 @@ Permintaan berikutnya memulai implementasi pada branch yang sama. Catatan perenc
 - [ ] QA visual/input langsung pada window aplikasi lain, banyak window, minimize/restore, fullscreen, Spaces, monitor kedua, skala berbeda dan Reduce Motion pada Mac nyata. Urutan window lintas-proses dan full-screen tidak dianggap terverifikasi hanya karena build berhasil.
 
 Aset pose ada di `Qoma/Assets.xcassets/Companion/CompanionPoseLightsUp.imageset` dan `CompanionPoseLightsBow.imageset`. Prompt produksi terdokumentasi di `design/qyube-distraction-v1/PRODUCTION_ASSET_PROMPTS.md`. Perubahan code/data lokal lain pada branch ini tidak dibersihkan atau dimasukkan sebagai bagian dari pekerjaan efek.
+
+## 15. Perbaikan visual distraction dan sound effect — 4 Oktober 2026
+
+User menguji implementasi §14 dan melaporkan gerak penguin kurang halus, snowflake terlalu sedikit/tidak terasa bertambah, serta redup–terang tidak terlihat bekerja. User juga menyediakan `ice-freezing.mp3` dan `light-switch.mp3`. Seluruh perubahan sebelumnya disimpan menggunakan `git add .` pada commit `242902f`; perbaikan dilanjutkan di branch `codex/distraction-animation-polish`.
+
+### Temuan dan perubahan
+
+- Transisi penguin sebelumnya mencampur alpha dua ilustrasi utuh yang bentuknya berbeda, sehingga muncul bayangan/gambar ganda. Dim/bright kini menggerakkan head, torso, dan kedua flipper dari aset watercolor yang sama secara berkesinambungan. Ice memakai pose hop yang telah ada, dengan antisipasi, loncatan, pendaratan dan puff berbentuk awan. SpriteKit dirender 60 fps; floe dan ember tetap pada anchor semula.
+- Renderer SwiftUI terpisah berhasil bergerak pada pemeriksaan awal; jadi kegagalan pengguna tidak dinyatakan sebagai bukti bahwa semua `TimelineView` berhenti di background. Integrasi sekarang memakai `DistractionEffectView` AppKit dan clock controller eksplisit 30 fps untuk drawing serta audio. Pengujian mempertahankan satu episode melalui policy update berulang hingga 51 detik.
+- Panel menggunakan level tepat di atas layer target dan frame window tersebut. Area jendela lain yang berada di depannya dipotong dari renderer; panel floating qyube juga dilindungi. Panel tidak dapat menjadi key/main window dan mengabaikan input. Bila target tidak tersedia, episode dan audio dihentikan.
+- Snowflake diperbesar, ditambah cabang, dan disebar pada cell yang diacak agar tidak menumpuk di satu sudut. Aturan tetap 6 awal, +4 setiap 10 detik, maksimal24. Muncul dengan pertumbuhan/fade singkat; setelah menetap tidak digambar ulang tanpa perubahan.
+- Monitor fokus sebelumnya meminta URL browser melalui AppleScript pada setiap polling. Sekarang lookup hanya dilakukan bila ada aturan domain yang masih perlu diperiksa; app yang sudah diizinkan/diblokir secara eksplisit tidak memerlukan lookup. Ini mengurangi pekerjaan sinkron pada jalur UI untuk penggunaan app-level yang disepakati. Analytics terpisah tidak diubah.
+
+### Audio
+
+- Kedua MP3 dikemas sebagai `NSDataAsset` (`IceFreezingSound` dan `LightSwitchSound`); file sumber user tetap disimpan.
+- Satu suara es per batch snowflake, bukan per keping atau frame. Klip dimainkan 1,4 detik lalu fade-out 0,2 detik.
+- Satu suara sakelar pada tiap perubahan terang→redup atau redup→terang, mengikuti fase visual. Tidak ada burst suara saat banyak frame terlewat.
+- Volume mengikuti slider sound dengan gain efek0,65. Toggle `Distraction sound effects` tersedia di Settings. Pause, safe app, kehilangan target dan session end menghentikan audio. Reduce Motion memakai veil statis tanpa bunyi sakelar berulang; batch es tetap dapat berbunyi.
+
+### Verifikasi dan batas
+
+- Tes integrasi mencakup akumulasi renderer lewat repeated policy updates, pixel alpha veil, area occlusion yang tetap transparan, input click-through, resource MP3 yang dapat didekode, satu cue per transisi, dan app-level policy yang melewati browser automation.
+- Render native penguin serta contoh 6/10/18/24 snowflake dan bright/mid/dark/bright disimpan di `design/qyube-distraction-v1/native-polish-check/`. Gambar ini berasal dari renderer aplikasi, bukan gambar AI baru.
+- Mode Debug `--companion-snapshots <directory>` dan `--distraction-snapshots <directory>` membuat pemeriksaan ulang tanpa membuat focus session atau catch ledger. Tes fixture tidak menggantikan QA semua aplikasi, Spaces, fullscreen dan dua monitor nyata.
+- Hasil akhir: build Debug arm64 berhasil; 30 tes unik dari `DistractionIntegrationTests`, `DistractionMotionTests`, `CompanionPlaybackTests`, dan `FocusPolicyEvaluatorTests` lulus. Pemeriksaan native menghasilkan `overlayAboveTarget=true`, `clickThrough=true`, count6/10/18/24 dan opacity0/0,175/0,35/0. Warning historis di area lain masih ada.
