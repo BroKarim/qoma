@@ -1,6 +1,6 @@
 # Kiki — Catatan Analisis Produk untuk AI Agent
 
-Tanggal pemeriksaan: 1 Oktober 2026. Versi terpasang: **0.0.89 (0.0.89)**, Early Works. Target: aplikasi macOS `/Applications/Kiki.app`, bundle identifier `com.earlyworks.kiki`.
+Tanggal pemeriksaan: 1 Oktober 2026; observasi tambahan dan screenshot: 3 Oktober 2026. Versi terpasang: **0.0.89 (0.0.89)**, Early Works. Target: aplikasi macOS `/Applications/Kiki.app`, bundle identifier `com.earlyworks.kiki`.
 
 ## 1. Cara membaca dokumen ini
 
@@ -11,11 +11,11 @@ Dokumen ini adalah studi perilaku produk melalui antarmuka, bukan audit source c
 - **INFERRED**: model penjelasan yang masuk akal, bukan implementasi yang telah dibuktikan.
 - **UNVERIFIED**: belum diuji, belum terlihat, atau pengujian terhalang.
 
-Status cakupan: **eksplorasi parsial**. Today, kalender, form sesi, pilihan mode, editor daftar, Settings, serta prompt break/repeat telah diperiksa. Onboarding, izin pertama kali, enforcement saat sesi berjalan, seluruh edge case, dan penyimpanan internal belum terverifikasi. Tidak ada pembongkaran bundle, pembacaan database privat, atau inspeksi trafik jaringan.
+Status cakupan: **eksplorasi parsial**. Today, kalender, form sesi, pilihan mode/durasi, editor daftar, timer aktif, Settings, serta prompt break/repeat telah diperiksa. Onboarding, izin pertama kali, enforcement saat sesi berjalan, seluruh edge case, dan penyimpanan internal belum terverifikasi. Tidak ada pembongkaran bundle, pembacaan database privat, atau inspeksi trafik jaringan. Observasi tambahan 3 Oktober dilakukan pada sesi pengguna yang sudah ada; **tidak ada sesi uji baru yang dimulai**.
 
-Hasil usaha sesi uji: pengguna memberi izin, tetapi sesi baru **belum berhasil dimulai**. Kontrol popup menghasilkan state yang tidak konsisten dengan screenshot dan beberapa elemen kehilangan frame. Pemeriksaan berhenti di form sesi; accessibility tree terakhir memuat draft `Kiki exploration test`, mode Allowing, durasi 25 menit. Tidak ada bukti sesi uji telah tercatat di riwayat. Pengguna diminta membawa Kiki ke foreground untuk pengujian lanjutan. Jangan membaca checklist yang belum tercentang sebagai fitur yang tidak tersedia.
+Pada pemeriksaan 1 Oktober, sesi uji baru **belum berhasil dimulai** karena kontrol popup dan screenshot tidak sinkron. Pada 3 Oktober, form, pilihan mode, dan daftar durasi dapat dilihat lebih jelas. Timer sesi pengguna yang sudah aktif juga terlihat. Ini membuktikan tampilan saat sesi berlangsung, tetapi **belum membuktikan transisi tombol Start → timer** atau perilaku sesi uji yang dibuat pemeriksa. Jangan membaca checklist yang belum tercentang sebagai fitur yang tidak tersedia.
 
-Catatan privasi: nama tugas dan daftar penggunaan pribadi tidak direproduksi di sini. Nilai contoh agregat dipakai hanya untuk menjelaskan UI. Penjelajahan sesi uji telah diizinkan pengguna; hasil pengujiannya harus dibedakan dari data riwayat sebelumnya.
+Catatan privasi: teks dokumen ini tidak mereproduksi nama tugas dan daftar penggunaan pribadi. Screenshot lokal 3 Oktober dapat memperlihatkannya, sehingga jangan mempublikasikan folder screenshot tanpa memeriksanya. Nilai contoh agregat dipakai hanya untuk menjelaskan UI. Penjelajahan sesi uji telah diizinkan pengguna; hasil pengujiannya harus dibedakan dari data riwayat sebelumnya.
 
 ## 2. Penjelasan sederhana
 
@@ -34,7 +34,7 @@ Today
 ├── New → Form sesi
 │   ├── Task to complete
 │   ├── Mode: Allowing / Blocking / Timer Only
-│   ├── Editor aplikasi dan situs
+│   ├── Editor Allow List / Block List (sesuai mode)
 │   ├── Duration
 │   └── Start → sesi aktif [belum terverifikasi penuh]
 └── Menu
@@ -45,6 +45,11 @@ Today
     ├── Give Feedback
     └── Quit
 
+Sesi aktif yang teramati
+├── Jendela timer mengambang → nama tugas, End session, Snooze
+├── Ikon pensil → editor Allow List
+└── Tombol Close → menutup jendela; akibatnya terhadap sesi perlu verifikasi
+
 Prompt pascasesi yang diamati
 Nice work! Break?
 ├── Start break [belum diuji]
@@ -54,6 +59,39 @@ Nice work! Break?
 ```
 
 Tidak semua kotak di atas telah diuji sampai selesai. Label kontrol menunjukkan kemampuan yang ditawarkan, bukan bukti semua efek sampingnya.
+
+## 3A. Alur pengguna dari awal sampai kembali ke Today
+
+### A. Memulai sesi baru — OBSERVED untuk navigasi, UNVERIFIED untuk efek Start [E5, E8]
+
+1. Dari **Today**, tekan **New** di bagian bawah.
+2. Isi atau ganti **Task to complete**. Pada sampel, nama tugas sebelumnya sudah terisi; periksa isinya sebelum memulai.
+3. Pilih **Mode**: **Allowing** (hanya aplikasi/situs terpilih), **Blocking** (memblokir aplikasi/situs terpilih), atau **Timer Only** (timer dan karakter tanpa daftar aturan di form).
+4. Jika memilih Allowing atau Blocking, tekan ikon pensil di deretan aplikasi untuk membuka **Allow List** atau **Block List**. Cari dan atur resource yang dibutuhkan, lalu tekan **Done**. Detail menambah/menghapus item belum diuji.
+5. Pilih **Duration**. Menu yang terlihat pada 3 Oktober memuat Stopwatch serta 1, 5, 10, 15, 20, 25, 30, 45, 50, 60, dan 90 menit. Ini daftar pada versi yang diperiksa, bukan jaminan semua opsi selalu tersedia.
+6. Tekan **Start** untuk memulai menurut label UI. **Transisi setelah tombol itu belum diuji langsung**. Jendela timer yang diamati pada sesi pengguna memperlihatkan hitungan mundur, nama tugas, **End session**, dan **Snooze for 2 minutes**.
+
+### B. Memakai sesi yang pernah dibuat — OBSERVED untuk kontrol, INFERRED untuk hasilnya [E3, E9]
+
+1. Di Today atau kalender, pilih baris sesi lama. Baris tersebut terbuka menjadi kartu detail.
+2. Kartu menampilkan ikon panah melingkar; accessibility tree menamainya **New Session**. Kontrol serupa tersedia pada tiap baris sesi Today.
+3. **Kemungkinan alurnya:** tekan ikon tersebut untuk membuat draft baru dari sesi lama, periksa kembali tugas/mode/daftar/durasi, lalu tekan Start. Efek ikon panah melingkar **belum ditekan dan diverifikasi**; jangan menganggapnya langsung menjalankan timer atau menyalin seluruh aturan.
+4. Tombol **New** biasa juga pernah membuka form dengan nama tugas sebelumnya yang sudah terisi. Ini tidak cukup untuk menyimpulkan bahwa form selalu memakai sesi terakhir atau menyimpan semua pengaturan sesi lama.
+
+### C. Membuka aplikasi utama saat sesi aktif — OBSERVED dan batasnya [E8]
+
+- Saat sesi aktif, jendela yang tertangkap adalah **timer kecil mengambang**, bukan Today. Klik area nama/timer memperlihatkan **End session** dan **Snooze**; ikon pensil membuka editor daftar.
+- Pernah dicoba menutup jendela timer lewat perintah **File → Close Window**. Jendela menghilang, tetapi ketika Kiki dibuka lagi melalui Finder, **timer sesi yang sama muncul kembali**. Jadi menutup jendela pada kejadian ini tidak sama dengan mengakhiri sesi. Ini hanya satu observasi, bukan kontrak perilaku semua kondisi.
+- **Cara membuka Today tanpa mengakhiri sesi belum terverifikasi.** Tidak ditemukan tombol berlabel Home/Today pada jendela timer yang diamati. Jangan memberi instruksi pasti seperti “klik ikon Dock” atau “klik ikon menu bar” sebelum jalurnya dibuktikan.
+- **Saran UI/UX:** aplikasi sebaiknya menyediakan tindakan **Open Today** yang jelas dari timer dan menu bar, sementara **End session** tetap tindakan terpisah. Ini rekomendasi, bukan fitur Kiki yang teramati.
+
+### D. Ikon Dock atau hanya menu bar? — UNVERIFIED
+
+Kiki tampak sebagai aplikasi macOS yang memiliki jendela, menu aplikasi native (**Kiki, File, Edit, View, Window**), dan dapat dibuka dari Finder. Menu aplikasi native di bagian atas layar **bukan bukti adanya ikon status menu bar**. Observasi ini juga **tidak membuktikan** apakah ikonnya tampil di Dock ketika berjalan. Screenshot yang tersimpan hanya menangkap jendela Kiki, bukan keseluruhan Dock/menu bar macOS. Karena itu jawaban faktual untuk “Dock atau menu bar saja?” masih **belum diketahui**. Sebagai keputusan UI/UX untuk aplikasi sejenis, menu bar cocok untuk membuka timer cepat; Dock cocok sebagai jalur yang mudah ditemukan menuju Today dan Settings. Keduanya dapat disediakan, tetapi ini rekomendasi desain, bukan deskripsi Kiki.
+
+### E. Selesai, jeda, dan kembali — OBSERVED sebagian [E1, E3, E8]
+
+Pada timer aktif ada **End session** dan **Snooze for 2 minutes**, tetapi efek kedua tombol belum diuji. Dalam observasi terpisah, setelah sesi lama berakhir muncul **Nice work! Break?**. Jalur **Skip break → Repeat session? → No → Today** sudah terbukti. Cabang **Start break** dan **Yes** belum diuji. Pada 3 Oktober, satu hitungan mundur mencapai nol lalu tampil lagi sekitar 10 menit untuk tugas yang sama; penyebabnya tidak diketahui, sehingga jangan menyimpulkan Kiki selalu mengulang sesi otomatis.
 
 ## 4. Today dan riwayat
 
@@ -86,12 +124,12 @@ Urutan konten:
 2. **Task to complete**: input teks dengan placeholder yang meminta aktivitas fokus.
 3. **Mode**: pemilih kebijakan.
 4. Ikon aplikasi/situs dan tombol edit pada mode Allowing.
-5. **Duration**: pemilih durasi; nilai yang terlihat 25 minutes.
+5. **Duration**: pemilih durasi; 25 menit terlihat pada 1 Oktober dan 30 menit pada form 3 Oktober.
 6. **Start**: tombol utama.
 
-Form awal terisi nama tugas sebelumnya pada sampel. Itu menunjukkan adanya pengisian ulang nilai, tetapi belum membuktikan persistensi lintas restart atau bahwa semua pengguna mendapat nilai tersebut. Demikian pula 25 menit adalah nilai yang diamati, **bukan minimum/maksimum atau default global yang sudah dipastikan**.
+Form awal terisi nama tugas sebelumnya pada sampel. Itu menunjukkan adanya pengisian ulang nilai, tetapi belum membuktikan persistensi lintas restart atau bahwa semua pengguna mendapat nilai tersebut. Nilai 25 dan 30 menit adalah nilai yang diamati pada kesempatan berbeda, **bukan default global yang sudah dipastikan**. Daftar opsi durasi yang terlihat dicatat pada alur 3A.
 
-Untuk pengujian, input diubah menjadi `Kiki exploration test`. Validasi input kosong, batas panjang, daftar lengkap durasi, serta kemampuan edit saat sesi berjalan belum terverifikasi.
+Untuk pengujian 1 Oktober, input diubah menjadi `Kiki exploration test`. Validasi input kosong, batas panjang, dan kemampuan edit nama tugas saat sesi berjalan belum terverifikasi.
 
 ### Tiga mode — OBSERVED [E5]
 
@@ -113,13 +151,15 @@ Jangan menganggap model konseptual ini sudah menangani browser, aplikasi sistem,
 - Editor dapat dibuka dari ikon pensil pada prompt pascasesi.
 - Editor ditutup tanpa mengubah pilihan daftar.
 
-**Ketidaksesuaian aksesibilitas:** screenshot menunjukkan Allow List, tetapi accessibility text menyebut Block List dan pertanyaan tentang yang diblokir. Ini bukti label tidak sinkron pada kondisi yang diperiksa, bukan bukti bahwa aturan aktif benar-benar terbalik.
+**Ketidaksesuaian pada 1 Oktober:** screenshot menunjukkan Allow List, tetapi accessibility text menyebut Block List dan pertanyaan tentang yang diblokir. Pada 3 Oktober, editor **Allow List** dan **Block List** terlihat terpisah dan masing-masing label aksesibilitas cocok dengan screenshot. Penyebab ketidaksesuaian awal tidak diketahui; itu bukan bukti bahwa aturan aktif pernah terbalik.
 
-Belum diuji: hasil pencarian, tambah/hapus item, website kustom, wildcard/subdomain, satu layanan yang punya aplikasi dan website, prioritas izin browser versus domain, serta kapan perubahan tersimpan.
+Pada 3 Oktober, mengetik nama aplikasi di kolom pencarian menampilkan saran yang sesuai. Belum diuji: tambah/hapus item, website kustom, wildcard/subdomain, satu layanan yang punya aplikasi dan website, prioritas izin browser versus domain, serta kapan perubahan tersimpan.
 
 ## 6. Sesi aktif dan pascasesi
 
-### Sesi aktif — OFFICIAL / UNVERIFIED
+### Sesi aktif — OBSERVED untuk tampilan, OFFICIAL / UNVERIFIED untuk enforcement [E8]
+
+Jendela timer kecil teramati pada sesi pengguna yang sudah berjalan. Tampilan hitungan mundur dapat dibuka menjadi nama tugas serta kontrol **End session** dan **Snooze for 2 minutes**. Ikon pensil membuka editor Allow List. Pemeriksa tidak memulai sesi itu, tidak menekan End/Snooze, dan tidak menguji pemblokiran pada aplikasi atau situs lain.
 
 Sumber resmi menggambarkan karakter yang menemani bekerja dan bereaksi saat pengguna membuka aktivitas yang tidak diperlukan. Presentasi tersebut mencakup efek dramatis seperti api. Itu adalah deskripsi produk, bukan bukti mekanisme blocking tingkat OS atau pengukuran latensi. [S2]
 
@@ -143,10 +183,10 @@ Transisi tersebut sudah dibuktikan. Namun, karena timer sebelumnya tidak dijalan
 | Show Kiki While Focused | Menampilkan karakter juga ketika fokus, bukan hanya saat distraksi | Aktif |
 | Keep Timer On Top | Menjaga jendela timer di atas jendela lain | Aktif |
 | Daily Focus Goal | Target fokus harian dengan input jam dan menit | 2 jam, 0 menit |
-| Check for Updates | Tindakan pemeriksaan update | Tidak dijalankan |
+| Check for Updates | Tindakan pemeriksaan update | Ditekan pada 3 Oktober; tidak ada perubahan tampilan yang teramati |
 | Reset Application | Tindakan reset | Tidak dijalankan; berpotensi destruktif |
 
-Versi 0.0.89 ditampilkan di bagian bawah. Menu utama juga menyediakan pengelolaan langganan, sign out, bantuan, feedback, dan quit. Tujuan akhir dan efek tombol-tombol tersebut tidak diuji. Tidak ada perubahan nilai Settings, reset aplikasi, logout, pembelian, atau pemberian permission.
+Versi 0.0.89 ditampilkan di bagian bawah. Menu utama juga menyediakan pengelolaan langganan, sign out, bantuan, feedback, dan quit. Pada 3 Oktober, **Manage Subscription** membuka portal tagihan Stripe di browser; screenshot portal tidak disimpan karena menampilkan data tagihan pribadi. Help dan Give Feedback tidak membuka halaman baru di jendela Kiki yang teramati. Tidak ada perubahan nilai Settings, reset aplikasi, logout, pembelian, atau pemberian permission.
 
 ## 8. Bahasa visual dan karakter
 
@@ -242,7 +282,8 @@ Selesaikan pengujian dengan sesi berlabel jelas; jangan mencampur hasil uji deng
 - [x] Form task, mode, duration, Start.
 - [x] Deskripsi tiga mode.
 - [x] Editor daftar dan kategori App/App & Website.
-- [ ] Daftar durasi lengkap dan validasi input.
+- [x] Opsi durasi yang terlihat pada versi 0.0.89.
+- [ ] Validasi input kosong, batas panjang, dan perubahan opsi antar akun/kondisi.
 - [ ] Start sesi Timer Only sampai selesai normal.
 - [ ] Pause/resume/stop bila tersedia, termasuk konfirmasi.
 - [ ] Uji Allowing dan Blocking dengan resource uji yang tidak sensitif.
@@ -268,9 +309,11 @@ Selesaikan pengujian dengan sesi berlabel jelas; jangan mencampur hasil uji deng
 | E4 | Kalender bulanan, hari/jumlah sesi, durasi | Belum uji seluruh periode |
 | E5 | Form tugas, 25 minutes, tiga mode dan deskripsi | Sesi aktif belum terverifikasi penuh |
 | E6 | Settings dan nilai yang sedang aktif | Tidak menyimpulkan nilai default |
-| E7 | Menu Settings/billing/logout/help/feedback/quit | Hanya Settings yang dibuka |
+| E7 | Menu Settings/billing/logout/help/feedback/quit | Settings dan portal billing dibuka; tindakan akun tidak dijalankan |
+| E8 | Screenshot 3 Oktober: [timer](kiki-screenshots/session-timer.png), [kontrol sesi](kiki-screenshots/session-controls.png), [form](kiki-screenshots/new-session.png), [mode](kiki-screenshots/session-modes.png), [durasi](kiki-screenshots/session-duration-options.png) | Sesi aktif bukan sesi uji baru; Start/End/Snooze tidak diuji |
+| E9 | Screenshot 3 Oktober: [Today](kiki-screenshots/today.png), [detail sesi](kiki-screenshots/session-detail.png), [kalender](kiki-screenshots/calendar-today.png), [Allow List](kiki-screenshots/allow-list.png), [Block List](kiki-screenshots/block-list.png), [Settings](kiki-screenshots/settings.png) | Ikon New Session pada kartu tidak ditekan; efek pengulangan belum terbukti |
 
-Bukti diperoleh dari screenshot dan accessibility tree dalam percakapan ini. Screenshot pengguna tidak disalin menjadi asset dokumentasi. URL renderer yang terlihat pada accessibility tree mengarah ke halaman lokal dalam `app.asar` (`today.html`, `allowed-apps.html`, `settings.html`). Itu mengindikasikan UI berbasis web/kemasan yang konsisten dengan Electron, tetapi tidak membuktikan framework frontend, arsitektur internal, atau database tertentu.
+Bukti diperoleh dari screenshot dan accessibility tree dalam percakapan ini. Screenshot observasi 3 Oktober tersimpan di [`kiki-screenshots/`](kiki-screenshots/README.md); tidak ada screenshot layar penuh Dock/menu bar atau portal tagihan. URL renderer yang terlihat pada accessibility tree mengarah ke halaman lokal dalam `app.asar` (`today.html`, `allowed-apps.html`, `settings.html`). Itu mengindikasikan UI berbasis web/kemasan yang konsisten dengan Electron, tetapi tidak membuktikan framework frontend, arsitektur internal, atau database tertentu.
 
 ### Sumber resmi
 
