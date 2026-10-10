@@ -4,8 +4,9 @@ import SwiftUI
 
 /// Owns the qyube runtime: home window, session coordinator, timer panel, companion panel, overlay, and menu bar status.
 @MainActor
-final class QyubeAppCoordinator {
+final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
     let sessionCoordinator: SessionCoordinator
+    private let focusPreferences = FocusPreferences.shared
     private let timerController = FloatingTimerController()
     private let companionController = CompanionWindowController()
     private let overlayController = DistractionOverlayController()
@@ -14,16 +15,27 @@ final class QyubeAppCoordinator {
     private var cancellables = Set<AnyCancellable>()
     private let navigation = QyubeNavigation()
     private var visibleSessionID: UUID?
+    private var mainWindowIsVisible = false
+    private var trackedSessionID: UUID?
 
     init(sessionCoordinator: SessionCoordinator? = nil) {
         self.sessionCoordinator = sessionCoordinator ?? SessionCoordinator()
         LegacySessionMigrator.migrateIfNeeded()
         self.distractionCoordinator = DistractionCoordinator(monitor: ForegroundActivityMonitor())
         self.menuBarController = MenuBarController()
+        super.init()
 
-        self.menuBarController.configure { [weak self] in
-            self?.handleStatusClick()
-        }
+        menuBarController.configure(
+            coordinator: self.sessionCoordinator,
+            onStart: { [weak self] minutes in await self?.startFromMenuBar(minutes: minutes) ?? false },
+            onOpen: { [weak self] in self?.navigation.page = .analytics; self?.showHomeWindow() },
+            onSettings: { [weak self] in self?.navigation.page = .settings; self?.showHomeWindow() },
+            onShowTimer: { [weak self] in self?.restoreTimerPanel() },
+            onViewCatches: { [weak self] session in
+                self?.navigation.showCatches(for: session)
+                self?.showHomeWindow()
+            }
+        )
 
         configurePanels()
         bindSessionCoordinator()
@@ -38,49 +50,65 @@ final class QyubeAppCoordinator {
 
     func showHomeWindow() {
         if let existing = homeWindowController?.window {
+            if !mainWindowIsVisible {
+                mainWindowIsVisible = true
+                AppActivationPolicy.enter()
+            }
+            existing.deminiaturize(nil)
             existing.makeKeyAndOrderFront(nil)
-            NSApp.activate(ignoringOtherApps: true)
             return
         }
 
-        let contentView = QyubeHomeView(
-            sessionCoordinator: sessionCoordinator, navigation: navigation,
-            onClose: { [weak self] in self?.homeWindowController?.window?.orderOut(nil) },
-            onShowTimer: { [weak self] in self?.restoreTimerPanel() },
-            onStarted: { [weak self] in self?.homeWindowController?.window?.orderOut(nil) }
-        )
+        let contentView = QyubeHomeView(navigation: navigation)
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 360, height: 610),
-            styleMask: [.titled, .closable, .miniaturizable, .fullSizeContentView],
+            contentRect: NSRect(x: 0, y: 0, width: 860, height: 580),
+            styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
             backing: .buffered,
             defer: false
         )
         window.title = "qyube"
         window.appearance = NSAppearance(named: .aqua)
-        window.titleVisibility = .hidden
-        window.titlebarAppearsTransparent = true
-        window.standardWindowButton(.closeButton)?.isHidden = true
-        window.standardWindowButton(.miniaturizeButton)?.isHidden = true
-        window.standardWindowButton(.zoomButton)?.isHidden = true
+        window.titleVisibility = .visible
         window.isReleasedWhenClosed = false
-        window.isOpaque = false
-        window.backgroundColor = .clear
+        window.minSize = NSSize(width: 700, height: 520)
+        window.delegate = self
         window.center()
-        window.contentView = NSHostingView(rootView: contentView.ignoresSafeArea())
+        window.contentView = NSHostingView(rootView: contentView)
+        mainWindowIsVisible = true
+        AppActivationPolicy.enter()
         window.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
         self.homeWindowController = NSWindowController(window: window)
+    }
+
+    func windowWillClose(_ notification: Notification) {
+        guard mainWindowIsVisible else { return }
+        mainWindowIsVisible = false
+        AppActivationPolicy.leave()
     }
 
     func restoreTimerPanel() {
         guard let snapshot = sessionCoordinator.snapshot else { return }
         guard !timerController.isVisible else { return }
-        timerController.show(remainingTime: sessionCoordinator.remainingTime, taskTitle: snapshot.draft.displayTitle, isPaused: snapshot.status == .paused)
+        timerController.show(
+            remainingTime: sessionCoordinator.remainingTime,
+            taskTitle: snapshot.draft.displayTitle,
+            isPaused: snapshot.status == .paused
+        )
     }
 
     // MARK: - Private
 
     private var homeWindowController: NSWindowController?
+
+    private func startFromMenuBar(minutes: Int) async -> Bool {
+        guard sessionCoordinator.snapshot == nil else { return false }
+        let draft = focusPreferences.draft(minutes: minutes)
+        let permission = await PermissionManager.shared.requestPermissionIfNeeded(
+            for: draft.policy, browserBundleID: draft.domainBrowserBundleID
+        )
+        guard permission == .granted else { return false }
+        return sessionCoordinator.startSession(draft: draft) != nil
+    }
 
     private func configurePanels() {
         overlayController.onVisualStateChanged = { [weak self] visual in
@@ -91,8 +119,7 @@ final class QyubeAppCoordinator {
             onClose: { [weak self] in self?.timerController.hide() },
             onPause: { [weak self] in self?.sessionCoordinator.pauseSession() },
             onResume: { [weak self] in self?.sessionCoordinator.resumeSession() },
-            onStop: { [weak self] in self?.sessionCoordinator.stopSession() },
-            onTaskChange: { [weak self] title in self?.sessionCoordinator.updateTask(title: title) }
+            onStop: { [weak self] in _ = self?.sessionCoordinator.stopSession() }
         ))
 
         companionController.configure(onTap: { [weak self] in
@@ -125,6 +152,18 @@ final class QyubeAppCoordinator {
                 self?.updateStatusItem()
             }
             .store(in: &cancellables)
+
+        focusPreferences.$hideFloatingTimer
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] hidden in
+                if hidden {
+                    self?.timerController.hide()
+                } else {
+                    self?.restoreTimerPanel()
+                }
+            }
+            .store(in: &cancellables)
     }
 
     private func bindDistractionCoordinator() {
@@ -145,13 +184,25 @@ final class QyubeAppCoordinator {
     private func handleSnapshotChange(_ snapshot: ActiveSessionSnapshot?) {
         if let snapshot {
             if snapshot.status == .active || snapshot.status == .paused {
+                updateAnalyticsTracking(for: snapshot)
                 companionController.show(sessionID: snapshot.id, paused: snapshot.status == .paused)
-                if visibleSessionID != snapshot.id {
+                if focusPreferences.hideFloatingTimer {
+                    timerController.hide()
+                } else if visibleSessionID != snapshot.id {
                     visibleSessionID = snapshot.id
-                    timerController.show(remainingTime: sessionCoordinator.remainingTime, taskTitle: snapshot.draft.displayTitle, isPaused: snapshot.status == .paused)
+                    timerController.show(
+                        remainingTime: sessionCoordinator.remainingTime,
+                        taskTitle: snapshot.draft.displayTitle,
+                        isPaused: snapshot.status == .paused
+                    )
                 } else {
-                    timerController.update(remainingTime: sessionCoordinator.remainingTime, taskTitle: snapshot.draft.displayTitle, isPaused: snapshot.status == .paused)
+                    timerController.update(
+                        remainingTime: sessionCoordinator.remainingTime,
+                        taskTitle: snapshot.draft.displayTitle,
+                        isPaused: snapshot.status == .paused
+                    )
                 }
+                visibleSessionID = snapshot.id
                 if snapshot.status == .active, snapshot.draft.policy.mode != .timerOnly {
                     distractionCoordinator.start(
                         policy: snapshot.draft.policy,
@@ -162,6 +213,7 @@ final class QyubeAppCoordinator {
                     overlayController.hide()
                 }
             } else {
+                finishAnalyticsTracking()
                 visibleSessionID = nil
                 timerController.hide()
                 companionController.hide()
@@ -169,6 +221,7 @@ final class QyubeAppCoordinator {
                 overlayController.hide()
             }
         } else {
+            finishAnalyticsTracking()
             visibleSessionID = nil
             timerController.hide()
             companionController.hide()
@@ -180,7 +233,11 @@ final class QyubeAppCoordinator {
 
     private func updateTimerPanel() {
         guard sessionCoordinator.snapshot != nil else { return }
-        timerController.update(remainingTime: sessionCoordinator.remainingTime, taskTitle: sessionCoordinator.currentTaskTitle, isPaused: sessionCoordinator.isPaused)
+        timerController.update(
+            remainingTime: sessionCoordinator.remainingTime,
+            taskTitle: sessionCoordinator.currentTaskTitle,
+            isPaused: sessionCoordinator.isPaused
+        )
     }
 
     private func updateStatusItem() {
@@ -193,17 +250,46 @@ final class QyubeAppCoordinator {
         menuBarController.updateTitle(title)
     }
 
-    private func handleStatusClick() {
-        if sessionCoordinator.snapshot != nil {
-            restoreTimerPanel()
-        } else {
-            showHomeWindow()
+    private func onSessionEnded(_ session: FocusSession) {
+        finishAnalyticsTracking()
+        navigation.refresh()
+        guard session.status == .completed else { return }
+        let count = navigation.catches.filter { $0.sessionID == session.id }.count
+        menuBarController.showCompletion(session, catchCount: count)
+    }
+
+    private func updateAnalyticsTracking(for snapshot: ActiveSessionSnapshot) {
+        guard AppConstants.AnalyticsSettings.isAnalyticsEnabled else {
+            finishAnalyticsTracking()
+            return
+        }
+        let tracker = ActivityTracker.shared
+        if trackedSessionID != snapshot.id {
+            finishAnalyticsTracking()
+            trackedSessionID = snapshot.id
+            if snapshot.status == .active {
+                tracker.startTracking(
+                    sessionID: snapshot.id,
+                    trackWebsites: PermissionManager.shared.automationStatus == .granted
+                )
+            }
+        }
+        if snapshot.status == .paused, tracker.isTracking {
+            tracker.pauseTracking()
+        } else if snapshot.status == .active, !tracker.isTracking {
+            tracker.resumeTracking(
+                sessionID: snapshot.id,
+                trackWebsites: PermissionManager.shared.automationStatus == .granted
+            )
         }
     }
 
-    private func onSessionEnded(_ session: FocusSession) {
-        navigation.showReport(session)
-        showHomeWindow()
+    private func finishAnalyticsTracking() {
+        guard trackedSessionID != nil else { return }
+        trackedSessionID = nil
+        let (appEvents, webVisits) = ActivityTracker.shared.stopTracking()
+        if !appEvents.isEmpty { AnalyticsStore.shared.appendAppActivityEvents(appEvents) }
+        if !webVisits.isEmpty { AnalyticsStore.shared.appendWebsiteVisits(webVisits) }
     }
 
     private func formatTime(_ time: TimeInterval) -> String {

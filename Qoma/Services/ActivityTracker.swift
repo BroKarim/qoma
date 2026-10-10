@@ -22,6 +22,7 @@ final class ActivityTracker: NSObject, ObservableObject {
     private var websitePollGeneration = 0
     private var websiteGraceTimer: Timer?
     private var websiteIconFetchesInFlight: Set<String> = []
+    private var tracksWebsites = true
 
     init(browserResolver: BrowserActivityResolver = .shared, iconCache: IconCacheActor = .init()) {
         self.browserResolver = browserResolver
@@ -29,8 +30,9 @@ final class ActivityTracker: NSObject, ObservableObject {
         super.init()
     }
 
-    func startTracking(sessionID: UUID) {
+    func startTracking(sessionID: UUID, trackWebsites: Bool = true) {
         isTracking = true
+        tracksWebsites = trackWebsites
         currentSessionID = sessionID
         pendingEvents = []
         pendingWebsiteVisits = []
@@ -52,8 +54,9 @@ final class ActivityTracker: NSObject, ObservableObject {
         Logger.tracking.info("Paused tracking")
     }
 
-    func resumeTracking(sessionID: UUID) {
+    func resumeTracking(sessionID: UUID, trackWebsites: Bool? = nil) {
         isTracking = true
+        if let trackWebsites { tracksWebsites = trackWebsites }
         currentSessionID = sessionID
         lastActivityTime = Date()
 
@@ -234,6 +237,7 @@ final class ActivityTracker: NSObject, ObservableObject {
     // MARK: - Website Session (Generation Tracking + Grace Period)
 
     private func scheduleWebsitePoll(bundleId: String, appName: String) {
+        guard tracksWebsites else { return }
         guard browserResolver.isBrowserSupported(bundleId) else {
             Logger.browser.debug("Unsupported browser: \(appName, privacy: .public) (\(bundleId, privacy: .public))")
             return

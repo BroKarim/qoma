@@ -73,6 +73,7 @@ struct CompanionPlaybackTests {
         var model = self.fishing()
         model.biteNow()
         model.advance(by: 2.71)
+        model.recordCatch(kindID: "anchovy")
         model.stop(activeSeconds: 300)
         #expect(model.releasedCatches == 0)
         #expect(model.depositedCatches == 1)
@@ -142,6 +143,8 @@ struct CompanionPlaybackTests {
         #expect(catchNode.position.x == 113)
         #expect(scene.playback.depositedCatches == 0)
         scene.advanceAnimation(by: 0.5)
+        #expect(scene.playback.depositedCatches == 0)
+        scene.recordCatch(kindID: "anchovy")
         #expect(scene.playback.depositedCatches == 1)
         #expect(scene.playback.phase == .casting)
     }

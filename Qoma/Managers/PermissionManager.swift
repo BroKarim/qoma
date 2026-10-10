@@ -35,8 +35,7 @@ final class PermissionManager: ObservableObject {
         browserBundleID: String
     ) async -> MonitoringPermissionStatus {
         if permissionRequirement(for: policy, browserBundleID: browserBundleID) == .available {
-            automationStatus = .granted
-            return automationStatus
+            return .granted
         }
         guard permissionRequirement(for: policy, browserBundleID: browserBundleID) == .needsPermission else {
             automationStatus = .restricted

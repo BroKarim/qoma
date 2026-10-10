@@ -39,39 +39,35 @@ struct AnalyticsHeatmapView: View {
                         .font(.qomaSubheadline)
                         .foregroundColor(.secondary)
                 } else {
-                    // Pakai GeometryReader hanya untuk month axis positioning
-                    VStack(alignment: .leading, spacing: 6) {
-                        // Grid heatmap — HStack spacing = cellSpacing (bukan columnWidth)
-                        HStack(alignment: .top, spacing: self.cellSpacing) {
-                            ForEach(Array(self.weekColumns.enumerated()), id: \.offset) { _, week in
-                                VStack(spacing: self.cellSpacing) {
-                                    ForEach(week, id: \.id) { cell in
-                                        self.heatmapCell(cell)
+                    ScrollView(.horizontal) {
+                        VStack(alignment: .leading, spacing: 6) {
+                            HStack(alignment: .top, spacing: self.cellSpacing) {
+                                ForEach(Array(self.weekColumns.enumerated()), id: \.offset) { _, week in
+                                    VStack(spacing: self.cellSpacing) {
+                                        ForEach(week, id: \.id) { cell in
+                                            self.heatmapCell(cell)
+                                        }
                                     }
+                                    .frame(width: self.cellSize)
                                 }
-                                .frame(width: self.cellSize)
                             }
-                        }
 
-                        // Month axis — pakai HStack spacing yang SAMA
-                        HStack(alignment: .center, spacing: self.cellSpacing) {
-                            ForEach(Array(self.weekColumns.enumerated()), id: \.offset) { index, week in
-                                // Lebar label = cellSize kolom itu + sisa sampai label berikutnya
-                                // Tapi cukup beri minWidth = 0, maxWidth = .infinity agar tidak terpotong
-                                // dan sembunyikan jika nil
-                                if let label = self.monthLabel(for: week, index: index) {
-                                    Text(label)
-                                        .font(.qoma(size: 10, weight: .medium))
-                                        .foregroundColor(.primary.opacity(0.78))
-                                        .fixedSize()  // <-- KUNCI: tidak terpotong
-                                        .frame(width: self.cellSize, alignment: .leading)
-                                } else {
-                                    Color.clear
-                                        .frame(width: self.cellSize)
+                            HStack(alignment: .center, spacing: self.cellSpacing) {
+                                ForEach(Array(self.weekColumns.enumerated()), id: \.offset) { index, week in
+                                    if let label = self.monthLabel(for: week, index: index) {
+                                        Text(label)
+                                            .font(.qoma(size: 10, weight: .medium))
+                                            .foregroundColor(.primary.opacity(0.78))
+                                            .fixedSize()
+                                            .frame(width: self.cellSize, alignment: .leading)
+                                    } else {
+                                        Color.clear.frame(width: self.cellSize)
+                                    }
                                 }
                             }
                         }
                     }
+                    .scrollIndicators(.hidden)
                 }
             }
         }

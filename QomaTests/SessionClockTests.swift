@@ -61,4 +61,16 @@ struct SessionClockTests {
         let clock = SessionClock(plannedMinutes: 1, startTime: start) { start.addingTimeInterval(300) }
         #expect(clock.activeSeconds == 60)
     }
+
+    @Test
+    func restartedSegmentKeepsPreviousActiveTimeAndCapsWakeOvershoot() {
+        let start = Date()
+        let clock = SessionClock(
+            plannedMinutes: 1,
+            startTime: start.addingTimeInterval(20),
+            accumulatedActiveSeconds: 20,
+            deadline: start.addingTimeInterval(80)
+        ) { start.addingTimeInterval(200) }
+        #expect(clock.activeSeconds == 80)
+    }
 }

@@ -139,6 +139,7 @@ final class SessionCoordinator: ObservableObject {
 
     func pauseSession() {
         guard var snap = snapshot, snap.status == .active else { return }
+        if clock?.isDue == true { _ = completeIfDue(); return }
         clock?.pause()
         snap.status = .paused
         snap.pausedAt = now()
@@ -173,10 +174,37 @@ final class SessionCoordinator: ObservableObject {
         Logger.session.info("Resumed session \(snap.id, privacy: .public)")
     }
 
+    @discardableResult
+    func restartSession() -> Bool {
+        guard var snap = snapshot, let clock,
+              snap.status == .active || snap.status == .paused,
+              !clock.isDue else { return false }
+        let replacement = SessionClock(
+            plannedMinutes: snap.draft.plannedMinutes,
+            startTime: now(),
+            accumulatedActiveSeconds: clock.activeSeconds,
+            now: now
+        )
+        snap.status = .active
+        snap.pausedAt = nil
+        snap.accumulatedActiveSeconds = replacement.accumulatedActiveSeconds
+        snap.activeSegmentStartedAt = replacement.startTime
+        snap.deadline = replacement.deadline
+        guard sessionRepository.saveActive(snap) else { return false }
+        self.clock = replacement
+        snapshot = snap
+        stopCatchTimer(discardInFlight: true)
+        startTicking()
+        startCatchTimer(afterResume: false)
+        bankIfThresholdReached()
+        return true
+    }
+
     /// Stop the session early. Records `interrupted` and discards provisional catches
     /// when active time is below five minutes.
     func stopSession(reason: String? = nil) -> FocusSession? {
         guard var snap = snapshot else { return nil }
+        if clock?.isDue == true { return completeIfDue() }
 
         let activeSeconds = clock?.activeSeconds ?? snap.accumulatedActiveSeconds
         let endedAt = now()
@@ -272,51 +300,10 @@ final class SessionCoordinator: ObservableObject {
         return session
     }
 
-    func updateTask(title: String) {
-        guard var snap = snapshot else { return }
-        snap.draft.taskTitle = title
-        guard sessionRepository.saveActive(snap) else {
-            Logger.session.error("Could not persist task title update")
-            return
-        }
-        snapshot = snap
-        Logger.session.info("Updated task title")
-    }
-
-    func updatePolicy(_ policy: SessionPolicy) {
-        guard var snap = snapshot else { return }
-        snap.draft.policy = policy
-        guard sessionRepository.saveActive(snap) else {
-            Logger.session.error("Could not persist policy update")
-            return
-        }
-        snapshot = snap
-        Logger.session.info("Updated session policy")
-    }
-
-    /// Temporarily allow a resource for the current session only.
-    func allowForCurrentSession(_ resource: FocusResource) {
-        guard var snap = snapshot else { return }
-        switch resource {
-        case .app(let bundleID):
-            if snap.draft.policy.mode == .allowing {
-                snap.draft.policy.allowedApps.insert(bundleID)
-            } else if snap.draft.policy.mode == .blocking {
-                snap.draft.policy.blockedApps.remove(bundleID)
-            }
-        case .domain(let host):
-            let normalized = FocusPolicyEvaluator.normalizeDomain(host)
-            if snap.draft.policy.mode == .allowing {
-                snap.draft.policy.allowedDomains.insert(normalized)
-            } else if snap.draft.policy.mode == .blocking {
-                snap.draft.policy.blockedDomains.remove(normalized)
-            }
-        }
-        guard sessionRepository.saveActive(snap) else {
-            Logger.session.error("Could not persist session-only rule")
-            return
-        }
-        snapshot = snap
+    func retryFinalization() {
+        guard let snap = snapshot,
+              snap.status == .completed || snap.status == .interrupted else { return }
+        recoverFinalizedSnapshot(snap)
     }
 
     // MARK: - Policy / distraction
@@ -513,7 +500,7 @@ final class SessionCoordinator: ObservableObject {
             startedAt: snap.startedAt,
             endedAt: endedAt,
             plannedMinutes: snap.draft.plannedMinutes,
-            actualActiveSeconds: min(snap.accumulatedActiveSeconds, TimeInterval(snap.draft.plannedMinutes) * 60),
+            actualActiveSeconds: snap.accumulatedActiveSeconds,
             status: status,
             draftSnapshot: snap.draft,
             taskTitle: snap.draft.displayTitle,

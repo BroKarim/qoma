@@ -6,7 +6,15 @@ struct InsightView: View {
   @State private var period = Period.day
   @State private var anchor = Date()
   @State private var expanded = false
+  @State private var selectedResultSessionID: UUID?
   @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+  init(history: [FocusSession] = [], catches: [CatchEvent] = [], initialSession: FocusSession? = nil) {
+    self.history = history
+    self.catches = catches
+    _anchor = State(initialValue: initialSession?.startedAt ?? Date())
+    _selectedResultSessionID = State(initialValue: initialSession?.id)
+  }
 
   enum Period: String, CaseIterable {
     case day = "Day"
@@ -31,6 +39,7 @@ struct InsightView: View {
   }
   private var periodCatches: [CatchEvent] {
     catches.filter { $0.depositedAt >= interval.start && $0.depositedAt < interval.end }
+      .filter { selectedResultSessionID == nil || $0.sessionID == selectedResultSessionID }
       .sorted { $0.depositedAt > $1.depositedAt }
   }
   private var totalSeconds: TimeInterval { sessions.reduce(0) { $0 + $1.actualActiveSeconds } }
@@ -80,14 +89,13 @@ struct InsightView: View {
           Divider()
           metrics
           focusDistribution
-          taskDistribution
           if !sessions.isEmpty { sessionList }
           if !grouped.isEmpty { catchSummary }
         }.padding(.horizontal, 22).padding(.vertical, 8)
       }
     }
-    .onChange(of: period) { expanded = false }
-    .onChange(of: anchor) { expanded = false }
+    .onChange(of: period) { expanded = false; selectedResultSessionID = nil }
+    .onChange(of: anchor) { expanded = false; selectedResultSessionID = nil }
   }
 
   private var catchesSection: some View {
@@ -181,45 +189,24 @@ struct InsightView: View {
       CompactFocusChart(sessions: sessions, interval: interval, period: period)
     }
   }
-  private var taskDistribution: some View {
-    let tasks = Dictionary(
-      grouping: sessions, by: { $0.taskTitle.isEmpty ? "Focus session" : $0.taskTitle }
-    )
-    .map { (title: $0.key, seconds: $0.value.reduce(0) { $0 + $1.actualActiveSeconds }) }
-    .sorted { $0.seconds > $1.seconds }
-    return VStack(alignment: .leading, spacing: 12) {
-      Text("Task distribution").font(.system(size: 14, weight: .semibold))
-      if tasks.isEmpty {
-        Text("Your focus time will appear here.").font(.caption).foregroundStyle(.secondary)
-      }
-      ForEach(tasks, id: \.title) { task in
-        VStack(spacing: 6) {
-          HStack {
-            Text(task.title).lineLimit(2)
-            Spacer()
-            Text(QyubeFormat.duration(task.seconds)).foregroundStyle(.secondary)
-          }.font(.system(size: 11))
-          GeometryReader { geometry in
-            Capsule().fill(Color.qyubeSelection)
-            Capsule().fill(Color.qyubeInk).frame(
-              width: geometry.size.width * task.seconds / max(1, totalSeconds))
-          }.frame(height: 3)
-        }
-      }
-    }
-  }
   private var sessionList: some View {
     VStack(alignment: .leading, spacing: 12) {
       Text("Sessions").font(.system(size: 14, weight: .semibold))
       ForEach(sessions) { session in
         HStack(alignment: .top) {
           Image(systemName: session.status == .completed ? "checkmark" : "circle")
-          Text(session.taskTitle.isEmpty ? "Focus session" : session.taskTitle).lineLimit(2)
+          VStack(alignment: .leading, spacing: 3) {
+            Text(session.taskTitle.isEmpty ? "Focus session" : session.taskTitle).lineLimit(2)
+            Text("\(session.startedAt.formatted(date: .omitted, time: .shortened))"
+              + " · \(session.status.rawValue.capitalized)")
+              .foregroundStyle(.secondary)
+          }
           Spacer()
           Text(QyubeFormat.duration(session.actualActiveSeconds)).foregroundStyle(.secondary)
         }.font(.system(size: 11)).accessibilityElement(children: .combine)
           .accessibilityLabel(
-            "\(session.taskTitle), \(session.status.rawValue), \(QyubeFormat.duration(session.actualActiveSeconds))"
+            "\(session.taskTitle.isEmpty ? "Focus session" : session.taskTitle), "
+              + "\(session.status.rawValue), \(QyubeFormat.duration(session.actualActiveSeconds))"
           )
       }
     }

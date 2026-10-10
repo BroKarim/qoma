@@ -36,12 +36,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         #endif
 
-        NSApp.setActivationPolicy(.regular)
+        NSApp.setActivationPolicy(.accessory)
         updaterManager.start()
 
         // qyube runtime
         coordinator = QyubeAppCoordinator()
-        coordinator?.showHomeWindow()
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {

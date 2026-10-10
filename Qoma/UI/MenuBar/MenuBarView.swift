@@ -1,237 +1,163 @@
 import SwiftUI
 
 struct MenuBarView: View {
-    @ObservedObject private var session = FocusSessionManager.shared
-    @State private var minutes: Int = 25
+    @ObservedObject var coordinator: SessionCoordinator
+    @ObservedObject var panelState: MenuBarPanelState
+    let onStart: (Int) async -> Bool
+    let onOpen: () -> Void
+    let onSettings: () -> Void
+    let onShowTimer: () -> Void
+    let onViewCatches: (FocusSession) -> Void
 
-    @AppStorage(AppConstants.QuickPresets.preset1Key)
-    private var quickPreset1: Int = AppConstants.QuickPresets.defaultValues[0]
-    @AppStorage(AppConstants.QuickPresets.preset2Key)
-    private var quickPreset2: Int = AppConstants.QuickPresets.defaultValues[1]
-    @AppStorage(AppConstants.QuickPresets.preset3Key)
-    private var quickPreset3: Int = AppConstants.QuickPresets.defaultValues[2]
     @AppStorage(AppConstants.MenuBarSettings.selectedPresetMinutesKey)
-    private var selectedPresetMinutes: Int = AppConstants.MenuBarSettings.defaultPresetMinutes
-
-    private let minTime = AppConstants.QuickPresets.minMinutes
-    private let maxTime = AppConstants.QuickPresets.maxMinutes
+    private var minutes = AppConstants.MenuBarSettings.defaultPresetMinutes
+    @State private var startFailed = false
+    @State private var actionError: String?
+    @State private var requestingPermission = false
+    @State private var confirmingStop = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            RulerPicker(value: self.$minutes, range: self.minTime...self.maxTime)
-                .frame(height: 30)
-                .padding(.top, 12)
-                .padding(.bottom, 4)
-                .padding(.horizontal, 10)
-                .accessibilityLabel("Focus Duration")
-                .accessibilityValue("\(self.minutes) minutes")
-
-            HStack(spacing: 8) {
-                if self.session.isActive {
-                    Button("cancel") {
-                        self.cancelSession()
-                    }
-                    .font(.system(size: 13, weight: .regular))
-                    .foregroundColor(.secondary)
-                    .buttonStyle(.plain)
-
-                    Button("restart") {
-                        self.startSession()
-                    }
-                    .font(.system(size: 13, weight: .regular))
-                    .foregroundColor(.primary)
-                    .buttonStyle(.plain)
-                } else {
-                    ForEach(
-                        Array([self.quickPreset1, self.quickPreset2, self.quickPreset3].enumerated()),
-                        id: \.offset)
-                    { _, preset in
-                        Button(action: {
-                            self.minutes = preset
-                            self.selectedPresetMinutes = preset
-                        }, label: {
-                            Text("\(preset)m")
-                                .font(.system(size: 13, weight: .regular))
-                                .foregroundColor(self.minutes == preset ? .primary : .secondary)
-                                .frame(minWidth: 30)
-                        })
-                        .buttonStyle(.plain)
-                    }
+        VStack(alignment: .leading, spacing: 12) {
+            if let session = panelState.completedSession {
+                completion(session)
+            } else if let snapshot = coordinator.snapshot,
+                      snapshot.status == .completed || snapshot.status == .interrupted {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Could not finish saving the session.")
+                    Button("Retry saving") { coordinator.retryFinalization() }
                 }
+            } else if coordinator.snapshot != nil {
+                activeControls
+            } else {
+                idleControls
             }
-            .padding(.horizontal, 16)
-
-            Spacer()
-
+            Divider()
             HStack {
-                Button(action: self.handlePrimaryAction) {
-                    Text(self.primaryButtonTitle)
-                        .font(.system(size: 13, weight: .regular))
-                        .foregroundColor(.primary)
+                Button("Open qyube", action: onOpen)
+                Spacer()
+                Menu {
+                    Button("Settings…", action: onSettings)
+                    Button("Show floating timer", action: onShowTimer)
+                        .disabled(coordinator.snapshot == nil)
+                    Divider()
+                    Button("Quit qyube") { NSApp.terminate(nil) }
+                } label: {
+                    Image(systemName: "ellipsis").frame(width: 20, height: 20)
                 }
-                .buttonStyle(.plain)
-                .keyboardShortcut(.defaultAction)
-
-                Spacer(minLength: 0)
-
-                    Menu(content: {
-                        Button("Settings...") {
-                            SettingsWindowController.show()
-                        }
-                        .keyboardShortcut(",", modifiers: .command)
-                        Button("Check for Updates...") {
-                            UpdaterManager.shared.checkForUpdates()
-                        }
-                        .disabled(!UpdaterManager.shared.canCheckForUpdates)
-                        Button("Contact Us") { self.openContact() }
-                        #if DEBUG
-                        Divider()
-                        Menu("Companion preview") {
-                            Button("Start fishing loop") { WindowManager.shared.preview(.start) }
-                            Button("Catch now (while fishing)") { WindowManager.shared.preview(.bite) }
-                            Button("Sleep") { WindowManager.shared.preview(.sleep) }
-                            Button("Resume fishing") { WindowManager.shared.preview(.resume) }
-                            Button("Distraction hop") { WindowManager.shared.preview(.distract) }
-                            Button("Session completed") { WindowManager.shared.preview(.complete) }
-                            Button("Stop before five minutes") { WindowManager.shared.preview(.stopEarly) }
-                            Divider()
-                            Button("Actual size · 118 pt artwork") { WindowManager.shared.preview(.actualSize) }
-                            Button("Inspect at 2× size") { WindowManager.shared.preview(.largeSize) }
-                            Button("Dismiss companion") { WindowManager.shared.preview(.dismiss) }
-                        }
-                        .disabled(self.session.isActive)
-                        #endif
-                        Divider()
-                        Button("Quit") { NSApp.terminate(nil) }
-                            .keyboardShortcut("q", modifiers: .command)
-                    }, label: {
-                    Image(systemName: "ellipsis")
-                        .font(.system(size: 16))
-                        .foregroundColor(.secondary)
-                })
                 .menuStyle(.borderlessButton)
-                .fixedSize()
-                .hideMenuIndicator()
+                .menuIndicator(.hidden)
+                .accessibilityLabel("More actions")
             }
-            .frame(maxWidth: .infinity)
-            .padding(.horizontal, 16)
-            .padding(.bottom, 12)
+            .font(.system(size: 12))
         }
-        .frame(
-            width: AppConstants.MenuBarSettings.panelWidth,
-            height: AppConstants.MenuBarSettings.panelHeight)
-        .background(VisualEffectBackground())
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1))
-        .onAppear {
-            self.minutes = self.clampMinutes(self.selectedPresetMinutes)
-        }
-        .onChange(of: self.minutes) { newValue in
-            let clamped = self.clampMinutes(newValue)
-            if self.minutes != clamped {
-                self.minutes = clamped
-                return
+        .padding(16)
+        .frame(width: 282)
+        .background(.regularMaterial)
+        .buttonStyle(.plain)
+        .confirmationDialog("Stop this focus session?", isPresented: $confirmingStop) {
+            Button("Stop session", role: .destructive) {
+                if coordinator.stopSession() == nil || coordinator.snapshot != nil {
+                    actionError = "Could not save this session."
+                }
             }
-            self.selectedPresetMinutes = clamped
+            Button("Keep focusing", role: .cancel) {}
+        } message: {
+            Text("Catches return to the sea if you focused for less than five minutes.")
         }
-        .onChange(of: self.selectedPresetMinutes) { newValue in
-            let clamped = self.clampMinutes(newValue)
-            if self.minutes != clamped {
-                self.minutes = clamped
+        .onAppear { minutes = min(60, max(1, minutes)) }
+    }
+
+    private var idleControls: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Focus duration").font(.system(size: 13, weight: .semibold))
+                Spacer()
+                Text("\(minutes)m").monospacedDigit()
+            }
+            Slider(
+                value: Binding(
+                    get: { Double(minutes) },
+                    set: { minutes = min(60, max(1, Int($0.rounded()))) }
+                ),
+                in: 1...60,
+                step: 1
+            )
+            .accessibilityLabel("Focus duration")
+            HStack(spacing: 18) {
+                ForEach(AppConstants.QuickPresets.defaultValues, id: \.self) { preset in
+                    Button("\(preset)m") { minutes = preset }
+                        .foregroundStyle(minutes == preset ? .primary : .secondary)
+                }
+            }
+            Button {
+                Task {
+                    requestingPermission = true
+                    defer { requestingPermission = false }
+                    startFailed = !(await onStart(minutes))
+                }
+            } label: {
+                Text("Start focus").frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(requestingPermission)
+            if startFailed {
+                Text("Could not start. Check the focus permissions in Settings.")
+                    .font(.caption).foregroundStyle(.secondary)
             }
         }
     }
 
-    // MARK: - Actions
-
-    private func startSession() {
-        let clampedMinutes = self.clampMinutes(self.minutes)
-        self.minutes = clampedMinutes
-        self.selectedPresetMinutes = clampedMinutes
-        self.session.start(task: "Focus Session", duration: TimeInterval(clampedMinutes * 60))
-        WindowManager.shared.showFloating()
-    }
-
-    private func openContact() {
-        if let url = URL(string: "mailto:support@qoma.app") {
-            NSWorkspace.shared.open(url)
-        }
-    }
-
-    private var primaryButtonTitle: String {
-        if !self.session.isActive { return "start" }
-        return self.session.isPaused ? "resume" : "pause"
-    }
-
-    private func handlePrimaryAction() {
-        if !self.session.isActive {
-            self.startSession()
-            return
-        }
-
-        if self.session.isPaused {
-            self.session.resume()
-        } else {
-            self.session.pause()
-        }
-    }
-
-    private func cancelSession() {
-        self.session.stop()
-    }
-
-    private func clampMinutes(_ value: Int) -> Int {
-        min(self.maxTime, max(self.minTime, value))
-    }
-}
-
-struct RulerPicker: View {
-    @Binding var value: Int
-    let range: ClosedRange<Int>
-
-    var body: some View {
-        GeometryReader { geo in
-            let totalRange = CGFloat(self.range.upperBound - self.range.lowerBound)
-            let stepWidth = geo.size.width / totalRange
-
-            ZStack(alignment: .leading) {
-                HStack(spacing: 0) {
-                    ForEach(0...Int(totalRange), id: \.self) { index in
-                        Rectangle()
-                            .fill(Color.gray.opacity(index % 5 == 0 ? 0.5 : 0.2))
-                            .frame(width: 1, height: index % 5 == 0 ? 20 : 10)
-                            .frame(maxWidth: .infinity)
+    private var activeControls: some View {
+        VStack(alignment: .leading, spacing: 15) {
+            HStack {
+                Text(coordinator.isPaused ? "Paused" : "Focusing")
+                    .font(.system(size: 13, weight: .semibold))
+                Spacer()
+                Text(QyubeFormat.countdown(coordinator.remainingTime))
+                    .font(.system(size: 20, weight: .medium, design: .rounded))
+                    .monospacedDigit()
+            }
+            HStack {
+                Button(coordinator.isPaused ? "Resume" : "Pause") {
+                    if coordinator.isPaused {
+                        coordinator.resumeSession()
+                    } else {
+                        coordinator.pauseSession()
                     }
                 }
-
-                Rectangle()
-                    .fill(Color.white)
-                    .frame(width: 2, height: 28)
-                    .shadow(color: .white.opacity(0.5), radius: 2)
-                    .offset(x: CGFloat(self.value - self.range.lowerBound) * stepWidth)
+                Spacer()
+                Button("Restart") {
+                    if !coordinator.restartSession() {
+                        actionError = "Could not restart this session."
+                    } else {
+                        actionError = nil
+                    }
+                }
+                Spacer()
+                Button("Stop") { confirmingStop = true }
             }
-            .contentShape(Rectangle())
-            .gesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { drag in
-                        let locationX = drag.location.x
-                        let percent = max(0, min(1, locationX / geo.size.width))
-                        let newValue = Int(Double(self.range.lowerBound) + (percent * Double(totalRange)))
-                        self.value = newValue
-                    })
+            .font(.system(size: 12))
+            if let actionError {
+                Text(actionError).font(.caption).foregroundStyle(.secondary)
+            }
         }
     }
-}
 
-extension View {
-    @ViewBuilder
-    func hideMenuIndicator() -> some View {
-        if #available(macOS 12.0, *) {
-            self.menuIndicator(.hidden)
-        } else {
-            self
+    private func completion(_ session: FocusSession) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Focus complete").font(.system(size: 15, weight: .semibold))
+            Text("\(QyubeFormat.duration(session.actualActiveSeconds)) focused · "
+                + "\(panelState.completedCatchCount) catches")
+                .font(.system(size: 12)).foregroundStyle(.secondary)
+            HStack {
+                Button("Start again") {
+                    panelState.completedSession = nil
+                    Task { startFailed = !(await onStart(minutes)) }
+                }
+                Spacer()
+                Button("Lihat hasil tangkapan") { onViewCatches(session) }
+            }
+            .font(.system(size: 12))
         }
     }
 }

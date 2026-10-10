@@ -1,87 +1,109 @@
-import Cocoa
+import AppKit
 import Combine
 import SwiftUI
 
-/// Reduced menu bar controller for qyube: status icon only.
-/// Tapping the icon restores/shows the timer panel if a session is active,
-/// or opens the Home window if not.
 @MainActor
-final class MenuBarController: NSObject {
+final class MenuBarPanelState: ObservableObject {
+    @Published var completedSession: FocusSession?
+    @Published var completedCatchCount = 0
+}
+
+@MainActor
+final class MenuBarController: NSObject, NSPopoverDelegate {
     static var shared: MenuBarController?
 
-    private let statusItem: NSStatusItem
-    private var onStatusClick: (() -> Void)?
-    private var cancellables = Set<AnyCancellable>()
+    private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+    private let popover = NSPopover()
+    private let panelState = MenuBarPanelState()
+    private weak var coordinator: SessionCoordinator?
 
     override init() {
-        self.statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         super.init()
-
-        if let button = statusItem.button {
-            button.action = #selector(self.statusItemClicked(_:))
-            button.target = self
-            button.image = makeStatusIcon()
-            button.imagePosition = .imageOnly
-        }
-
-        MenuBarController.shared = self
+        statusItem.button?.target = self
+        statusItem.button?.action = #selector(togglePopover)
+        popover.behavior = .transient
+        popover.delegate = self
+        updateTitle("")
+        Self.shared = self
     }
 
-    func configure(onClick: @escaping () -> Void) {
-        self.onStatusClick = onClick
+    func configure(
+        coordinator: SessionCoordinator,
+        onStart: @escaping (Int) async -> Bool,
+        onOpen: @escaping () -> Void,
+        onSettings: @escaping () -> Void,
+        onShowTimer: @escaping () -> Void,
+        onViewCatches: @escaping (FocusSession) -> Void
+    ) {
+        self.coordinator = coordinator
+        popover.contentViewController = NSHostingController(rootView: MenuBarView(
+            coordinator: coordinator,
+            panelState: panelState,
+            onStart: onStart,
+            onOpen: { [weak self] in self?.popover.performClose(nil); onOpen() },
+            onSettings: { [weak self] in self?.popover.performClose(nil); onSettings() },
+            onShowTimer: { [weak self] in self?.popover.performClose(nil); onShowTimer() },
+            onViewCatches: { [weak self] session in
+                self?.popover.performClose(nil)
+                onViewCatches(session)
+            }
+        ))
     }
 
     func updateTitle(_ title: String) {
-        statusItem.button?.title = title
-        statusItem.button?.image = title.isEmpty ? makeStatusIcon() : nil
-        statusItem.button?.imagePosition = title.isEmpty ? .imageOnly : .noImage
-        statusItem.button?.font = .monospacedDigitSystemFont(ofSize: 13, weight: .regular)
-        statusItem.button?.setAccessibilityLabel(title.isEmpty ? "Open qyube" : "Show timer, \(title) remaining")
+        guard let button = statusItem.button else { return }
+        button.title = title
+        button.image = title.isEmpty ? makeStatusIcon() : nil
+        button.imagePosition = title.isEmpty ? .imageOnly : .noImage
+        button.font = .monospacedDigitSystemFont(ofSize: 13, weight: .regular)
+        button.setAccessibilityLabel(title.isEmpty ? "Open qyube controls" : "qyube, \(title) remaining")
         statusItem.length = title.isEmpty ? NSStatusItem.squareLength : NSStatusItem.variableLength
     }
 
-    /// Legacy hook for old FocusSessionManager; new flow uses status-click restore instead.
-    func showPopover() {
-        onStatusClick?()
+    func showCompletion(_ session: FocusSession, catchCount: Int) {
+        guard session.status == .completed else { return }
+        panelState.completedSession = session
+        panelState.completedCatchCount = catchCount
+        showPopover()
     }
 
-    @objc private func statusItemClicked(_: Any?) {
-        onStatusClick?()
+    func showPopover() {
+        guard let button = statusItem.button else { return }
+        let height: CGFloat = if panelState.completedSession != nil {
+            160
+        } else if coordinator?.snapshot != nil {
+            176
+        } else {
+            235
+        }
+        popover.contentSize = NSSize(width: 282, height: height)
+        popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+    }
+
+    func popoverDidClose(_ notification: Notification) {
+        panelState.completedSession = nil
+    }
+
+    @objc private func togglePopover() {
+        if popover.isShown {
+            popover.performClose(nil)
+        } else {
+            showPopover()
+        }
     }
 
     private func makeStatusIcon() -> NSImage {
-        let text = "Q"
-        let targetSize = NSSize(width: 16, height: 16)
-        let cornerRadius: CGFloat = 4
-        let image = NSImage(size: targetSize, flipped: false) { rect in
-            let bgRect = rect.insetBy(dx: 0.5, dy: 0.5)
-            let path = NSBezierPath(roundedRect: bgRect, xRadius: cornerRadius, yRadius: cornerRadius)
-            NSColor.white.setFill()
-            path.fill()
-
-            let font = NSFont.monospacedSystemFont(ofSize: 10, weight: .bold)
-            let attributes: [NSAttributedString.Key: Any] = [
-                .font: font,
-                .foregroundColor: NSColor.black,
-            ]
-            let string = NSString(string: text)
-            let textSize = string.size(withAttributes: attributes)
-            let drawPoint = NSPoint(
-                x: rect.midX - (textSize.width / 2),
-                y: rect.midY - (textSize.height / 2) - 0.5)
-
-            let context = NSGraphicsContext.current
-            let priorOp = context?.compositingOperation ?? .sourceOver
-            context?.compositingOperation = .destinationOut
-            string.draw(at: drawPoint, withAttributes: attributes)
-            context?.compositingOperation = priorOp
-
-            NSColor.black.withAlphaComponent(0.18).setStroke()
-            path.lineWidth = 1
-            path.stroke()
+        let image = NSImage(size: NSSize(width: 16, height: 16), flipped: false) { rect in
+            NSColor.labelColor.setFill()
+            NSBezierPath(roundedRect: rect.insetBy(dx: 1, dy: 1), xRadius: 4, yRadius: 4).fill()
+            let label = NSString(string: "Q")
+            label.draw(at: NSPoint(x: 4, y: 2), withAttributes: [
+                .font: NSFont.monospacedSystemFont(ofSize: 11, weight: .bold),
+                .foregroundColor: NSColor.windowBackgroundColor,
+            ])
             return true
         }
-        image.isTemplate = false
+        image.isTemplate = true
         return image
     }
 }

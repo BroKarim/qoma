@@ -25,7 +25,7 @@ struct SessionCoordinatorTests {
 
     private func makeCoordinator(
         accountID: String = "test",
-        repositories: Repositories = makeRepositories(),
+        repositories: Repositories,
         now: @escaping () -> Date = Date.init
     ) -> SessionCoordinator {
         SessionCoordinator(
@@ -63,6 +63,30 @@ struct SessionCoordinatorTests {
     }
 
     @Test
+    func restartKeepsSessionIdentityAndCumulativeTimeAfterRestore() {
+        let accountID = UUID().uuidString
+        let repositories = makeRepositories()
+        let start = Date()
+        var current = start
+        let coordinator = makeCoordinator(accountID: accountID, repositories: repositories) { current }
+        let first = coordinator.startSession(draft: SessionDraft(plannedMinutes: 1))!
+        current = start.addingTimeInterval(30)
+        #expect(coordinator.restartSession())
+        #expect(coordinator.snapshot?.id == first.id)
+        #expect(coordinator.snapshot?.accumulatedActiveSeconds == 30)
+        #expect(coordinator.remainingTime == 60)
+
+        let restored = makeCoordinator(accountID: accountID, repositories: repositories) { current }
+        restored.restore()
+        current = start.addingTimeInterval(91)
+        let completed = restored.completeIfDue()
+        #expect(completed?.id == first.id)
+        #expect(completed?.actualActiveSeconds == 90)
+        #expect(repositories.sessions.loadHistory(accountID: accountID).count == 1)
+        cleanup(repositories)
+    }
+
+    @Test
     func stopBeforeFiveMinutesDiscardsProvisionalCatch() {
         let accountID = UUID().uuidString
         let repositories = makeRepositories()
@@ -96,6 +120,22 @@ struct SessionCoordinatorTests {
         #expect(second == nil)
         #expect(first?.status == .completed)
         #expect(repositories.sessions.loadActive(accountID: accountID) == nil)
+        cleanup(repositories)
+    }
+
+    @Test
+    func stopAfterDeadlineRecordsCompletion() {
+        let accountID = UUID().uuidString
+        let repositories = makeRepositories()
+        let start = Date()
+        var current = start
+        let coordinator = makeCoordinator(accountID: accountID, repositories: repositories) { current }
+        coordinator.startSession(draft: SessionDraft(plannedMinutes: 1))
+        current = start.addingTimeInterval(61)
+
+        let result = coordinator.stopSession()
+        #expect(result?.status == .completed)
+        #expect(result?.actualActiveSeconds == 60)
         cleanup(repositories)
     }
 

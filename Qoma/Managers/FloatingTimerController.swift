@@ -104,7 +104,6 @@ struct FloatingTimerActions {
     var onPause: () -> Void = {}
     var onResume: () -> Void = {}
     var onStop: () -> Void = {}
-    var onTaskChange: (String) -> Void = { _ in }
 }
 
 struct FloatingTimerContentView: View {
@@ -112,10 +111,7 @@ struct FloatingTimerContentView: View {
     let taskTitle: String
     let isPaused: Bool
     let actions: FloatingTimerActions
-    @State private var editingTitle: String = ""
     @State private var confirmingStop = false
-    @State private var editingTask = false
-    @FocusState private var isTitleFocused: Bool
 
     var body: some View {
         VStack(spacing: 4) {
@@ -133,11 +129,6 @@ struct FloatingTimerContentView: View {
                         if isPaused { actions.onResume() } else { actions.onPause() }
                     }
                     Button("Stop session", role: .destructive) { confirmingStop = true }
-                    Divider()
-                    Button("Edit task…") {
-                        editingTitle = taskTitle
-                        editingTask = true
-                    }
                 } label: {
                     Image(systemName: "ellipsis")
                         .font(.system(size: 13, weight: .semibold))
@@ -164,16 +155,6 @@ struct FloatingTimerContentView: View {
                 .fill(Color.white.opacity(0.96))
                 .shadow(color: Color.black.opacity(0.10), radius: 18, x: 0, y: 8)
         )
-        .popover(isPresented: $editingTask) {
-            VStack(alignment: .leading, spacing: 12) {
-                Text("What are you working on?").font(.headline)
-                TextField("Focus session", text: $editingTitle).textFieldStyle(.roundedBorder)
-                    .focused($isTitleFocused)
-                    .onSubmit { actions.onTaskChange(editingTitle); editingTask = false }
-                Button("Save") { actions.onTaskChange(editingTitle); editingTask = false }
-                    .keyboardShortcut(.defaultAction)
-            }.padding(18).frame(width: 230)
-        }
         .confirmationDialog("Stop this session?", isPresented: $confirmingStop) {
             Button("Stop session", role: .destructive, action: actions.onStop)
             Button("Keep focusing", role: .cancel) {}

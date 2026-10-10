@@ -25,7 +25,7 @@ struct SessionCoordinatorCatchTests {
 
     private func makeCoordinator(
         accountID: String = "test",
-        repositories: Repositories = makeRepositories(),
+        repositories: Repositories,
         now: @escaping () -> Date = Date.init,
         autoCatchEnabled: Bool = false
     ) -> SessionCoordinator {
@@ -78,7 +78,8 @@ struct SessionCoordinatorCatchTests {
     @Test
     func distractionDoesNotCancelInFlightCatch() {
         let accountID = UUID().uuidString
-        let coordinator = makeCoordinator(accountID: accountID, repositories: makeRepositories())
+        let repositories = makeRepositories()
+        let coordinator = makeCoordinator(accountID: accountID, repositories: repositories)
         coordinator.startSession(draft: SessionDraft(plannedMinutes: 10, policy: .timerOnly))
         coordinator.scheduleNextBite()
         coordinator.beginReel()
@@ -106,6 +107,29 @@ struct SessionCoordinatorCatchTests {
         let session = coordinator.stopSession()
         #expect(session?.status == .interrupted)
         #expect(repositories.catches.listBanked(accountID: accountID).count == 1)
+        cleanup(repositories)
+    }
+
+    @Test
+    func restartKeepsProvisionalCatchAndCumulativeBankThreshold() {
+        let accountID = UUID().uuidString
+        let repositories = makeRepositories()
+        let start = Date()
+        var current = start
+        let coordinator = makeCoordinator(accountID: accountID, repositories: repositories, now: { current })
+        coordinator.startSession(draft: SessionDraft(plannedMinutes: 10))
+        current = start.addingTimeInterval(240)
+        coordinator.scheduleNextBite()
+        coordinator.beginReel()
+        let catchEvent = coordinator.depositCatch()!.event
+        #expect(!catchEvent.isBanked)
+
+        #expect(coordinator.restartSession())
+        #expect(repositories.catches.listProvisional(sessionID: catchEvent.sessionID, accountID: accountID).count == 1)
+        current = start.addingTimeInterval(301)
+        _ = coordinator.stopSession()
+        #expect(repositories.catches.listBanked(accountID: accountID).count == 1)
+        #expect(repositories.sessions.loadHistory(accountID: accountID).count == 1)
         cleanup(repositories)
     }
 

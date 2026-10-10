@@ -3,20 +3,24 @@ import SwiftUI
 
 struct AnalyticsDashboardView: View {
     private let usePreviewData: Bool
+    private let calendarOnly: Bool
 
     @State private var dashboardState: DashboardState = .loading
     @State private var selectedDay = Calendar.current.startOfDay(for: Date())
 
-    init(usePreviewData: Bool = false) {
+    init(usePreviewData: Bool = false, calendarOnly: Bool = false) {
         self.usePreviewData = usePreviewData
+        self.calendarOnly = calendarOnly
     }
 
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 18) {
                 SettingsPageHeader(
-                    title: "Analytics",
-                    subtitle: "Inspect focus history, daily sessions, and tracked activity.")
+                    title: self.calendarOnly ? "Calendar" : "Analytics",
+                    subtitle: self.calendarOnly
+                        ? "Choose a day to review your focus history."
+                        : "Inspect focus history, daily sessions, and tracked activity.")
 
                 self.content
             }
@@ -60,10 +64,12 @@ struct AnalyticsDashboardView: View {
             //     topWebsites: self.selectedDayDomains(in: data))
             // Session Summaries - deferred to next release
             // self.sessionSummariesView(data: data)
-            AnalyticsBreakdownView(
-                date: self.selectedDay,
-                apps: self.selectedDayApps(in: data),
-                domains: self.selectedDayDomains(in: data))
+            if !self.calendarOnly {
+                AnalyticsBreakdownView(
+                    date: self.selectedDay,
+                    apps: self.selectedDayApps(in: data),
+                    domains: self.selectedDayDomains(in: data))
+            }
         }
     }
 
@@ -179,7 +185,24 @@ struct AnalyticsDashboardView: View {
     }
 
     private func makeStoredData() -> AnalyticsDashboardData? {
-        let sessions = AnalyticsStore.shared.loadFocusSessions()
+        var sessionsByID: [UUID: FocusSessionRecord] = [:]
+        for record in AnalyticsStore.shared.loadFocusSessions() {
+            sessionsByID[record.id] = record
+        }
+        for session in SessionRepository.shared.loadHistory(accountID: "local") {
+            sessionsByID[session.id] = FocusSessionRecord(
+                id: session.id,
+                startedAt: session.startedAt,
+                endedAt: session.endedAt,
+                plannedMinutes: session.plannedMinutes,
+                actualFocusSeconds: session.actualActiveSeconds,
+                sessionMode: .quickSession,
+                taskTitle: session.taskTitle,
+                completed: session.status == .completed,
+                interruptedReason: session.interruptedReason
+            )
+        }
+        let sessions = Array(sessionsByID.values)
         let appEvents = AnalyticsStore.shared.loadAppActivityEvents()
         let webVisits = AnalyticsStore.shared.loadWebsiteVisits()
         let heatmapCells = AnalyticsEngine.shared.buildHeatmapCells(from: sessions)

@@ -15,7 +15,8 @@ enum AppActivationPolicy {
         // swiftlint:disable:next empty_count
         if count > 0 { return }
         Task { @MainActor in
-            NSApp.setActivationPolicy(.accessory)
+            // swiftlint:disable:next empty_count
+            if count == 0 { NSApp.setActivationPolicy(.accessory) }
         }
     }
 }

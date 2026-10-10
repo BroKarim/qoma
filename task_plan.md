@@ -565,3 +565,89 @@ User menguji implementasi §14 dan melaporkan gerak penguin kurang halus, snowfl
 - Temuan 14 (membersihkan flow legacy) belum dihapus: `--companion-preview`, menu debug, dan pemeriksaan visual masih memanggil `WindowManager`/flow lama. Hapus setelah preview dipindah ke controller baru dan dites agar developer tooling tidak ikut rusak.
 - Rules berbasis website hanya dijamin untuk Safari/Chrome; browser lain tetap dinilai sebagai aplikasi keseluruhan. Verifikasi prompt Apple Events dan pencabutan izin secara manual pada macOS masih diperlukan.
 - `xcodebuild -project Qoma.xcodeproj -scheme Qoma -configuration Debug -destination 'platform=macOS' build` berhasil. Test suite tidak dijalankan pada turn ini; perubahan tes sudah diisolasi untuk run berikutnya.
+
+## 17. Rencana revisi alur menu bar dan jendela utama — 10 Oktober 2026
+
+**Status:** alur inti telah diimplementasikan pada branch `codex/menubar-first-plan-2026-10-10`; pemeriksaan interaksi manual pada Mac masih terbuka. Bagian ini mengungguli keputusan UI/alur di bagian 1–15 yang bertentangan, terutama Home/New Session, judul tugas, aturan per sesi, klik status item, Dock, dan Fishing Report otomatis. Aturan domain, penghitungan waktu aktif, ledger tangkapan, recovery, serta perbaikan audit bagian 16 tetap berlaku. Jangan mengubah data lama secara destruktif.
+
+**Dasar pembandingan:** `task_plan.md` tidak ada di branch `main`; perilaku lama diperiksa langsung pada `MenuBarView.swift`, `MenuBarController.swift`, dan `FocusSessionManager.swift` di branch itu. Tombol Restart lama memanggil `start()` lagi, yang membuat record analytics baru tanpa mempertahankan identitas sesi lama. Permintaan produk sekarang adalah **satu sesi logis saat Restart**, jadi perilaku visual menu bar diambil dari `main`, sedangkan semantik ID/persistence harus diperbaiki di coordinator baru. Branch `main` juga membuka panel untuk break ketika countdown habis; fase ini mengikuti keputusan dokumen saat ini untuk tidak memakai break otomatis.
+
+### Keputusan produk dan batas fase
+
+| Area | Alur target |
+|---|---|
+| Pusat interaksi | qyube berjalan sebagai aplikasi menu bar. Saat launch normal, jendela utama tidak dibuka. Klik ikon menu bar membuka panel ringkas untuk memilih durasi, Start, Pause/Resume, Restart, Stop, membuka aplikasi utama, Settings, dan Quit. Kontrol sesi memakai satu `SessionCoordinator`/clock aktif; jangan menghidupkan kembali `FocusSessionManager` lama sebagai sumber state kedua. |
+| Dock dan jendela | Saat jendela utama tertutup, aplikasi bersifat accessory dan tidak menampilkan ikon Dock. Ikon Dock muncul ketika jendela utama dibuka; menutup jendela menyembunyikannya kembali tanpa menghentikan sesi. `Open qyube` di panel menu bar selalu dapat membuka jendela utama. Quit adalah aksi terpisah. |
+| Durasi | Pilihan awal 25 menit; preset 10/25/60 menit; pilihan manual 1–60 menit mengikuti kontrol sederhana branch `main`. Durasi terakhir yang dipilih disimpan untuk Start berikutnya. Istilah Pomodoro di fase ini hanya berarti countdown fokus; tidak ada break atau siklus otomatis. Pilihan khusus 180 menit dari rancangan lama tidak menjadi bagian panel ringkas fase ini. |
+| Identitas sesi | Pengguna tidak diminta memberi nama sesi/tugas dan tidak melihat form New Session. Sesi baru memakai label netral `Focus session` pada riwayat dan aksesibilitas. Data historis yang sudah punya judul tetap dibaca; jangan hapus atau ubah judul lama saat migrasi. Distribusi berdasarkan judul tugas baru tidak relevan, sedangkan metrik fokus, waktu, aplikasi, domain, dan tangkapan tetap ada. |
+| Aturan fokus | Mode `timerOnly`/`allowing`/`blocking`, daftar aplikasi/domain, dan browser pilihan menjadi preferensi global persisten di Settings; `timerOnly` adalah default pertama kali. Daftar Allowing dan Blocking disimpan terpisah ketika mode berganti. Saat Start, salin aturan saat itu ke snapshot sesi agar riwayat dan evaluasi sesi stabil; perubahan Settings berlaku untuk sesi berikutnya, bukan mengubah sesi aktif diam-diam. Jika izin yang diperlukan tidak tersedia, tampilkan keadaan izin dan opsi Timer Only sebelum Start, jangan mengklaim aturan domain sedang bekerja. |
+| Panel floating | Saat active/paused, penguin dan timer tampil otomatis. Pause membuat penguin tidur. Menutup timer hanya menyembunyikan timer; penguin tetap tampil dan dapat memulihkan timer. Preferensi `Hide floating timer` di Settings berlaku langsung dan tetap tersimpan untuk sesi berikutnya; menu bar tetap menyediakan kontrol sesi. Saat idle kedua panel tidak tampil. |
+| Selesai | Countdown nol menghasilkan satu sesi `completed`. Penguin/timer menutup setelah transisi aman; panel menu bar ringkas muncul dengan `Start again` dan `Lihat hasil tangkapan`. Jendela utama tidak terbuka otomatis. Tombol hasil membuka **Insight** pada hari/sesi yang baru selesai, karena Insight menampilkan event tangkapan individual; Catalog tetap halaman koleksi spesies keseluruhan. Panel selesai memuat ringkasan singkat saja, bukan Fishing Report besar. |
+| Stop/Restart/Quit | Stop meminta konfirmasi dan menyimpan `interrupted` dengan waktu aktif nyata. Restart mengulang countdown durasi sesi saat ini **dalam sesi logis yang sama**: ID sesi tetap, tidak menambah record interrupted/completed, dan tidak membuat reward tambahan. Quit ketika active/paused meminta konfirmasi `Stop and Quit`, menyimpan interrupted lebih dulu, lalu keluar; menutup jendela utama bukan Quit. |
+| Akses akun | Implementasi auth, trial, langganan, pembayaran, serta gate akses ditunda pada fase ini. Jangan menambahkan gate lokal palsu atau mengubah penyimpanan riwayat/tangkapan karena penundaan ini. |
+
+### Urutan pengalaman pengguna
+
+```text
+Launch → hanya ikon menu bar; tidak membuka main window
+Klik ikon → panel ringkas idle (durasi 25m awal; preset/manual; Start; Open qyube; Settings; Quit)
+Start → snapshot sesi dengan aturan global saat Start → penguin + timer floating
+      → panel menu bar active: sisa waktu, Pause, Restart, Stop, Open qyube
+Pause → waktu aktif dan proses tangkapan berhenti; penguin tidur; Resume dari panel
+Restart → countdown kembali penuh dalam ID sesi yang sama; tidak finalisasi sesi
+Stop + konfirmasi → interrupted; aturan bank/discard tangkapan saat ini → panel ringkas idle
+Countdown nol → completed; finalisasi sekali → panel selesai ringkas
+               ├─ Start again → sesi baru memakai durasi terakhir dan aturan global terbaru
+               └─ Lihat hasil tangkapan → jendela utama / Insight / hari atau sesi tersebut
+Open qyube → jendela utama pada Analytics; pilih Insight, Catalog, Calendar, Settings
+Tutup jendela → kembali ke menu bar; sesi tetap berjalan bila aktif
+Quit saat aktif → konfirmasi → simpan interrupted → keluar
+```
+
+Klik status item selalu membuka/menutup panel menu bar sesuai keadaan idle, active, paused, atau completed. Karena itulah perilaku lama `klik active → restore timer / no-op` pada bagian 1, 4, dan 12 diganti. Pengguna tetap bisa memulihkan timer dari penguin atau dari aksi ringkas di panel menu bar. `Start again` baru membuat sesi **setelah** sesi terdahulu selesai; berbeda dari `Restart` yang mempertahankan sesi aktif.
+
+### Struktur jendela utama
+
+- Satu jendela utama dengan warna putih/hangat dari UI qyube saat ini dan bentuk sidebar native seperti `Qoma/UI/SettingsView.swift`: lebar sidebar sekitar 200 pt, jendela minimum sekitar 700 × 520 pt. Pertahankan komponen dan isi yang sudah bekerja; ubah shell/navigasi hanya sejauh perlu. Referensi `SettingsView.swift` di `.agents/skills/macos-settings-ui/references/` menjadi acuan pola, bukan source yang langsung menggantikan UI produk.
+- **Analytics** adalah halaman awal jendela, memakai `Qoma/UI/Main/AnalyticsDashboardView.swift`; heatmap-nya ada di `Qoma/UI/Components/AnalyticsHeatmapView.swift`. Dashboard lama masih membaca `AnalyticsStore`, sedangkan sesi/tangkapan baru ada di repository baru: penyelarasan sumber data diperlukan agar heatmap dan ringkasan tidak kosong/terbelah. Jangan membuat analitik contoh sebagai data pengguna.
+- Sidebar memuat Analytics, Insight, Catalog, Calendar, dan Settings. Calendar dapat menavigasi pilihan tanggal/heatmap analytics yang sama; jangan membuat mesin agregasi kedua hanya untuk Calendar. Insight saat ini (`Qoma/UI/Main/InsightView.swift`) menampilkan periode fokus, daftar sesi, dan event tangkapan; pertahankan kemampuan itu dan dukung navigasi langsung dari tombol `Lihat hasil tangkapan`. Catalog tetap daftar semua spesies beserta count, termasuk yang belum ditemukan.
+- Halaman Today/`CompactTodayView` dan alur `NewSessionView` tidak menjadi bagian navigasi target. Jendela utama tidak memerlukan tombol Start atau form task/mode/durasi duplikat. Settings berada dalam jendela utama; `⌘,` dan aksi Settings dari menu bar membuka route itu, bukan membuat alur konfigurasi sesi yang kedua.
+- Tampilan sesi baru pada Insight/Analytics memakai tanggal, jam, durasi, status, dan hasil tangkapan, bukan judul tugas buatan pengguna. Riwayat lama yang mempunyai judul tetap tampil sesuai data lama. Metrik distribusi judul tugas boleh diganti ringkasan yang memang tersedia, tanpa menghilangkan total fokus atau statistik completed/interrupted.
+
+### Aturan sesi, Restart, dan tangkapan yang harus dijaga
+
+- `SessionCoordinator` tetap satu sumber state untuk menu bar, floating timer, penguin, policy overlay, Insight, dan report. Satu sesi aktif per perangkat. Start/pause/resume/restart/stop/completion hanya dianggap berhasil setelah state penting tersimpan; kegagalan persistence tidak boleh membuat UI/tangkapan seolah aksi berhasil.
+- Restart mengembalikan **sisa countdown** ke durasi penuh yang dipilih saat sesi dimulai, tanpa membuat UUID baru. Waktu fokus aktif yang sudah dijalani tetap kumulatif, waktu pause tidak dihitung, dan catch yang sudah banked tidak dibuang. Provisional mengikuti ambang lima menit berdasarkan waktu aktif kumulatif; jangan reset ambang untuk memperoleh/kehilangan tangkapan secara tidak sengaja. Karena clock sekarang membatasi durasi aktif terhadap `plannedMinutes`, implementasi nanti harus memisahkan panjang putaran countdown dari total waktu aktif sesi yang telah di-restart, lalu menjaga restore setelah relaunch. Satu finalisasi dan satu entri riwayat untuk ID tersebut.
+- Stop sebelum lima menit aktif mengembalikan provisional ke laut; Stop pada/di atas lima menit menyimpan catch yang telah terdeposit. Catch yang masih di reel ketika Stop/selesai tidak diberikan. Rare/legendary tetap dapat muncul kapan pun; tidak ada reward tambahan karena completed. Persistensi catch per event dan bank/recovery idempotent dari bagian 16 tidak diubah.
+- Jika perubahan Settings dibuat saat sesi aktif, snapshot policy sesi itu tetap dipakai sampai berakhir, sementara pilihan baru tersimpan untuk Start berikutnya. Pengecualian hanya untuk preferensi tampilan `Hide floating timer`, yang langsung menyembunyikan/menampilkan panel timer tanpa mengubah sesi atau tangkapan.
+- `completed` hanya ketika countdown benar-benar mencapai nol. `interrupted` hanya dari Stop/Quit yang dikonfirmasi. Setelah report ringkas ditutup, user kembali ke panel idle; riwayat dan hasil tetap dapat dibuka dari Insight/Catalog. Crash/relaunch tetap memulihkan satu active snapshot tanpa duplikasi.
+
+### Peta dampak implementasi berikutnya
+
+| Area kode | Perubahan terencana; bukan perubahan pada branch dokumentasi ini |
+|---|---|
+| `Qoma/Managers/AppDelegate.swift`, `Qoma/Managers/QyubeAppCoordinator.swift` | Launch tanpa `showHomeWindow()`, kendalikan policy accessory/regular sesuai jendela, route Analytics/Insight/Settings, dan tampilkan panel selesai tanpa membuka jendela otomatis. Pertahankan konfirmasi Quit dan jalur debug preview. |
+| `Qoma/Managers/MenuBarController.swift`, `Qoma/UI/MenuBar/MenuBarView.swift` | Pulihkan panel ringkas branch `main` sebagai permukaan kontrol, tetapi hubungkan ke `SessionCoordinator` baru. Status item/panel memiliki keadaan idle, active, paused, completed; aksi Open qyube/Settings/Quit dan hasil tangkapan masuk panel tanpa membesarkannya menjadi report penuh. |
+| `Qoma/Domain/Focus/SessionCoordinator.swift`, `SessionClock.swift`, `FocusModels.swift` | Bentuk draft internal dari durasi + snapshot policy global tanpa nama pengguna; tambah restart in-place yang persisten, durasi aktif kumulatif, satu finalisasi, dan restore aman. Pertahankan format baca data lama/migrasi. |
+| `Qoma/UI/Main/QyubeHomeView.swift`, `AnalyticsDashboardView.swift`, `InsightView.swift`, `CatalogView.swift`, `Qoma/UI/SettingsView.swift` | Jadikan dashboard analytics halaman awal; pindahkan navigasi ke sidebar putih; integrasikan Settings dan route hasil tangkapan. Singkirkan Today/New Session dari navigasi setelah kontrol menu bar lengkap, tanpa menghapus data atau fitur Insight/Catalog. |
+| `Qoma/UI/Main/NewSessionView.swift`, `Qoma/UI/Main/FishingReportView.swift`, floating timer | Form New Session dan report besar tidak dipakai pada alur utama; pertahankan sementara sampai seluruh aksesnya terganti. Timer/penguin tetap dua panel dengan state coordinator yang sama, tanpa edit nama tugas atau aturan per sesi sebagai jalur utama. |
+| `Qoma/Services/AnalyticsStore.swift`, repository sesi/tangkapan, agregator analytics | Pastikan heatmap, statistik fokus, sesi baru, dan hasil tangkapan membaca data nyata yang konsisten; migrasi historis tetap idempotent. Hapus ketergantungan tampilan baru pada distribusi judul tugas, bukan record historisnya. |
+
+### Kriteria selesai untuk fase implementasi nanti
+
+1. Launch hanya menampilkan ikon menu bar; menu bar dapat Start dengan 25 menit awal, preset 10/25/60, dan pilihan 1–60. Jendela utama hanya terbuka lewat aksi eksplisit dan menutupnya tidak mengakhiri sesi. Ikon Dock mengikuti visibilitas jendela.
+2. Satu sesi berjalan melalui Start → Pause → Resume → Restart → Stop maupun Start → completed tanpa timer kedua, record ganda, atau catch ganda. Restart mempertahankan UUID, total waktu aktif, serta catch banked; restore setelah relaunch tetap benar.
+3. Settings mode dan daftar aplikasi/domain tersimpan lintas launch, dipakai sebagai snapshot pada Start berikutnya, dan perubahan saat sesi aktif tidak mengubah evaluasi policy sesi itu. Timer Only tidak meminta izin policy yang tidak diperlukan.
+4. Penguin dan timer muncul pada Start, kecuali timer memang disembunyikan oleh preferensi pengguna; pause menidurkan penguin; menyembunyikan timer mempertahankan penguin; aksi menu bar tetap dapat mengendalikan sesi. Preferensi hide timer berlaku segera dan persisten.
+5. Countdown nol menampilkan panel menu bar ringkas dengan Start again dan Lihat hasil tangkapan. Tombol hasil membuka Insight pada hasil sesi yang tepat. Catalog, Insight, Analytics, dan Calendar menampilkan data nyata yang konsisten, termasuk hasil sesi lama.
+6. Stop <5 menit, Stop ≥5 menit, completion, Quit saat aktif, kegagalan tulis, dan recovery mengikuti aturan ledger/audit yang sudah ditetapkan. Verifikasi native panel/menu bar/Dock dan tes domain yang berkaitan diperlukan saat kode benar-benar diubah.
+
+### Hasil implementasi — 10 Oktober 2026
+
+- Launch sekarang memakai activation policy accessory dan tidak membuka jendela utama. Menu bar menampilkan panel kontrol untuk memilih durasi, Start, Pause/Resume, Restart, Stop, Settings, Open qyube, dan Quit. Saat completed, panel yang sama menampilkan ringkasan pendek, Start again, serta tautan hasil tangkapan ke Insight.
+- Jendela utama memakai sidebar native sekitar 200 pt dan tampilan putih. Analytics dengan heatmap menjadi halaman awal; Calendar memakai heatmap dan ringkasan harian yang sama tanpa penggandaan agregator. Insight dan Catalog tetap membaca riwayat/tangkapan yang ada. Form Today/New Session dan report besar tidak lagi menjadi route utama, tetapi source lamanya dipertahankan sementara.
+- Mode dan daftar aplikasi/domain menjadi preferensi persisten di Settings. Start menyalin policy global ke snapshot sesi; edit policy di tengah sesi tidak mengubah snapshot aktif. Preferensi Hide floating timer berlaku langsung. Penguin tetap aktif selama sesi, termasuk saat timer disembunyikan.
+- Restart memakai ID sesi yang sama, mengulang countdown, mempertahankan akumulasi waktu fokus dan tangkapan tersimpan, serta tetap dapat dipulihkan setelah relaunch. Stop dan completion mempertahankan finalisasi/ledger yang idempotent; Stop setelah deadline yang sudah tercapai diselesaikan sebagai completed.
+- Dashboard menggabungkan sesi repository baru dan AnalyticsStore lama berdasarkan UUID agar heatmap tidak kehilangan sesi baru atau menghitung migrasi dua kali. ActivityTracker merekam aktivitas aplikasi selama sesi baru; pembacaan situs hanya dijalankan bila izin Automation sudah benar-benar diberikan. Timer Only tidak menandai izin itu sebagai granted.
+- Tes domain tambahan mencakup Restart + restore, tangkapan provisional melintasi Restart, preferensi global, dan Timer Only tanpa izin browser. Dua tes companion yang masih mengasumsikan landing visual otomatis memberi reward diselaraskan dengan kontrak bahwa reward hanya bertambah dari event tersimpan. Pemeriksaan native menu bar, Dock, dan posisi panel pada beberapa Spaces/monitor tetap perlu dilakukan pada Mac nyata.
+- Verifikasi otomatis pada 10 Oktober: build Debug macOS berhasil; suite penuh `xcodebuild test` lulus dengan 164 tes. Pemeriksaan manual visual dan interaksi di aplikasi nyata belum dilakukan pada perubahan ini.
