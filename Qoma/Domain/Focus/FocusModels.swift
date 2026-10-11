@@ -69,6 +69,20 @@ struct SessionDraft: Codable, Equatable, Sendable {
         self.domainBrowserBundleID = domainBrowserBundleID
     }
 
+    private enum CodingKeys: String, CodingKey {
+        case taskTitle, plannedMinutes, policy, domainBrowserBundleID
+    }
+
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        taskTitle = try values.decode(String.self, forKey: .taskTitle)
+        plannedMinutes = try values.decode(Int.self, forKey: .plannedMinutes)
+        policy = try values.decode(SessionPolicy.self, forKey: .policy)
+        // Sessions saved before browser selection used Safari implicitly.
+        domainBrowserBundleID = try values.decodeIfPresent(String.self, forKey: .domainBrowserBundleID)
+            ?? "com.apple.Safari"
+    }
+
     var displayTitle: String {
         taskTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             ? "Focus session"

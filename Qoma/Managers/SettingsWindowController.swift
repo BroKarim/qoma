@@ -49,12 +49,12 @@ final class SettingsWindowController: NSWindowController, NSWindowDelegate {
 
         window.title = "Settings"
         window.appearance = NSAppearance(named: .aqua)
-        window.titleVisibility = .visible
-        window.titlebarAppearsTransparent = false
+        window.titleVisibility = .hidden
+        window.titlebarAppearsTransparent = true
         window.toolbarStyle = .automatic
         window.isMovableByWindowBackground = true
         window.setFrameAutosaveName("QomaSettingsWindow")
-        window.minSize = NSSize(width: 700, height: 520)
+        window.minSize = NSSize(width: 860, height: 580)
         window.center()
         window.delegate = self
 

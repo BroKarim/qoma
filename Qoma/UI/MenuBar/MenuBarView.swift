@@ -11,6 +11,12 @@ struct MenuBarView: View {
 
     @AppStorage(AppConstants.MenuBarSettings.selectedPresetMinutesKey)
     private var minutes = AppConstants.MenuBarSettings.defaultPresetMinutes
+    @AppStorage(AppConstants.QuickPresets.preset1Key)
+    private var preset1 = AppConstants.QuickPresets.defaultValues[0]
+    @AppStorage(AppConstants.QuickPresets.preset2Key)
+    private var preset2 = AppConstants.QuickPresets.defaultValues[1]
+    @AppStorage(AppConstants.QuickPresets.preset3Key)
+    private var preset3 = AppConstants.QuickPresets.defaultValues[2]
     @State private var startFailed = false
     @State private var actionError: String?
     @State private var requestingPermission = false
@@ -84,7 +90,8 @@ struct MenuBarView: View {
             )
             .accessibilityLabel("Focus duration")
             HStack(spacing: 18) {
-                ForEach(AppConstants.QuickPresets.defaultValues, id: \.self) { preset in
+                ForEach(Array([preset1, preset2, preset3].enumerated()), id: \.offset) { _, value in
+                    let preset = min(60, max(1, value))
                     Button("\(preset)m") { minutes = preset }
                         .foregroundStyle(minutes == preset ? .primary : .secondary)
                 }

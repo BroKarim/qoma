@@ -42,10 +42,10 @@ struct SettingsSurfaceCard<Content: View>: View {
         .padding(20)
         .background(
             RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(Color.white.opacity(0.035)))
+                .fill(Color.qyubeSidebar))
         .overlay(
             RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .stroke(Color.white.opacity(0.08), lineWidth: 1))
+                .stroke(Color.qyubeLine, lineWidth: 1))
     }
 }
 
@@ -95,6 +95,6 @@ struct SettingsBadge: View {
             .padding(.vertical, 6)
             .background(
                 Capsule()
-                    .fill(Color.white.opacity(0.06)))
+                    .fill(Color.qyubeSelection))
     }
 }

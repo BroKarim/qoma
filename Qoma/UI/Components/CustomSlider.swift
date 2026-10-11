@@ -12,7 +12,7 @@ struct CustomSlider: View {
 
             ZStack(alignment: .leading) {
                 Capsule()
-                    .fill(Color.white.opacity(0.1))
+                    .fill(Color.primary.opacity(0.1))
                     .frame(height: 4)
 
                 Capsule()

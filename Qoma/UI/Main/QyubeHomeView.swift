@@ -43,38 +43,47 @@ struct QyubeHomeView: View {
     @State private var settingsTab: SettingsTab = .general
 
     var body: some View {
-        NavigationSplitView(columnVisibility: .constant(.all)) {
-            List {
-                ForEach(QyubeNavigation.Page.allCases) { page in
-                    Button {
-                        navigation.page = page
-                        if page != .insight { navigation.selectedResult = nil }
-                        navigation.refresh()
-                    } label: {
-                        Label(page.title, systemImage: page.symbol)
-                            .foregroundStyle(Color.qyubeInk)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.vertical, 8)
-                            .padding(.horizontal, 10)
+        HStack(spacing: 0) {
+            VStack(spacing: 0) {
+                Color.clear.frame(height: 52)
+                Text("qyube")
+                    .font(.qoma(size: 18, weight: .semibold))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 12)
+                VStack(spacing: 2) {
+                    ForEach(QyubeNavigation.Page.allCases) { page in
+                        Button {
+                            navigation.page = page
+                            if page != .insight { navigation.selectedResult = nil }
+                            navigation.refresh()
+                        } label: {
+                            SettingsNavigationRow(
+                                title: page.title, symbol: page.symbol,
+                                isSelected: navigation.page == page
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityAddTraits(navigation.page == page ? .isSelected : [])
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityAddTraits(navigation.page == page ? .isSelected : [])
-                    .listRowInsets(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
-                    .listRowBackground(navigation.page == page ? Color.qyubeSelection : .clear)
                 }
+                .padding(.horizontal, 10)
+                Spacer()
+                SettingsSidebarFooter()
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 16)
             }
-            .listStyle(.sidebar)
-            .navigationTitle("qyube")
-            .navigationSplitViewColumnWidth(min: 185, ideal: 200, max: 220)
-            .toolbar(removing: .sidebarToggle)
-        } detail: {
+            .frame(width: 220)
+            .frame(maxHeight: .infinity)
+            .background(Color.qyubeSidebar)
+            Rectangle().fill(Color.qyubeLine).frame(width: 1)
             detail
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                .background(.white)
-                .navigationTitle(navigation.page.title)
+                .background(Color.qyubeBackground)
         }
-        .navigationSplitViewStyle(.balanced)
-        .frame(minWidth: 700, minHeight: 520)
+        .frame(minWidth: 860, minHeight: 580)
+        .background(Color.qyubeBackground)
+        .ignoresSafeArea(.container, edges: .top)
         .environment(\.colorScheme, .light)
         .tint(.qyubeInk)
         .onAppear { navigation.refresh() }
@@ -107,7 +116,7 @@ struct QyubeHomeView: View {
                 Group {
                     switch settingsTab {
                     case .general: QyubeGeneralSettingsPane()
-                    case .appearance: QyubeAppearanceSettingsPane()
+                    case .appearance: AppearanceSettingsPane()
                     case .about: QyubeAboutSettingsPane()
                     }
                 }

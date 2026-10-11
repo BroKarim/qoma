@@ -68,9 +68,10 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
         )
         window.title = "qyube"
         window.appearance = NSAppearance(named: .aqua)
-        window.titleVisibility = .visible
+        window.titleVisibility = .hidden
+        window.titlebarAppearsTransparent = true
         window.isReleasedWhenClosed = false
-        window.minSize = NSSize(width: 700, height: 520)
+        window.minSize = NSSize(width: 860, height: 580)
         window.delegate = self
         window.center()
         window.contentView = NSHostingView(rootView: contentView)

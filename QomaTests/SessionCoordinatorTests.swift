@@ -39,6 +39,41 @@ struct SessionCoordinatorTests {
     }
 
     @Test
+    func legacyHistoryDoesNotBlockRecoveryOrStartingNextSession() throws {
+        let repositories = makeRepositories()
+        defer { cleanup(repositories) }
+        let start = Date()
+        let legacy = FocusSession(
+            accountID: "test", startedAt: start, endedAt: start,
+            plannedMinutes: 10, actualActiveSeconds: 60, status: .completed,
+            draftSnapshot: SessionDraft(plannedMinutes: 10), taskTitle: "Legacy session"
+        )
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        var records = try JSONSerialization.jsonObject(with: encoder.encode([legacy])) as! [[String: Any]]
+        var draft = records[0]["draftSnapshot"] as! [String: Any]
+        draft.removeValue(forKey: "domainBrowserBundleID")
+        records[0]["draftSnapshot"] = draft
+        try JSONSerialization.data(withJSONObject: records).write(
+            to: repositories.directory.appendingPathComponent("sessions/history-test.json")
+        )
+        let terminal = ActiveSessionSnapshot(
+            accountID: "test", startedAt: start, deadline: start,
+            accumulatedActiveSeconds: 30, draft: SessionDraft(plannedMinutes: 10),
+            status: .interrupted, endedAt: start
+        )
+        #expect(repositories.sessions.saveActive(terminal))
+        let coordinator = makeCoordinator(repositories: repositories)
+        coordinator.restore()
+        #expect(coordinator.snapshot == nil)
+        let history = repositories.sessions.loadHistory(accountID: "test")
+        #expect(history.count == 2)
+        #expect(history.first?.id == legacy.id)
+        #expect(history.first?.draftSnapshot.domainBrowserBundleID == "com.apple.Safari")
+        #expect(coordinator.startSession(draft: SessionDraft())?.status == .active)
+    }
+
+    @Test
     func startSessionCreatesActiveSnapshot() {
         let repositories = makeRepositories()
         let coordinator = makeCoordinator(repositories: repositories)

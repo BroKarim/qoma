@@ -52,6 +52,8 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
 
     func updateTitle(_ title: String) {
         guard let button = statusItem.button else { return }
+        let compact = UserDefaults.standard.object(forKey: AppConstants.MenuBarSettings.compactIconKey) as? Bool ?? true
+        let title = compact ? "" : title
         button.title = title
         button.image = title.isEmpty ? makeStatusIcon() : nil
         button.imagePosition = title.isEmpty ? .imageOnly : .noImage

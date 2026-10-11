@@ -11,6 +11,31 @@
 **Fokus:** macOS lebih dulu. Rancangan iOS tetap pekerjaan lanjutan.
 **Nama target kode saat ini:** `Qoma`; nama produk yang dituju: `qyube`.
 
+## jangan dihapus, catatan pribadi 
+
+- cara run di terminal : 
+xcodebuild \
+  -project qoma.xcodeproj \
+  -scheme Qoma \
+  -configuration Debug \
+  -destination 'platform=macOS' \
+  build
+
+open ~/Library/Developer/Xcode/DerivedData/qoma-drxrbpjdzxdevegbhqstemmkbakm/Build/Products/Debug/Qoma.app
+
+atua klo g bisa : 
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
+xcodebuild build \
+  -project qoma.xcodeproj \
+  -scheme Qoma \
+  -configuration Debug \
+  -destination 'platform=macOS'
+
+lalu : 
+open ~/Library/Developer/Xcode/DerivedData/qoma-drxrbpjdzxdevegbhqstemmkbakm/Build/Products/Debug/Qoma.app
+
+cara kill : 
+
 ## 0. Cara memakai rencana ini
 
 Dokumen ini menjadi sumber keputusan untuk implementasi macOS berikutnya. `PRODUCT_SPEC.md`, `ROADMAP.md`, `findings.md`, dan beberapa catatan desain masih memuat keputusan lama tentang tag, break, free tier, pembayaran App Store, serta fitur kolam animasi. Bila bertentangan, gunakan keputusan pengguna di dokumen ini dan buat PR dokumentasi penyelarasan sebelum rilis. Jangan menganggap contoh nama tipe/fungsi di sini sudah ada; bagian **Usulan** adalah kontrak yang harus diwujudkan atau diganti dengan alasan yang tercatat.
@@ -651,3 +676,11 @@ Klik status item selalu membuka/menutup panel menu bar sesuai keadaan idle, acti
 - Dashboard menggabungkan sesi repository baru dan AnalyticsStore lama berdasarkan UUID agar heatmap tidak kehilangan sesi baru atau menghitung migrasi dua kali. ActivityTracker merekam aktivitas aplikasi selama sesi baru; pembacaan situs hanya dijalankan bila izin Automation sudah benar-benar diberikan. Timer Only tidak menandai izin itu sebagai granted.
 - Tes domain tambahan mencakup Restart + restore, tangkapan provisional melintasi Restart, preferensi global, dan Timer Only tanpa izin browser. Dua tes companion yang masih mengasumsikan landing visual otomatis memberi reward diselaraskan dengan kontrak bahwa reward hanya bertambah dari event tersimpan. Pemeriksaan native menu bar, Dock, dan posisi panel pada beberapa Spaces/monitor tetap perlu dilakukan pada Mac nyata.
 - Verifikasi otomatis pada 10 Oktober: build Debug macOS berhasil; suite penuh `xcodebuild test` lulus dengan 164 tes. Pemeriksaan manual visual dan interaksi di aplikasi nyata belum dilakukan pada perubahan ini.
+
+### Perbaikan regresi menu bar dan layout — 11 Oktober 2026
+
+- Penyebab Start terkunci: riwayat sesi lama belum menyimpan `SessionDraft.domainBrowserBundleID`. Decoder yang mewajibkan kolom itu menolak seluruh riwayat; finalisasi terminal tertahan dan panel menampilkan Retry saving. Pembacaan draft kini menerima kolom yang tidak ada dengan default Safari, sesuai perilaku sesi lama. Riwayat dan ledger tidak dihapus; recovery pada launch berikutnya menyelesaikan sesi tertahan dan membuka Start kembali. Penanganan kegagalan tulis tetap dipertahankan.
+- Shell utama dan Settings kembali ke struktur `main`: HStack, sidebar tetap 220 pt, row 13 pt, titlebar transparan, footer versi, minimum jendela 860 × 580 pt. Warna tetap putih. Analytics/Insight/Catalog/Calendar/Settings tetap tersedia tanpa label sidebar terpotong oleh List native.
+- General dan Appearance memakai kembali pane/kartu/layout lama: quick presets, completion sound, volume, auto-mute, compact icon, opacity, dan tema timer. Focus rules, Hide floating timer, distraction sound, serta reduce companion motion ditambahkan pada struktur kartu yang sama. Preset tersimpan dan compact icon terhubung kembali ke menu bar.
+- Tes regresi mereproduksi kegagalan recovery akibat draft lama sebelum fix, lalu lulus setelah fix: riwayat lama dipertahankan, terminal terselesaikan, dan sesi berikutnya dapat dimulai. Build + suite penuh `xcodebuild test` lulus: 165 tes, 0 gagal. Pemeriksaan decoding format lama juga lulus.
+- Recovery data asli terkonfirmasi sesudah build baru diluncurkan: riwayat lama tetap dapat dibaca, sesi terminal tertahan masuk ke riwayat, dan snapshot terminal sudah dibersihkan. Verifikasi visual melalui otomatisasi native belum selesai: alat UI tidak dapat mengakses build accessory yang tidak memiliki jendela. Tampilan akhir, klik menu bar pada build terbaru, dan interaksi panel masih perlu diperiksa di aplikasi nyata.

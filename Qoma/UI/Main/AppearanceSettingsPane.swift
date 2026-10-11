@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct AppearanceSettingsPane: View {
+    @AppStorage("qyube.reduceMotionOverride") private var reduceMotionOverride = false
     @AppStorage(AppConstants.FloatingThemeSettings.opacityKey)
     private var floatingOpacity: Double = AppConstants.FloatingThemeSettings.defaultOpacity
     @AppStorage(AppConstants.FloatingThemeSettings.selectedThemeKey)
@@ -19,6 +20,11 @@ struct AppearanceSettingsPane: View {
 
                 windowFeelSection
                 timerThemeSection
+                SettingsSurfaceCard {
+                    SettingsRow(title: "Reduce companion motion", subtitle: "Keep the penguin visible with gentler movement.") {
+                        Toggle("", isOn: $reduceMotionOverride).toggleStyle(.switch)
+                    }
+                }
             }
             .padding(24)
             .padding(.top, 8)
@@ -127,18 +133,18 @@ private struct FloatingThemeOptionCard: View {
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(.qyubeInk)
                 }
             }
         }
         .padding(12)
         .background(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(Color.white.opacity(isSelected ? 0.08 : 0.035)))
+                .fill(isSelected ? Color.qyubeSelection : Color.qyubeSidebar))
         .overlay(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .stroke(
-                    isSelected ? Color.white.opacity(0.18) : Color.white.opacity(0.08),
+                    Color.qyubeLine,
                     lineWidth: 1))
     }
 }
