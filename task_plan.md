@@ -34,7 +34,7 @@ xcodebuild build \
 lalu : 
 open ~/Library/Developer/Xcode/DerivedData/qoma-drxrbpjdzxdevegbhqstemmkbakm/Build/Products/Debug/Qoma.app
 
-cara kill : 
+cara kill : pkill -f Qoma
 
 ## 0. Cara memakai rencana ini
 
