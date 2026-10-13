@@ -19,7 +19,6 @@ struct MenuBarView: View {
     private var preset3 = AppConstants.QuickPresets.defaultValues[2]
     @State private var actionError: String?
     @State private var requestingPermission = false
-    @State private var confirmingStop = false
 
     private var isRunning: Bool { coordinator.isActive || coordinator.isPaused }
 
@@ -48,18 +47,6 @@ struct MenuBarView: View {
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(.black.opacity(0.12), lineWidth: 1))
         .environment(\.colorScheme, .light)
-        .confirmationDialog("Cancel this focus session?", isPresented: $confirmingStop) {
-            Button("Cancel session", role: .destructive) {
-                if coordinator.stopSession() == nil || coordinator.snapshot != nil {
-                    actionError = "Could not save this session."
-                } else {
-                    actionError = nil
-                }
-            }
-            Button("Keep focusing", role: .cancel) {}
-        } message: {
-            Text("Catches return to the sea if you focused for less than five minutes.")
-        }
         .onAppear { minutes = min(60, max(1, minutes)) }
     }
 
@@ -95,7 +82,13 @@ struct MenuBarView: View {
 
             HStack(spacing: 8) {
                 if isRunning {
-                    Button("cancel") { confirmingStop = true }.foregroundStyle(.secondary)
+                    Button("cancel") {
+                        if coordinator.stopSession() == nil || coordinator.snapshot != nil {
+                            actionError = "Could not save this session."
+                        } else {
+                            actionError = nil
+                        }
+                    }.foregroundStyle(.secondary)
                     Button("restart") {
                         actionError = coordinator.restartSession() ? nil : "Could not restart this session."
                     }

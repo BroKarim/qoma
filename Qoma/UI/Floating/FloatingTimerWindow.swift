@@ -3,7 +3,7 @@ import SwiftUI
 struct FloatingTimerView: View {
     private static let timerFontName = "RobotoMono-VariableFont_wght"
 
-    @ObservedObject private var timer = FocusSessionManager.shared.timerService
+    @ObservedObject var timer: TimerReadoutModel
 
     @AppStorage(AppConstants.FloatingThemeSettings.opacityKey)
     private var floatingOpacity: Double = AppConstants.FloatingThemeSettings.defaultOpacity

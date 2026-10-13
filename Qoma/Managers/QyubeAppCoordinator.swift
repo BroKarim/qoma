@@ -88,12 +88,10 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
     }
 
     func restoreTimerPanel() {
-        guard let snapshot = sessionCoordinator.snapshot else { return }
+        guard sessionCoordinator.isActive || sessionCoordinator.isPaused else { return }
         guard !timerController.isVisible else { return }
         timerController.show(
-            remainingTime: sessionCoordinator.remainingTime,
-            taskTitle: snapshot.draft.displayTitle,
-            isPaused: snapshot.status == .paused
+            remainingTime: sessionCoordinator.remainingTime
         )
     }
 
@@ -115,13 +113,6 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
         overlayController.onVisualStateChanged = { [weak self] visual in
             self?.companionController.setDistractionVisual(visual)
         }
-
-        timerController.configure(actions: FloatingTimerActions(
-            onClose: { [weak self] in self?.timerController.hide() },
-            onPause: { [weak self] in self?.sessionCoordinator.pauseSession() },
-            onResume: { [weak self] in self?.sessionCoordinator.resumeSession() },
-            onStop: { [weak self] in _ = self?.sessionCoordinator.stopSession() }
-        ))
 
         companionController.configure(onTap: { [weak self] in
             self?.restoreTimerPanel()
@@ -192,15 +183,11 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
                 } else if visibleSessionID != snapshot.id {
                     visibleSessionID = snapshot.id
                     timerController.show(
-                        remainingTime: sessionCoordinator.remainingTime,
-                        taskTitle: snapshot.draft.displayTitle,
-                        isPaused: snapshot.status == .paused
+                        remainingTime: sessionCoordinator.remainingTime
                     )
                 } else {
                     timerController.update(
-                        remainingTime: sessionCoordinator.remainingTime,
-                        taskTitle: snapshot.draft.displayTitle,
-                        isPaused: snapshot.status == .paused
+                        remainingTime: sessionCoordinator.remainingTime
                     )
                 }
                 visibleSessionID = snapshot.id
@@ -235,9 +222,7 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
     private func updateTimerPanel() {
         guard sessionCoordinator.snapshot != nil else { return }
         timerController.update(
-            remainingTime: sessionCoordinator.remainingTime,
-            taskTitle: sessionCoordinator.currentTaskTitle,
-            isPaused: sessionCoordinator.isPaused
+            remainingTime: sessionCoordinator.remainingTime
         )
     }
 

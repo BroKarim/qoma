@@ -723,3 +723,16 @@ Semua rekomendasi interview menu bar disetujui pengguna pada 13 Oktober. Bagian 
 
 - Hasil verifikasi 13 Oktober: build Debug berhasil; 18 tes terkait coordinator, catch ledger, dan preferensi lulus tanpa kegagalan. Render AppKit untuk idle, active, paused, dan completed berhasil dan sudah diperiksa secara visual; screenshot tersimpan di `build/menubar-preview/`. Probe render sementara sudah dibersihkan. `git diff --check` bersih.
 - Pengujian klik native (drag ruler, dropdown, Escape, klik luar, multi-monitor/Spaces) belum dilakukan secara langsung; render membuktikan layout, bukan seluruh interaksi window. Suite penuh tidak diulang pada perubahan tampilan ini.
+
+
+## 19. Cancel langsung dan timer mengikuti main — 13 Oktober 2026
+
+Permintaan terbaru pengguna menggantikan konfirmasi Cancel dan pilihan Compact icon pada bagian 18. Branch: `codex/timer-display-main-style-2026-10-13`.
+
+- Cancel pada panel menu bar langsung memanggil Stop tanpa confirmation popup. Error penyimpanan tetap terlihat, dan aturan provisional/banked catch serta finalisasi coordinator tetap berlaku.
+- Menu bar selalu menampilkan MM:SS, tanpa logo Q. Ketika idle, tampil durasi terakhir yang dipilih pada ruler/preset (misalnya 35:00 lalu 10:00), termasuk setelah relaunch. Selama active/paused, countdown sesi menjadi sumber tampilan. Notification preferensi memperbarui teks saat pilihan idle berubah; preferensi Compact icon lama tidak memengaruhi tampilan. Baris pengaturan tersebut menjadi informasi Timer display agar tidak menawarkan opsi yang sudah tidak berlaku.
+- Floating timer kembali memakai `FloatingTimerWindow.swift` dari main: 110 × 62 pt, sudut 18 pt, font Roboto Mono 30 pt, baseline, warna tema, opacity, border, dan efek background lama. View yang sebelumnya mengamati TimerService legacy kini mengamati TimerReadoutModel dari coordinator terbaru, sehingga hanya ada satu clock.
+- `FloatingTimerController` memakai view tersebut dan ukuran constants main; header close/menu actions serta label Paused pada panel floating baru dihapus. Pause/Resume/Cancel dan Show floating timer tetap lewat menu bar; Hide floating timer lewat Settings. Posisi tersimpan, kemampuan drag, dan visibilitas lintas Spaces tetap berlaku. Floating ilustrasi tidak diubah.
+- Tes display mencakup default 25:00, pilihan idle 35:00 → 10:00, prioritas countdown sesi, preferensi icon lama yang diabaikan, serta batas 1–60 menit. Tes coordinator/catch tetap memeriksa aturan Stop dan recovery.
+
+- Verifikasi: build Debug macOS berhasil; 19 tes terkait display/coordinator/catch lulus. Diff floating view terhadap main hanya perubahan model sumber waktu. Pemeriksaan klik native dan screenshot floating runtime belum dilakukan; suite penuh tidak diulang.

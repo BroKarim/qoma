@@ -105,14 +105,13 @@ final class MenuBarController: NSObject {
     func updateTitle(_ title: String) {
         latestTitle = title
         guard let button = statusItem.button else { return }
-        let compact = UserDefaults.standard.object(forKey: AppConstants.MenuBarSettings.compactIconKey) as? Bool ?? true
-        let title = compact ? "" : title
+        let title = Self.displayTitle(sessionTitle: title, defaults: .standard)
         button.title = title
-        button.image = title.isEmpty ? makeStatusIcon() : nil
-        button.imagePosition = title.isEmpty ? .imageOnly : .noImage
+        button.image = nil
+        button.imagePosition = .noImage
         button.font = .monospacedDigitSystemFont(ofSize: 13, weight: .regular)
-        button.setAccessibilityLabel(title.isEmpty ? "Open qyube controls" : "qyube, \(title) remaining")
-        statusItem.length = title.isEmpty ? NSStatusItem.squareLength : NSStatusItem.variableLength
+        button.setAccessibilityLabel("Open qyube controls, \(title)")
+        statusItem.length = NSStatusItem.variableLength
     }
 
     func showCompletion(_ session: FocusSession, catchCount: Int) {
@@ -213,18 +212,10 @@ final class MenuBarController: NSObject {
         }
     }
 
-    private func makeStatusIcon() -> NSImage {
-        let image = NSImage(size: NSSize(width: 16, height: 16), flipped: false) { rect in
-            NSColor.labelColor.setFill()
-            NSBezierPath(roundedRect: rect.insetBy(dx: 1, dy: 1), xRadius: 4, yRadius: 4).fill()
-            let label = NSString(string: "Q")
-            label.draw(at: NSPoint(x: 4, y: 2), withAttributes: [
-                .font: NSFont.monospacedSystemFont(ofSize: 11, weight: .bold),
-                .foregroundColor: NSColor.windowBackgroundColor,
-            ])
-            return true
-        }
-        image.isTemplate = true
-        return image
+    static func displayTitle(sessionTitle: String, defaults: UserDefaults) -> String {
+        guard sessionTitle.isEmpty else { return sessionTitle }
+        let selected = defaults.object(forKey: AppConstants.MenuBarSettings.selectedPresetMinutesKey) as? Int
+            ?? AppConstants.MenuBarSettings.defaultPresetMinutes
+        return QyubeFormat.countdown(TimeInterval(min(60, max(1, selected)) * 60))
     }
 }

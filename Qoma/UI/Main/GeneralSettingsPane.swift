@@ -16,8 +16,6 @@ struct GeneralSettingsPane: View {
     private var autoMuteAfter5Seconds: Bool = true
     @AppStorage(AppConstants.SoundSettings.volumeKey)
     private var soundVolume: Double = AppConstants.SoundSettings.defaultVolume
-    @AppStorage(AppConstants.MenuBarSettings.compactIconKey)
-    private var compactMenuBarIcon: Bool = true
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -130,11 +128,10 @@ struct GeneralSettingsPane: View {
                     subtitle: "Control how Qoma looks in compact top-bar mode.")
 
                 SettingsRow(
-                    title: "Compact icon",
-                    subtitle: "Use smaller menu bar presence for cleaner desktop.")
+                    title: "Timer display",
+                    subtitle: "Shows the selected duration when idle and remaining time while focusing.")
                 {
-                    Toggle("", isOn: $compactMenuBarIcon)
-                        .toggleStyle(.switch)
+                    Text("MM:SS").monospacedDigit().foregroundStyle(.secondary)
                 }
             }
         }
