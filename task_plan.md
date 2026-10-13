@@ -684,3 +684,42 @@ Klik status item selalu membuka/menutup panel menu bar sesuai keadaan idle, acti
 - General dan Appearance memakai kembali pane/kartu/layout lama: quick presets, completion sound, volume, auto-mute, compact icon, opacity, dan tema timer. Focus rules, Hide floating timer, distraction sound, serta reduce companion motion ditambahkan pada struktur kartu yang sama. Preset tersimpan dan compact icon terhubung kembali ke menu bar.
 - Tes regresi mereproduksi kegagalan recovery akibat draft lama sebelum fix, lalu lulus setelah fix: riwayat lama dipertahankan, terminal terselesaikan, dan sesi berikutnya dapat dimulai. Build + suite penuh `xcodebuild test` lulus: 165 tes, 0 gagal. Pemeriksaan decoding format lama juga lulus.
 - Recovery data asli terkonfirmasi sesudah build baru diluncurkan: riwayat lama tetap dapat dibaca, sesi terminal tertahan masuk ke riwayat, dan snapshot terminal sudah dibersihkan. Verifikasi visual melalui otomatisasi native belum selesai: alat UI tidak dapat mengakses build accessory yang tidak memiliki jendela. Tampilan akhir, klik menu bar pada build terbaru, dan interaksi panel masih perlu diperiksa di aplikasi nyata.
+
+
+## 18. Menu bar mengikuti main dengan panel putih — 13 Oktober 2026
+
+### Keputusan dan batas perubahan
+
+Semua rekomendasi interview menu bar disetujui pengguna pada 13 Oktober. Bagian ini menjadi acuan terbaru untuk desain panel dan preset, menggantikan ketentuan menu bar/preset yang berbeda di bagian 17. Implementasi dikerjakan pada branch `codex/menubar-white-ruler-2026-10-13`. Scope: menu bar saja; halaman dan layout aplikasi utama tetap mengikuti hasil perbaikan sebelumnya.
+
+- Baseline source: `main:Qoma/UI/MenuBar/MenuBarView.swift`, `main:Qoma/Managers/MenuBarController.swift`, dan `main:Qoma/Utils/Constants.swift`. Bentuk panel mengikuti main; gambar 1 menjadi acuan idle dan seluruh layout gambar 3 menjadi acuan aktif dengan warna putih. Gambar 2 menjelaskan perubahan preset menjadi cancel/restart.
+- Panel tetap **250 × 138 pt** untuk idle, active, paused, completed, dan recovery error; sudut 12 pt, border tipis, bayangan native, tanpa panah popover. Panel berupa NSPanel borderless/nonactivating seperti main, muncul di bawah ikon dan dibatasi ke layar tempat ikon berada.
+- Background putih lembut, teks gelap, ruler abu-abu, indikator merah. Teks kontrol 13 pt mengikuti main. Countdown aktif 32 pt dengan monospaced digits di kanan bawah.
+
+### Tampilan dan interaksi per state
+
+| State | Ruler dan baris atas | Bagian bawah | Perilaku |
+| --- | --- | --- | --- |
+| Idle | Ruler durasi 1–60 menit; tiga preset tersimpan di bawahnya | start kiri, … kanan | Ruler dapat diklik/diseret dan disesuaikan via accessibility. Pilihan terakhir tersimpan. Default instalasi baru 5/10/25; durasi awal 25. Preferensi yang sudah tersimpan tidak ditimpa. |
+| Active | Ruler progres menuju kiri, cancel/restart kiri, … kanan | pause kiri, countdown besar kanan | Ruler hanya menampilkan progres terhadap durasi awal sesi; tidak dapat mengubah durasi. Start yang berhasil menutup panel dan menampilkan penguin/timer sesuai preferensi. |
+| Paused | Sama seperti active; indikator berhenti | resume kiri, countdown yang berhenti kanan | Pause/Resume memakai clock yang sama; penguin mengikuti state paused yang sudah ada. |
+| Completed | Focus complete dan ringkasan durasi/jumlah tangkapan | start again dan Lihat hasil tangkapan | Panel otomatis terbuka. Start again memakai durasi sesi yang selesai dan snapshot preferensi global terbaru. Hasil membuka Insight untuk sesi tersebut. |
+| Recovery error | Pesan gagal simpan dan Retry saving | … | Hanya muncul ketika finalisasi benar-benar gagal; perlindungan data dan perbaikan kompatibilitas riwayat lama tetap dipakai. |
+
+### Kontrol dan lifecycle
+
+1. Restart mengulang countdown memakai durasi asli, ID sesi yang sama, waktu fokus kumulatif, dan tangkapan tersimpan. Restart dari paused langsung kembali aktif. Ruler yang berjalan bukan picker kedua.
+2. Cancel menampilkan konfirmasi singkat lalu memanggil Stop coordinator. Aturan tangkapan tetap: <5 menit melepas provisional; >=5 menit mempertahankan tangkapan banked. Panel kembali idle setelah penyimpanan berhasil. Kegagalan penyimpanan tetap terlihat dan dapat dipulihkan.
+3. Menu … berisi Open qyube, Settings…, Show floating timer ketika active/paused, Check for Updates… (disabled bila updater unavailable), Contact Us, dan Quit. Tidak ada footer/tombol Open terpisah yang memperbesar panel.
+4. Klik di luar, klik ulang ikon, dan Escape menutup panel tanpa mengubah sesi. Start atau Start again menutup panel hanya setelah berhasil; kegagalan Start tetap terlihat dan pengguna dapat mencoba kembali. Enter menjalankan aksi utama.
+5. Ikon Q/timer di menu bar mengikuti preferensi Compact icon dari main. Start tetap berasal dari satu coordinator terbaru. Clock, recovery, policy global, catch ledger, penguin, floating timer, Quit confirmation, dan analytics tidak diganti dengan engine lama.
+
+### Implementasi dan verifikasi
+
+- `MenuBarView.swift`: struktur ruler/preset main, panel putih, countdown besar, menu tambahan, completion ukuran tetap, Start again dengan durasi sesi sebelumnya, dan pesan error yang tetap mempertahankan state.
+- `MenuBarController.swift`: mengganti NSPopover dengan NSPanel dan pola hosting/posisi/klik luar dari main; menambahkan Escape serta penutupan setelah Start berhasil.
+- `Constants.swift`: default quick presets kembali 5/10/25 tanpa menimpa UserDefaults pengguna.
+- Tes domain tambahan mengunci Restart dari paused: kembali active, mempertahankan UUID dan akumulasi waktu, memakai durasi awal. Render lokal idle/active/paused/completed dipakai untuk pemeriksaan visual tanpa mengubah data pengguna.
+
+- Hasil verifikasi 13 Oktober: build Debug berhasil; 18 tes terkait coordinator, catch ledger, dan preferensi lulus tanpa kegagalan. Render AppKit untuk idle, active, paused, dan completed berhasil dan sudah diperiksa secara visual; screenshot tersimpan di `build/menubar-preview/`. Probe render sementara sudah dibersihkan. `git diff --check` bersih.
+- Pengujian klik native (drag ruler, dropdown, Escape, klik luar, multi-monitor/Spaces) belum dilakukan secara langsung; render membuktikan layout, bukan seluruh interaksi window. Suite penuh tidak diulang pada perubahan tampilan ini.

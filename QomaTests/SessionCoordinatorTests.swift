@@ -122,6 +122,25 @@ struct SessionCoordinatorTests {
     }
 
     @Test
+    func restartFromPauseResumesSameSessionWithOriginalDuration() {
+        let repositories = makeRepositories()
+        defer { cleanup(repositories) }
+        let start = Date()
+        var current = start
+        let coordinator = makeCoordinator(repositories: repositories) { current }
+        let first = coordinator.startSession(draft: SessionDraft(plannedMinutes: 25))!
+        current = start.addingTimeInterval(40)
+        coordinator.pauseSession()
+        current = start.addingTimeInterval(100)
+        #expect(coordinator.restartSession())
+        #expect(coordinator.isActive)
+        #expect(!coordinator.isPaused)
+        #expect(coordinator.snapshot?.id == first.id)
+        #expect(coordinator.snapshot?.accumulatedActiveSeconds == 40)
+        #expect(coordinator.remainingTime == 1500)
+    }
+
+    @Test
     func stopBeforeFiveMinutesDiscardsProvisionalCatch() {
         let accountID = UUID().uuidString
         let repositories = makeRepositories()
