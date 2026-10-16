@@ -3,29 +3,46 @@ import SwiftUI
 struct QyubeAboutSettingsPane: View {
     private var version: String {
         let value = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
-        return "Version \(value)"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "—"
+        return "Version \(value) (\(build))"
     }
 
     var body: some View {
-        Form {
-            Section {
-                HStack(spacing: 18) {
-                    Image("CompanionPoseFishing")
-                        .resizable().scaledToFit()
-                        .frame(width: 74, height: 74)
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text("qyube").font(.title.bold())
-                        Text(version).foregroundStyle(.secondary)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 28) {
+                JournalPageHeader(
+                    eyebrow: "A CALMER FOCUS AHEAD",
+                    title: "About",
+                    subtitle: "A small companion for focused work.")
+                SettingsSurfaceCard {
+                    VStack(alignment: .leading, spacing: 18) {
+                        HStack(spacing: 24) {
+                            Image("CompanionPoseFishing").resizable().scaledToFit().frame(width: 100, height: 110)
+                                .accessibilityHidden(true)
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("qyube").font(.system(size: 36, design: .serif))
+                                Text(self.version).font(.system(size: 12)).foregroundStyle(.secondary)
+                            }
+                        }
+                        Divider()
+                        Text("Make room for focused work, one quiet moment at a time.")
+                            .font(.system(size: 21, design: .serif))
+                        Text(
+                            "Focus with a fishing companion, revisit your day, and collect little finds along the way. "
+                                + "Your focus history and collection are stored on this Mac.")
+                            .font(.system(size: 13)).foregroundStyle(.secondary).lineSpacing(5)
                     }
                 }
-            }
-            Section("About") {
-                Text("A small fishing companion for focused work on your Mac.")
-                    .foregroundStyle(.secondary)
-            }
+                SettingsSurfaceCard {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("A little help").font(.system(size: 23, design: .serif))
+                        Divider()
+                        Link("Contact support", destination: URL(string: "mailto:support@qoma.app")!)
+                        Text("Made for quieter days and moments well spent.")
+                            .font(.system(size: 13, design: .serif)).foregroundStyle(.secondary)
+                    }
+                }
+            }.padding(28).padding(.top, 12)
         }
-        .formStyle(.grouped)
-        .scrollContentBackground(.hidden)
-        .contentMargins(.top, 8, for: .scrollContent)
     }
 }

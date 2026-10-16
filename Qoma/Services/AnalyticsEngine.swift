@@ -35,8 +35,7 @@ final class AnalyticsEngine {
             bestDay: bestDay,
             bestDaySeconds: bestDaySeconds,
             topApps: self.buildTopApps(from: appEvents),
-            topDomains: self.buildTopDomains(from: webVisits)
-        )
+            topDomains: self.buildTopDomains(from: webVisits))
     }
 
     // MARK: - Heatmap
@@ -57,7 +56,7 @@ final class AnalyticsEngine {
         var daySessionCounts: [Date: Int] = [:]
         for session in sessions {
             let day = calendar.startOfDay(for: session.startedAt)
-            if day >= actualStart && day <= today {
+            if day >= actualStart, day <= today {
                 dayTotals[day, default: 0] += session.actualFocusSeconds
                 daySessionCounts[day, default: 0] += 1
             }
@@ -159,8 +158,7 @@ final class AnalyticsEngine {
                 sessionCount: sessions.count,
                 topApps: Array(topApps),
                 topDomains: Array(topDomains),
-                heatmapScore: Self.intensityLevel(for: focusSeconds)
-            ))
+                heatmapScore: Self.intensityLevel(for: focusSeconds)))
 
             currentDate = calendar.date(byAdding: .day, value: 1, to: currentDate)!
         }
@@ -196,8 +194,7 @@ final class AnalyticsEngine {
                 kind: .app,
                 name: event.appName,
                 detail: event.windowTitle,
-                seconds: event.durationSeconds
-            ))
+                seconds: event.durationSeconds))
         }
 
         for visit in dayWeb {
@@ -208,8 +205,7 @@ final class AnalyticsEngine {
                 kind: .website,
                 name: visit.domain,
                 detail: visit.pageTitle,
-                seconds: visit.durationSeconds
-            ))
+                seconds: visit.durationSeconds))
         }
 
         return entries.sorted { $0.startedAt < $1.startedAt }
@@ -223,8 +219,15 @@ final class AnalyticsEngine {
         endDate: Date? = nil,
         limit: Int = 10) -> [AnalyticsBreakdownItem]
     {
-        let filteredEvents = appEvents.filter { event in
-            Self.isWithinRange(event.startedAt, startDate: startDate, endDate: endDate)
+        let filteredEvents = appEvents.compactMap { event -> AppActivityEvent? in
+            var clipped = event
+            clipped.durationSeconds = Self.clippedDuration(
+                start: event.startedAt,
+                end: event.endedAt,
+                duration: event.durationSeconds,
+                rangeStart: startDate,
+                rangeEnd: endDate)
+            return clipped.durationSeconds > 0 ? clipped : nil
         }
 
         return self.buildBreakdownItems(
@@ -241,8 +244,15 @@ final class AnalyticsEngine {
         endDate: Date? = nil,
         limit: Int = 10) -> [AnalyticsBreakdownItem]
     {
-        let filteredVisits = webVisits.filter { visit in
-            Self.isWithinRange(visit.startedAt, startDate: startDate, endDate: endDate)
+        let filteredVisits = webVisits.compactMap { visit -> WebsiteVisitRecord? in
+            var clipped = visit
+            clipped.durationSeconds = Self.clippedDuration(
+                start: visit.startedAt,
+                end: visit.endedAt,
+                duration: visit.durationSeconds,
+                rangeStart: startDate,
+                rangeEnd: endDate)
+            return clipped.durationSeconds > 0 ? clipped : nil
         }
 
         return self.buildBreakdownItems(
@@ -252,6 +262,18 @@ final class AnalyticsEngine {
             bundleIdKey: nil,
             limit: limit,
             isWebsite: true)
+    }
+
+    private static func clippedDuration(
+        start: Date, end: Date?, duration: Double, rangeStart: Date?, rangeEnd: Date?) -> Double
+    {
+        guard duration.isFinite, duration > 0 else { return 0 }
+        let finish = end ?? start.addingTimeInterval(duration)
+        let span = finish.timeIntervalSince(start)
+        guard span > 0 else { return 0 }
+        let lower = max(start, rangeStart ?? start)
+        let upper = min(finish, rangeEnd ?? finish)
+        return duration * max(0, upper.timeIntervalSince(lower)) / span
     }
 
     // MARK: - Helpers
@@ -272,7 +294,7 @@ final class AnalyticsEngine {
             currentDay = calendar.date(byAdding: .day, value: -1, to: currentDay)!
         }
 
-        if streak == 0 && uniqueDays.contains(calendar.date(byAdding: .day, value: -1, to: today)!) {
+        if streak == 0, uniqueDays.contains(calendar.date(byAdding: .day, value: -1, to: today)!) {
             currentDay = calendar.date(byAdding: .day, value: -1, to: today)!
             while uniqueDays.contains(currentDay) {
                 streak += 1
@@ -345,14 +367,13 @@ final class AnalyticsEngine {
                     groupedItems.first?[keyPath: key]
                 }
 
-                var iconData: Data?
-                if isWebsite {
+                var iconData: Data? = if isWebsite {
                     // For websites, try to get a favicon asynchronously later,
                     // but for now return nil so the view shows the letter fallback.
                     // A real favicon fetch can be done in the view layer or pre-warmed.
-                    iconData = nil
+                    nil
                 } else {
-                    iconData = bundleID.flatMap { IconUtils.getAppIconAsPNG(for: $0) }
+                    bundleID.flatMap { IconUtils.getAppIconAsPNG(for: $0) }
                 }
 
                 return AnalyticsBreakdownItem(

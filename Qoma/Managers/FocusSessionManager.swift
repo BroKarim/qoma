@@ -61,8 +61,7 @@ final class FocusSessionManager: ObservableObject {
                 actualFocusSeconds: 0,
                 sessionMode: .quickSession,
                 taskTitle: task,
-                taskPlanId: nil
-            )
+                taskPlanId: nil)
             self.activeSessionRecord = sessionRecord
             self.activityTracker.startTracking(sessionID: sessionRecord.id)
         }
@@ -73,7 +72,7 @@ final class FocusSessionManager: ObservableObject {
 
     func stop() {
         let activeSeconds = self.timerService.elapsedTime(totalDuration: self.duration)
-        finalizeAnalyticsSession(completed: false, interruptedReason: "User stopped")
+        self.finalizeAnalyticsSession(completed: false, interruptedReason: "User stopped")
         self.soundAlertPlayer.stop()
         // Suppress the synchronous zero-time publisher before intentionally stopping.
         self.completionHandled = true
@@ -117,7 +116,7 @@ final class FocusSessionManager: ObservableObject {
         switch self.state.phase {
         case .focus:
             if self.state.mode == .quickSession {
-                finalizeAnalyticsSession(completed: true)
+                self.finalizeAnalyticsSession(completed: true)
             }
             self.prepareBreak(type: .short)
             WindowManager.shared.completeCompanion()
@@ -189,27 +188,25 @@ final class FocusSessionManager: ObservableObject {
         let defaults = UserDefaults.standard
         let selectedSoundID = defaults.string(forKey: AppConstants.SoundSettings.selectedSoundKey)
             ?? AppConstants.SoundSettings.defaultSoundID
-        let autoMuteAfter5Seconds =
-            defaults.object(forKey: AppConstants.SoundSettings.autoMuteAfter5SecondsKey) as? Bool
-                ?? true
         let soundVolume = defaults.object(forKey: AppConstants.SoundSettings.volumeKey) as? Double
             ?? AppConstants.SoundSettings.defaultVolume
 
         self.soundAlertPlayer.play(
             soundID: selectedSoundID,
-            volume: soundVolume,
-            autoMuteAfter5Seconds: autoMuteAfter5Seconds)
+            volume: soundVolume)
     }
 }
 
 @MainActor
-private final class SoundAlertPlayer {
+final class SoundAlertPlayer {
+    static let shared = SoundAlertPlayer()
     private var player: AVAudioPlayer?
     private var autoMuteWorkItem: DispatchWorkItem?
 
-    func play(soundID: String, volume: Double, autoMuteAfter5Seconds: Bool) {
+    func play(soundID: String, volume: Double) {
         self.stop()
 
+        guard soundID != "off" else { return }
         guard let option = AppConstants.SoundSettings.options.first(where: { $0.id == soundID }) else {
             Logger.sound.error("Unknown sound id: \(soundID, privacy: .public)")
             return
@@ -242,7 +239,7 @@ private final class SoundAlertPlayer {
             return
         }
 
-        guard autoMuteAfter5Seconds else { return }
+        // Completion alerts are always short, including previously saved auto-mute=false preferences.
 
         let workItem = DispatchWorkItem { [weak self] in
             self?.stop()

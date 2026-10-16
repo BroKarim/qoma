@@ -1,12 +1,14 @@
 # qyube — Rencana Implementasi macOS (Alur Kiki, Identitas qyube)
 
-**Status:** kontrak implementasi untuk AI agent; belum ada perubahan kode pada sesi perencanaan ini.
+**Status:** main UI diimplementasikan pada 16 Oktober 2026; bagian 21 mencatat hasil dan pengecualian terhadap rencana bagian 20. Login produksi serta data berat individu belum diaktifkan.
 
 **Branch implementasi awal:** `codex/kiki-flow-core`.
 
 **Branch audit dan perbaikan UI:** `codex/qyube-ui-rework`.
 
-**Diperbarui:** 1 Oktober 2026.
+**Diperbarui:** 16 Oktober 2026 (Asia/Jakarta).
+
+**Branch perencanaan terbaru:** `codex/main-ui-plan-2026-10-16`; baseline tersimpan pada commit `6f29b0d` di `codex/floating-timer-soft-panel`.
 
 **Fokus:** macOS lebih dulu. Rancangan iOS tetap pekerjaan lanjutan.
 **Nama target kode saat ini:** `Qoma`; nama produk yang dituju: `qyube`.
@@ -736,3 +738,187 @@ Permintaan terbaru pengguna menggantikan konfirmasi Cancel dan pilihan Compact i
 - Tes display mencakup default 25:00, pilihan idle 35:00 → 10:00, prioritas countdown sesi, preferensi icon lama yang diabaikan, serta batas 1–60 menit. Tes coordinator/catch tetap memeriksa aturan Stop dan recovery.
 
 - Verifikasi: build Debug macOS berhasil; 19 tes terkait display/coordinator/catch lulus. Diff floating view terhadap main hanya perubahan model sumber waktu. Pemeriksaan klik native dan screenshot floating runtime belum dilakukan; suite penuh tidak diulang.
+
+## 20. Rencana main app berdasarkan prototype — 16 Oktober 2026
+
+### Status, prioritas, dan referensi
+
+Ini rencana pekerjaan berikutnya, belum implementasi UI. Commit `6f29b0d` menyimpan seluruh perubahan saat ini, termasuk floating timer Soft Panel/Liquid Glass, perubahan menu bar yang sudah berada di worktree, dan file prototype. Pembaruan dokumen dikerjakan pada branch `codex/main-ui-plan-2026-10-16` setelah commit tersebut. Catatan pribadi dan hasil implementasi terdahulu tetap dipertahankan sebagai riwayat; keputusan di bagian ini menggantikan ketentuan navigasi, isi Settings, dan pemisahan Insight/Calendar yang berbeda di atas.
+
+| Halaman | Prototype yang dipakai |
+|---|---|
+| Analytics | [a-cozy-journal.png](output/imagegen/analytics-concepts/a-cozy-journal.png) |
+| Daily Catches, bagian dari Analytics | [c-ledger.png](output/imagegen/daily-catches-concepts/c-ledger.png) |
+| Catalog | [catalog-collectors-desk-v1.png](output/imagegen/catalog-concepts/catalog-collectors-desk-v1.png) |
+| Settings | [settings-cozy-journal-v1.png](output/imagegen/settings-concepts/settings-cozy-journal-v1.png) |
+| About | Belum ada prototype yang dipilih |
+
+Sidebar memiliki tepat empat route: **Analytics, Catalog, Settings, About**, tanpa gambar. Analytics menjadi halaman awal. Insight dan Calendar dihapus dari navigasi setelah seluruh caller hasil tangkapan berpindah. Jangan menganggap isi/data contoh dalam gambar sebagai data produksi atau mengembalikan fitur yang sudah dibatalkan hanya karena masih terlihat pada prototype lama.
+
+### A. Kontrak fungsi dan hubungan data
+
+Nama fungsi baru di bawah adalah **usulan**, bukan klaim bahwa API-nya sudah tersedia. Utamakan mengubah fungsi yang ada daripada membuat store, repository, atau coordinator kedua.
+
+```text
+SessionCoordinator → SessionRepository / CatchRepository
+ActivityTracker → AnalyticsStore (app activity + website visits)
+                         ↓
+QyubeNavigation.refresh() + pemuatan dashboard untuk accountID yang sama
+                         ↓
+riwayat digabung berdasarkan UUID + catch banked dideduplikasi berdasarkan event ID
+  ├─ AnalyticsEngine.buildHeatmapCells() → pilihan tanggal
+  ├─ selectedDay → interval harian → ringkasan + top apps + top websites
+  ├─ interval harian + depositedAt → Daily Catches + urutan waktu
+  └─ semua catch banked → Catalog counts + discovery progress
+
+Settings → preferensi tersimpan → timer / audio / companion
+Account → identitas akun + access state → accountID untuk pembacaan dan sesi berikutnya
+About → versi aplikasi + tautan informasi
+```
+
+- `SessionCoordinator` tetap pemilik clock, catch lifecycle, Restart, Stop, completion, dan recovery. Redesign tidak mengganti engine sesi, probabilitas rarity, ambang banking lima menit, atau idempotensi persistence.
+- `QyubeNavigation.refresh()` sekarang membaca accountID literal `local`; dashboard juga membaca repository langsung dengan literal yang sama. Saat integrasi akun dibuat, kedua jalur harus menerima identitas yang konsisten. Jangan memindahkan data `local` diam-diam ke akun yang baru login.
+- `AnalyticsStore` menyimpan data legacy dan aktivitas; `SessionRepository` menyimpan sesi baru. Pertahankan merge berdasarkan UUID seperti `makeStoredData()` saat ini, dengan record repository baru mengungguli duplikat legacy. Jangan menjumlahkan dua representasi sesi yang sama.
+- Refresh setelah finalisasi/deposit yang benar-benar tersimpan, ketika membuka halaman, dan ketika konteks akun berubah. Tanggal yang dipilih tidak di-reset setiap refresh. Satu pembaruan konsisten memberi data ke semua bagian halaman, tanpa masing-masing komponen membaca disk pada setiap render.
+- Bedakan loading, data kosong, izin situs belum diberikan, dan kegagalan baca. Jangan menyamarkan kegagalan baca sebagai koleksi kosong; API repository yang saat ini hanya mengembalikan array perlu ditinjau pada jalur yang akan menampilkan error.
+
+### B. Navigasi dan akses hasil tangkapan
+
+1. Ubah `QyubeNavigation.Page` serta switch detail `QyubeHomeView` menjadi empat route final. Hilangkan state `settingsTab`; Settings tidak lagi memiliki General/Appearance/About tabs. About memakai route sendiri.
+2. Ubah fungsi existing `showCatches(for:)`: refresh data, pindah ke Analytics, pilih hari dari hasil sesi, lalu scroll ke Daily Catches. Jangan lagi menunjuk `.insight` atau bergantung pada `selectedResult` untuk merender halaman yang dihapus.
+3. Untuk sesi lintas tengah malam, usulan tujuan tautan adalah hari `depositedAt` tangkapan banked terbaru milik sesi itu; bila tidak ada, gunakan `endedAt ?? startedAt`. Tandai perilaku ini dalam tes navigasi. Tautan tetap menunjukkan seluruh hasil pada hari terpilih, bukan filter sesi tersembunyi.
+4. Caller pada panel completed menu bar dan `QyubeAppCoordinator` harus ikut diperbarui. `SettingsWindowController.compactSettingsAction`, menu Settings, dan `⌘,` membuka route Settings yang sama. About dibuka dari sidebar; tidak membentuk instance jendela utama baru.
+5. Menutup jendela utama tidak menghentikan sesi atau menghilangkan companion. Launch/menu bar/Dock tetap mengikuti perilaku yang sudah bekerja. Hapus source Insight/Calendar hanya setelah pencarian caller dan penggantian route selesai; record historis tidak dihapus.
+
+### C. Analytics: semua detail mengikuti tanggal terpilih
+
+**Fungsi existing yang dipakai ulang:** `loadData()`, `makeStoredData()`, `syncSelectedDay(using:)`, `selectedDaySessions(in:)`, `selectedDayApps(in:)`, `selectedDayDomains(in:)`, serta `AnalyticsEngine.buildHeatmapCells`, `buildTopApps`, dan `buildTopDomains`.
+
+**Fungsi/perilaku yang harus dibuat atau disesuaikan:**
+
+| Fungsi usulan / existing | Input → output dan tanggung jawab |
+|---|---|
+| `selectDay(_:)` | Tanggal dari heatmap atau route hasil → normalisasi awal hari, simpan pilihan, perbarui seluruh detail secara bersamaan. Default pertama hari ini; hari kosong tetap boleh dipilih. |
+| `dayInterval(for:calendar:)` | Tanggal + kalender → interval `[startOfDay, nextStartOfDay)`. Gunakan perhitungan kalender, bukan menambah 86.400 detik. |
+| `makeStoredData()` | Sesi legacy + sesi repository + aktivitas + catch banked akun → input dashboard konsisten tanpa duplikasi. Tambahkan catch ke model dashboard yang ada, bukan database analytics baru. |
+| `buildDaySummary(...)` | Sesi dalam hari terpilih → total fokus, jumlah sesi, completed, interrupted. Gunakan aturan atribusi sesi yang konsisten dengan heatmap. |
+| `selectedDayApps` / `selectedDayDomains` | Aktivitas yang beririsan dengan interval → ranking harian; potong durasi di batas hari agar waktu dari hari lain tidak masuk. Pastikan predicate existing tidak kehilangan event yang mulai sebelum tengah malam. |
+| `selectedDayCatches(...)` | Catch banked + interval → event dengan `depositedAt >= start && depositedAt < end`; jangan memakai tanggal banking sebagai tanggal tangkapan. |
+| `buildDailyCatchRows(...)` | Event harian → kelompok per `kindID`, nama/rarity/art dari CatalogDefinitions, jumlah, jam pertama/terakhir, dan daftar event terurut. Jumlah seluruh kelompok harus sama dengan jumlah event harian unik. |
+| `toggleCatchHistory(...)` | Kelompok terpilih → buka/tutup riwayat berbasis waktu; tidak membutuhkan nama sesi, judul tugas, atau pengelompokan per sesi. |
+
+**Aturan hasil harian:**
+
+- Focus Activity boleh merangkum beberapa bulan sebagai pemilih hari. Semua angka ringkasan, breakdown, dan Daily Catches di bawahnya hanya untuk satu hari terpilih. Tidak ada filter Week/Month/Year, perbandingan periode, statistik all-time, atau progress koleksi keseluruhan pada Analytics.
+- Ringkasan sesi mengikuti baseline existing: sesi diatribusikan ke tanggal `startedAt`, termasuk total `actualActiveSeconds` sesi tersebut. Heatmap dan ringkasan harus memakai aturan sama; jangan membagi durasi sesi lintas hari secara tebakan karena record ringkasan tidak menyimpan seluruh segmen aktif/pause. Aktivitas aplikasi/situs tetap dipotong ke interval harian. Perbedaan ini perlu diuji dan dijelaskan lewat label bila membingungkan pengguna.
+- Daily Catches ditempatkan setelah Daily Breakdown (Top Apps dan Top Websites), mengikuti prototype `c-ledger.png`. Tampilkan count per jenis dan jam tangkapan; pengurutan waktu stabil dengan ID sebagai tie-breaker. Provisional yang belum banked tidak masuk analytics maupun Catalog. Banking terlambat boleh menambah hasil hari deposit sebelumnya setelah refresh.
+- Hari tanpa sesi tetap menampilkan angka nol dan empty state yang sesuai; jangan otomatis mengganti pilihan menjadi hari terakhir aktif. Hari dengan catch tetapi tanpa sesi yang terbaca tetap menampilkan catch yang benar, sambil menangani error sumber sesi secara terpisah.
+- Analytics dan Catalog memakai lookup jenis/art/rarity yang sama. Unknown `kindID` dari data lama tidak boleh crash atau menghilang tanpa penjelasan; gunakan label netral dan placeholder khusus.
+- Hilangkan bagian Insight yang menduplikasi statistik; riwayat detail yang masih dibutuhkan ditampung dalam hasil harian. Tidak perlu nama sesi baru. Judul historis tetap tersimpan tanpa menjadi syarat tampilan.
+
+### D. Catalog: koleksi keseluruhan dan berat ikan
+
+**Existing:** `CatalogView.counts`, `kinds`, filter All/Fish/Ocean finds, detail sheet, `CatalogDefinitions.allKinds`, `kind(id:)`, dan `CatchRepository.listBanked` / `countByKind`.
+
+1. Bentuk card dari definisi semua jenis, lalu gabungkan count event banked akun. Fungsi usulan `buildCatalogItems(kinds:catches:)` menghasilkan identity jenis, discovered, count, rarity, art, dan berat bila ada. Ini transformasi presentasi; tidak mengubah ledger atau roll engine.
+2. `discoveryProgress(...)` menghitung jumlah jenis dikenal dengan count > 0 dibanding total definisi, bukan jumlah individu ikan. Filter kategori tidak mengubah denominator progress keseluruhan. Jenis lama yang belum dikenal tidak menambah denominator secara sembarang.
+3. Jenis ditemukan menampilkan nama, berat ikan jika tersedia, jumlah tangkapan, dan rarity. Jenis belum ditemukan memakai siluet hitam art jenis yang sama dan nama `???`; jangan membocorkan nama/berat/rarity melalui detail sheet, tooltip, atau accessibility label.
+4. Art ikan tampak atas tanpa mata; art unik dipetakan berdasarkan `kindID`, digunakan bersama oleh Catalog dan Daily Catches. Siluet dibuat dari alpha asset yang sama agar bentuk cocok. Jangan memakai satu gambar ikan yang sama untuk semua spesies seperti placeholder existing. Ketersediaan asset final merupakan pekerjaan terpisah dari mockup halaman.
+5. `rarityColor(_:)` atau pemetaan existing menjadi satu sumber warna nama, disertai label rarity agar informasi tidak hanya mengandalkan warna. Data rarity tetap mengikuti `CatalogDefinitions`, bukan ditebak dari warna gambar.
+6. **Berat belum diputuskan.** `CatchEvent` dan `Kind` saat ini tidak memiliki field berat. Angka kilogram di prototype adalah contoh. Sebelum implementasi data berat, pilih apakah card menunjukkan berat tetap spesies, catch terakhir, atau rekor terberat; jangan menganggap mockup menetapkan salah satunya.
+7. Bila berat per individu dipilih, tambahkan field opsional yang kompatibel dengan record lama, tentukan distribusi/batas per jenis, roll sekali saat identitas catch ditetapkan, simpan bersama event, lalu gunakan kembali setelah banking/recovery. Dilarang random ulang saat render, refresh, atau login. Data lama tanpa berat tampil `—`; jangan mengarang backfill. Bila berat tetap spesies dipilih, cukup metadata Kind dan tidak perlu migrasi event.
+8. Ocean finds tetap koleksi yang bisa difilter; jangan memaksakan satuan kg ikan pada batu/kayu/kerang tanpa keputusan produk. Detail card, bila dipertahankan, membaca model yang sama sehingga count dan discovery tidak berbeda dari grid.
+
+### E. Settings: satu halaman, preferensi yang benar-benar terhubung
+
+| Kelompok | Fungsi dan hubungan |
+|---|---|
+| Account | Menampilkan status login, nama/email nyata bila tersedia, aksi login/logout, loading/error/retry; detail integrasi di bagian F. |
+| Sound | Pilih suara akhir sesi termasuk Off, atur volume, dan preview memakai player yang sama dengan completion. Hentikan preview sebelumnya sebelum memutar baru; clamp volume ke 0...1. Suara berhenti otomatis paling lambat lima detik. |
+| Floating timer | Show floating timer adalah invers dari `FocusPreferences.hideFloatingTimer`; perubahan berlaku langsung pada panel existing. Warna angka memakai key tema existing dan preview. Liquid Glass memakai key existing dan hanya tersedia pada macOS 26+; sistem lebih lama selalu memakai panel solid. |
+| Comfort | Reduce motion memakai preferensi existing dan diterapkan pada companion serta cue distraksi; menghormati pengaturan aksesibilitas sistem. |
+
+- Gabungkan pemakaian preferensi dari `GeneralSettingsPane`, `AppearanceSettingsPane`, dan wrapper `QyubeGeneralSettingsPane` ke satu route. Pertahankan key penyimpanan yang relevan dan default pengguna; jangan membuat state terpisah yang hanya mengubah preview.
+- Hapus kontrol Quick presets, informasi Timer display, Opacity, serta toggle Auto mute. Menghapus editor preset tidak menghapus preset menu bar atau nilai lama yang telah disimpan; panel menu bar masih membaca nilai existing, default instalasi baru tetap 5/10/25. Menghapus Opacity membuat timer solid benar-benar menggunakan opacity tetap 1; nilai lama boleh tetap tersimpan tetapi tidak boleh menyisakan panel transparan yang tak lagi bisa diatur.
+- Auto mute lima detik menjadi perilaku tetap untuk preview dan completion, termasuk pengguna yang pernah menyimpan `false`. Pilihan Off harus mencegah pemutaran suara, bukan hanya menyetel volume UI menjadi nol. Pilihan suara mockup seperti Soft bell tidak menjamin asset tersedia; gunakan asset berlisensi yang ada atau sediakan asset sebelum menampilkan pilihan baru.
+- Audit `CompletionSoundPlayer` di `FocusSessionManager.swift` dan alur `QyubeAppCoordinator.onSessionEnded`. Player existing berada di jalur manager legacy; pastikan sesi coordinator baru memutar completion tepat sekali tanpa menghidupkan clock legacy. Playback terjadi setelah finalisasi berhasil; restore record terminal tidak boleh mengulang alarm setiap launch.
+- Liquid Glass sudah diimplementasikan pada baseline; pakai kembali availability guard dan `FloatingTimerView`, jangan menambahkan panel/clock baru. Preferensi warna, visibility, glass, motion, dan volume berlaku segera tanpa restart sesi. Peninggalan glass=true pada macOS lama harus diabaikan dengan aman.
+- **Akses Focus rules harus tetap ada sampai penggantinya berfungsi.** Prototype Settings tidak menampilkannya, tetapi implementasi saat ini mengatur policy global di Settings dan menu bar belum memiliki editor pengganti. Sebelum menghapus section itu, pindahkan pengaturan Allowing/Blocking/Timer Only serta daftar app/domain ke akses konfigurasi yang jelas dari menu bar, memakai `FocusPreferences` yang sama. Tidak membuat halaman sidebar kelima. Jika tujuan kontrol belum disepakati, pertahankan akses existing sementara dan catat sebagai keputusan implementasi yang belum final.
+- Policy baru tetap menjadi snapshot untuk Start berikutnya, tidak mengubah sesi aktif. Preferensi distraction sound yang tidak muncul pada prototype juga tidak boleh diam-diam menjadi suara yang tak bisa dimatikan: tetapkan hubungannya dengan Off/volume atau pertahankan kontrol existing sampai diputuskan. Jangan menghapus kemampuan tanpa memeriksa caller.
+
+### F. Account: login/logout sederhana, integrasi nyata terpisah dari mockup
+
+**Fakta baseline:** `Qoma/Auth/AccessCoordinator.swift` adalah stub lokal yang mengembalikan state akses. Ada `AccessState`, tetapi belum ada API login/logout, profil pengguna, atau penyimpanan token produksi. AccountID repository dan coordinator masih `local`. Nama/email pada prototype hanya contoh.
+
+| Fungsi usulan | Kontrak |
+|---|---|
+| `restoreAccount()` | Baca credential dari Keychain, validasi/refresh melalui layanan akun, hasilkan signedOut/signedIn/loading/error; jangan menganggap state stub sebagai bukti autentikasi. |
+| `signIn()` | Buka alur web Google/Apple yang sudah direncanakan; validasi callback/state/PKCE, simpan token aman, lalu muat profil dan refresh access. Cancel kembali ke state sebelumnya; error dapat dicoba lagi. |
+| `signOut()` | Akhiri autentikasi dan hapus credential sesuai hasil layanan, bersihkan profil/cache presentasi akun, lalu tampilkan signedOut. Jangan menghapus riwayat/catch lokal. |
+| `refreshAccountContext()` | Sesudah login/logout → selaraskan accountID pembacaan, access gate, dan coordinator untuk sesi berikutnya; reset pilihan/detail akun sebelumnya agar tidak bocor antar akun. |
+
+- Hubungkan fungsi di lapisan akun existing bila memungkinkan, tanpa membuat sistem billing/sync baru. Tampilkan login ketika signedOut dan nama/email + logout ketika signedIn. Jangan tampilkan Synced, paket subscription, atau keberhasilan palsu dari tombol yang hanya mengubah Boolean lokal.
+- Backend URL, callback scheme/universal link, konfigurasi provider, profil dan refresh/revoke endpoint adalah dependensi yang harus ditetapkan sebelum login produksi dinyatakan selesai. Bagian ini tidak mengotorisasi pembuatan layanan berbayar atau perubahan paket Stripe.
+- Saat sesi active/paused, logout atau perpindahan akun harus menunggu sesi diselesaikan/dihentikan lewat coordinator; jangan mengganti accountID sesi yang sedang berjalan. Beri penjelasan singkat bila aksi ditunda. Finalisasi dan ledger tetap milik akun awal sesi.
+- Migrasi koleksi `local` ke akun belum ditentukan; jangan menyalin/menggabungkan otomatis atau memperlihatkan riwayat satu akun ke akun lain. Penyimpanan aktivitas AnalyticsStore saat ini tidak dipartisi akun sehingga perlu batas akun yang nyata sebelum dukungan banyak akun produksi. Tetapkan ownership/migrasi eksplisit dan tes isolasi sebelum mengaktifkan perpindahan akun dengan data nyata.
+- Login tidak otomatis mengaktifkan sinkronisasi iCloud. Kontrak trial/billing lama tidak diubah oleh redesign ini; implementasi autentikasi/gate tetap perlu keputusan layanan yang sudah disebut di bagian terdahulu.
+
+### G. About: route keempat
+
+- Pindahkan isi `QyubeAboutSettingsPane` menjadi halaman About tersendiri; tampilkan identitas aplikasi, deskripsi singkat, versi/build dari Bundle, dan tautan Privacy Policy serta bantuan/contact yang memang tersedia. Jangan menulis versi hardcoded atau mengarang alamat layanan.
+- Fungsi usulan `openAboutLink(_:)` memakai pembukaan URL platform dengan URL konfigurasi yang valid. Link yang belum tersedia tidak tampil sebagai aksi aktif palsu. Tidak perlu profil, statistik, achievement, atau pengaturan tambahan untuk mengisi halaman.
+- Check for Updates dapat memakai updater yang sudah tersedia; jangan memasang Sparkle atau jalur distribusi baru hanya untuk redesign About. Jangan duplikasi seluruh About di footer Settings.
+
+### H. Peta perubahan dan urutan pengerjaan
+
+| Tahap | File/caller yang harus dijangkau | Hasil yang harus dapat diperiksa |
+|---|---|---|
+| 1. Data harian dan route | `QyubeHomeView.swift`, `QyubeAppCoordinator.swift`, `MenuBarView.swift`, `AnalyticsDashboardView.swift`, `AnalyticsEngine.swift`, model analytics, repository sesi/catch | Empat route, pemilihan tanggal yang stabil, hasil menu bar menuju Daily Catches hari yang tepat, merge legacy tanpa duplikasi. |
+| 2. Analytics + Daily Catches | Dashboard, `AnalyticsHeatmapView`, `AnalyticsBreakdownView`, komponen catch harian seperlunya | Ringkasan/breakdown/catches hanya hari terpilih; ledger waktu tanpa nama sesi; empty/error/permission states. |
+| 3. Catalog | `CatalogView.swift`, `CatalogDefinitions.swift`, `QyubeCatchArt` dan asset catalog; `CatchEvent`/engine/repository hanya bila keputusan berat membutuhkannya | Filter, discovery, count, rarity, art tampak atas, siluet, dan kontrak berat yang telah dikunci. |
+| 4. Settings | Shell Settings, pane General/Appearance, `FocusPreferences`, `Constants.swift`, `FloatingTimerWindow.swift`, completion audio dan companion | Satu halaman dengan preferensi efektif, availability Glass, penghapusan kontrol yang aman, akses rules tetap berfungsi. |
+| 5. Account | `AccessCoordinator.swift`, lifecycle AppDelegate/QomaApp untuk callback, repository scope dan coordinator injection | Login/logout nyata setelah dependensi backend tersedia; isolasi akun dan perlindungan sesi aktif. UI akun tidak dianggap integrasi selesai sebelum ini. |
+| 6. About + pembersihan | About pane/route, semua caller Insight/Calendar/tab Settings lama, project resources | About terpisah; tidak ada route yatim atau penghapusan data. Source lama dihapus setelah pengganti lengkap. |
+
+Jangan menambah dependency untuk transformasi grouping, filter, formatter, atau penyimpanan preferensi sederhana. Pisahkan commit fungsi dari asset bila membantu review. Asset ikan final, keputusan berat, backend autentikasi, tujuan editor rules, dan kontrol distraction sound dicatat sebagai dependensi spesifik; pekerjaan data harian/navigasi yang independen dapat berjalan lebih dahulu.
+
+### I. Validasi dan kriteria selesai
+
+- Tes agregasi: merge UUID legacy/baru; hari kosong; batas awal/akhir hari; DST; aktivitas menyeberang tengah malam; atribusi sesi sesuai heatmap; catch banked terlambat tetap masuk tanggal deposit; provisional tidak masuk; event duplikat tidak menambah count; unknown kind tidak crash.
+- Tes hubungan halaman: memilih sel heatmap memperbarui semua bagian; refresh tidak meloncat tanggal; tautan completed menuju Analytics + Daily Catches; jumlah kelompok harian sama dengan event unik; Catalog memakai total akun, bukan tanggal/filter Analytics.
+- Tes Catalog: kategori dan denominator progress; siluet/name/accessibility tak membocorkan item terkunci; pembacaan record lama tanpa berat bila schema berubah; berat tidak berubah setelah bank/restore bila per-event dipilih.
+- Tes Settings: key existing, invers show/hide, preferensi langsung diterapkan, Glass tersimpan pada OS lama, opacity solid tetap 1, suara Off/volume/stop lima detik, completion sekali setelah persistence berhasil. Tes snapshot policy tetap melindungi sesi aktif.
+- Tes akun ketika layanan tersedia: callback tidak sah ditolak, cancel/error/retry, refresh credential, logout tidak menghapus data, perpindahan akun tidak membuka data akun sebelumnya, sesi aktif tidak dipindah identitas. Preview/mock akun hanya pada Debug, tidak dianggap bukti login berhasil.
+- Build Debug macOS dan tes domain yang terdampak wajib lulus saat implementasi. Periksa native window resizing, keyboard/VoiceOver, scroll ke catches, login callback, menu bar, timer/companion, serta Glass pada Mac pendukung. Pemeriksaan render tidak menggantikan klik native.
+- Tidak termasuk scope: achievement, fullscreen penguin, background scene/audio ambience baru, halaman Insight/Calendar terpisah, sync cloud, dan billing baru. Penyederhanaan tidak boleh merusak Start/Pause/Resume/Restart/Stop/recovery yang sudah bekerja.
+
+### Hasil pembaruan dokumen — 16 Oktober 2026
+
+- Rencana dan referensi prototype dicatat; belum ada implementasi main UI atau account pada branch ini.
+- Baseline sudah di-commit sebelum branch perencanaan dibuat. Validasi pembaruan ini hanya struktur dokumen, path referensi prototype, dan `git diff --check`; build/test aplikasi tidak diulang untuk perubahan Markdown.
+
+
+## 21. Implementasi main UI — 16 Oktober 2026
+
+### Keputusan terbaru pengguna dan scope
+
+- Fokus UI/offline; login tidak diaktifkan. Account menunjukkan penggunaan lokal dengan tombol login nonaktif dan keterangan, tanpa profil/token/keberhasilan login palsu.
+- Art ikan final belum dikunci. Analytics memakai asset existing `design/qyube-collectibles-v1/assets/`; Catalog sementara memakai satu ikan tampak atas **dengan mata** untuk semua jenis ikan. Keputusan tanpa mata di bagian 20 dibatalkan. Ocean finds memakai asset masing-masing. Siluet berasal dari alpha asset lewat template rendering, bukan file terpisah.
+- Asset ikan placeholder Catalog dibuat memakai imagegen bawaan dan dibundel pada `Qoma/Assets.xcassets/CatalogFishPlaceholder.imageset`. Asset harian dibundel pada `Collectible-<kindID>.imageset`. Sembilan gambar berukuran maksimum 512 px, sekitar 1,5 MB total; halaman tidak mengunduh asset maupun favicon.
+- Berat memakai kg dengan dua desimal (contoh `0.01 kg`), termasuk nilai positif kecil yang dibulatkan minimal `0.01 kg`. Record existing tidak memiliki berat; UI menampilkan `— kg` dan keterangan belum tercatat. Tidak ada random/backfill berat, perubahan schema catch, atau klaim bahwa format satuan menentukan apakah berat per individu/rekor/spesies.
+
+### Perubahan yang sudah dibuat
+
+- Shell memiliki Analytics, Catalog, Settings, About; sidebar tanpa gambar, Settings satu halaman. Window awal 1180 × 820 pt; minimum 860 × 580 pt tetap didukung dengan scroll/reflow. Lifecycle window/menu bar dan clock sesi tetap memakai coordinator existing.
+- Analytics memakai tanggal bersama milik navigation. Heatmap memilih hari, ringkasan/breakdown/ledger mengikuti hari itu; hari kosong tidak berpindah otomatis. Sesi legacy dan repository digabung berdasarkan UUID seperti baseline. Top apps/websites kini memotong event yang beririsan dengan batas hari, termasuk event yang dimulai sehari sebelumnya.
+- Daily Catches sesudah Daily Breakdown mengelompokkan event banked berdasarkan jenis, menampilkan count dan waktu, serta disclosure riwayat urut waktu. Event dideduplikasi berdasarkan ID, difilter tanggal deposit `[start, nextDay)`, provisional dikecualikan. Unknown kind diberi placeholder/label netral. Hasil menu bar mengarah ke Analytics dan scroll ke ledger hari tangkapan banked terakhir sesi itu, fallback ke hari selesai sesi.
+- Catalog memakai total tangkapan banked akun lokal, kategori All/Fish/Ocean finds, progress jenis ditemukan, count, nama/rarity berwarna, detail, dan `???` untuk jenis terkunci. Teks aksesibilitas/detail tidak membocorkan nama/rarity jenis terkunci. Grid empat kolom pada ukuran awal dan menyesuaikan saat dipersempit.
+- Settings menghubungkan Sound/Off/volume/preview, show timer, warna angka, Liquid Glass macOS 26+, reduce motion, dan distraction sounds ke preferensi existing. Focus rules tetap tersedia melalui disclosure karena belum ada editor pengganti di menu bar; policy snapshot sesi aktif tetap terlindungi.
+- Quick presets, Timer display, Opacity dan Auto mute editor tidak ada pada route Settings baru. Preset menu bar dan nilai tersimpan tetap dipakai. Panel solid selalu opacity 1; completion/preview berhenti setelah lima detik. Pemutar audio existing dipakai ulang untuk completion coordinator baru setelah finalisasi berhasil, tanpa menghidupkan timer legacy.
+- About memiliki route sendiri, versi/build dari Bundle, deskripsi lokal, dan Contact support dari alamat existing. Tidak mengarang tautan Privacy Policy yang belum tersedia. Source Insight/Settings lama dipertahankan untuk menghindari penghapusan jalur legacy di luar scope, tetapi tidak muncul sebagai route utama.
+- Belum termasuk integrasi akun, migrasi akun lokal, cloud sync, final art seluruh ikan, random berat, achievement, atau fullscreen. Repository existing masih memiliki keterbatasan membedakan kegagalan baca dari array kosong; redesign ini tidak mengklaim menyelesaikan kontrak error persistence tersebut.
+
+### Verifikasi
+
+- Build Debug macOS berhasil; suite akhir `xcodebuild test` lulus 172 tes, 0 gagal. Probe render terpisah juga lulus dan sudah dihapus dari suite permanen. SwiftLint strict pada 16 file yang berubah bersih; SwiftFormat lint pada 15 file lolos (coordinator mempertahankan format existing untuk meminimalkan diff); `git diff --check` bersih. Warning lama dari file proyek lain dan konfigurasi Xcode masih ada.
+- Render lokal memakai NSHostingView pada lebar 1180/860 pt dan memeriksa empat halaman serta ledger setelah scroll. Probe render sementara tidak menjadi bagian produk atau suite permanen. Uji klik native, VoiceOver, multi-monitor/Spaces dan tampilan Glass saat aktif masih perlu pemeriksaan langsung.

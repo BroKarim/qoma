@@ -61,7 +61,7 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
 
         let contentView = QyubeHomeView(navigation: navigation)
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 860, height: 580),
+            contentRect: NSRect(x: 0, y: 0, width: 1180, height: 820),
             styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
             backing: .buffered,
             defer: false
@@ -71,7 +71,7 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
         window.titleVisibility = .hidden
         window.titlebarAppearsTransparent = true
         window.isReleasedWhenClosed = false
-        window.minSize = NSSize(width: 860, height: 580)
+        window.minSize = NSSize(width: 1180, height: 820)
         window.delegate = self
         window.center()
         window.contentView = NSHostingView(rootView: contentView)
@@ -134,7 +134,11 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
         sessionCoordinator.$lastCatchEvent
             .compactMap { $0 }
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] event in self?.companionController.recordCatch(kindID: event.kindID) }
+            .sink { [weak self] event in
+                self?.companionController.recordCatch(kindID: event.kindID)
+                self?.navigation.refresh()
+                NotificationCenter.default.post(name: .qyubeCollectionChanged, object: nil)
+            }
             .store(in: &cancellables)
 
         sessionCoordinator.$remainingTime
@@ -239,7 +243,14 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
     private func onSessionEnded(_ session: FocusSession) {
         finishAnalyticsTracking()
         navigation.refresh()
+        NotificationCenter.default.post(name: .qyubeCollectionChanged, object: nil)
         guard session.status == .completed else { return }
+        let defaults = UserDefaults.standard
+        SoundAlertPlayer.shared.play(
+            soundID: defaults.string(forKey: AppConstants.SoundSettings.selectedSoundKey)
+                ?? AppConstants.SoundSettings.defaultSoundID,
+            volume: defaults.object(forKey: AppConstants.SoundSettings.volumeKey) as? Double
+                ?? AppConstants.SoundSettings.defaultVolume)
         let count = navigation.catches.filter { $0.sessionID == session.id }.count
         menuBarController.showCompletion(session, catchCount: count)
     }

@@ -7,7 +7,7 @@ struct SettingsPageHeader: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(self.title)
-                .font(.qoma(size: 28, weight: .semibold))
+                .font(.system(size: 38, weight: .regular, design: .serif))
 
             Text(self.subtitle)
                 .font(.qoma(size: 13, weight: .medium))
@@ -23,7 +23,7 @@ struct SettingsSectionHeading: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(self.title)
-                .font(.qoma(size: 16, weight: .semibold))
+                .font(.system(size: 22, design: .serif))
 
             Text(self.subtitle)
                 .font(.qoma(size: 12.5, weight: .medium))
@@ -41,11 +41,11 @@ struct SettingsSurfaceCard<Content: View>: View {
         }
         .padding(20)
         .background(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(Color.qyubeSidebar))
+            RoundedRectangle(cornerRadius: 9, style: .continuous)
+                .fill(Color.white.opacity(0.42)))
         .overlay(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .stroke(Color.qyubeLine, lineWidth: 1))
+            RoundedRectangle(cornerRadius: 9, style: .continuous)
+                .stroke(Color.qyubeLine, lineWidth: 0.7))
     }
 }
 

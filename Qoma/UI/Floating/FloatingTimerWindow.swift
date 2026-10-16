@@ -3,8 +3,6 @@ import SwiftUI
 struct FloatingTimerView: View {
     @ObservedObject var timer: TimerReadoutModel
 
-    @AppStorage(AppConstants.FloatingThemeSettings.opacityKey)
-    private var floatingOpacity: Double = AppConstants.FloatingThemeSettings.defaultOpacity
     @AppStorage(AppConstants.FloatingThemeSettings.selectedThemeKey)
     private var selectedThemeID: String = AppConstants.FloatingThemeSettings.defaultThemeID
     @AppStorage(AppConstants.FloatingThemeSettings.liquidGlassKey)
@@ -13,48 +11,49 @@ struct FloatingTimerView: View {
     private let panelShape = RoundedRectangle(cornerRadius: 13, style: .continuous)
 
     var body: some View {
-        panel
+        self.panel
             .environment(\.colorScheme, .light)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("Time remaining")
-            .accessibilityValue(format(timer.remainingTime))
+            .accessibilityValue(self.format(self.timer.remainingTime))
     }
 
     @ViewBuilder private var panel: some View {
-        if #available(macOS 26.0, *), liquidGlass {
-            timerContent
-                .glassEffect(.regular, in: panelShape)
+        if #available(macOS 26.0, *), self.liquidGlass {
+            self.timerContent
+                .glassEffect(.regular, in: self.panelShape)
         } else {
-            timerContent
-                .background(softPanelBackground)
-                .clipShape(panelShape)
+            self.timerContent
+                .background(self.softPanelBackground)
+                .clipShape(self.panelShape)
         }
     }
 
     private var timerContent: some View {
-        Text(format(timer.remainingTime))
-            .font(.system(size: AppConstants.FloatingLayoutSettings.timerOnlyFontSize,
-                          weight: .medium, design: .serif).monospacedDigit())
-            .foregroundStyle(FloatingTheme.from(id: selectedThemeID).textColor)
+        Text(self.format(self.timer.remainingTime))
+            .font(.system(
+                size: AppConstants.FloatingLayoutSettings.timerOnlyFontSize,
+                weight: .medium,
+                design: .serif).monospacedDigit())
+            .foregroundStyle(FloatingTheme.from(id: self.selectedThemeID).textColor)
             .lineLimit(1)
             .minimumScaleFactor(0.6)
-            .frame(width: AppConstants.FloatingLayoutSettings.timerOnlyWidth,
-                   height: AppConstants.FloatingLayoutSettings.timerOnlyHeight)
+            .frame(
+                width: AppConstants.FloatingLayoutSettings.timerOnlyWidth,
+                height: AppConstants.FloatingLayoutSettings.timerOnlyHeight)
     }
 
     private var softPanelBackground: some View {
-        let opacity = min(AppConstants.FloatingThemeSettings.maxOpacity,
-                          max(AppConstants.FloatingThemeSettings.minOpacity, floatingOpacity))
-        return panelShape
-            .fill(LinearGradient(colors: [.white, Color(white: 0.97)],
-                                 startPoint: .top, endPoint: .bottom))
-            .overlay(panelShape.strokeBorder(Color.black.opacity(0.10), lineWidth: 0.5))
+        self.panelShape
+            .fill(LinearGradient(
+                colors: [.white, Color(white: 0.97)],
+                startPoint: .top,
+                endPoint: .bottom))
+            .overlay(self.panelShape.strokeBorder(Color.black.opacity(0.10), lineWidth: 0.5))
             .overlay(
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
                     .strokeBorder(Color.black.opacity(0.07), lineWidth: 0.7)
-                    .padding(3)
-            )
-            .opacity(opacity)
+                    .padding(3))
     }
 
     private func format(_ time: TimeInterval) -> String {
