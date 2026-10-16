@@ -44,7 +44,7 @@ struct AnalyticsHeatmapView: View {
                             }
                             .padding(3)
                         }
-                        .scrollIndicators(.automatic)
+                        .qyubeHorizontalScrollIndicator()
                         .onAppear { proxy.scrollTo(self.weeks.last?.first?.id, anchor: .trailing) }
                     }
                 }
@@ -68,9 +68,11 @@ struct AnalyticsHeatmapView: View {
 
     private func monthLabel(_ week: [AnalyticsHeatmapCell]) -> String {
         guard let day = week.first?.date else { return "" }
-        let isFirst = day == self.cells.first?.date
-        let startsMonth = week.contains { Calendar.current.component(.day, from: $0.date) == 1 }
-        return isFirst || startsMonth ? (week.last?.date ?? day).formatted(.dateTime.month(.abbreviated)) : ""
+        if day == self.cells.first?.date {
+            return day.formatted(.dateTime.month(.abbreviated))
+        }
+        return week.first { Calendar.current.component(.day, from: $0.date) == 1 }?
+            .date.formatted(.dateTime.month(.abbreviated)) ?? ""
     }
 
     private func cellSize(for availableWidth: CGFloat) -> CGFloat {

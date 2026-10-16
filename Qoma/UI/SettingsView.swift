@@ -71,19 +71,21 @@ struct SettingsNavigationRow: View {
     let isSelected: Bool
 
     var body: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: title.isEmpty ? 0 : 10) {
             Image(systemName: symbol)
                 .font(.qoma(size: 14, weight: .medium))
-                .frame(width: 20)
-            Text(title)
-                .font(.qoma(size: 13, weight: isSelected ? .semibold : .regular))
-                .lineLimit(1)
-            Spacer()
+                .frame(width: 20, height: 20)
+            if !title.isEmpty {
+                Text(title)
+                    .font(.qoma(size: 13, weight: isSelected ? .semibold : .regular))
+                    .lineLimit(1)
+                Spacer()
+            }
         }
         .foregroundStyle(isSelected ? Color.qyubeInk : Color.secondary)
-        .padding(.horizontal, 8)
+        .frame(maxWidth: .infinity, alignment: title.isEmpty ? .center : .leading)
+        .padding(.horizontal, title.isEmpty ? 2 : 8)
         .padding(.vertical, 7)
-        .frame(maxWidth: .infinity)
         .background(RoundedRectangle(cornerRadius: 8).fill(isSelected ? Color.qyubeSelection : .clear))
         .overlay(RoundedRectangle(cornerRadius: 8).stroke(isSelected ? Color.qyubeLine : .clear, lineWidth: 1))
         .contentShape(Rectangle())

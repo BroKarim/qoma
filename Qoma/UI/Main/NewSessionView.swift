@@ -68,6 +68,7 @@ struct NewSessionView: View {
           }
         }.padding(.horizontal, 22).padding(.bottom, 8)
       }
+      .qyubeScrollIndicator()
       QyubePrimaryButton(title: "Start session") {
         guard coordinator.snapshot == nil else { return }
         Task {
@@ -120,7 +121,7 @@ struct DurationRuler: View {
               .accessibilityAddTraits(selection == minute ? .isSelected : [])
           }
         }
-      }.scrollIndicators(.never)
+      }.qyubeHideNativeScrollers()
         .onAppear { proxy.scrollTo(selection == 10 ? 180 : selection, anchor: .leading) }
         .onChange(of: selection) { withAnimation { proxy.scrollTo(selection, anchor: .center) } }
     }
@@ -197,6 +198,7 @@ struct QyubeAppRuleEditor: View {
           }
         }
       }
+      .qyubeScrollIndicator()
       DisclosureGroup("Websites (advanced)") {
         VStack(alignment: .leading, spacing: 8) {
           Picker("Browser for website rules", selection: $selectedDomainBrowser) {

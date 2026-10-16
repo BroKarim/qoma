@@ -29,6 +29,7 @@ struct AnalyticsTimelineView: View {
                             }
                         }
                     }
+                    .qyubeScrollIndicator()
                     .frame(maxHeight: 300)
                 }
             }

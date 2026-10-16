@@ -70,8 +70,9 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
         window.appearance = NSAppearance(named: .aqua)
         window.titleVisibility = .hidden
         window.titlebarAppearsTransparent = true
+        window.titlebarSeparatorStyle = .none
         window.isReleasedWhenClosed = false
-        window.minSize = NSSize(width: 1180, height: 820)
+        window.minSize = NSSize(width: 640, height: 580)
         window.delegate = self
         window.center()
         window.contentView = NSHostingView(rootView: contentView)

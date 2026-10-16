@@ -50,6 +50,7 @@ struct QyubeCompactSettingsView: View {
         }
       }.font(.system(size: 12)).padding(.horizontal, 22).padding(.bottom, 24)
     }
+    .qyubeScrollIndicator()
   }
   private func heading(_ title: String) -> some View {
     Text(title).font(.system(size: 14, weight: .semibold))

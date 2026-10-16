@@ -29,6 +29,7 @@ struct QyubeJournalSettingsView: View {
                 self.focusRules
             }.padding(28).padding(.top, 12)
         }
+        .qyubeScrollIndicator()
         .sheet(isPresented: self.$editingRules) {
             QyubeAppRuleEditor(policy: self.$focus.policy, selectedDomainBrowser: self.$focus.browserBundleID)
         }

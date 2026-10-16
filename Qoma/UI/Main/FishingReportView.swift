@@ -49,6 +49,7 @@ struct FishingReportView: View {
           }
         }.padding(.horizontal, 22).padding(.bottom, 12)
       }
+      .qyubeScrollIndicator()
       VStack(spacing: 12) {
         QyubePrimaryButton(title: hasActiveSession ? "Show timer" : "Start another session", action: onStartAgain)
         Button("Back to Home", action: onGoHome).buttonStyle(.plain).font(.system(size: 12))

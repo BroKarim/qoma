@@ -32,8 +32,8 @@ struct AnalyticsDashboardView: View {
                             title: "Analytics",
                             subtitle: self.selectedDay.formatted(.dateTime.weekday(.wide).day().month(.wide)))
                         Spacer(minLength: 12)
-                        Image("CompanionPoseFishing").resizable().scaledToFit()
-                            .frame(width: 124, height: 124).accessibilityHidden(true)
+                        Image("JournalArcticPenguin").resizable().scaledToFit()
+                            .frame(width: 220, height: 147).accessibilityHidden(true)
                     }
                     self.overview
                     AnalyticsHeatmapView(cells: self.heatmapCells, selectedDate: self.$selectedDay)
@@ -43,6 +43,7 @@ struct AnalyticsDashboardView: View {
                 .padding(28)
                 .padding(.top, 12)
             }
+            .qyubeScrollIndicator()
             .onAppear {
                 self.loadData()
                 if self.catchRequest != nil { proxy.scrollTo("daily-catches", anchor: .top) }

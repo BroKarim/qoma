@@ -88,7 +88,7 @@ struct QyubeHomeView: View {
                             .accessibilityAddTraits(self.navigation.page == page ? .isSelected : [])
                         }
                     }
-                    .padding(.horizontal, 10)
+                    .padding(.horizontal, compact ? 6 : 10)
                     Spacer()
                     if !compact {
                         SettingsSidebarFooter()
@@ -96,7 +96,7 @@ struct QyubeHomeView: View {
                             .padding(.bottom, 16)
                     }
                 }
-                .frame(width: compact ? 68 : 220)
+                .frame(width: compact ? 52 : 220)
                 .frame(maxHeight: .infinity)
                 .background(Color.qyubeSidebar)
                 Rectangle().fill(Color.qyubeLine).frame(width: 1)
@@ -104,6 +104,7 @@ struct QyubeHomeView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                     .background(Color.qyubeBackground)
             }
+            .animation(.easeInOut(duration: 0.18), value: compact)
         }
         .frame(minWidth: 640, minHeight: 580)
         .background(Color.qyubeBackground)

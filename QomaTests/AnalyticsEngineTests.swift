@@ -149,6 +149,21 @@ struct AnalyticsEngineTests {
         #expect(cells.allSatisfy { $0.intensityLevel == 0 })
     }
 
+    @Test func defaultHeatmapContains52WeeksEndingTodayWithoutFutureCells() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try #require(TimeZone(secondsFromGMT: 0))
+        let now = try #require(calendar.date(from: DateComponents(year: 2026, month: 10, day: 16, hour: 12)))
+        let today = calendar.startOfDay(for: now)
+
+        let cells = self.engine.buildHeatmapCells(from: [], calendar: calendar, now: now)
+        let weeks = cells.chunked(into: 7)
+
+        #expect(weeks.count == 52)
+        #expect(cells.last?.date == today)
+        #expect(cells.allSatisfy { $0.date <= today })
+        #expect(calendar.component(.weekday, from: try #require(cells.first?.date)) == 1)
+    }
+
     // MARK: - buildTopApps
 
     @Test func buildTopAppsSortedByDuration() throws {

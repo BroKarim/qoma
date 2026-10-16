@@ -44,5 +44,6 @@ struct QyubeAboutSettingsPane: View {
                 }
             }.padding(28).padding(.top, 12)
         }
+        .qyubeScrollIndicator()
     }
 }

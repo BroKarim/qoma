@@ -43,23 +43,25 @@ final class AnalyticsEngine {
     func buildHeatmapCells(
         from sessions: [FocusSessionRecord],
         days: Int? = nil,
-        calendar: Calendar = .current) -> [AnalyticsHeatmapCell]
+        calendar: Calendar = .current,
+        now: Date = Date()) -> [AnalyticsHeatmapCell]
     {
         let actualStart: Date
         let endDate: Date
         let shouldPadToWeek: Bool
+        let today = calendar.startOfDay(for: now)
         if let days {
-            let today = calendar.startOfDay(for: Date())
             let targetStart = calendar.date(byAdding: .day, value: -(days - 1), to: today) ?? today
             let daysToSunday = calendar.component(.weekday, from: targetStart) - 1
             actualStart = calendar.date(byAdding: .day, value: -daysToSunday, to: targetStart) ?? targetStart
             endDate = calendar.date(byAdding: .day, value: 1, to: today) ?? today
             shouldPadToWeek = true
         } else {
-            guard let firstSession = sessions.map(\.startedAt).min() else { return [] }
-            actualStart = calendar.startOfDay(for: firstSession)
-            guard let oneYearLater = calendar.date(byAdding: .year, value: 1, to: actualStart) else { return [] }
-            endDate = oneYearLater
+            let daysSinceSunday = calendar.component(.weekday, from: today) - 1
+            let currentWeekStart = calendar.date(byAdding: .day, value: -daysSinceSunday, to: today) ?? today
+            actualStart = calendar.date(byAdding: .weekOfYear, value: -51, to: currentWeekStart)
+                ?? currentWeekStart
+            endDate = calendar.date(byAdding: .day, value: 1, to: today) ?? today
             shouldPadToWeek = false
         }
 

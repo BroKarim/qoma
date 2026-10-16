@@ -34,6 +34,7 @@ struct GeneralSettingsPane: View {
             .padding(.top, 8)
             .frame(maxWidth: .infinity, alignment: .topLeading)
         }
+        .qyubeScrollIndicator()
         .onAppear {
             if !AppConstants.SoundSettings.options.contains(where: { $0.id == selectedSoundID }) {
                 selectedSoundID = AppConstants.SoundSettings.defaultSoundID

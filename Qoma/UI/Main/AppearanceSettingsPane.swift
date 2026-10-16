@@ -32,6 +32,7 @@ struct AppearanceSettingsPane: View {
             .padding(.top, 8)
             .frame(maxWidth: .infinity, alignment: .topLeading)
         }
+        .qyubeScrollIndicator()
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .onAppear {
             floatingOpacity = clampOpacity(floatingOpacity)

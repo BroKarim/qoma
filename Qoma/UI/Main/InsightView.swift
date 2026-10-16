@@ -93,6 +93,7 @@ struct InsightView: View {
           if !grouped.isEmpty { catchSummary }
         }.padding(.horizontal, 22).padding(.vertical, 8)
       }
+      .qyubeScrollIndicator()
     }
     .onChange(of: period) { expanded = false; selectedResultSessionID = nil }
     .onChange(of: anchor) { expanded = false; selectedResultSessionID = nil }

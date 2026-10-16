@@ -47,6 +47,7 @@ struct CatalogView: View {
                     .frame(maxWidth: .infinity).padding(.vertical, 8)
             }.padding(28).padding(.top, 12)
         }
+        .qyubeScrollIndicator()
         .sheet(item: self.$selected) { kind in
             CatalogDetail(kind: kind, catchCount: self.counts[kind.id, default: 0])
         }
