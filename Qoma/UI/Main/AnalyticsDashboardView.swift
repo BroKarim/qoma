@@ -8,7 +8,6 @@ struct AnalyticsDashboardView: View {
     @State private var apps: [AppActivityEvent] = []
     @State private var websites: [WebsiteVisitRecord] = []
     @State private var catches: [CatchEvent] = []
-    @State private var expandedHistory = false
 
     private var daySessions: [FocusSessionRecord] {
         self.sessions.filter { Calendar.current.isDate($0.startedAt, inSameDayAs: self.selectedDay) }
@@ -54,7 +53,6 @@ struct AnalyticsDashboardView: View {
                 proxy.scrollTo("daily-catches", anchor: .top)
             }
         }
-        .onChange(of: self.selectedDay) { _, _ in self.expandedHistory = false }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             self.loadData()
         }
@@ -106,70 +104,60 @@ struct AnalyticsDashboardView: View {
 
     private var dailyCatches: some View {
         let events = self.dayCatches
+        let groups = DailyCatchSummary.groups(for: events)
+        let columns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 4)
         return SettingsSurfaceCard {
             VStack(alignment: .leading, spacing: 18) {
                 HStack {
                     SettingsSectionHeading(title: "Daily Catches", subtitle: "Little finds from this day’s focus.")
                     Spacer()
-                    Text("\(events.count)").font(.system(size: 32, design: .serif))
-                        .accessibilityLabel("\(events.count) catches on the selected day")
+                    Text("\(events.count) catches · \(groups.count) types")
+                        .font(.system(size: 16, design: .serif))
+                        .foregroundStyle(.secondary)
+                        .accessibilityLabel(
+                            "\(events.count) catches across \(groups.count) types on the selected day")
                 }
                 Divider()
                 if events.isEmpty {
                     Label(
                         "No catches on this day. A quiet spot, ready for your next focus.",
                         systemImage: "water.waves")
-                        .foregroundStyle(.secondary).padding(.vertical, 20)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, minHeight: 160)
                 } else {
-                    ForEach(DailyCatchSummary.groups(for: events)) { group in
-                        self.catchRow(group)
-                        Divider()
-                    }
-                    DisclosureGroup("Catch history · \(events.count) finds", isExpanded: self.$expandedHistory) {
-                        LazyVStack(spacing: 0) {
-                            ForEach(events) { event in
-                                HStack(spacing: 16) {
-                                    Text(event.depositedAt, format: .dateTime.hour().minute())
-                                        .monospacedDigit().foregroundStyle(.secondary).frame(
-                                            width: 70,
-                                            alignment: .leading)
-                                    Circle().fill(Color.qyubeAccent).frame(width: 6, height: 6)
-                                    Text(CatalogDefinitions.kind(id: event.kindID)?.name ?? "Unknown find")
-                                    Spacer()
-                                    Image(systemName: "checkmark").foregroundStyle(Color.qyubeAccent)
+                    ViewThatFits(in: .horizontal) {
+                        HStack(alignment: .top, spacing: 20) {
+                            ScrollView {
+                                LazyVGrid(columns: columns, spacing: 12) {
+                                    ForEach(groups) { group in
+                                        FishCatchCardView(summary: group)
+                                    }
                                 }
-                                .font(.system(size: 12)).padding(.vertical, 10)
                             }
-                        }.padding(.top, 12)
-                    }
-                    .font(.system(size: 13))
-                }
-            }
-        }
-    }
+                            .qyubeScrollIndicator()
+                            .frame(minWidth: 540, maxWidth: .infinity, minHeight: 340, maxHeight: 340)
 
-    private func catchRow(_ group: DailyCatchSummary) -> some View {
-        let kind = CatalogDefinitions.kind(id: group.kindID)
-        return HStack(spacing: 18) {
-            QyubeCatchArt(kindID: group.kindID).frame(width: 96, height: 66)
-            VStack(alignment: .leading, spacing: 5) {
-                Text(kind?.name ?? "Unknown find").font(.system(size: 19, design: .serif))
-                    .foregroundStyle(kind?.rarity.color ?? .qyubeInk)
-                Text(kind?.rarity.rawValue.capitalized ?? "Uncatalogued").font(.system(size: 11))
-                    .foregroundStyle(.secondary)
-            }
-            Spacer()
-            if let first = group.events.first, let last = group.events.last {
-                VStack(alignment: .trailing, spacing: 5) {
-                    Text("×\(group.events.count)").font(.system(size: 22, design: .serif))
-                    Text(
-                        first.depositedAt.formatted(.dateTime.hour().minute()) + " – "
-                            + last.depositedAt.formatted(.dateTime.hour().minute()))
-                        .font(.system(size: 11)).foregroundStyle(.secondary)
+                            CatchTimelineView(events: events)
+                                .frame(minWidth: 250, idealWidth: 290, maxWidth: 340)
+                        }
+
+                        VStack(alignment: .leading, spacing: 16) {
+                            ScrollView {
+                                LazyVGrid(columns: columns, spacing: 12) {
+                                    ForEach(groups) { group in
+                                        FishCatchCardView(summary: group)
+                                    }
+                                }
+                            }
+                            .qyubeScrollIndicator()
+                            .frame(height: 340)
+
+                            CatchTimelineView(events: events)
+                        }
+                    }
                 }
             }
         }
-        .accessibilityElement(children: .combine)
     }
 
     private func loadData() {
