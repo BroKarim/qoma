@@ -18,6 +18,10 @@ struct AnalyticsDashboardView: View {
         DailyCatchSummary.events(on: self.selectedDay, from: self.catches)
     }
 
+    private var heatmapCells: [AnalyticsHeatmapCell] {
+        AnalyticsEngine.shared.buildHeatmapCells(from: self.sessions)
+    }
+
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
@@ -32,9 +36,7 @@ struct AnalyticsDashboardView: View {
                             .frame(width: 124, height: 124).accessibilityHidden(true)
                     }
                     self.overview
-                    AnalyticsHeatmapView(
-                        cells: AnalyticsEngine.shared.buildHeatmapCells(from: self.sessions),
-                        selectedDate: self.$selectedDay)
+                    AnalyticsHeatmapView(cells: self.heatmapCells, selectedDate: self.$selectedDay)
                     self.breakdown
                     self.dailyCatches.id("daily-catches")
                 }
@@ -58,30 +60,23 @@ struct AnalyticsDashboardView: View {
     }
 
     private var overview: some View {
-        HStack(alignment: .top, spacing: 0) {
-            self.stat(
-                "Total focus",
-                value: QyubeFormat.duration(self.daySessions.reduce(0) { $0 + $1.actualFocusSeconds }),
-                symbol: "leaf",
-                color: .qyubeAccent)
-            Divider()
-            self.stat("Sessions", value: "\(self.daySessions.count)", symbol: "chart.bar", color: .qyubeAccent)
-            Divider()
-            self.stat(
-                "Completed",
-                value: "\(self.daySessions.filter(\.completed).count)",
-                symbol: "checkmark.circle",
-                color: .qyubeAccent)
-            Divider()
-            self.stat(
-                "Interrupted",
-                value: "\(self.daySessions.count(where: { !$0.completed }))",
-                symbol: "xmark.circle",
-                color: Color(red: 0.67, green: 0.40, blue: 0.36))
+        ViewThatFits(in: .horizontal) {
+            HStack(alignment: .top, spacing: 0) { self.stats }
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) { self.stats }
         }
         .fixedSize(horizontal: false, vertical: true)
         .padding(.vertical, 6)
         .accessibilityElement(children: .contain)
+    }
+
+    @ViewBuilder private var stats: some View {
+        self.stat("Total focus", value: QyubeFormat.duration(self.daySessions.reduce(0) { $0 + $1.actualFocusSeconds }), symbol: "leaf", color: .qyubeAccent)
+        Divider()
+        self.stat("Sessions", value: "\(self.daySessions.count)", symbol: "chart.bar", color: .qyubeAccent)
+        Divider()
+        self.stat("Completed", value: "\(self.daySessions.filter(\.completed).count)", symbol: "checkmark.circle", color: .qyubeAccent)
+        Divider()
+        self.stat("Interrupted", value: "\(self.daySessions.count(where: { !$0.completed }))", symbol: "xmark.circle", color: Color(red: 0.67, green: 0.40, blue: 0.36))
     }
 
     private func stat(_ title: String, value: String, symbol: String, color: Color) -> some View {

@@ -10,6 +10,10 @@
 
 **Branch perencanaan terbaru:** `codex/main-ui-plan-2026-10-16`; baseline tersimpan pada commit `6f29b0d` di `codex/floating-timer-soft-panel`.
 
+**Branch pekerjaan UI analytics:** `codex/analytics-responsive-heatmap-2026-10-16`.
+
+**Pembaruan 16 Oktober 2026:** Analytics Dashboard sedang diperbaiki agar adaptif terhadap lebar window. Sidebar memiliki mode compact ikon-saja, statistik memakai layout adaptif, dan heatmap memakai satu tahun sejak sesi pertama (bukan 210 hari terakhir). Heatmap akan menggunakan scroll horizontal hanya ketika lebar minimum cell tidak lagi muat.
+
 **Fokus:** macOS lebih dulu. Rancangan iOS tetap pekerjaan lanjutan.
 **Nama target kode saat ini:** `Qoma`; nama produk yang dituju: `qyube`.
 

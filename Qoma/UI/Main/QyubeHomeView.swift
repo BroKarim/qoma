@@ -55,49 +55,57 @@ struct QyubeHomeView: View {
     @ObservedObject var navigation: QyubeNavigation
 
     var body: some View {
-        HStack(spacing: 0) {
-            VStack(spacing: 0) {
-                Color.clear.frame(height: 52)
-                Text("qyube")
-                    .font(.system(size: 32, design: .serif))
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 8)
-                Text("A CALMER\nFOCUS AHEAD")
-                    .font(.system(size: 9, design: .serif)).tracking(2.5).lineSpacing(5)
-                    .foregroundStyle(.secondary).frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 18).padding(.bottom, 32)
-                VStack(spacing: 5) {
-                    ForEach(QyubeNavigation.Page.allCases) { page in
-                        Button {
-                            self.navigation.page = page
-                            self.navigation.catchRequest = nil
-                            self.navigation.refresh()
-                        } label: {
-                            SettingsNavigationRow(
-                                title: page.title,
-                                symbol: page.symbol,
-                                isSelected: self.navigation.page == page)
+        GeometryReader { geometry in
+            let compact = geometry.size.width < 760
+            HStack(spacing: 0) {
+                VStack(spacing: 0) {
+                    Color.clear.frame(height: 52)
+                    if !compact {
+                        Text("qyube")
+                            .font(.system(size: 32, design: .serif))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, 16)
+                            .padding(.bottom, 8)
+                        Text("A CALMER\nFOCUS AHEAD")
+                            .font(.system(size: 9, design: .serif)).tracking(2.5).lineSpacing(5)
+                            .foregroundStyle(.secondary).frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, 18).padding(.bottom, 32)
+                    }
+                    VStack(spacing: 5) {
+                        ForEach(QyubeNavigation.Page.allCases) { page in
+                            Button {
+                                self.navigation.page = page
+                                self.navigation.catchRequest = nil
+                                self.navigation.refresh()
+                            } label: {
+                                SettingsNavigationRow(
+                                    title: compact ? "" : page.title,
+                                    symbol: page.symbol,
+                                    isSelected: self.navigation.page == page)
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel(page.title)
+                            .accessibilityAddTraits(self.navigation.page == page ? .isSelected : [])
                         }
-                        .buttonStyle(.plain)
-                        .accessibilityAddTraits(self.navigation.page == page ? .isSelected : [])
+                    }
+                    .padding(.horizontal, 10)
+                    Spacer()
+                    if !compact {
+                        SettingsSidebarFooter()
+                            .padding(.horizontal, 16)
+                            .padding(.bottom, 16)
                     }
                 }
-                .padding(.horizontal, 10)
-                Spacer()
-                SettingsSidebarFooter()
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 16)
+                .frame(width: compact ? 68 : 220)
+                .frame(maxHeight: .infinity)
+                .background(Color.qyubeSidebar)
+                Rectangle().fill(Color.qyubeLine).frame(width: 1)
+                self.detail
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .background(Color.qyubeBackground)
             }
-            .frame(width: 220)
-            .frame(maxHeight: .infinity)
-            .background(Color.qyubeSidebar)
-            Rectangle().fill(Color.qyubeLine).frame(width: 1)
-            self.detail
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                .background(Color.qyubeBackground)
         }
-        .frame(minWidth: 860, minHeight: 580)
+        .frame(minWidth: 640, minHeight: 580)
         .background(Color.qyubeBackground)
         .ignoresSafeArea(.container, edges: .top)
         .environment(\.colorScheme, .light)

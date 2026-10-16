@@ -8,6 +8,10 @@ struct AnalyticsHeatmapView: View {
         self.cells.chunked(into: 7)
     }
 
+    private let cellSpacing: CGFloat = 5
+    private let minimumCellSize: CGFloat = 12
+    private let maximumCellSize: CGFloat = 17
+
     private let colors: [Color] = [
         Color(white: 0.92), Color(red: 0.85, green: 0.89, blue: 0.84),
         Color(red: 0.74, green: 0.81, blue: 0.73), Color(red: 0.62, green: 0.73, blue: 0.62),
@@ -23,23 +27,28 @@ struct AnalyticsHeatmapView: View {
                     Text("Choose a day").font(.system(size: 11)).foregroundStyle(.secondary)
                 }
                 Divider()
-                ScrollViewReader { proxy in
-                    ScrollView(.horizontal) {
-                        HStack(alignment: .top, spacing: 5) {
-                            ForEach(self.weeks, id: \.first?.id) { week in
-                                VStack(spacing: 5) {
-                                    ForEach(week) { cell in self.cellButton(cell) }
-                                    Text(self.monthLabel(week)).font(.system(size: 9)).foregroundStyle(.secondary)
-                                        .frame(height: 14).fixedSize()
+                GeometryReader { geometry in
+                    let cellSize = self.cellSize(for: geometry.size.width)
+                    ScrollViewReader { proxy in
+                        ScrollView(.horizontal) {
+                            HStack(alignment: .top, spacing: self.cellSpacing) {
+                                ForEach(self.weeks, id: \.first?.id) { week in
+                                    VStack(spacing: self.cellSpacing) {
+                                        ForEach(week) { cell in self.cellButton(cell, size: cellSize) }
+                                        Text(self.monthLabel(week)).font(.system(size: 9)).foregroundStyle(.secondary)
+                                            .frame(height: 14).fixedSize()
+                                    }
+                                    .frame(width: cellSize)
+                                    .id(week.first?.id)
                                 }
-                                .frame(width: 17)
-                                .id(week.first?.id)
                             }
+                            .padding(3)
                         }
-                        .padding(3)
+                        .scrollIndicators(.automatic)
+                        .onAppear { proxy.scrollTo(self.weeks.last?.first?.id, anchor: .trailing) }
                     }
-                    .onAppear { proxy.scrollTo(self.weeks.last?.first?.id, anchor: .trailing) }
                 }
+                .frame(height: 7 * self.maximumCellSize + 6 * self.cellSpacing + 14 + 6)
                 HStack(spacing: 5) {
                     Text("Less")
                     ForEach(0..<self.colors.count, id: \.self) { level in
@@ -47,7 +56,9 @@ struct AnalyticsHeatmapView: View {
                     }
                     Text("More focus")
                     Spacer()
-                    Button("Today") { self.selectedDate = Calendar.current.startOfDay(for: Date()) }
+                    Button("First day") {
+                        self.selectedDate = self.cells.first?.date ?? Calendar.current.startOfDay(for: Date())
+                    }
                         .buttonStyle(.plain).foregroundStyle(Color.qyubeAccent)
                 }
                 .font(.system(size: 10)).foregroundStyle(.secondary)
@@ -62,13 +73,19 @@ struct AnalyticsHeatmapView: View {
         return isFirst || startsMonth ? (week.last?.date ?? day).formatted(.dateTime.month(.abbreviated)) : ""
     }
 
-    private func cellButton(_ cell: AnalyticsHeatmapCell) -> some View {
+    private func cellSize(for availableWidth: CGFloat) -> CGFloat {
+        let weekCount = CGFloat(max(self.weeks.count, 1))
+        let availableForCells = availableWidth - 6 - (weekCount - 1) * self.cellSpacing
+        return min(self.maximumCellSize, max(self.minimumCellSize, availableForCells / weekCount))
+    }
+
+    private func cellButton(_ cell: AnalyticsHeatmapCell, size: CGFloat) -> some View {
         let selected = Calendar.current.isDate(cell.date, inSameDayAs: self.selectedDate)
         let future = Calendar.current.startOfDay(for: cell.date) > Calendar.current.startOfDay(for: Date())
         return Button { self.selectedDate = Calendar.current.startOfDay(for: cell.date) } label: {
             RoundedRectangle(cornerRadius: 3)
                 .fill(self.colors[min(max(cell.intensityLevel, 0), self.colors.count - 1)])
-                .frame(width: 17, height: 17)
+                .frame(width: size, height: size)
                 .overlay(RoundedRectangle(cornerRadius: 3)
                     .stroke(selected ? Color.qyubeAccent : .clear, lineWidth: 2))
         }

@@ -42,21 +42,32 @@ final class AnalyticsEngine {
 
     func buildHeatmapCells(
         from sessions: [FocusSessionRecord],
-        days: Int = 210) -> [AnalyticsHeatmapCell]
+        days: Int? = nil,
+        calendar: Calendar = .current) -> [AnalyticsHeatmapCell]
     {
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-        let targetStart = calendar.date(byAdding: .day, value: -(days - 1), to: today)!
-
-        let weekday = calendar.component(.weekday, from: targetStart)
-        let daysToSunday = weekday - 1
-        let actualStart = calendar.date(byAdding: .day, value: -daysToSunday, to: targetStart)!
+        let actualStart: Date
+        let endDate: Date
+        let shouldPadToWeek: Bool
+        if let days {
+            let today = calendar.startOfDay(for: Date())
+            let targetStart = calendar.date(byAdding: .day, value: -(days - 1), to: today) ?? today
+            let daysToSunday = calendar.component(.weekday, from: targetStart) - 1
+            actualStart = calendar.date(byAdding: .day, value: -daysToSunday, to: targetStart) ?? targetStart
+            endDate = calendar.date(byAdding: .day, value: 1, to: today) ?? today
+            shouldPadToWeek = true
+        } else {
+            guard let firstSession = sessions.map(\.startedAt).min() else { return [] }
+            actualStart = calendar.startOfDay(for: firstSession)
+            guard let oneYearLater = calendar.date(byAdding: .year, value: 1, to: actualStart) else { return [] }
+            endDate = oneYearLater
+            shouldPadToWeek = false
+        }
 
         var dayTotals: [Date: Double] = [:]
         var daySessionCounts: [Date: Int] = [:]
         for session in sessions {
             let day = calendar.startOfDay(for: session.startedAt)
-            if day >= actualStart, day <= today {
+            if day >= actualStart, day < endDate {
                 dayTotals[day, default: 0] += session.actualFocusSeconds
                 daySessionCounts[day, default: 0] += 1
             }
@@ -64,7 +75,7 @@ final class AnalyticsEngine {
 
         var cells: [AnalyticsHeatmapCell] = []
         var currentDate = actualStart
-        while currentDate <= today {
+        while currentDate < endDate {
             let seconds = dayTotals[currentDate] ?? 0
             let sessionCount = daySessionCounts[currentDate] ?? 0
             let level = Self.intensityLevel(for: seconds)
@@ -77,18 +88,17 @@ final class AnalyticsEngine {
             currentDate = calendar.date(byAdding: .day, value: 1, to: currentDate)!
         }
 
-        // Pad to complete weeks on the trailing edge (Saturday).
-        while cells.count % 7 != 0 {
-            let seconds = dayTotals[currentDate] ?? 0
-            let sessionCount = daySessionCounts[currentDate] ?? 0
-            let level = Self.intensityLevel(for: seconds)
-            cells.append(
-                AnalyticsHeatmapCell(
+        if shouldPadToWeek {
+            while cells.count % 7 != 0 {
+                let seconds = dayTotals[currentDate] ?? 0
+                let sessionCount = daySessionCounts[currentDate] ?? 0
+                cells.append(AnalyticsHeatmapCell(
                     date: currentDate,
                     focusSeconds: seconds,
                     sessionCount: sessionCount,
-                    intensityLevel: level))
-            currentDate = calendar.date(byAdding: .day, value: 1, to: currentDate)!
+                    intensityLevel: Self.intensityLevel(for: seconds)))
+                currentDate = calendar.date(byAdding: .day, value: 1, to: currentDate)!
+            }
         }
 
         return cells
