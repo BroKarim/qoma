@@ -139,6 +139,6 @@ extension Color {
     static let qyubeCardBackground = Color.white
     static let qyubeInk = Color(white: 0.13)
     static let qyubeLine = Color(white: 0.88)
-    static let qyubeSelection = Color(red: 0.86, green: 0.89, blue: 0.85)
-    static let qyubeAccent = Color(red: 0.35, green: 0.46, blue: 0.38)
+    static let qyubeSelection = Color(red: 220 / 255, green: 232 / 255, blue: 237 / 255)
+    static let qyubeAccent = Color(red: 82 / 255, green: 115 / 255, blue: 134 / 255)
 }

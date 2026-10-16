@@ -38,6 +38,7 @@ struct AnalyticsDashboardView: View {
                     self.overview
                     AnalyticsHeatmapView(cells: self.heatmapCells, selectedDate: self.$selectedDay)
                     self.breakdown
+                    // bagian daily-catch
                     self.dailyCatches.id("daily-catches")
                 }
                 .padding(28)

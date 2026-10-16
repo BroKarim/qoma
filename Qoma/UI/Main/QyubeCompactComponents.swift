@@ -106,7 +106,7 @@ struct JournalPageHeader: View {
 extension CatalogDefinitions.Rarity {
     var color: Color {
         switch self {
-        case .common: Color(red: 0.28, green: 0.43, blue: 0.32)
+        case .common: Color(red: 96 / 255, green: 125 / 255, blue: 139 / 255)
         case .uncommon: Color(red: 0.23, green: 0.39, blue: 0.57)
         case .rare: Color(red: 0.62, green: 0.27, blue: 0.24)
         case .legendary: Color(red: 0.51, green: 0.36, blue: 0.16)

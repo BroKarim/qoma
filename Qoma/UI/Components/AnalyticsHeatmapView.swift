@@ -13,9 +13,12 @@ struct AnalyticsHeatmapView: View {
     private let maximumCellSize: CGFloat = 17
 
     private let colors: [Color] = [
-        Color(white: 0.92), Color(red: 0.85, green: 0.89, blue: 0.84),
-        Color(red: 0.74, green: 0.81, blue: 0.73), Color(red: 0.62, green: 0.73, blue: 0.62),
-        Color(red: 0.48, green: 0.63, blue: 0.51), Color(red: 0.33, green: 0.48, blue: 0.37),
+        Color(red: 235 / 255, green: 238 / 255, blue: 240 / 255),
+        Color(red: 223 / 255, green: 234 / 255, blue: 240 / 255),
+        Color(red: 196 / 255, green: 220 / 255, blue: 230 / 255),
+        Color(red: 154 / 255, green: 191 / 255, blue: 207 / 255),
+        Color(red: 113 / 255, green: 156 / 255, blue: 174 / 255),
+        Color(red: 82 / 255, green: 115 / 255, blue: 134 / 255),
     ]
 
     var body: some View {
