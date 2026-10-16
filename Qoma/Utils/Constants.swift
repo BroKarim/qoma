@@ -29,8 +29,9 @@ enum AppConstants {
     enum FloatingThemeSettings {
         static let opacityKey = "floatingOpacity"
         static let selectedThemeKey = "floatingThemeID"
+        static let liquidGlassKey = "floatingLiquidGlass"
         static let defaultThemeID = "obsidian"
-        static let defaultOpacity = 0.85
+        static let defaultOpacity = 1.0
         static let minOpacity = 0.4
         static let maxOpacity = 1.0
     }

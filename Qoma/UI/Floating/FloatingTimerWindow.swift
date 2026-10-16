@@ -1,85 +1,64 @@
 import SwiftUI
 
 struct FloatingTimerView: View {
-    private static let timerFontName = "RobotoMono-VariableFont_wght"
-
     @ObservedObject var timer: TimerReadoutModel
 
     @AppStorage(AppConstants.FloatingThemeSettings.opacityKey)
     private var floatingOpacity: Double = AppConstants.FloatingThemeSettings.defaultOpacity
     @AppStorage(AppConstants.FloatingThemeSettings.selectedThemeKey)
     private var selectedThemeID: String = AppConstants.FloatingThemeSettings.defaultThemeID
+    @AppStorage(AppConstants.FloatingThemeSettings.liquidGlassKey)
+    private var liquidGlass = false
+
+    private let panelShape = RoundedRectangle(cornerRadius: 13, style: .continuous)
 
     var body: some View {
-        let theme = self.selectedTheme
-        let clampedOpacity = min(
-            AppConstants.FloatingThemeSettings.maxOpacity,
-            max(AppConstants.FloatingThemeSettings.minOpacity, self.floatingOpacity))
-
-        self.timerOnlyContent(theme: theme)
-            .frame(
-                width: AppConstants.FloatingLayoutSettings.timerOnlyWidth,
-                height: AppConstants.FloatingLayoutSettings.timerOnlyHeight)
-            .background(self.panelBackground(theme: theme, opacity: clampedOpacity))
-            .clipShape(RoundedRectangle(cornerRadius: 18))
-            .animation(.easeInOut(duration: 0.2), value: self.floatingOpacity)
+        panel
+            .environment(\.colorScheme, .light)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Time remaining")
+            .accessibilityValue(format(timer.remainingTime))
     }
 
-    private var selectedTheme: FloatingTheme {
-        FloatingTheme.from(id: self.selectedThemeID)
-    }
-
-    private func timerOnlyContent(theme: FloatingTheme) -> some View {
-        VStack(spacing: 0) {
-            Spacer()
-            Text(self.format(self.timer.remainingTime))
-                .font(.custom(Self.timerFontName, size: AppConstants.FloatingLayoutSettings.timerOnlyFontSize))
-                .foregroundColor(theme.textColor)
-                .baselineOffset(-(AppConstants.FloatingLayoutSettings.timerOnlyFontSize * 0.15))
-            Spacer()
+    @ViewBuilder private var panel: some View {
+        if #available(macOS 26.0, *), liquidGlass {
+            timerContent
+                .glassEffect(.regular, in: panelShape)
+        } else {
+            timerContent
+                .background(softPanelBackground)
+                .clipShape(panelShape)
         }
-        .frame(maxWidth: .infinity)
     }
 
-    private func panelBackground(theme: FloatingTheme, opacity: Double) -> some View {
-        let panelShape = RoundedRectangle(cornerRadius: 18)
+    private var timerContent: some View {
+        Text(format(timer.remainingTime))
+            .font(.system(size: AppConstants.FloatingLayoutSettings.timerOnlyFontSize,
+                          weight: .medium, design: .serif).monospacedDigit())
+            .foregroundStyle(FloatingTheme.from(id: selectedThemeID).textColor)
+            .lineLimit(1)
+            .minimumScaleFactor(0.6)
+            .frame(width: AppConstants.FloatingLayoutSettings.timerOnlyWidth,
+                   height: AppConstants.FloatingLayoutSettings.timerOnlyHeight)
+    }
 
-        return panelShape.fill(theme.backgroundColor.opacity(opacity))
-            .shadow(color: Color.black.opacity(0.30), radius: 32, x: 0, y: 32)
-            .shadow(color: Color.black.opacity(0.30), radius: 16, x: 0, y: 16)
-            .shadow(color: Color.black.opacity(0.24), radius: 8, x: 0, y: 8)
-            .shadow(color: Color.black.opacity(0.24), radius: 4, x: 0, y: 4)
-            .shadow(color: Color.black.opacity(0.16), radius: 8, x: 0, y: -8)
-            .shadow(color: Color.black.opacity(0.24), radius: 2, x: 0, y: 2)
+    private var softPanelBackground: some View {
+        let opacity = min(AppConstants.FloatingThemeSettings.maxOpacity,
+                          max(AppConstants.FloatingThemeSettings.minOpacity, floatingOpacity))
+        return panelShape
+            .fill(LinearGradient(colors: [.white, Color(white: 0.97)],
+                                 startPoint: .top, endPoint: .bottom))
+            .overlay(panelShape.strokeBorder(Color.black.opacity(0.10), lineWidth: 0.5))
             .overlay(
-                panelShape
-                    .stroke(Color.black.opacity(1.0), lineWidth: 1)
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .strokeBorder(Color.black.opacity(0.07), lineWidth: 0.7)
+                    .padding(3)
             )
-            .overlay(
-                panelShape
-                    .fill(Color.white.opacity(0.08))
-                    .blendMode(.plusLighter)
-            )
-            .overlay(
-                panelShape
-                    .stroke(
-                        LinearGradient(
-                            gradient: Gradient(stops: [
-                                .init(color: Color.white.opacity(0.20), location: 0.0),
-                                .init(color: Color.white.opacity(0.0), location: 0.15)
-                            ]),
-                            startPoint: .top,
-                            endPoint: .bottom
-                        ),
-                        lineWidth: 1
-                    )
-            )
+            .opacity(opacity)
     }
 
     private func format(_ time: TimeInterval) -> String {
         let total = max(0, Int(time.rounded(.down)))
-        let m = total / 60
-        let s = total % 60
-        return String(format: "%02d:%02d", m, s)
+        return String(format: "%02d:%02d", total / 60, total % 60)
     }
 }

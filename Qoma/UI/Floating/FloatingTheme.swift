@@ -46,7 +46,7 @@ enum FloatingTheme: String, CaseIterable, Identifiable {
         case .ivory:
             Color(red: 37.0 / 255.0, green: 37.0 / 255.0, blue: 41.0 / 255.0)
         default:
-            .white
+            self.backgroundColor
         }
     }
 

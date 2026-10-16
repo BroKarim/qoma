@@ -128,12 +128,7 @@ struct MenuBarView: View {
                 .keyboardShortcut(.defaultAction)
                 .disabled(requestingPermission)
                 Spacer(minLength: 0)
-                if isRunning {
-                    Text(QyubeFormat.countdown(coordinator.remainingTime))
-                        .font(.system(size: 32, weight: .regular))
-                        .monospacedDigit()
-                        .accessibilityLabel("Time remaining")
-                } else {
+                if !isRunning {
                     moreActions
                 }
             }

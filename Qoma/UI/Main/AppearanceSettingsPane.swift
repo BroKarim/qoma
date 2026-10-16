@@ -6,6 +6,8 @@ struct AppearanceSettingsPane: View {
     private var floatingOpacity: Double = AppConstants.FloatingThemeSettings.defaultOpacity
     @AppStorage(AppConstants.FloatingThemeSettings.selectedThemeKey)
     private var selectedThemeID: String = AppConstants.FloatingThemeSettings.defaultThemeID
+    @AppStorage(AppConstants.FloatingThemeSettings.liquidGlassKey)
+    private var liquidGlass = false
 
     private let themeColumns = [
         GridItem(.adaptive(minimum: 124), spacing: 12, alignment: .top),
@@ -50,6 +52,15 @@ struct AppearanceSettingsPane: View {
                     title: "Window feel",
                     subtitle: "Core polish that applies instantly to floating panel.")
 
+                if #available(macOS 26.0, *) {
+                    SettingsRow(title: "Liquid Glass", subtitle: "Use a translucent glass surface for the floating timer.") {
+                        Toggle("Liquid Glass", isOn: $liquidGlass)
+                            .labelsHidden()
+                            .toggleStyle(.switch)
+                    }
+                    Divider()
+                }
+
                 SettingsRow(
                     title: "Opacity",
                     subtitle: "Higher value feels solid. Lower value feels lighter.")
@@ -68,8 +79,14 @@ struct AppearanceSettingsPane: View {
                             .frame(width: 44, alignment: .trailing)
                     }
                 }
+                .disabled(liquidGlassEnabled)
             }
         }
+    }
+
+    private var liquidGlassEnabled: Bool {
+        if #available(macOS 26.0, *) { return liquidGlass }
+        return false
     }
 
     private var timerThemeSection: some View {
@@ -109,14 +126,10 @@ private struct FloatingThemeOptionCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [theme.swatchLeadingColor, theme.swatchTrailingColor],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing))
+                .fill(Color(white: 0.98))
                 .overlay(
                     Text("25:00")
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .font(.system(size: 22, weight: .medium, design: .serif).monospacedDigit())
                         .foregroundColor(theme.textColor))
                 .overlay(
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
