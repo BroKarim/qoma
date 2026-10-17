@@ -30,8 +30,8 @@ private final class EdgeToEdgeHostingController<Content: View>: NSHostingControl
 
 @MainActor
 final class MenuBarPanelState: ObservableObject {
-    @Published var completedSession: FocusSession?
-    @Published var completedCatchCount = 0
+    @Published var panelHeight = AppConstants.MenuBarSettings.panelHeight
+    @Published var isEditorPresented = false
 }
 
 @MainActor
@@ -39,12 +39,20 @@ final class MenuBarController: NSObject {
     static var shared: MenuBarController?
     private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
     private let panel = MenuBarPanel(
-        contentRect: NSRect(x: 0, y: 0, width: AppConstants.MenuBarSettings.panelWidth, height: AppConstants.MenuBarSettings.panelHeight),
-        styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false
+        contentRect: NSRect(
+            x: 0,
+            y: 0,
+            width: AppConstants.MenuBarSettings.panelWidth,
+            height: AppConstants.MenuBarSettings.panelHeight
+        ),
+        styleMask: [.borderless, .nonactivatingPanel],
+        backing: .buffered,
+        defer: false
     )
     private let panelState = MenuBarPanelState()
     private var latestTitle = ""
     private var preferencesObserver: AnyCancellable?
+    private var heightObserver: AnyCancellable?
     private var localClickMonitor: Any?
     private var globalClickMonitor: Any?
 
@@ -69,6 +77,10 @@ final class MenuBarController: NSObject {
                 guard let self else { return }
                 self.updateTitle(self.latestTitle)
             }
+        heightObserver = panelState.$panelHeight.removeDuplicates().sink { [weak self] _ in
+            guard self?.panel.isVisible == true else { return }
+            self?.positionPanelBelowStatusItem()
+        }
         Self.shared = self
     }
 
@@ -78,14 +90,17 @@ final class MenuBarController: NSObject {
 
     func configure(
         coordinator: SessionCoordinator,
+        preferences: FocusPreferences,
         onStart: @escaping (Int) async -> Bool,
         onOpen: @escaping () -> Void,
         onSettings: @escaping () -> Void,
         onShowTimer: @escaping () -> Void,
-        onViewCatches: @escaping (FocusSession) -> Void
+        loadCatches: @escaping () -> [CatchEvent]
     ) {
         let rootView = MenuBarView(
-            coordinator: coordinator, panelState: panelState,
+            coordinator: coordinator,
+            panelState: panelState,
+            preferences: preferences,
             onStart: { [weak self] minutes in
                 let success = await onStart(minutes)
                 if success { self?.closePanel() }
@@ -94,7 +109,7 @@ final class MenuBarController: NSObject {
             onOpen: { [weak self] in self?.closePanel(); onOpen() },
             onSettings: { [weak self] in self?.closePanel(); onSettings() },
             onShowTimer: { [weak self] in self?.closePanel(); onShowTimer() },
-            onViewCatches: { [weak self] session in self?.closePanel(); onViewCatches(session) }
+            loadCatches: loadCatches
         )
         let hostingController = EdgeToEdgeHostingController(rootView: rootView)
         hostingController.view.wantsLayer = true
@@ -114,10 +129,8 @@ final class MenuBarController: NSObject {
         statusItem.length = NSStatusItem.variableLength
     }
 
-    func showCompletion(_ session: FocusSession, catchCount: Int) {
-        guard session.status == .completed else { return }
-        panelState.completedSession = session
-        panelState.completedCatchCount = catchCount
+    func showIdleAfterCompletion() {
+        panelState.isEditorPresented = false
         showPopover()
     }
 
@@ -129,7 +142,7 @@ final class MenuBarController: NSObject {
 
     private func closePanel() {
         panel.orderOut(nil)
-        panelState.completedSession = nil
+        panelState.isEditorPresented = false
     }
 
     @objc private func togglePopover() {
@@ -141,7 +154,7 @@ final class MenuBarController: NSObject {
 
         let panelSize = NSSize(
             width: AppConstants.MenuBarSettings.panelWidth,
-            height: AppConstants.MenuBarSettings.panelHeight)
+            height: panelState.panelHeight)
         let spacing: CGFloat = 6
         var origin = NSPoint(
             x: buttonFrame.midX - (panelSize.width / 2),
@@ -195,6 +208,12 @@ final class MenuBarController: NSObject {
 
     private func dismissPanelIfNeeded(for event: NSEvent) {
         guard self.panel.isVisible else { return }
+        if panelState.isEditorPresented { return }
+        if let eventWindow = event.window,
+           eventWindow !== panel,
+           eventWindow.level == .popUpMenu {
+            return
+        }
 
         let screenPoint: NSPoint = if let eventWindow = event.window {
             eventWindow.convertPoint(toScreen: event.locationInWindow)

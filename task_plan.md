@@ -1,6 +1,6 @@
 # qyube — Rencana Implementasi macOS (Alur Kiki, Identitas qyube)
 
-**Status:** main UI diimplementasikan pada 16 Oktober 2026; bagian 21 mencatat hasil dan pengecualian terhadap rencana bagian 20. Login produksi serta data berat individu belum diaktifkan.
+**Status:** main UI diimplementasikan pada 16 Oktober 2026; bagian 21 mencatat hasil dan pengecualian terhadap rencana bagian 20. Bagian 22 adalah rencana MenuBar terbaru yang disetujui pengguna, belum diimplementasikan. Login produksi serta data berat individu belum diaktifkan.
 
 **Branch implementasi awal:** `codex/kiki-flow-core`.
 
@@ -11,6 +11,8 @@
 **Branch perencanaan terbaru:** `codex/main-ui-plan-2026-10-16`; baseline tersimpan pada commit `6f29b0d` di `codex/floating-timer-soft-panel`.
 
 **Branch pekerjaan UI analytics:** `codex/analytics-responsive-heatmap-2026-10-16`.
+
+**Branch perencanaan MenuBar terbaru:** `codex/menubar-app-rules-plan-2026-10-16`, dibuat dari `codex/daily-catches-grid-timeline-2026-10-16` sesudah snapshot commit `daaaafd` (`feat: refine daily catches grid and timeline`). Bagian 22 mengungguli keputusan MenuBar/rules/restart yang bertentangan di bagian terdahulu.
 
 **Pembaruan 16 Oktober 2026:** Analytics Dashboard sedang diperbaiki agar adaptif terhadap lebar window. Sidebar memiliki mode compact ikon-saja, statistik memakai layout adaptif, dan heatmap memakai satu tahun sejak sesi pertama (bukan 210 hari terakhir). Heatmap akan menggunakan scroll horizontal hanya ketika lebar minimum cell tidak lagi muat.
 
@@ -926,3 +928,211 @@ Jangan menambah dependency untuk transformasi grouping, filter, formatter, atau 
 
 - Build Debug macOS berhasil; suite akhir `xcodebuild test` lulus 172 tes, 0 gagal. Probe render terpisah juga lulus dan sudah dihapus dari suite permanen. SwiftLint strict pada 16 file yang berubah bersih; SwiftFormat lint pada 15 file lolos (coordinator mempertahankan format existing untuk meminimalkan diff); `git diff --check` bersih. Warning lama dari file proyek lain dan konfigurasi Xcode masih ada.
 - Render lokal memakai NSHostingView pada lebar 1180/860 pt dan memeriksa empat halaman serta ledger setelah scroll. Probe render sementara tidak menjadi bagian produk atau suite permanen. Uji klik native, VoiceOver, multi-monitor/Spaces dan tampilan Glass saat aktif masih perlu pemeriksaan langsung.
+
+## 22. Rencana MenuBar: mode, live app rules, reset timer, dan ikan harian — 16 Oktober 2026
+
+### 22.1 Status, tujuan, dan prioritas keputusan
+
+**Status: diimplementasikan pada 17 Oktober 2026.** Batas “planning only” berlaku pada pembaruan dokumen tanggal 16 Oktober; implementasi pada branch ini sekarang mengikuti kontrak dan koreksi desain terbaru di bagian ini.
+
+Tujuan: MenuBar menjadi tempat mengatur durasi, mode dan aplikasi, mengontrol sesi, serta melihat sekilas ikan hari ini. Gunakan palette Arctic yang sudah diterapkan, asset lokal dan coordinator/repository existing. Tidak menambah halaman utama, dependency, network service, clock sesi kedua, atau sistem blocking OS baru.
+
+Urutan sumber keputusan: koreksi pengguna setelah sesi grill → bagian 22 ini → implementasi baseline sebagai fakta teknis → rencana lama. Bagian lama yang menyatakan aturan hanya berlaku pada sesi berikutnya, editor domain tersedia, Restart melanjutkan sesi yang sama, completion card, dan tombol hasil tangkapan MenuBar sudah kalah oleh bagian ini.
+
+### 22.2 Keputusan produk final
+
+| Area | Kontrak |
+|---|---|
+| Mode | Timer only / Allowing / Blocking; default instalasi baru Timer only, pilihan terakhir disimpan. Mode terkunci selama active dan paused. |
+| Allowing | Semua app dianggap tidak diizinkan kecuali app yang dipilih. Minimal satu app pilihan diperlukan saat Start maupun setelah edit live. qyube sendiri tetap dapat digunakan agar kontrol tidak mengunci pengguna. |
+| Blocking | Semua app diizinkan kecuali app yang dipilih. Daftar kosong sah; editor tetap ditampilkan dan Start tetap bisa. |
+| Browser | Chrome, Safari dan browser lain diperlakukan sebagai app biasa. Tidak ada input, search, filter, atau permission khusus untuk `x.com`, `instagram.com`, dan domain lain pada versi ini. |
+| Edit app | Dapat dilakukan pada idle, active, paused untuk Allowing/Blocking. Setiap checkbox langsung disimpan dan diterapkan; Done hanya menutup, bukan Save. Escape/klik luar tidak membatalkan perubahan yang berhasil. |
+| Penyimpanan daftar | Allowing dan Blocking memiliki set terpisah; berganti mode tidak menghapus set lainnya. Edit live juga menjadi pilihan default sesi berikutnya untuk mode itu. |
+| Ringkasan aturan | Di bawah mode: maksimal lima ikon app, `+N`, tombol pensil; tooltip nama app. Empty state tetap menawarkan Edit. |
+| Kontrol aktif | `restart` dan `pause` berdampingan sebagai teks lowercase di footer; `pause` menjadi `resume` ketika paused. Tidak ada angka countdown atau tombol ikon pada state active/paused. Cancel dihapus, termasuk tidak dipindah menjadi End session di menu `…`. |
+| Restart / reset | Maknanya mengakhiri sesi sekarang, menyimpan waktu fokus yang telah dijalani menurut aturan Stop existing, lalu kembali idle dengan durasi awal siap dimulai. Play/Start berikutnya membuat sesi baru; tidak otomatis mulai. |
+| Selesai alami | Kembali ke kontrol idle, MenuBar otomatis terbuka, completion sound existing tetap. Tidak ada completion card, total focus/catch summary, Start again atau Lihat hasil tangkapan. |
+| Ikan harian | View-only, satu baris horizontal di bawah area mode + ringkasan app. Maksimal 20 ikan terbaru hari lokal ini; duplikat jenis tetap tampil sebagai event terpisah; terbaru di kiri. |
+| Tampilan ikan | Gambar saja tanpa background, border atau card; scrollbar disembunyikan. Tooltip nama dan jam boleh; tidak ada klik, detail, View all atau navigasi dari ikan. |
+| Empty catches | `No catches today. Start a focus session.` Hanya banked/permanen yang tampil; provisional tidak ditampilkan. |
+| Ukuran | Lebar tetap ringkas; tinggi mengikuti mode, aturan, ikan/error. Tidak mempertahankan tinggi fixed 138 pt yang memotong konten baru. |
+
+**Batas arti blocking:** kontrak di atas menentukan app yang melanggar policy. Mekanisme penanganan distraksi tetap overlay/companion/audio existing, bukan mencegah launch, force quit, menutup dokumen, atau menghalangi klik app lewat API OS. Tidak memperkenalkan tindakan merusak pekerjaan pengguna. Jika diperlukan pemblokiran OS nyata, itu scope baru yang memerlukan keputusan terpisah.
+
+**Interpretasi Restart yang dipakai:** koreksi nomor 15 pengguna (restart juga bermakna end session) menggantikan rekomendasi lama nomor 13–14. Karena itu hasil reset adalah **idle**, bukan snapshot baru dalam status paused. Waktu sesi lama disimpan sekali, tidak dibawa lagi menjadi accumulated time sesi baru. Ikon Play saat idle berarti Start sesi baru; saat paused berarti Resume sesi yang sama.
+
+### 22.3 Fakta baseline yang sudah diperiksa
+
+| File / API existing | Fakta dan implikasi |
+|---|---|
+| `Qoma/UI/MenuBar/MenuBarView.swift` | Ruler/preset, Start/Pause/Resume/Restart/Cancel, error teks, `completion(_:)`, `onViewCatches`, dan `Menu` untuk More actions. Lebar/tinggi fixed dari constants. Belum ada mode atau app picker. |
+| `Qoma/Managers/MenuBarController.swift` | Host berupa custom `NSPanel`, bukan NSPopover. `MenuBarPanelState` menyimpan completedSession/count; `showCompletion` membuka panel; Start berhasil menutup panel. Local/global mouse monitors menutup panel bila klik di luar frame parent/status item. |
+| `Qoma/Utils/Constants.swift` | Baseline panelWidth **250 pt**, panelHeight **138 pt**; koreksi ringkasan percakapan sebelumnya yang menyebut sekitar 300×180. Ubah kontrak height di view dan controller sekaligus. |
+| `Qoma/Domain/Focus/FocusPreferences.swift` | `policy` disimpan JSON di UserDefaults; set allowed/blocked terpisah; `draft(minutes:)` mengambil policy global berikut browserBundleID. Published didSet belum menyediakan hasil kegagalan persistence. |
+| `SessionCoordinator` | `currentPolicy` dari snapshot; saveActive sebelum publish pada Pause/Resume. `restartSession()` saat ini mempertahankan UUID dan cumulative time lalu langsung active; ini harus berubah atau tidak dipakai oleh UI baru. |
+| `stopSession(reason:)` | Menghasilkan interrupted, mempertahankan active time; provisional sebelum 5 menit dibuang, sesudah threshold di-bank. Return session non-nil belum selalu berarti finalisasi sukses; wajib periksa outcome/snapshot. |
+| `completeIfDue()` / `retryFinalization()` | Ada jalur terminal snapshot dan idempotent history. Banking atau saveActive bisa gagal sebelum status terminal dipublish; UI yang hanya mengecek terminal snapshot belum mencakup semua error. |
+| `QyubeAppCoordinator` | `startFromMenuBar` mengambil FocusPreferences; snapshot subscription memulai/menghentikan monitor/panel. lastCatchEvent me-refresh navigation dan mem-post collectionChanged. `onSessionEnded` memainkan sound lalu showCompletion untuk completed. |
+| `DistractionCoordinator.start` | Menangkap policy dalam subscription, lalu stop/restart monitor bila policy berubah. Edit live harus mengevaluasi aktivitas saat ini, bukan menunggu user pindah app. Periksa pula akumulasi detour agar tidak ter-reset/terhitung ganda. |
+| `ForegroundActivityMonitor` | NSWorkspace untuk app foreground; resolver domain terpisah. App-only tidak membutuhkan browser Automation. |
+| `QyubeAppRuleEditor` di `NewSessionView.swift` | Sudah ada search/checkbox, scanning app roots, AppIcon, dan domain advanced. Reuse logika yang berguna; jangan menyalin domain UI ke editor MenuBar. Scanning sekarang sinkron dan perlu dijauhkan dari render/tick. |
+| `QyubeJournalSettingsView.focusRules` | Saat ini masih ada pengaturan global dan akses editor domain. Harus diselaraskan agar tidak menjadi pintu bypass mode lock/app-only/live rules. |
+| `DailyCatchSummary.events` | Memfilter banked menurut depositedAt pada interval hari lokal `[start,nextDay)`, dedupe UUID dan sort ascending. Reuse untuk MenuBar, jangan mengubah urutan Analytics hanya demi MenuBar. |
+| Repository | JSON `.atomic`, history finalization idempotent berdasarkan UUID, banked-event per ID. Belum ada transaksi lintas file; beberapa API baca mengembalikan kosong pada error dan deleteProvisional tidak mengembalikan hasil. Jangan menjanjikan zero data loss pada disk yang tidak dapat ditulis. |
+
+### 22.4 Alur UI dan state
+
+Urutan konten yang ditargetkan: ruler/durasi → preset saat idle → Mode → ikon allowed/blocked + Edit (hanya dua mode itu) → Today's catches → error/save status bila ada → footer `start` saat idle atau `restart` + `pause`/`resume` saat sesi, beserta More actions. Detail spacing menyesuaikan panel ringkas; tidak menambah task name, website, ilustrasi dekoratif atau statistik all-time.
+
+| State | Mode dan app | Timer / tindakan | Ikan |
+|---|---|---|---|
+| Idle | Picker enabled; editor app enabled bila Allowing/Blocking | Ruler editable 1–60 menit + preset existing; Start/Play aktif kecuali Allowing kosong / operasi belum selesai | Hari ini |
+| Active | Mode read-only; Edit app enabled | Ruler indikator tersisa; teks `restart` + `pause` di footer | Hari ini; update sesudah banking |
+| Paused | Mode read-only; Edit app enabled | Waktu berhenti; teks `restart` + `resume` di footer | Hari ini |
+| Finishing / retrying | Jangan tampilkan idle palsu; mode/editor/start dikunci sementara | Indikasi menyimpan yang ringkas; tidak membuat sesi baru | Banked yang valid tetap boleh terlihat |
+| Save failed | Status jelas dengan Retry saving, data pending dipertahankan | Jangan membuat sesi baru/reset success palsu | Jangan mengarang catch sebagai berhasil |
+| Completed berhasil | Kontrol idle; mode terakhir tetap | Otomatis buka panel; durasi pilihan terakhir tetap; tanpa completion card | Refresh lalu tampilkan hari ini |
+| Reset berhasil | Idle; mode dapat dipilih lagi | Durasi sesi yang di-reset menjadi pilihan siap Start; panel tetap terbuka, tidak bunyi completion | Banked dipertahankan, provisional sesuai threshold |
+
+- Pause menunda timer/catch/monitor seperti behavior existing; edit saat paused mengubah snapshot tersimpan, evaluasi efektif saat Resume. Tidak menghidupkan kembali monitoring/overlay selama paused.
+- Jangan biarkan default keyboard action parent memulai/pause sesi ketika fokus ada di search/checkbox/popover. Enter di editor dapat menutup Done; Space mengubah checkbox; Escape menutup editor lebih dahulu.
+- Semua ikon kontrol memiliki tooltip dan accessibilityLabel yang sesuai aksi aktual. Mode lock harus terbaca, misalnya `Mode cannot be changed during a session`.
+- App ditandai melalui bundle ID stabil; nama/icon hanya presentasi. qyube sendiri selalu aman seperti exception existing, bukan item yang dapat dipilih untuk memblokir akses kontrolnya sendiri.
+
+### 22.5 Kontrak app-only, preferensi, dan edit live
+
+**Satu sumber sesi:** selama active/paused, ringkasan/editor membaca `snapshot.draft.policy`, bukan hanya preferences yang bisa berbeda. Idle membaca FocusPreferences. Tidak membuat policy kedua di @State tanpa sinkronisasi.
+
+Fungsi usulan di `SessionCoordinator` (nama boleh disesuaikan):
+
+`updateAppRules(allowedApps: Set<String>, blockedApps: Set<String>) -> Bool`
+
+1. Hanya menerima active/paused, bukan nil/terminal/finalizing. Jangan menerima mode baru dari view; pertahankan mode dalam snapshot. Trim/validasi bundle ID nonkosong dan jangan membuat dependensi nama app/file path.
+2. Update set relevan untuk mode sesi; set mode lain dipertahankan. Tolak menghapus app terakhir pada Allowing, tampilkan alasan ringkas dan biarkan checkbox tetap selected. Blocking kosong sah.
+3. Buat candidate snapshot tanpa mengubah UUID, deadline, accumulated time, pausedAt, catch phase, analytics segment atau accountID.
+4. Persist candidate melalui saveActive lebih dahulu. Bila gagal: tidak publish policy baru, tidak centang UI sukses palsu, pertahankan policy efektif lama dan tampilkan Retry/change error.
+5. Sesudah berhasil: publish snapshot → app coordinator menerima perubahan → policy monitor/overlay memakai aturan baru. Salin perubahan app set relevan ke preference default untuk sesi berikutnya. Jangan membiarkan observer policy global mengubah mode sesi.
+6. Pastikan `@Published`/subscription ordering tidak membaca snapshot lama saat mengevaluasi perubahan. Jangan restart clock, pause/resume, reset catch atau analytics hanya karena app list berubah.
+
+Idle: setiap toggle memperbarui preferensi langsung. Untuk active/paused, urutan authoritative adalah snapshot tersimpan kemudian preferences. UserDefaults bukan transaksi bersama file snapshot; jika aplikasi crash di sela keduanya, sesi yang dipulihkan harus tetap memakai snapshot valid. Tambahkan pengujian round-trip preferences dan pesan jika jalur persist yang dipilih dapat melaporkan failure; jangan mengklaim fsync guarantee dari didSet yang menelan error encoding.
+
+**Efek langsung:** `DistractionCoordinator` harus reevaluate foreground activity dengan policy terbaru dalam siklus update yang sama, termasuk ketika user menutup editor kembali ke app yang sudah aktif. Reuse/resample NSWorkspace; cegah async result policy lama atau domain lookup lama menimpa decision baru. Bila app yang tadinya diblokir diizinkan, overlay harus berhenti; sebaliknya app yang baru diblokir mendapat respons existing. Pause tetap bebas overlay.
+
+**Legacy domains:** jangan menghapus field Codable, riwayat atau domain tersimpan secara destruktif. Untuk Start baru dari semua entry point, buat policy efektif app-only dengan kedua set domain kosong; jangan request Automation untuk rules app-only. Preference legacy boleh disimpan untuk kompatibilitas tetapi tidak diam-diam dipakai oleh draft baru. Sesi legacy active/paused yang dipulihkan harus dinormalisasi ke app-only melalui saveActive terkontrol sebelum dilanjutkan, sambil mempertahankan mode/app/time/account/UUID. Bila gagal simpan, tampilkan error dan jangan mengumumkan migrasi sukses. Catat normalisasi satu kali untuk recovery. Field browser/domain boleh tetap ada pada model demi decode history; bukan alasan menampilkan editor website lagi.
+
+**Settings:** setelah editor MenuBar berfungsi, hapus disclosure Focus rules dari Settings utama dan akses legacy yang masih reachable, atau alihkan ke editor yang sama dengan lock/update callback yang sama. Pilihan utama: konfigurasi focus lewat MenuBar saja, tanpa dua UI yang menulis policy dengan aturan berbeda. Audit `NewSessionView` dan seluruh pemanggil `QyubeAppRuleEditor`, `FocusPreferences.draft`, `startSession` supaya entry point lain yang masih dapat dicapai tidak memulai Allowing kosong, mengaktifkan domain, atau melewati aturan live.
+
+### 22.6 Editor app native dan lifecycle panel
+
+- Gunakan SwiftUI `.popover` anchored ke tombol Edit, berisi TextField search, ScrollView/LazyVStack app row dengan AppIcon + nama + checkbox, tombol `Choose application…`, dan Done. Popover berinteraksi dengan keyboard; jangan mencoba menaruh TextField di SwiftUI Menu/NSMenu `moreActions`.
+- Reuse scanning dari editor existing dengan ekstraksi sekecil yang diperlukan. Scan `/Applications`, `/System/Applications`, `~/Applications`, skip hidden/package descendants, dedupe bundleID, sertakan pilihan tersimpan yang hilang dari disk. Tampilkan nama fallback bundleID dan ikon fallback; tetap bisa uncheck app yang telah dihapus.
+- Scan sekali saat dibutuhkan, bukan per body, per keypress, atau per detik countdown. Lakukan pekerjaan file enumeration di luar main actor lalu publish hasil di main actor; gunakan ikon lokal/cache existing, bukan network. Search lokal case-insensitive, urutan selected first lalu nama; jangan memindahkan row fokus mendadak saat toggle (stabilkan urutan selama popover terbuka).
+- `Choose application…` memakai NSOpenPanel untuk satu `.app`; validasi Bundle dan bundleIdentifier. Cancel tidak mengubah data. App di path khusus masuk pilihan dan selected lewat callback yang sama. Jangan meminta akses filesystem luas hanya untuk discovery.
+- UI menunjukkan `Changes apply immediately`; Done/Escape/klik luar hanya menutup. Checkbox memakai hasil callback persistence, bukan binding yang selalu dianggap sukses. Handle loading/empty search/error discovery tanpa menghapus selected IDs.
+- **Wajib audit mouse monitor parent:** saat ini klik child popover dianggap di luar NSPanel dan menutup parent. Track popover/editor presentation dan window ownership/frame secara terarah; klik di popover atau NSOpenPanel milik editor tidak menutup parent. Jangan mematikan seluruh dismiss behavior secara permanen. Klik luar sesungguhnya menutup child lalu parent dengan aman, dan tidak mengonsumsi klik aplikasi lain.
+- Escape menutup layer teratas; app picker/dialog tidak ditutup parent sebelum hasil diterima. Pastikan keyboard focus/search tidak hilang tiap snapshot/tick. Uji dengan actual NSPanel karena render statis tidak menguji event routing ini.
+
+### 22.7 Reset: akhir sesi lama, bukan restart clock lama
+
+- Cari semua caller `restartSession()` dan tes restart sebelum mengubah API. UI baru memanggil aksi reset/end yang melakukan finalisasi satu kali lewat coordinator existing; ubah nama API bila itu menghindari kontrak lama yang menyesatkan. Jangan meninggalkan caller yang diam-diam masih melanjutkan clock lama.
+- Gunakan aturan Stop existing: active time tetap tercatat; banked catches tidak hilang. Provisional di bawah threshold lima menit dibuang, di atas/sama threshold di-bank; jangan memberi hadiah tambahan karena reset.
+- Setelah finalisasi benar-benar berhasil, snapshot nil, timer/companion/overlay ditutup mengikuti alur existing; simpan durasi sesi sebagai selectedPresetMinutes. UI menjadi Start/Play untuk sesi baru. UUID/startedAt baru hanya dibuat saat user benar-benar menekan Start.
+- Reset saat paused sama dengan reset saat active; pause time tidak ikut focus. Reset saat deadline sudah tercapai harus menyelesaikan completed lewat completeIfDue, bukan menciptakan interrupted yang terlambat.
+- Ketika saving gagal, jangan mengosongkan snapshot atau membuat idle yang dapat Start lagi. Tahan pending outcome dengan Retry. Multiple clicks tidak menggandakan history, banking, callback, atau sound.
+- Hapus Cancel dan rekomendasi End session di More actions; reset adalah jalan pengguna untuk mengakhiri. Tooltip disarankan `Reset and end session` agar aksi yang menyimpan sesi lama jelas. Tidak ada confirmation dialog tambahan untuk alur normal ini.
+
+### 22.8 Completion dan kegagalan penyimpanan yang aman
+
+**Jangan menjanjikan bahwa penulisan disk selalu berhasil.** Tangani kegagalan secara terukur: pertahankan data sumber recovery, jangan menampilkan sukses sebelum aman, dan sediakan retry idempotent.
+
+1. Hilangkan `completedSession`/count sebagai penentu tampilan MenuBar dan hapus completion card/callback `onViewCatches` dari jalur ini setelah seluruh caller diperbarui. `QyubeNavigation.showCatches` hanya dihapus jika tidak dipakai di tempat lain.
+2. Pisahkan aksi membuka panel dari data completion, misalnya `showIdleAfterCompletion()` hanya membuka panel setelah finalisasi sukses. `onSessionEnded` refresh navigation/catches, mempertahankan sound untuk completed, lalu membuka MenuBar kontrol idle. Interrupted/reset tidak memainkan completion sound.
+3. Tambahkan state penyimpanan kecil pada coordinator, misalnya `finalizationState` dengan idle/saving/failed dan pending terminal intent. Ini diperlukan karena banking/saveActive bisa gagal sebelum snapshot menjadi terminal. UI tidak boleh menyimpulkan semua error hanya dari `snapshot.status`.
+4. Bekukan waktu akhir dan activeSeconds pada finalization attempt pertama. Sesudah deadline jangan terus menambah focus seconds atau menjalankan catch saat disk error. Stop timer/catch/monitor pada transisi finishing dengan outcome yang dapat dicoba ulang; jangan mereset ledger/clock sumber sebelum persist berhasil.
+5. Tulis terminal intent/snapshot secara atomic sebelum destructive cleanup provisional dan sebelum menghapus active record. Simpan ID/account/mode/draft/time/status yang sama untuk retry. Audit urutan Stop sekarang (menghapus provisional sebelum saveActive) dan Complete (bank sebelum saveActive); perbaiki hanya bagian yang dibutuhkan agar intent/recovery tidak hilang. Banked yang sudah tercatat tidak boleh dibatalkan bila langkah berikutnya gagal.
+6. Setelah terminal snapshot durable: reconcile provisional → finalizeOnce history → cleanup active. Bila satu langkah gagal, tahan pending snapshot dan error; retry melanjutkan ID/outcome yang sama. Hanya panggil onSessionEnded/reset UI setelah ledger/history mencapai outcome sukses. Hapus active hanya setelah history tersimpan.
+7. Gagal deleteActive sesudah history sukses tidak boleh membuat duplikasi atau replay sound pada launch berikutnya. Recovery perlu membedakan terminal yang sudah ada di history dari completion baru; finalization yang didedupe tidak mengulang callback/notifikasi/sound/panel tanpa alasan. Buktikan lewat tes restore proses baru, bukan cuma Set ID in-memory.
+8. Retry manual jelas dan operasi tunggal. Boleh satu retry otomatis saat membuka panel/restore jika state pending, tanpa loop tanpa batas. Jangan busy retry tiap frame/tick atau mengganggu user dengan alert berulang. Jika semua penulisan gagal, jelaskan bahwa data masih pending dan jangan menyembunyikannya sebagai idle.
+9. `deleteProvisional` sekarang Void/try?; bila penghapusan menjadi prasyarat outcome yang aman, ubah return/error secara minimal dan sesuaikan protocol, concrete repo, mocks, callers, tests. Jangan menambah framework transaksi/database hanya untuk alur ini. Corrupt history tidak boleh ditimpa dengan array kosong agar retry tampak berhasil.
+
+Auto-open normal completion tetap berlaku seperti permintaan pengguna. Jika completion terjadi saat editor sedang terbuka, tutup editor dengan aman sebelum mengganti isi/height parent. Error finalisasi juga perlu terlihat saat panel dibuka otomatis pada akhir timer; tidak boleh meninggalkan sesi macet tanpa penjelasan.
+
+### 22.9 Today's catches: data, render, refresh
+
+- Sumber authoritative `CatchRepository.listBanked(accountID:)` dengan account sesi/local existing; jangan menggabungkan akun. Reuse `DailyCatchSummary.events(on:from:calendar:)` → filter kind.isFish → reverse urutan event → prefix(20). Ocean finds tetap ada di Analytics/Catalog, tidak masuk baris khusus ikan ini. Unknown kind tidak crash; jangan menebak artwork spesies.
+- Filter berdasarkan **depositedAt**, bukan bankedAt; catch kemarin yang baru dibank hari ini tetap milik kemarin, sesuai Analytics. Deduplicate UUID, bukan kindID. Jangan memakai groups(for:) karena user ingin duplikat ikan tetap terlihat.
+- Reuse `QyubeCatchArt(kindID:catalog:false)` dan asset Collectible lokal. Ukuran gambar konsisten sekitar 32–40 pt, satu baris, tanpa bg/border/card. Seluruh daftar maksimum 20 node, tanpa gambar baru atau unduhan favicon.
+- Gunakan ScrollView horizontal + `.scrollIndicators(.hidden)`; jangan pasang modifier custom QyubeScrollIndicator di baris ini. Beri fade/partial next fish sebagai petunjuk overflow bila perlu, tanpa scrollbar. Trackpad/Shift-wheel dan accessibility scrolling tetap berfungsi.
+- View-only: tidak ada Button/onTapGesture, pointer affordance, View all atau navigasi. Tooltip nama/jam dan accessibility label boleh; setiap event yang diketahui tetap dibacakan sebagai item berbeda.
+- Refresh saat panel muncul, catch deposit/banking sukses, banking threshold lima menit (meskipun tidak ada deposit baru), finalisasi/recovery, dan hari lokal berubah. Notification existing lastCatchEvent saja belum cukup untuk banking batch; emit collectionChanged setelah mutation bank sukses atau refresh melalui outcome coordinator yang tepat.
+- Refresh juga saat wake/timezone/system day change; panel yang dibiarkan terbuka melewati tengah malam harus menjadi hari baru. Recompute interval dengan Calendar.current; hindari hardcode 86400 detik/DST. Data lama di-cache untuk presentasi saja, tidak dibaca ulang dari disk tiap countdown tick.
+- Jika baca repository hanya mengembalikan [], jangan mengklaim bisa membedakan disk error dari hari kosong. Untuk jalur load yang perlu membedakan error, tambahkan hasil/error lokal yang minimal; jangan tampilkan `No catches today` sebagai pesan untuk kegagalan baca yang diketahui.
+
+### 22.10 Ukuran, warna, dan integrasi file
+
+- Reuse qyubeBackground, qyubeInk, qyubeLine, qyubeSelection dan qyubeAccent Arctic. Tidak generate asset baru pada pekerjaan ini. Ukuran lebar mulai dari 250 pt existing; sesuaikan hanya jika search/controls membutuhkan ruang dan catat ukuran akhir.
+- Tinggi parent harus memakai satu sumber ukuran yang dihitung dari state/konten, diterapkan ke frame root dan NSPanel positioning. Reposition saat mode/empty/error berubah; anchor tetap di bawah status item, clamp ke visibleFrame monitor yang relevan. Child popover tidak keluar layar bila status item di ujung kanan.
+- App list detail boleh scroll vertikal pada tinggi terbatas. Panel parent tetap ringkas; jangan memasukkan seluruh daftar app ke parent atau membiarkan tinggi tumbuh mengikuti jumlah ikan.
+
+| File / area | Perubahan implementasi yang diharapkan |
+|---|---|
+| `Qoma/UI/MenuBar/MenuBarView.swift` | Mode picker/locked state, rule summary + live editor, kontrol footer berbasis teks, reset, view-only catch strip, idle completion, error/retry, height adaptif. |
+| `Qoma/Managers/MenuBarController.swift` | Injection preferences/data/callback seperlunya, hapus state completion card, show idle on finish, resize/reanchor, child popover/file picker dismissal handling. |
+| `Qoma/Managers/QyubeAppCoordinator.swift` | Start app-only, bind live snapshot rules ke monitoring, refresh catch saat banking, completion/reset outcome, no duplicate sound, account source konsisten. |
+| `Qoma/Domain/Focus/SessionCoordinator.swift` | updateAppRules, reset/end semantics, pending/error finalization/retry/recovery, outcome yang tidak mengandalkan optional session semata. |
+| `Qoma/Domain/Focus/FocusPreferences.swift` | Default mode/set reuse, draft app-only, validasi Allowing, kompatibilitas legacy. Jangan mengganti key preference pengguna. |
+| `Qoma/UI/Main/NewSessionView.swift` / editor | Reuse/extract app discovery/editor secara minimal; hapus reachable domain UI, selaraskan validasi dan call sites. Jangan refactor seluruh file legacy tanpa kebutuhan. |
+| `Qoma/UI/Main/QyubeJournalSettingsView.swift` | Hapus Focus rules sementara setelah MenuBar replacement berfungsi; audit akses legacy lainnya. |
+| `Qoma/Services/DistractionCoordinator.swift`, `ForegroundActivityMonitor.swift` | Reevaluate app sekarang, stale-result protection, paused semantics; tidak reset clock/catches/detour tanpa sebab. |
+| `Qoma/Domain/Focus/FocusPolicyEvaluator.swift` | Reuse allowing/blocking app semantics; tests app-only browser dan empty Blocking. Domain model/history tetap decode-compatible. |
+| `Qoma/Models/DailyCatchSummary.swift` / strip helper bila perlu | Reuse day filter/dedupe; helper latest fish hanya bila mempermudah tes tanpa menduplikasi Analytics aggregation. |
+| `Qoma/Persistence/SessionRepository.swift`, `CatchRepository.swift` | Perubahan terarah hanya untuk failure/retry/cleanup correctness; atomik per file, UUID idempotence dan compatibility dipertahankan. |
+| `Qoma/Utils/Constants.swift` | Ukuran adaptif/konstanta batas 20 bila perlu; hapus height fixed sebagai kontrak tunggal yang salah. |
+| `QomaTests` | Update kontrak restart lama, tambah live rules/failure/selection/catch day tests; mocks mengikuti API yang benar-benar berubah. |
+
+### 22.11 Urutan pengerjaan agent implementasi
+
+1. **Audit baseline:** git status, AGENTS/skills yang berlaku, semua caller restart/stop/start/editor/showCompletion, repo mocks dan tes. Baca dua referensi `kiki-screenshots/new-session.png` dan `kiki-screenshots/allow-list.png` untuk komposisi, bukan menyalin karakter/warna Kiki. Verifikasi Arctic tokens sudah ada.
+2. **Kunci behavior domain dengan tes:** app-only draft/legacy compatibility, Allowing nonempty vs Blocking empty; updateAppRules transactional candidate; reset ke idle dan sesi baru saat Start. Tes existing yang menyatakan restart same UUID + langsung active harus diperbarui, bukan dibiarkan melindungi behavior yang dibatalkan.
+3. **Finalisasi aman:** audit ordering, error state dan recovery; implement/fault-test sebelum UI membuang completion state. Jangan membuat panel idle lebih dulu untuk menyembunyikan failure.
+4. **Editor dan monitor:** native popover/app discovery + immediate callback, snapshot→monitor update, stale decisions dan paused handling. Hubungkan Settings/entry point existing ke kontrak yang sama.
+5. **Panel UI:** mode + summary, icons, reset, daily fish strip, adaptif height, completion auto-open dan child window lifecycle. Hapus callback/state yatim hanya sesudah semua caller dipindahkan.
+6. **Verifikasi terarah kemudian suite/build:** cek domain tests, lint file berubah, render state, native interaction. Catat keterbatasan tes hardware. Tidak menambah akun/backend/website atau fitur di luar scope.
+
+### 22.12 Rencana pengujian dan acceptance criteria
+
+**Tes behavior/data yang bermakna (gunakan clock/repository injection existing):**
+
+- Start Allowing kosong ditolak pada semua reachable entry points; Blocking kosong boleh; Timer only tidak menjalankan policy monitor. Memilih browser berlaku seluruh browser dan tidak meminta Automation untuk rules.
+- Edit app saat active tersimpan di active snapshot + efektif tanpa mengubah mode/UUID/time/account/catch phase. Resume sesudah edit paused memakai aturan baru. Restore membaca aturan live terakhir. Last allow item tidak bisa dihapus; Blocking dapat dikosongkan.
+- saveActive gagal pada live update: checkbox/snapshot/policy efektif tidak berubah dan error terlihat; retry valid sukses. Edit app yang sedang foreground memperbarui isDistractionActive tanpa pindah app. Result lama tidak mengembalikan overlay setelah app diizinkan; pause tidak memunculkan overlay.
+- Preferences mempertahankan dua set lintas mode/launch. Domain legacy tetap decode dan tersimpan pada history; draft baru app-only. Mode tidak dapat dibypass melalui Settings yang masih reachable. Normalisasi restore tidak mengubah duration/ID/account.
+- Reset active dan paused: history interrupted satu kali, actualActiveSeconds benar, snapshot akhirnya nil, tidak autostart, durasi awal tetap. Start berikutnya UUID baru dan activeSeconds nol. Reset pada deadline menjadi completed satu kali. Provisional <5 menit dibuang, >=5 menit di-bank, banked existing tetap ada.
+- Fault injection untuk bank, terminal save, history write, delete active, delete provisional bila contract diubah; retry tidak menduplikasi history/catch/callback, tidak menambah active time setelah deadline, dan tidak menghapus sumber recovery sebelum durable intent. Restore proses baru mengatasi partial bank/history success/cleanup failure tanpa replay alarm.
+- Catch strip: tanggal lokal/DST/tengah malam/timezone change; depositedAt versus bankedAt; provisional exclude; fish-only, duplicate species retain, UUID dedupe, newest-first stable tie, >20 dibatasi, unknown kind aman, account isolation. Bulk banking threshold memperbarui daftar tanpa menunggu deposit baru.
+
+**Native UI QA wajib sebelum dinyatakan selesai:**
+
+- Idle tiga mode, Allowing kosong, Blocking kosong, banyak pilihan, active, paused, save failed dan completion auto-open. Tidak ada completion card, Cancel atau End session menu yang tertinggal.
+- Checkbox/search/Done/Escape/klik luar, membuka NSOpenPanel, pilih file valid/cancel, menutup dan membuka ulang parent; parent tidak menutup ketika interaksi child. Fokus text tidak direbut keyboard Start/defaultAction.
+- `restart`/`pause`/`resume` actual behavior sesuai label teks; disabled/loading/error mencegah double submit; mode read-only tetapi Edit tersedia selama active/paused.
+- Horizontal catches tanpa scrollbar, tidak clickable, tooltip dan VoiceOver/keyboard labels masuk akal; input scroll tetap berfungsi.
+- Panel bertambah/mengecil tanpa crop dan tetap di layar pada monitor kanan/kiri/berbeda skala; completed saat child terbuka/waktu layar tidur tidak meninggalkan popover yatim. Floating timer/companion existing tetap sinkron.
+- Build Debug macOS dan tes domain terdampak wajib lulus; lint/format file yang diubah dan `git diff --check`. Laporkan warning baseline terpisah; jangan mengklaim native clicks teruji hanya dari NSHostingView render.
+
+**Definition of done:** mode/app editor berfungsi dari MenuBar, edit live durable dan efektif, reset mengakhiri sesi secara aman, completion otomatis membuka idle, strip ikan harian view-only benar, Settings tidak menjadi jalur aturan yang bertentangan, serta failure/recovery dan native popover QA sudah dibuktikan.
+
+### 22.13 Hasil pembaruan dokumen hari ini
+
+- Snapshot perubahan branch sebelumnya disimpan sebagai `daaaafd`; branch baru dibuat dari HEAD itu tanpa reset/cherry-pick atau perubahan kode aplikasi.
+- Rencana di atas menggabungkan seluruh persetujuan dan pengecualian pengguna terhadap pertanyaan grill. Restart/end, live edit apps, app-only, Blocking kosong, auto-open completion, scrollbar hidden dan view-only catches adalah keputusan terbaru.
+- Validasi saat perencanaan: sumber kode dan referensi telah diperiksa, struktur/link file dicek dan `git diff --check` dijalankan. Build/test runtime belum dijalankan pada tahap perencanaan tersebut.
+
+### 22.14 Hasil implementasi — 17 Oktober 2026
+
+- MenuBar sekarang memakai panel Arctic adaptif 280 pt dengan mode, ringkasan app, editor popover native, strip ikan harian, status penyimpanan, dan footer teks `start` / `restart` + `pause` / `resume`.
+- Policy sesi baru dan policy yang dipulihkan dinormalisasi menjadi app-only. Allowing kosong ditolak, Blocking kosong sah, dan perubahan app live disimpan ke snapshot sebelum dipublikasikan.
+- Reset mengakhiri sesi ke idle dan Start berikutnya membuat UUID baru. Finalisasi menyimpan terminal intent lebih dahulu, membekukan waktu saat gagal, dan menyediakan retry idempotent.
+- Completion card dan jalur Focus rules lama di Settings dihapus. Completion alami me-refresh data, memainkan sound existing, lalu membuka kontrol idle.
+- QA native membuktikan mode menu tidak menutup parent, pencarian/checkbox memperbarui pilihan langsung, dan Done hanya menutup popover. Build Debug dan seluruh test suite macOS lulus; warning lint/concurrency yang tersisa berasal dari baseline di luar scope ini.

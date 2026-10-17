@@ -4,6 +4,27 @@ import Testing
 
 @MainActor
 struct SessionCoordinatorTests {
+    private final class FailingSessionRepository: SessionRepositoryProtocol, @unchecked Sendable {
+        let base: SessionRepository
+        var failNextSave = false
+
+        init(base: SessionRepository) {
+            self.base = base
+        }
+
+        func loadActive(accountID: String) -> ActiveSessionSnapshot? { base.loadActive(accountID: accountID) }
+        func saveActive(_ snapshot: ActiveSessionSnapshot) -> Bool {
+            if failNextSave {
+                failNextSave = false
+                return false
+            }
+            return base.saveActive(snapshot)
+        }
+        func deleteActive(accountID: String) -> Bool { base.deleteActive(accountID: accountID) }
+        func finalizeOnce(_ session: FocusSession) -> Bool { base.finalizeOnce(session) }
+        func loadHistory(accountID: String) -> [FocusSession] { base.loadHistory(accountID: accountID) }
+    }
+
     private struct Repositories {
         let sessions: SessionRepository
         let catches: CatchRepository
@@ -98,7 +119,28 @@ struct SessionCoordinatorTests {
     }
 
     @Test
-    func restartKeepsSessionIdentityAndCumulativeTimeAfterRestore() {
+    func allowingRequiresAnAppAndLiveUpdateKeepsSessionIdentity() {
+        let repositories = makeRepositories()
+        defer { cleanup(repositories) }
+        let coordinator = makeCoordinator(repositories: repositories)
+        #expect(coordinator.startSession(draft: SessionDraft(policy: SessionPolicy(mode: .allowing))) == nil)
+
+        var policy = SessionPolicy(mode: .allowing)
+        policy.allowedApps = ["com.example.Editor"]
+        policy.blockedApps = ["com.example.Distraction"]
+        let started = coordinator.startSession(draft: SessionDraft(policy: policy))
+        #expect(started != nil)
+        #expect(coordinator.updateAppRules(
+            allowedApps: ["com.example.Editor", "com.example.Browser"],
+            blockedApps: []))
+        #expect(coordinator.snapshot?.id == started?.id)
+        #expect(coordinator.snapshot?.draft.policy.allowedApps.contains("com.example.Browser") == true)
+        #expect(coordinator.snapshot?.draft.policy.blockedApps == ["com.example.Distraction"])
+        #expect(coordinator.updateAppRules(allowedApps: [], blockedApps: []) == false)
+    }
+
+    @Test
+    func resetEndsSessionAndNextStartUsesNewIdentity() {
         let accountID = UUID().uuidString
         let repositories = makeRepositories()
         let start = Date()
@@ -106,23 +148,18 @@ struct SessionCoordinatorTests {
         let coordinator = makeCoordinator(accountID: accountID, repositories: repositories) { current }
         let first = coordinator.startSession(draft: SessionDraft(plannedMinutes: 1))!
         current = start.addingTimeInterval(30)
-        #expect(coordinator.restartSession())
-        #expect(coordinator.snapshot?.id == first.id)
-        #expect(coordinator.snapshot?.accumulatedActiveSeconds == 30)
-        #expect(coordinator.remainingTime == 60)
-
-        let restored = makeCoordinator(accountID: accountID, repositories: repositories) { current }
-        restored.restore()
-        current = start.addingTimeInterval(91)
-        let completed = restored.completeIfDue()
-        #expect(completed?.id == first.id)
-        #expect(completed?.actualActiveSeconds == 90)
+        #expect(coordinator.resetSession())
+        #expect(coordinator.snapshot == nil)
+        #expect(repositories.sessions.loadHistory(accountID: accountID).first?.id == first.id)
+        let second = coordinator.startSession(draft: SessionDraft(plannedMinutes: 1))
+        #expect(second?.id != first.id)
+        #expect(second?.accumulatedActiveSeconds == 0)
         #expect(repositories.sessions.loadHistory(accountID: accountID).count == 1)
         cleanup(repositories)
     }
 
     @Test
-    func restartFromPauseResumesSameSessionWithOriginalDuration() {
+    func resetFromPauseEndsSessionWithoutResuming() {
         let repositories = makeRepositories()
         defer { cleanup(repositories) }
         let start = Date()
@@ -132,12 +169,61 @@ struct SessionCoordinatorTests {
         current = start.addingTimeInterval(40)
         coordinator.pauseSession()
         current = start.addingTimeInterval(100)
-        #expect(coordinator.restartSession())
-        #expect(coordinator.isActive)
-        #expect(!coordinator.isPaused)
-        #expect(coordinator.snapshot?.id == first.id)
-        #expect(coordinator.snapshot?.accumulatedActiveSeconds == 40)
-        #expect(coordinator.remainingTime == 1500)
+        #expect(coordinator.resetSession())
+        #expect(coordinator.snapshot == nil)
+        let ended = repositories.sessions.loadHistory(accountID: "test").first
+        #expect(ended?.id == first.id)
+        #expect(ended?.actualActiveSeconds == 40)
+    }
+
+    @Test
+    func failedResetCanRetryWithoutAddingActiveTime() {
+        let repositories = makeRepositories()
+        defer { cleanup(repositories) }
+        let sessionRepository = FailingSessionRepository(base: repositories.sessions)
+        let start = Date()
+        var current = start
+        let coordinator = SessionCoordinator(
+            accountID: "test",
+            sessionRepository: sessionRepository,
+            catchRepository: repositories.catches,
+            now: { current },
+            autoCatchEnabled: false
+        )
+        coordinator.startSession(draft: SessionDraft(plannedMinutes: 10))
+        current = start.addingTimeInterval(30)
+        sessionRepository.failNextSave = true
+
+        #expect(coordinator.resetSession() == false)
+        #expect(coordinator.finalizationState == .failed("Could not save this session."))
+        current = start.addingTimeInterval(180)
+        coordinator.retryFinalization()
+
+        #expect(coordinator.snapshot == nil)
+        #expect(repositories.sessions.loadHistory(accountID: "test").first?.actualActiveSeconds == 30)
+    }
+
+    @Test
+    func failedLiveRuleSaveDoesNotPublishCandidate() {
+        let repositories = makeRepositories()
+        defer { cleanup(repositories) }
+        let sessionRepository = FailingSessionRepository(base: repositories.sessions)
+        var policy = SessionPolicy(mode: .allowing)
+        policy.allowedApps = ["com.example.Editor"]
+        let coordinator = SessionCoordinator(
+            accountID: "test",
+            sessionRepository: sessionRepository,
+            catchRepository: repositories.catches,
+            autoCatchEnabled: false
+        )
+        coordinator.startSession(draft: SessionDraft(policy: policy))
+        sessionRepository.failNextSave = true
+
+        #expect(coordinator.updateAppRules(
+            allowedApps: ["com.example.Editor", "com.example.Browser"],
+            blockedApps: []
+        ) == false)
+        #expect(coordinator.snapshot?.draft.policy.allowedApps == ["com.example.Editor"])
     }
 
     @Test

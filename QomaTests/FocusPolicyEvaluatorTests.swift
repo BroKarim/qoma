@@ -4,7 +4,6 @@ import Testing
 
 struct FocusPolicyEvaluatorTests {
     private let chrome = "com.google.Chrome"
-    private let safari = "com.apple.Safari"
     private let slack = "com.tinyspeck.slackmacgap"
     private let xcode = "com.apple.dt.Xcode"
 
@@ -38,13 +37,13 @@ struct FocusPolicyEvaluatorTests {
     }
 
     @Test
-    func allowingDomainExceptionForChrome() {
+    func allowingIgnoresLegacyDomainRules() {
         var policy = SessionPolicy(mode: .allowing)
         policy.allowedDomains.insert("example.com")
         let activity = ForegroundActivity(bundleID: chrome, appName: "Chrome", domain: "www.example.com", browserBundleID: chrome)
         let decision = FocusPolicyEvaluator.evaluate(activity, against: policy)
-        #expect(decision.isDistraction == false)
-        #expect(decision.reason == .allowedDomain)
+        #expect(decision.isDistraction)
+        #expect(decision.reason == .blockedExplicitly)
     }
 
     @Test
@@ -54,7 +53,7 @@ struct FocusPolicyEvaluatorTests {
         let activity = ForegroundActivity(bundleID: chrome, appName: "Chrome", domain: "youtube.com", browserBundleID: chrome)
         let decision = FocusPolicyEvaluator.evaluate(activity, against: policy)
         #expect(decision.isDistraction == true)
-        #expect(decision.reason == .blockedBrowser)
+        #expect(decision.reason == .blockedExplicitly)
     }
 
     @Test
@@ -87,23 +86,13 @@ struct FocusPolicyEvaluatorTests {
     }
 
     @Test
-    func blockingBlockedDomainOnAllowedBrowser() {
+    func blockingIgnoresLegacyDomainRules() {
         var policy = SessionPolicy(mode: .blocking)
         policy.blockedDomains.insert("youtube.com")
-        let activity = ForegroundActivity(bundleID: safari, appName: "Safari", domain: "www.youtube.com", browserBundleID: safari)
+        let activity = ForegroundActivity(bundleID: chrome, appName: "Chrome", domain: "www.youtube.com", browserBundleID: chrome)
         let decision = FocusPolicyEvaluator.evaluate(activity, against: policy)
-        #expect(decision.isDistraction == true)
-        #expect(decision.reason == .blockedDomain)
-    }
-
-    @Test
-    func blockingDomainFailsClosedWhenBrowserDomainCannotBeRead() {
-        var policy = SessionPolicy(mode: .blocking)
-        policy.blockedDomains.insert("youtube.com")
-        let activity = ForegroundActivity(bundleID: safari, appName: "Safari", domain: nil, browserBundleID: safari)
-        let decision = FocusPolicyEvaluator.evaluate(activity, against: policy)
-        #expect(decision.isDistraction)
-        #expect(decision.reason == .noDomainRead)
+        #expect(!decision.isDistraction)
+        #expect(decision.reason == .safeByDefault)
     }
 
     @Test

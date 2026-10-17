@@ -1,5 +1,6 @@
 import AppKit
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct NewSessionView: View {
   @ObservedObject var coordinator: SessionCoordinator
@@ -7,8 +8,6 @@ struct NewSessionView: View {
   let onStarted: () -> Void
   @State private var editingApps = false
   @State private var startFailed = false
-  @State private var permissionFailed = false
-  @State private var requestingPermission = false
 
   var body: some View {
     VStack(spacing: 0) {
@@ -62,36 +61,38 @@ struct NewSessionView: View {
             Text("This session could not start. Check your access and try again.")
               .font(.caption).foregroundStyle(.secondary)
           }
-          if permissionFailed {
-            Text("Browser access is needed to apply domain rules. Allow qyube in System Settings → Privacy & Security → Automation, then try again.")
-              .font(.caption).foregroundStyle(.secondary)
-          }
         }.padding(.horizontal, 22).padding(.bottom, 8)
       }
       .qyubeScrollIndicator()
       QyubePrimaryButton(title: "Start session") {
         guard coordinator.snapshot == nil else { return }
-        Task {
-          requestingPermission = true
-          defer { requestingPermission = false }
-          let permission = await PermissionManager.shared.requestPermissionIfNeeded(
-            for: draft.policy, browserBundleID: draft.domainBrowserBundleID)
-          guard permission == .granted else {
-            permissionFailed = true
-            return
-          }
-          permissionFailed = false
-          if coordinator.startSession(draft: draft) != nil { onStarted() } else { startFailed = true }
-        }
-      }.keyboardShortcut(.defaultAction).disabled(coordinator.snapshot != nil || requestingPermission).padding(22)
+        if coordinator.startSession(draft: draft) != nil { onStarted() } else { startFailed = true }
+      }
+      .keyboardShortcut(.defaultAction)
+      .disabled(coordinator.snapshot != nil || (draft.policy.mode == .allowing && apps.isEmpty))
+      .padding(22)
     }
     .sheet(isPresented: $editingApps) {
-      QyubeAppRuleEditor(policy: $draft.policy, selectedDomainBrowser: $draft.domainBrowserBundleID)
+      QyubeAppRuleEditor(
+        mode: draft.policy.mode,
+        selectedApps: apps,
+        onToggle: { id, selected in
+          setApp(id, selected: selected)
+          return true
+        })
     }
   }
 
   private var apps: Set<String> {
     draft.policy.mode == .allowing ? draft.policy.allowedApps : draft.policy.blockedApps
+  }
+
+  private func setApp(_ id: String, selected: Bool) {
+    if draft.policy.mode == .allowing {
+      if selected { draft.policy.allowedApps.insert(id) } else { draft.policy.allowedApps.remove(id) }
+    } else {
+      if selected { draft.policy.blockedApps.insert(id) } else { draft.policy.blockedApps.remove(id) }
+    }
   }
 }
 
@@ -150,133 +151,139 @@ struct AppIcon: View {
   }
 }
 
+private struct AppChoice: Identifiable, Sendable {
+  let id: String
+  let name: String
+}
+
 struct QyubeAppRuleEditor: View {
-  @Binding var policy: SessionPolicy
-  @Binding var selectedDomainBrowser: String
+  let mode: FocusPolicyMode
+  let selectedApps: Set<String>
+  let onToggle: (String, Bool) -> Bool
   @Environment(\.dismiss) private var dismiss
-  @State private var domain = ""
   @State private var installedApps: [AppChoice] = []
   @State private var search = ""
+  @State private var errorMessage: String?
+  @State private var loading = true
 
-  private struct AppChoice: Identifiable {
-    let id: String
-    let name: String
-  }
-  private var selectedApps: Set<String> {
-    policy.mode == .allowing ? policy.allowedApps : policy.blockedApps
-  }
-  private var selectedDomains: Set<String> {
-    policy.mode == .allowing ? policy.allowedDomains : policy.blockedDomains
+  private var filteredApps: [AppChoice] {
+    guard !search.isEmpty else { return installedApps }
+    return installedApps.filter { $0.name.localizedStandardContains(search) }
   }
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 16) {
-      HStack {
-        Text(policy.mode == .allowing ? "Allowed apps" : "Distracting apps").font(.headline)
-        Spacer()
-        Button("Done") { dismiss() }.keyboardShortcut(.defaultAction)
+    VStack(alignment: .leading, spacing: 14) {
+      Text(mode == .allowing ? "Allowed apps" : "Blocked apps").font(.headline)
+      Text("Changes apply immediately").font(.callout).foregroundStyle(.secondary)
+      HStack(spacing: 8) {
+        Image(systemName: "magnifyingglass").foregroundStyle(Color.qyubeAccent)
+        TextField("Search apps", text: $search).textFieldStyle(.plain)
       }
-      Text("Selecting a browser applies to every website inside it.")
-        .font(.caption).foregroundStyle(.secondary)
-      TextField("Search apps", text: $search).textFieldStyle(.roundedBorder)
+      .padding(.horizontal, 10).frame(height: 34)
+      .background(Color.qyubeSelection.opacity(0.55), in: RoundedRectangle(cornerRadius: 8))
+      .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.qyubeAccent.opacity(0.55)))
       ScrollView {
-        LazyVStack(alignment: .leading, spacing: 12) {
-          ForEach(
-            installedApps.filter {
-              search.isEmpty || $0.name.localizedCaseInsensitiveContains(search)
-            }
-          ) { app in
+        LazyVStack(alignment: .leading, spacing: 4) {
+          ForEach(filteredApps) { app in
             Toggle(
               isOn: Binding(
-                get: { selectedApps.contains(app.id) }, set: { setApp(app.id, selected: $0) })
+                get: { selectedApps.contains(app.id) },
+                set: { setApp(app.id, selected: $0) })
             ) {
               HStack {
-                AppIcon(bundleID: app.id).frame(width: 22, height: 22)
+                AppIcon(bundleID: app.id).frame(width: 24, height: 24)
                 Text(app.name)
               }
-            }.toggleStyle(.checkbox)
+              .padding(.vertical, 6).padding(.horizontal, 8)
+            }
+            .toggleStyle(.checkbox)
+            .background(
+              selectedApps.contains(app.id) ? Color.qyubeSelection.opacity(0.55) : .clear,
+              in: RoundedRectangle(cornerRadius: 7))
+          }
+          if loading {
+            ProgressView().frame(maxWidth: .infinity).padding()
+          } else if filteredApps.isEmpty {
+            Text("No matching applications.").foregroundStyle(.secondary).padding()
           }
         }
       }
-      .qyubeScrollIndicator()
-      DisclosureGroup("Websites (advanced)") {
-        VStack(alignment: .leading, spacing: 8) {
-          Picker("Browser for website rules", selection: $selectedDomainBrowser) {
-            Text("Safari").tag("com.apple.Safari")
-            Text("Google Chrome").tag("com.google.Chrome")
-          }.pickerStyle(.segmented)
-          Text("Website rules read the active domain in the selected browser; app rules still work in other browsers.")
-            .font(.caption).foregroundStyle(.secondary)
-          HStack {
-            TextField("example.com", text: $domain).textFieldStyle(.roundedBorder)
-            Button("Add", action: addDomain).disabled(
-              domain.trimmingCharacters(in: .whitespaces).isEmpty)
-          }
-          ForEach(selectedDomains.sorted(), id: \.self) { host in
-            HStack {
-              Text(host).font(.caption)
-              Spacer()
-              Button {
-                removeDomain(host)
-              } label: {
-                Image(systemName: "minus.circle")
-              }
-              .buttonStyle(.plain).accessibilityLabel("Remove \(host)")
-            }
-          }
-        }.padding(.top, 10)
+      .scrollIndicators(.hidden)
+      if let errorMessage {
+        Text(errorMessage).font(.callout).foregroundStyle(.red)
       }
-    }.padding(22).frame(width: 310, height: 440).background(.white)
-      .task { loadApps() }
+      Divider()
+      HStack {
+        Button("Choose application…", systemImage: "plus", action: chooseApplication)
+          .buttonStyle(.plain).foregroundStyle(Color.qyubeAccent)
+        Spacer()
+        Button("Done") { dismiss() }.keyboardShortcut(.defaultAction)
+          .buttonStyle(.borderedProminent).tint(Color.qyubeAccent)
+      }
+    }
+    .padding(18).frame(width: 310, height: 410).background(Color.qyubeBackground)
+    .task { await loadApps() }
   }
 
-  private func loadApps() {
+  private func loadApps() async {
+    let selectedApps = selectedApps
+    let mainBundleID = Bundle.main.bundleIdentifier
+    let choices = await Task.detached {
+      Self.discoverApplications(selectedApps: selectedApps, excluding: mainBundleID)
+    }.value
+    installedApps = choices
+    loading = false
+  }
+
+  nonisolated private static func discoverApplications(
+    selectedApps: Set<String>,
+    excluding mainBundleID: String?
+  ) -> [AppChoice] {
     var choices: [String: AppChoice] = [:]
     let roots = [
-      URL(fileURLWithPath: "/Applications"), URL(fileURLWithPath: "/System/Applications"),
-      FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Applications"),
+      URL(fileURLWithPath: "/Applications"),
+      URL(fileURLWithPath: "/System/Applications"),
+      FileManager.default.homeDirectoryForCurrentUser.appending(path: "Applications"),
     ]
     for root in roots {
-      guard
-        let enumerator = FileManager.default.enumerator(
-          at: root, includingPropertiesForKeys: nil,
-          options: [.skipsHiddenFiles, .skipsPackageDescendants])
-      else { continue }
+      guard let enumerator = FileManager.default.enumerator(
+        at: root,
+        includingPropertiesForKeys: nil,
+        options: [.skipsHiddenFiles, .skipsPackageDescendants]
+      ) else { continue }
       for case let url as URL in enumerator where url.pathExtension == "app" {
-        guard let bundle = Bundle(url: url), let id = bundle.bundleIdentifier else { continue }
+        guard let bundle = Bundle(url: url),
+              let id = bundle.bundleIdentifier,
+              id != mainBundleID else { continue }
         choices[id] = AppChoice(id: id, name: url.deletingPathExtension().lastPathComponent)
       }
     }
-    for id in selectedApps where choices[id] == nil { choices[id] = AppChoice(id: id, name: id) }
-    installedApps = choices.values.sorted {
-      $0.name.localizedStandardCompare($1.name) == .orderedAscending
+    for id in selectedApps where choices[id] == nil {
+      choices[id] = AppChoice(id: id, name: id)
+    }
+    return choices.values.sorted {
+      if selectedApps.contains($0.id) != selectedApps.contains($1.id) {
+        return selectedApps.contains($0.id)
+      }
+      return $0.name.localizedStandardCompare($1.name) == .orderedAscending
     }
   }
+
   private func setApp(_ id: String, selected: Bool) {
-    if policy.mode == .allowing {
-      if selected { policy.allowedApps.insert(id) } else { policy.allowedApps.remove(id) }
-    } else {
-      if selected { policy.blockedApps.insert(id) } else { policy.blockedApps.remove(id) }
-    }
+    errorMessage = onToggle(id, selected) ? nil : "Keep at least one allowed app."
   }
-  private func addDomain() {
-    let trimmed = domain.trimmingCharacters(in: .whitespacesAndNewlines)
-    let host =
-      URL(string: trimmed.contains("://") ? trimmed : "https://\(trimmed)")?.host ?? trimmed
-    let normalized = FocusPolicyEvaluator.normalizeDomain(host)
-    guard !normalized.isEmpty else { return }
-    if policy.mode == .allowing {
-      policy.allowedDomains.insert(normalized)
-    } else {
-      policy.blockedDomains.insert(normalized)
+
+  private func chooseApplication() {
+    let panel = NSOpenPanel()
+    panel.allowedContentTypes = [.application]
+    panel.allowsMultipleSelection = false
+    panel.canChooseDirectories = false
+    guard panel.runModal() == .OK, let url = panel.url,
+          let bundle = Bundle(url: url), let id = bundle.bundleIdentifier,
+          id != Bundle.main.bundleIdentifier else { return }
+    if !installedApps.contains(where: { $0.id == id }) {
+      installedApps.append(AppChoice(id: id, name: url.deletingPathExtension().lastPathComponent))
     }
-    domain = ""
-  }
-  private func removeDomain(_ host: String) {
-    if policy.mode == .allowing {
-      policy.allowedDomains.remove(host)
-    } else {
-      policy.blockedDomains.remove(host)
-    }
+    setApp(id, selected: true)
   }
 }

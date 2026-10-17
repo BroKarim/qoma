@@ -27,13 +27,14 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
 
         menuBarController.configure(
             coordinator: self.sessionCoordinator,
+            preferences: self.focusPreferences,
             onStart: { [weak self] minutes in await self?.startFromMenuBar(minutes: minutes) ?? false },
             onOpen: { [weak self] in self?.navigation.page = .analytics; self?.showHomeWindow() },
             onSettings: { [weak self] in self?.navigation.page = .settings; self?.showHomeWindow() },
             onShowTimer: { [weak self] in self?.restoreTimerPanel() },
-            onViewCatches: { [weak self] session in
-                self?.navigation.showCatches(for: session)
-                self?.showHomeWindow()
+            loadCatches: { [weak self] in
+                guard let self else { return [] }
+                return CatchRepository.shared.listBanked(accountID: self.sessionCoordinator.sessionAccountID)
             }
         )
 
@@ -103,10 +104,6 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
     private func startFromMenuBar(minutes: Int) async -> Bool {
         guard sessionCoordinator.snapshot == nil else { return false }
         let draft = focusPreferences.draft(minutes: minutes)
-        let permission = await PermissionManager.shared.requestPermissionIfNeeded(
-            for: draft.policy, browserBundleID: draft.domainBrowserBundleID
-        )
-        guard permission == .granted else { return false }
         return sessionCoordinator.startSession(draft: draft) != nil
     }
 
@@ -147,6 +144,31 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
             .sink { [weak self] _ in
                 self?.updateTimerPanel()
                 self?.updateStatusItem()
+            }
+            .store(in: &cancellables)
+
+        sessionCoordinator.$catchesRevision
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.navigation.refresh()
+                NotificationCenter.default.post(name: .qyubeCollectionChanged, object: nil)
+            }
+            .store(in: &cancellables)
+
+        sessionCoordinator.$finalizationState
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] state in
+                guard let self, state != .idle else { return }
+                self.finishAnalyticsTracking()
+                self.timerController.hide()
+                self.companionController.hide()
+                self.distractionCoordinator.stop()
+                self.overlayController.hide()
+                if case .failed = state {
+                    self.menuBarController.showPopover()
+                }
             }
             .store(in: &cancellables)
 
@@ -252,8 +274,7 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
                 ?? AppConstants.SoundSettings.defaultSoundID,
             volume: defaults.object(forKey: AppConstants.SoundSettings.volumeKey) as? Double
                 ?? AppConstants.SoundSettings.defaultVolume)
-        let count = navigation.catches.filter { $0.sessionID == session.id }.count
-        menuBarController.showCompletion(session, catchCount: count)
+        menuBarController.showIdleAfterCompletion()
     }
 
     private func updateAnalyticsTracking(for snapshot: ActiveSessionSnapshot) {

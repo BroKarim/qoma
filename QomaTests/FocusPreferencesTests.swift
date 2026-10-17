@@ -14,6 +14,7 @@ struct FocusPreferencesTests {
         #expect(preferences.policy == .timerOnly)
         preferences.policy.mode = .blocking
         preferences.policy.blockedApps.insert("com.example.Blocked")
+        preferences.policy.blockedDomains.insert("example.com")
         preferences.browserBundleID = "com.google.Chrome"
         preferences.hideFloatingTimer = true
         let activeDraft = preferences.draft(minutes: 25)
@@ -26,6 +27,8 @@ struct FocusPreferencesTests {
         #expect(draft.policy.mode == .allowing)
         #expect(draft.policy.blockedApps.contains("com.example.Blocked"))
         #expect(draft.policy.allowedApps.contains("com.example.Allowed"))
+        #expect(draft.policy.allowedDomains.isEmpty)
+        #expect(draft.policy.blockedDomains.isEmpty)
         #expect(draft.domainBrowserBundleID == "com.google.Chrome")
         #expect(restored.hideFloatingTimer)
         #expect(draft.plannedMinutes == 25)

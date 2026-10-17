@@ -2,7 +2,6 @@ import SwiftUI
 
 struct GeneralSettingsPane: View {
     @ObservedObject private var focus = FocusPreferences.shared
-    @State private var editingRules = false
     @AppStorage(DistractionAudioPlayer.enabledKey) private var distractionSounds = true
     @AppStorage(AppConstants.QuickPresets.preset1Key)
     private var quickPreset1: Int = AppConstants.QuickPresets.defaultValues[0]
@@ -27,7 +26,6 @@ struct GeneralSettingsPane: View {
                 quickPresetsSection
                 completionSoundSection
                 menuBarSection
-                focusRulesSection
                 floatingSection
             }
             .padding(24)
@@ -135,32 +133,6 @@ struct GeneralSettingsPane: View {
                     Text("MM:SS").monospacedDigit().foregroundStyle(.secondary)
                 }
             }
-        }
-    }
-
-    private var focusRulesSection: some View {
-        SettingsSurfaceCard {
-            VStack(alignment: .leading, spacing: 16) {
-                SettingsSectionHeading(title: "Focus rules", subtitle: "Changes apply to the next session you start.")
-                SettingsRow(title: "Mode for new sessions") {
-                    Picker("", selection: $focus.policy.mode) {
-                        Text("Timer only").tag(FocusPolicyMode.timerOnly)
-                        Text("Allowing").tag(FocusPolicyMode.allowing)
-                        Text("Blocking").tag(FocusPolicyMode.blocking)
-                    }
-                    .pickerStyle(.menu)
-                    .frame(width: 220, alignment: .trailing)
-                }
-                if focus.policy.mode != .timerOnly {
-                    Divider()
-                    SettingsRow(title: "Apps and websites") {
-                        Button("Choose…") { editingRules = true }
-                    }
-                }
-            }
-        }
-        .sheet(isPresented: $editingRules) {
-            QyubeAppRuleEditor(policy: $focus.policy, selectedDomainBrowser: $focus.browserBundleID)
         }
     }
 

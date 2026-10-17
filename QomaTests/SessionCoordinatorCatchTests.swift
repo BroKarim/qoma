@@ -111,7 +111,7 @@ struct SessionCoordinatorCatchTests {
     }
 
     @Test
-    func restartKeepsProvisionalCatchAndCumulativeBankThreshold() {
+    func resetBeforeThresholdDiscardsProvisionalCatch() {
         let accountID = UUID().uuidString
         let repositories = makeRepositories()
         let start = Date()
@@ -124,11 +124,9 @@ struct SessionCoordinatorCatchTests {
         let catchEvent = coordinator.depositCatch()!.event
         #expect(!catchEvent.isBanked)
 
-        #expect(coordinator.restartSession())
-        #expect(repositories.catches.listProvisional(sessionID: catchEvent.sessionID, accountID: accountID).count == 1)
-        current = start.addingTimeInterval(301)
-        _ = coordinator.stopSession()
-        #expect(repositories.catches.listBanked(accountID: accountID).count == 1)
+        #expect(coordinator.resetSession())
+        #expect(repositories.catches.listProvisional(sessionID: catchEvent.sessionID, accountID: accountID).isEmpty)
+        #expect(repositories.catches.listBanked(accountID: accountID).isEmpty)
         #expect(repositories.sessions.loadHistory(accountID: accountID).count == 1)
         cleanup(repositories)
     }

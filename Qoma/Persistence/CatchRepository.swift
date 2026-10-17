@@ -9,7 +9,7 @@ protocol CatchRepositoryProtocol: Sendable {
     func listBanked(accountID: String) -> [CatchEvent]
     func listProvisional(sessionID: UUID, accountID: String) -> [CatchEvent]
     func countByKind(accountID: String) -> [String: Int]
-    func deleteProvisional(sessionID: UUID, accountID: String)
+    func deleteProvisional(sessionID: UUID, accountID: String) -> Bool
 }
 
 /// JSON-backed catch ledger. Provisional events live only for the active session.
@@ -100,10 +100,17 @@ final class CatchRepository: CatchRepositoryProtocol, @unchecked Sendable {
         }
     }
 
-    func deleteProvisional(sessionID: UUID, accountID: String) {
+    func deleteProvisional(sessionID: UUID, accountID: String) -> Bool {
         syncIO {
             let url = provisionalFileURL(sessionID: sessionID, accountID: accountID)
-            try? FileManager.default.removeItem(at: url)
+            guard FileManager.default.fileExists(atPath: url.path) else { return true }
+            do {
+                try FileManager.default.removeItem(at: url)
+                return true
+            } catch {
+                Logger.store.error("Delete provisional catches failed: \(error.localizedDescription, privacy: .public)")
+                return false
+            }
         }
     }
 

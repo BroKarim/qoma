@@ -11,8 +11,6 @@ struct QyubeJournalSettingsView: View {
     @AppStorage(AppConstants.FloatingThemeSettings.liquidGlassKey) private var glass = false
     @AppStorage("qyube.reduceMotionOverride") private var reduceMotion = false
     @AppStorage(DistractionAudioPlayer.enabledKey) private var distractionSounds = true
-    @State private var editingRules = false
-    @State private var rulesExpanded = false
 
     var body: some View {
         ScrollView {
@@ -26,13 +24,9 @@ struct QyubeJournalSettingsView: View {
                 self.soundSettings
                 self.floatingSettings
                 self.comfort
-                self.focusRules
             }.padding(28).padding(.top, 12)
         }
         .qyubeScrollIndicator()
-        .sheet(isPresented: self.$editingRules) {
-            QyubeAppRuleEditor(policy: self.$focus.policy, selectedDomainBrowser: self.$focus.browserBundleID)
-        }
         .onDisappear { SoundAlertPlayer.shared.stop() }
         .onChange(of: self.sound) { _, _ in SoundAlertPlayer.shared.stop() }
         .onChange(of: self.volume) { _, value in
@@ -160,24 +154,6 @@ struct QyubeJournalSettingsView: View {
                     Toggle("Distraction sound effects", isOn: self.$distractionSounds).labelsHidden()
                         .toggleStyle(.switch)
                 }
-            }
-        }
-    }
-
-    private var focusRules: some View {
-        SettingsSurfaceCard {
-            DisclosureGroup("Focus rules", isExpanded: self.$rulesExpanded) {
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Changes apply to the next session you start.").font(.caption).foregroundStyle(.secondary)
-                    Picker("Mode for new sessions", selection: self.$focus.policy.mode) {
-                        Text("Timer only").tag(FocusPolicyMode.timerOnly)
-                        Text("Allowing").tag(FocusPolicyMode.allowing)
-                        Text("Blocking").tag(FocusPolicyMode.blocking)
-                    }
-                    if self.focus.policy.mode != .timerOnly {
-                        Button("Choose apps and websites…") { self.editingRules = true }
-                    }
-                }.padding(.top, 14)
             }
         }
     }

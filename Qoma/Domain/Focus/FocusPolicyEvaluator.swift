@@ -25,21 +25,6 @@ enum FocusPolicyEvaluator {
             return PolicyDecision(isDistraction: false, reason: .allowedExplicitly)
         }
 
-        if isBrowserCapableOfDomainPolicy(normalizedBundle) {
-            if let domain = activity.domain {
-                if policy.allowedDomains.contains(normalizeDomain(domain)) {
-                    return PolicyDecision(isDistraction: false, reason: .allowedDomain)
-                }
-            }
-            return PolicyDecision(isDistraction: true, reason: .blockedBrowser)
-        }
-
-        if activity.domain != nil {
-            if let domain = activity.domain, policy.allowedDomains.contains(normalizeDomain(domain)) {
-                return PolicyDecision(isDistraction: false, reason: .allowedDomain)
-            }
-        }
-
         return PolicyDecision(isDistraction: true, reason: .blockedExplicitly)
     }
 
@@ -48,17 +33,6 @@ enum FocusPolicyEvaluator {
 
         if policy.blockedApps.contains(normalizedBundle) {
             return PolicyDecision(isDistraction: true, reason: .blockedExplicitly)
-        }
-
-        if isBrowserCapableOfDomainPolicy(normalizedBundle) {
-            if let domain = activity.domain {
-                if policy.blockedDomains.contains(normalizeDomain(domain)) {
-                    return PolicyDecision(isDistraction: true, reason: .blockedDomain)
-                }
-            } else if !policy.blockedDomains.isEmpty {
-                return PolicyDecision(isDistraction: true, reason: .noDomainRead)
-            }
-            return PolicyDecision(isDistraction: false, reason: .allowedBrowser)
         }
 
         return PolicyDecision(isDistraction: false, reason: .safeByDefault)

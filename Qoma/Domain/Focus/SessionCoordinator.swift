@@ -2,6 +2,12 @@ import Foundation
 import Combine
 import OSLog
 
+enum SessionFinalizationState: Equatable {
+    case idle
+    case saving
+    case failed(String)
+}
+
 /// Coordinates a single active focus session: timer, persistence, policy, and catch.
 /// Replaces the legacy FocusSessionManager break/session mixing.
 @MainActor
@@ -22,11 +28,16 @@ final class SessionCoordinator: ObservableObject {
     @Published private(set) var isDistractionActive = false
     @Published private(set) var lastCatchEvent: CatchEvent?
     @Published private(set) var currentReelKindID: String?
+    @Published private(set) var finalizationState: SessionFinalizationState = .idle
+    @Published private(set) var catchesRevision = 0
 
     private var clock: SessionClock?
     private var catchEngine: CatchEngine?
     private var timerCancellable: AnyCancellable?
     private var finalizedSessionIDs = Set<UUID>()
+    private var thresholdBankedSessionIDs = Set<UUID>()
+    private var pendingFinalizationSnapshot: ActiveSessionSnapshot?
+    private var pendingRestorationSnapshot: ActiveSessionSnapshot?
 
     // Catch timer state
     private var catchTimer: Timer?
@@ -38,6 +49,7 @@ final class SessionCoordinator: ObservableObject {
     var isPaused: Bool { snapshot?.status == .paused }
     var currentTaskTitle: String { snapshot?.draft.displayTitle ?? "" }
     var currentPolicy: SessionPolicy { snapshot?.draft.policy ?? .timerOnly }
+    var sessionAccountID: String { accountID }
 
     var onSessionEnded: ((FocusSession) -> Void)?
 
@@ -62,11 +74,24 @@ final class SessionCoordinator: ObservableObject {
     /// Attempt to restore an active session from disk.
     func restore() {
         guard snapshot == nil else { return }
-        guard let stored = sessionRepository.loadActive(accountID: accountID) else { return }
+        guard var stored = sessionRepository.loadActive(accountID: accountID) else { return }
 
         if stored.status == .completed || stored.status == .interrupted {
+            snapshot = stored
+            finalizationState = .saving
             recoverFinalizedSnapshot(stored)
             return
+        }
+
+        if !stored.draft.policy.allowedDomains.isEmpty || !stored.draft.policy.blockedDomains.isEmpty {
+            stored.draft.policy.allowedDomains = []
+            stored.draft.policy.blockedDomains = []
+            guard sessionRepository.saveActive(stored) else {
+                pendingRestorationSnapshot = stored
+                snapshot = stored
+                finalizationState = .failed("Could not update this restored session.")
+                return
+            }
         }
 
         let plannedDuration = TimeInterval(stored.draft.plannedMinutes) * 60
@@ -102,7 +127,13 @@ final class SessionCoordinator: ObservableObject {
     @discardableResult
     func startSession(draft: SessionDraft) -> ActiveSessionSnapshot? {
         guard canStartSession() else { return nil }
+        guard finalizationState == .idle else { return nil }
         guard snapshot == nil else { return snapshot }
+        guard draft.policy.mode != .allowing || !draft.policy.allowedApps.isEmpty else { return nil }
+
+        var draft = draft
+        draft.policy.allowedDomains = []
+        draft.policy.blockedDomains = []
 
         let plannedDuration = TimeInterval(draft.plannedMinutes) * 60
         let id = UUID()
@@ -175,29 +206,10 @@ final class SessionCoordinator: ObservableObject {
     }
 
     @discardableResult
-    func restartSession() -> Bool {
-        guard var snap = snapshot, let clock,
-              snap.status == .active || snap.status == .paused,
-              !clock.isDue else { return false }
-        let replacement = SessionClock(
-            plannedMinutes: snap.draft.plannedMinutes,
-            startTime: now(),
-            accumulatedActiveSeconds: clock.activeSeconds,
-            now: now
-        )
-        snap.status = .active
-        snap.pausedAt = nil
-        snap.accumulatedActiveSeconds = replacement.accumulatedActiveSeconds
-        snap.activeSegmentStartedAt = replacement.startTime
-        snap.deadline = replacement.deadline
-        guard sessionRepository.saveActive(snap) else { return false }
-        self.clock = replacement
-        snapshot = snap
-        stopCatchTimer(discardInFlight: true)
-        startTicking()
-        startCatchTimer(afterResume: false)
-        bankIfThresholdReached()
-        return true
+    func resetSession() -> Bool {
+        guard snapshot?.status == .active || snapshot?.status == .paused else { return false }
+        _ = stopSession(reason: "Reset from menu bar")
+        return snapshot == nil
     }
 
     /// Stop the session early. Records `interrupted` and discards provisional catches
@@ -209,49 +221,22 @@ final class SessionCoordinator: ObservableObject {
         let activeSeconds = clock?.activeSeconds ?? snap.accumulatedActiveSeconds
         let endedAt = now()
 
-        if activeSeconds < CatchEngine.bankThresholdSeconds {
-            catchRepository.deleteProvisional(sessionID: snap.id, accountID: accountID)
-        } else if !catchRepository.bankProvisional(sessionID: snap.id, accountID: accountID, at: endedAt) {
-            Logger.session.error("Could not bank catches before stopping session")
-            return nil
-        }
-
         snap.status = .interrupted
         snap.accumulatedActiveSeconds = activeSeconds
         snap.endedAt = endedAt
         snap.interruptedReason = reason
         snap.activeSegmentStartedAt = nil
-        guard sessionRepository.saveActive(snap) else {
-            Logger.session.error("Could not persist stopped session")
-            return nil
-        }
+        pendingFinalizationSnapshot = snap
         stopTicking()
         stopCatchTimer(discardInFlight: true)
-        snapshot = snap
-
-        if activeSeconds < CatchEngine.bankThresholdSeconds {
-            Logger.session.info("Discarded provisional catches for short session")
+        guard sessionRepository.saveActive(snap) else {
+            Logger.session.error("Could not persist stopped session")
+            finalizationState = .failed("Could not save this session.")
+            return nil
         }
-
-        let session = FocusSession(
-            id: snap.id,
-            accountID: accountID,
-            startedAt: snap.startedAt,
-            endedAt: endedAt,
-            plannedMinutes: snap.draft.plannedMinutes,
-            actualActiveSeconds: activeSeconds,
-            status: .interrupted,
-            draftSnapshot: snap.draft,
-            taskTitle: snap.draft.displayTitle,
-            interruptedReason: reason
-        )
-
-        finalizeOnce(session)
-        guard finalizedSessionIDs.contains(session.id) else { return session }
-        reset()
-        Logger.session.info("Stopped session \(snap.id, privacy: .public)")
-        onSessionEnded?(session)
-        return session
+        snapshot = snap
+        finalizationState = .saving
+        return recoverFinalizedSnapshot(snap)
     }
 
     /// Complete the session because the countdown reached zero.
@@ -263,47 +248,71 @@ final class SessionCoordinator: ObservableObject {
 
         let activeSeconds = clock.activeSeconds
         let endedAt = snap.deadline
-        guard catchRepository.bankProvisional(sessionID: snap.id, accountID: accountID, at: endedAt) else {
-            Logger.session.error("Could not bank catches before completing session")
-            return nil
-        }
-
         snap.status = .completed
         snap.accumulatedActiveSeconds = activeSeconds
         snap.endedAt = endedAt
         snap.activeSegmentStartedAt = nil
-        guard sessionRepository.saveActive(snap) else {
-            Logger.session.error("Could not persist completed session")
-            return nil
-        }
+        pendingFinalizationSnapshot = snap
         stopTicking()
         stopCatchTimer(discardInFlight: true)
+        guard sessionRepository.saveActive(snap) else {
+            Logger.session.error("Could not persist completed session")
+            finalizationState = .failed("Could not save the completed session.")
+            return nil
+        }
         snapshot = snap
-
-        let session = FocusSession(
-            id: snap.id,
-            accountID: accountID,
-            startedAt: snap.startedAt,
-            endedAt: endedAt,
-            plannedMinutes: snap.draft.plannedMinutes,
-            actualActiveSeconds: activeSeconds,
-            status: .completed,
-            draftSnapshot: snap.draft,
-            taskTitle: snap.draft.displayTitle
-        )
-
-        finalizeOnce(session)
-        guard finalizedSessionIDs.contains(session.id) else { return session }
-        reset()
-        Logger.session.info("Completed session \(snap.id, privacy: .public)")
-        onSessionEnded?(session)
-        return session
+        finalizationState = .saving
+        return recoverFinalizedSnapshot(snap)
     }
 
     func retryFinalization() {
+        if let pending = pendingRestorationSnapshot {
+            finalizationState = .saving
+            guard sessionRepository.saveActive(pending) else {
+                finalizationState = .failed("Could not update this restored session.")
+                return
+            }
+            pendingRestorationSnapshot = nil
+            snapshot = nil
+            finalizationState = .idle
+            restore()
+            return
+        }
+        if let pending = pendingFinalizationSnapshot {
+            finalizationState = .saving
+            guard sessionRepository.saveActive(pending) else {
+                finalizationState = .failed("Could not save this session.")
+                return
+            }
+            snapshot = pending
+            _ = recoverFinalizedSnapshot(pending)
+            return
+        }
         guard let snap = snapshot,
               snap.status == .completed || snap.status == .interrupted else { return }
-        recoverFinalizedSnapshot(snap)
+        finalizationState = .saving
+        _ = recoverFinalizedSnapshot(snap)
+    }
+
+    @discardableResult
+    func updateAppRules(allowedApps: Set<String>, blockedApps: Set<String>) -> Bool {
+        guard var snap = snapshot, snap.status == .active || snap.status == .paused else { return false }
+        let allowedApps = Self.validBundleIDs(allowedApps)
+        let blockedApps = Self.validBundleIDs(blockedApps)
+        switch snap.draft.policy.mode {
+        case .allowing:
+            guard !allowedApps.isEmpty else { return false }
+            snap.draft.policy.allowedApps = allowedApps
+        case .blocking:
+            snap.draft.policy.blockedApps = blockedApps
+        case .timerOnly:
+            return false
+        }
+        snap.draft.policy.allowedDomains = []
+        snap.draft.policy.blockedDomains = []
+        guard sessionRepository.saveActive(snap) else { return false }
+        snapshot = snap
+        return true
     }
 
     // MARK: - Policy / distraction
@@ -348,6 +357,7 @@ final class SessionCoordinator: ObservableObject {
             }
         }
         lastCatchEvent = result.event
+        if result.banked { catchesRevision += 1 }
         return result
     }
 
@@ -375,7 +385,7 @@ final class SessionCoordinator: ObservableObject {
     private func scheduleCatchTimer(after interval: TimeInterval) {
         catchTimer?.invalidate()
         catchTimer = Timer.scheduledTimer(withTimeInterval: max(0.01, interval), repeats: false) { [weak self] _ in
-            self?.handleCatchTimerFired()
+            MainActor.assumeIsolated { self?.handleCatchTimerFired() }
         }
     }
 
@@ -424,6 +434,7 @@ final class SessionCoordinator: ObservableObject {
             }
         }
         lastCatchEvent = result.event
+        if result.banked { catchesRevision += 1 }
         Logger.session.info("Deposited catch \(result.event.kindID) banked=\(result.banked, privacy: .public)")
     }
 
@@ -464,35 +475,35 @@ final class SessionCoordinator: ObservableObject {
         timerCancellable = nil
     }
 
-    private func finalizeOnce(_ session: FocusSession) {
-        guard !finalizedSessionIDs.contains(session.id) else { return }
-        guard sessionRepository.finalizeOnce(session) else {
-            Logger.session.error("Could not finalize session history")
-            return
-        }
-        finalizedSessionIDs.insert(session.id)
-        if !sessionRepository.deleteActive(accountID: accountID) {
-            Logger.session.error("Could not remove finalized active snapshot; recovery will deduplicate it")
-        }
-    }
-
     private func bankIfThresholdReached() {
         guard let snap = snapshot, let clock,
-              clock.activeSeconds >= CatchEngine.bankThresholdSeconds else { return }
-        if !catchRepository.bankProvisional(sessionID: snap.id, accountID: accountID, at: now()) {
+              clock.activeSeconds >= CatchEngine.bankThresholdSeconds,
+              !thresholdBankedSessionIDs.contains(snap.id) else { return }
+        if catchRepository.bankProvisional(sessionID: snap.id, accountID: accountID, at: now()) {
+            thresholdBankedSessionIDs.insert(snap.id)
+            catchesRevision += 1
+        } else {
             Logger.session.error("Could not bank provisional catches at threshold")
         }
     }
 
-    private func recoverFinalizedSnapshot(_ snap: ActiveSessionSnapshot) {
+    @discardableResult
+    private func recoverFinalizedSnapshot(_ snap: ActiveSessionSnapshot) -> FocusSession? {
         let endedAt = snap.endedAt ?? now()
         let status = snap.status
         if status == .interrupted && snap.accumulatedActiveSeconds < CatchEngine.bankThresholdSeconds {
-            catchRepository.deleteProvisional(sessionID: snap.id, accountID: accountID)
+            guard catchRepository.deleteProvisional(sessionID: snap.id, accountID: accountID) else {
+                finalizationState = .failed("Could not clean up this session. Try saving again.")
+                snapshot = snap
+                return nil
+            }
         } else if !catchRepository.bankProvisional(sessionID: snap.id, accountID: accountID, at: endedAt) {
             Logger.session.error("Could not reconcile provisional catches for terminal session")
+            finalizationState = .failed("Could not save today’s catches. Try saving again.")
             snapshot = snap
-            return
+            return nil
+        } else {
+            catchesRevision += 1
         }
         let session = FocusSession(
             id: snap.id,
@@ -506,21 +517,36 @@ final class SessionCoordinator: ObservableObject {
             taskTitle: snap.draft.displayTitle,
             interruptedReason: snap.interruptedReason
         )
-        finalizeOnce(session)
-        guard finalizedSessionIDs.contains(session.id) else {
+        let wasAlreadyFinalized = sessionRepository.loadHistory(accountID: accountID).contains { $0.id == session.id }
+        guard finalizedSessionIDs.contains(session.id) || sessionRepository.finalizeOnce(session) else {
+            Logger.session.error("Could not finalize session history")
+            finalizationState = .failed("Could not finish saving this session.")
             snapshot = snap
-            return
+            return session
+        }
+        finalizedSessionIDs.insert(session.id)
+        if !sessionRepository.deleteActive(accountID: accountID) {
+            Logger.session.error("Could not remove finalized active snapshot; recovery will deduplicate it")
         }
         reset()
-        onSessionEnded?(session)
+        if !wasAlreadyFinalized { onSessionEnded?(session) }
+        return session
     }
 
     private func reset() {
         snapshot = nil
         clock = nil
         catchEngine = nil
+        thresholdBankedSessionIDs.removeAll()
+        pendingFinalizationSnapshot = nil
+        pendingRestorationSnapshot = nil
         isDistractionActive = false
+        finalizationState = .idle
         stopTicking()
         stopCatchTimer(discardInFlight: false)
+    }
+
+    private static func validBundleIDs(_ ids: Set<String>) -> Set<String> {
+        Set(ids.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty })
     }
 }

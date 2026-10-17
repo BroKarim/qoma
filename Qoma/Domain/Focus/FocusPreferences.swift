@@ -42,10 +42,25 @@ final class FocusPreferences: ObservableObject {
     }
 
     func draft(minutes: Int) -> SessionDraft {
-        SessionDraft(
+        var appOnlyPolicy = policy
+        appOnlyPolicy.allowedDomains = []
+        appOnlyPolicy.blockedDomains = []
+        return SessionDraft(
             plannedMinutes: min(60, max(1, minutes)),
-            policy: policy,
+            policy: appOnlyPolicy,
             domainBrowserBundleID: browserBundleID
         )
+    }
+
+    func updateApps(_ apps: Set<String>, for mode: FocusPolicyMode) {
+        let apps = Set(apps.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty })
+        switch mode {
+        case .allowing:
+            policy.allowedApps = apps
+        case .blocking:
+            policy.blockedApps = apps
+        case .timerOnly:
+            break
+        }
     }
 }

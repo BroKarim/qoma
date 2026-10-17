@@ -51,8 +51,8 @@ enum AppConstants {
         static let compactIconKey = "menuBarCompactIcon"
         static let selectedPresetMinutesKey = "menuBarSelectedPresetMinutes"
         static let defaultPresetMinutes = 25
-        static let panelWidth: CGFloat = 250
-        static let panelHeight: CGFloat = 138
+        static let panelWidth: CGFloat = 280
+        static let panelHeight: CGFloat = 300
     }
 
 enum AnalyticsSettings {
