@@ -24,7 +24,7 @@ struct QyubeAboutSettingsPane: View {
                                 Text(self.version).font(.system(size: 12)).foregroundStyle(.secondary)
                             }
                         }
-                        Divider()
+                        QyubeInkDivider()
                         Text("Make room for focused work, one quiet moment at a time.")
                             .font(.system(size: 21, design: .serif))
                         Text(
@@ -36,7 +36,7 @@ struct QyubeAboutSettingsPane: View {
                 SettingsSurfaceCard {
                     VStack(alignment: .leading, spacing: 16) {
                         Text("A little help").font(.system(size: 23, design: .serif))
-                        Divider()
+                        QyubeInkDivider()
                         Link("Contact support", destination: URL(string: "mailto:support@qoma.app")!)
                         Text("Made for quieter days and moments well spent.")
                             .font(.system(size: 13, design: .serif)).foregroundStyle(.secondary)

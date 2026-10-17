@@ -99,7 +99,7 @@ struct QyubeHomeView: View {
                 .frame(width: compact ? 52 : 220)
                 .frame(maxHeight: .infinity)
                 .background(Color.qyubeSidebar)
-                Rectangle().fill(Color.qyubeLine).frame(width: 1)
+                QyubeInkDivider(axis: .vertical).frame(width: 2)
                 self.detail
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                     .background(Color.qyubeBackground)
@@ -134,11 +134,12 @@ struct QyubeHomeView: View {
 }
 
 extension Color {
-    static let qyubeBackground = Color(red: 0.985, green: 0.981, blue: 0.971)
-    static let qyubeSidebar = Color(red: 0.951, green: 0.953, blue: 0.943)
+    static let qyubeBackground = Color(red: 251 / 255, green: 250 / 255, blue: 248 / 255)
+    static let qyubeSidebar = Color(red: 243 / 255, green: 243 / 255, blue: 240 / 255)
     static let qyubeCardBackground = Color.white
-    static let qyubeInk = Color(white: 0.13)
-    static let qyubeLine = Color(white: 0.88)
+    static let qyubeInk = Color(red: 33 / 255, green: 33 / 255, blue: 33 / 255)
+    static let qyubeLine = Color(red: 224 / 255, green: 224 / 255, blue: 224 / 255)
     static let qyubeSelection = Color(red: 220 / 255, green: 232 / 255, blue: 237 / 255)
     static let qyubeAccent = Color(red: 82 / 255, green: 115 / 255, blue: 134 / 255)
+    static let qyubeInterrupted = Color(red: 171 / 255, green: 102 / 255, blue: 92 / 255)
 }

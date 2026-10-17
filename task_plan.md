@@ -1144,3 +1144,44 @@ Auto-open normal completion tetap berlaku seperti permintaan pengguna. Jika comp
 - Editor app tetap popover terpisah. Header `list` dan `Allow List`/`Block List`, pencarian, baris app bercheckbox, akses Choose application, serta footer Done mengikuti referensi Kiki dan palette yang sama. Callback live update, guard Allowing kosong, error, dan persistence tetap memakai alur existing.
 - Build Debug macOS, tes coordinator/reset/live rules, daily catch summary, dan menu-bar timer lulus. Render AppKit memeriksa idle timer-only/Allowing, active, paused, serta kedua editor; screenshot tersimpan di `output/menubar-ink-and-ice/`. Harness render sementara dihapus sesudah inspeksi.
 - Klik/keyboard native pada panel, pencarian, NSOpenPanel, dan multi-monitor belum diuji ulang pada redesign ini; hasil render tidak dianggap bukti event routing.
+
+## 23. Hand-drawn Arctic untuk app utama — 17 Oktober 2026
+
+**Status:** complete
+
+### 23.1 Scope
+
+- Buat primitive border/surface yang stabil, sedikit miring, tidak terpotong, dan deterministik.
+- Gunakan palette Arctic v1 secara persis untuk foundation, interaction, rarity, dan heatmap.
+- Terapkan melalui komponen bersama ke Settings, Analytics, Catalog, navigation selection, catch cards, dan timeline cards.
+- Pertahankan kontrol macOS native, data flow, accessibility, dan perilaku navigasi existing.
+- Hindari background image, texture, dependency baru, dan dekorasi pada setiap row.
+
+### 23.2 Fase
+
+1. **complete — Foundation:** palette tokens, ink surface/divider, border MenuBar yang tidak clipping.
+2. **complete — Shared components:** SettingsSurfaceCard, navigation selection, headers, catch cards.
+3. **complete — Page treatment:** Settings, Analytics, Catalog dan detail sheet.
+4. **complete — Validation:** lint, build, tests terdampak, render pada ukuran window minimum dan normal.
+
+### 23.3 Acceptance
+
+- Border organik tetap utuh pada semua sisi dan tidak berubah antar-render.
+- Informasi chart/heatmap tetap geometris dan terbaca; gaya hand-drawn berada pada struktur dan selection.
+- Settings standalone dan halaman Settings dalam app berbagi visual language yang sama.
+- Build Debug macOS, tests terkait, lint file berubah, dan `git diff --check` lulus.
+
+### 23.4 Error log
+
+- Patch gabungan pertama gagal karena konteks extension rarity berada di `QyubeCompactComponents.swift`, bukan `CatalogView.swift`; patch dipecah dan target diperbaiki tanpa perubahan parsial.
+- `xcodebuild -list` di sandbox gagal mengakses DerivedData/SwiftPM cache pengguna; validasi dipindahkan ke derived data `/tmp` dengan izin build yang sesuai.
+- `ImageRenderer` tidak dapat menangkap kontrol AppKit dan menghasilkan placeholder; harness sementara diganti dengan `NSHostingView` di window buffer.
+- Dua percobaan output visual awal tertahan sandbox test karena jalur `/tmp` lama/bersama; output dipindahkan ke container temp unik dan parallel testing dimatikan.
+- Render halaman anak sempat mengikuti Dark Mode karena berada di luar root app; capture final memakai light scheme yang sama dengan `QyubeHomeView`.
+
+### 23.5 Hasil implementasi
+
+- Border tinta sekarang diinset aman dan dipakai melalui satu modifier surface; divider organik baru menggantikan garis kaku pada struktur utama.
+- Settings standalone/in-app, Analytics, Catalog, sidebar selection, kartu tangkapan, timeline, dan theme preview memakai bahasa Ink & Ice yang konsisten.
+- Palette memakai nilai Arctic v1 persis, termasuk `Interrupted` dan rarity; native controls serta geometri chart tetap dipertahankan.
+- Build Debug macOS, 49 tes Analytics/Daily Catch, visual render pada ukuran minimum/normal, lint seluruh Swift yang berubah, dan `git diff --check` lulus.

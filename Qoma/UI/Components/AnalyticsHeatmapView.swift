@@ -29,7 +29,7 @@ struct AnalyticsHeatmapView: View {
                     Spacer()
                     Text("Choose a day").font(.system(size: 11)).foregroundStyle(.secondary)
                 }
-                Divider()
+                QyubeInkDivider()
                 GeometryReader { geometry in
                     let cellSize = self.cellSize(for: geometry.size.width)
                     ScrollViewReader { proxy in

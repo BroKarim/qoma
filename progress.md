@@ -233,3 +233,21 @@
 - Added the image index, reproduction prompts, visual contract and implementation caveats in the new design folder.
 - Appended task_plan §12 and ART_DIRECTION §14, keeping all previous sections. Added findings here without replacing historical entries.
 - Scope: image artifacts and documentation only; no new Swift edits, application build or runtime-test claims for this batch.
+
+## Session: 2026-10-17 — Hand-drawn Arctic main UI
+
+### Implementation and validation
+
+- **Status:** complete
+- Created branch `codex/hand-drawn-arctic-main-ui` from committed Ink & Ice MenuBar work.
+- Audited palette, Settings surfaces, Analytics, Catalog, and shared card/navigation callers.
+- Chose the smallest complete seam: shared deterministic ink primitives plus targeted page-specific treatments.
+- First combined page patch failed on an incorrect rarity-extension location; no partial patch was applied, then the change was split by actual file ownership.
+- Added safely inset deterministic ink borders, an ink surface modifier, and an organic divider.
+- Updated exact Arctic color tokens and rarity colors from the approved palette.
+- Applied the shared language to both sidebars, Settings cards and headings, Analytics overview/cards/dividers, Catalog controls/specimen cards/detail, and catch cards/timelines.
+- Preserved native toggles, pickers, sliders, charts, data flow, and accessibility behavior.
+- Sandbox `xcodebuild -list` could not access the user DerivedData and SwiftPM caches; validation used `/tmp/qyube-main-handdrawn-build` with build authorization.
+- Built the Debug macOS app successfully and ran the affected Analytics/Daily Catch suite successfully (49 tests).
+- Replaced the first unsupported `ImageRenderer` visual harness with a temporary AppKit-hosted capture, inspected Settings, Catalog, and Analytics at representative sizes, then removed the harness.
+- Targeted SwiftLint completed with no warnings for all changed Swift files.

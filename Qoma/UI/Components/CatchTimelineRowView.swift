@@ -31,8 +31,7 @@ struct CatchTimelineRowView: View {
             QyubeCatchArt(kindID: self.event.kindID)
                 .frame(width: 36, height: 30)
                 .padding(5)
-                .background(Color.qyubeBackground, in: RoundedRectangle(cornerRadius: 8))
-                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.qyubeLine, lineWidth: 0.7))
+                .qyubeInkSurface(fill: .qyubeBackground, stroke: .qyubeLine, lineWidth: 0.7)
 
             Text(self.name)
                 .font(.system(size: 12, weight: .medium))

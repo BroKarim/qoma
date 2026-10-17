@@ -94,7 +94,7 @@ struct JournalPageHeader: View {
             HStack(spacing: 16) {
                 Text(self.eyebrow).font(.system(size: 9, weight: .medium)).tracking(3)
                     .foregroundStyle(Color.qyubeAccent)
-                Rectangle().fill(Color.qyubeLine).frame(maxWidth: 260).frame(height: 0.5)
+                QyubeInkDivider().frame(maxWidth: 260)
             }.padding(.bottom, 8)
             Text(self.title).font(.system(size: 44, design: .serif))
             Text(self.subtitle).font(.system(size: 17, design: .serif)).foregroundStyle(.secondary)
@@ -107,9 +107,9 @@ extension CatalogDefinitions.Rarity {
     var color: Color {
         switch self {
         case .common: Color(red: 96 / 255, green: 125 / 255, blue: 139 / 255)
-        case .uncommon: Color(red: 0.23, green: 0.39, blue: 0.57)
-        case .rare: Color(red: 0.62, green: 0.27, blue: 0.24)
-        case .legendary: Color(red: 0.51, green: 0.36, blue: 0.16)
+        case .uncommon: Color(red: 59 / 255, green: 99 / 255, blue: 145 / 255)
+        case .rare: Color(red: 158 / 255, green: 69 / 255, blue: 61 / 255)
+        case .legendary: Color(red: 130 / 255, green: 92 / 255, blue: 41 / 255)
         }
     }
 }

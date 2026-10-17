@@ -3,7 +3,8 @@ import SwiftUI
 /// A fixed ink contour keeps the hand-drawn edge steady while the timer updates.
 struct QyubeInkBorder: Shape {
     func path(in rect: CGRect) -> Path {
-        let r = rect.insetBy(dx: 1, dy: 1)
+        // Keep the imperfect contour inside its bounds so antialiasing never clips an edge.
+        let r = rect.insetBy(dx: 2, dy: 2)
         let radius = min(11.0, r.height / 2)
         var path = Path()
         path.move(to: CGPoint(x: r.minX + radius, y: r.minY + 0.6))
@@ -26,4 +27,15 @@ struct QyubeInkBorder: Shape {
 
 extension Color {
     static let qyubeMenuInk = Color(red: 37 / 255, green: 62 / 255, blue: 74 / 255)
+}
+
+extension View {
+    func qyubeInkSurface(
+        fill: Color = .qyubeCardBackground.opacity(0.72),
+        stroke: Color = .qyubeAccent.opacity(0.58),
+        lineWidth: CGFloat = 1
+    ) -> some View {
+        background(QyubeInkBorder().fill(fill))
+            .overlay(QyubeInkBorder().stroke(stroke, lineWidth: lineWidth).allowsHitTesting(false))
+    }
 }

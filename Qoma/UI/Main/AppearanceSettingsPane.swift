@@ -23,7 +23,10 @@ struct AppearanceSettingsPane: View {
                 windowFeelSection
                 timerThemeSection
                 SettingsSurfaceCard {
-                    SettingsRow(title: "Reduce companion motion", subtitle: "Keep the penguin visible with gentler movement.") {
+                    SettingsRow(
+                        title: "Reduce companion motion",
+                        subtitle: "Keep the penguin visible with gentler movement.")
+                    {
                         Toggle("", isOn: $reduceMotionOverride).toggleStyle(.switch)
                     }
                 }
@@ -54,12 +57,15 @@ struct AppearanceSettingsPane: View {
                     subtitle: "Core polish that applies instantly to floating panel.")
 
                 if #available(macOS 26.0, *) {
-                    SettingsRow(title: "Liquid Glass", subtitle: "Use a translucent glass surface for the floating timer.") {
+                    SettingsRow(
+                        title: "Liquid Glass",
+                        subtitle: "Use a translucent glass surface for the floating timer.")
+                    {
                         Toggle("Liquid Glass", isOn: $liquidGlass)
                             .labelsHidden()
                             .toggleStyle(.switch)
                     }
-                    Divider()
+                    QyubeInkDivider()
                 }
 
                 SettingsRow(
@@ -126,14 +132,14 @@ private struct FloatingThemeOptionCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            QyubeInkBorder()
                 .fill(Color(white: 0.98))
                 .overlay(
                     Text("25:00")
                         .font(.system(size: 22, weight: .medium, design: .serif).monospacedDigit())
                         .foregroundColor(theme.textColor))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    QyubeInkBorder()
                         .stroke(theme.borderColor, lineWidth: 1))
                 .frame(height: 64)
 
@@ -152,13 +158,8 @@ private struct FloatingThemeOptionCard: View {
             }
         }
         .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(isSelected ? Color.qyubeSelection : Color.qyubeSidebar))
-        .overlay(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .stroke(
-                    Color.qyubeLine,
-                    lineWidth: 1))
+        .qyubeInkSurface(
+            fill: isSelected ? .qyubeSelection : .qyubeSidebar,
+            stroke: isSelected ? .qyubeAccent.opacity(0.72) : .qyubeLine)
     }
 }

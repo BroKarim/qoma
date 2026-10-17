@@ -90,7 +90,7 @@ struct GeneralSettingsPane: View {
                     .frame(width: 220, alignment: .trailing)
                 }
 
-                Divider()
+                QyubeInkDivider()
 
                 SettingsRow(title: "Volume", subtitle: "Applies to all completion sounds.") {
                     HStack(spacing: 6) {
@@ -106,7 +106,7 @@ struct GeneralSettingsPane: View {
                     }
                 }
 
-                Divider()
+                QyubeInkDivider()
 
                 SettingsRow(
                     title: "Auto mute after 5 seconds",
@@ -139,11 +139,13 @@ struct GeneralSettingsPane: View {
     private var floatingSection: some View {
         SettingsSurfaceCard {
             VStack(alignment: .leading, spacing: 16) {
-                SettingsSectionHeading(title: "While focusing", subtitle: "The penguin stays visible during active and paused sessions.")
+                SettingsSectionHeading(
+                    title: "While focusing",
+                    subtitle: "The penguin stays visible during active and paused sessions.")
                 SettingsRow(title: "Distraction sound effects") {
                     Toggle("", isOn: $distractionSounds).toggleStyle(.switch)
                 }
-                Divider()
+                QyubeInkDivider()
                 SettingsRow(title: "Hide floating timer", subtitle: "Use the menu bar to bring it back.") {
                     Toggle("", isOn: $focus.hideFloatingTimer).toggleStyle(.switch)
                 }

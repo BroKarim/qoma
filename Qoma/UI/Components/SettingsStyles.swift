@@ -12,6 +12,8 @@ struct SettingsPageHeader: View {
             Text(self.subtitle)
                 .font(.qoma(size: 13, weight: .medium))
                 .foregroundColor(.secondary)
+
+            QyubeInkDivider().frame(maxWidth: 280)
         }
     }
 }
@@ -28,6 +30,8 @@ struct SettingsSectionHeading: View {
             Text(self.subtitle)
                 .font(.qoma(size: 12.5, weight: .medium))
                 .foregroundColor(.secondary)
+
+            QyubeInkDivider().frame(maxWidth: 180)
         }
     }
 }
@@ -40,12 +44,7 @@ struct SettingsSurfaceCard<Content: View>: View {
             self.content()
         }
         .padding(20)
-        .background(
-            RoundedRectangle(cornerRadius: 9, style: .continuous)
-                .fill(Color.white.opacity(0.42)))
-        .overlay(
-            RoundedRectangle(cornerRadius: 9, style: .continuous)
-                .stroke(Color.qyubeLine, lineWidth: 0.7))
+        .qyubeInkSurface(fill: .qyubeCardBackground.opacity(0.58))
     }
 }
 
@@ -93,8 +92,6 @@ struct SettingsBadge: View {
             .foregroundColor(.secondary)
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
-            .background(
-                Capsule()
-                    .fill(Color.qyubeSelection))
+            .background(QyubeInkBorder().fill(Color.qyubeSelection))
     }
 }

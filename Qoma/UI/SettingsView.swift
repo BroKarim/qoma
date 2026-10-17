@@ -47,7 +47,7 @@ struct SettingsView: View {
             .frame(width: 220)
             .frame(maxHeight: .infinity)
             .background(Color.qyubeSidebar)
-            Rectangle().fill(Color.qyubeLine).frame(width: 1)
+            QyubeInkDivider(axis: .vertical).frame(width: 2)
             Group {
                 switch selectedTab {
                 case .general: GeneralSettingsPane()
@@ -86,8 +86,10 @@ struct SettingsNavigationRow: View {
         .frame(maxWidth: .infinity, alignment: title.isEmpty ? .center : .leading)
         .padding(.horizontal, title.isEmpty ? 2 : 8)
         .padding(.vertical, 7)
-        .background(RoundedRectangle(cornerRadius: 8).fill(isSelected ? Color.qyubeSelection : .clear))
-        .overlay(RoundedRectangle(cornerRadius: 8).stroke(isSelected ? Color.qyubeLine : .clear, lineWidth: 1))
+        .background(QyubeInkBorder().fill(isSelected ? Color.qyubeSelection : .clear))
+        .overlay(QyubeInkBorder().stroke(
+            isSelected ? Color.qyubeAccent.opacity(0.62) : .clear,
+            lineWidth: 1))
         .contentShape(Rectangle())
     }
 }

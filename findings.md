@@ -110,3 +110,11 @@ This section records the latest user decisions. Older Dzenn/Universal Purchase/A
 - Nine prototype PNGs are now local to `design/qyube-compact-v1/`: two prior Home images plus seven new page proposals. Built-in image_gen was used, with prompts and image limitations recorded next to the assets.
 - Native implementation must correct illustrative discrepancies: continuous minute ruler, fixed-size viewport with scroll for Insight, computed graph/count values, and overlay-only Settings menu. See the package README for full details.
 - Seven new screens await user review. No runtime UI was implemented in this prototype pass.
+
+## 2026-10-17 — Hand-drawn Arctic main UI
+
+- Approved direction: hand-drawn structure with precise native controls and charts; avoid applying a strong irregular border to every row.
+- Canonical palette is `output/imagegen/arctic-palette/qyube-arctic-palette-v1.png` and `prompt-v1.md`: Snow `#FBFAF8`, Frost `#F3F3F0`, Paper `#FFFFFF`, Ink `#212121`, Fjord `#527386`, Ice `#DCE8ED`, Divider `#E0E0E0`, Interrupted `#AB665C`.
+- Existing `SettingsSurfaceCard` is the highest-leverage seam: it is shared by Settings, Analytics, About, General, Appearance, timeline, and empty states.
+- Existing `QyubeInkBorder` deliberately varies its path but its top control point can put a 1.3 pt stroke too close to clipping. The shared replacement must inset the path safely.
+- Settings exists in two surfaces: standalone `Qoma/UI/SettingsView.swift` and in-app `QyubeJournalSettingsView`; both already reuse shared navigation/card components.

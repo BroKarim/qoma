@@ -34,7 +34,7 @@ struct AnalyticsDashboardView: View {
                         Image("JournalArcticPenguin").resizable().scaledToFit()
                             .frame(width: 220, height: 147).accessibilityHidden(true)
                     }
-                    self.overview
+                    SettingsSurfaceCard { self.overview }
                     AnalyticsHeatmapView(cells: self.heatmapCells, selectedDate: self.$selectedDay)
                     self.breakdown
                     // bagian daily-catch
@@ -70,13 +70,25 @@ struct AnalyticsDashboardView: View {
     }
 
     @ViewBuilder private var stats: some View {
-        self.stat("Total focus", value: QyubeFormat.duration(self.daySessions.reduce(0) { $0 + $1.actualFocusSeconds }), symbol: "leaf", color: .qyubeAccent)
-        Divider()
+        self.stat(
+            "Total focus",
+            value: QyubeFormat.duration(self.daySessions.reduce(0) { $0 + $1.actualFocusSeconds }),
+            symbol: "leaf",
+            color: .qyubeAccent)
+        QyubeInkDivider(axis: .vertical).frame(width: 2)
         self.stat("Sessions", value: "\(self.daySessions.count)", symbol: "chart.bar", color: .qyubeAccent)
-        Divider()
-        self.stat("Completed", value: "\(self.daySessions.filter(\.completed).count)", symbol: "checkmark.circle", color: .qyubeAccent)
-        Divider()
-        self.stat("Interrupted", value: "\(self.daySessions.count(where: { !$0.completed }))", symbol: "xmark.circle", color: Color(red: 0.67, green: 0.40, blue: 0.36))
+        QyubeInkDivider(axis: .vertical).frame(width: 2)
+        self.stat(
+            "Completed",
+            value: "\(self.daySessions.filter(\.completed).count)",
+            symbol: "checkmark.circle",
+            color: .qyubeAccent)
+        QyubeInkDivider(axis: .vertical).frame(width: 2)
+        self.stat(
+            "Interrupted",
+            value: "\(self.daySessions.count(where: { !$0.completed }))",
+            symbol: "xmark.circle",
+            color: .qyubeInterrupted)
     }
 
     private func stat(_ title: String, value: String, symbol: String, color: Color) -> some View {
@@ -117,7 +129,7 @@ struct AnalyticsDashboardView: View {
                         .accessibilityLabel(
                             "\(events.count) catches across \(groups.count) types on the selected day")
                 }
-                Divider()
+                QyubeInkDivider()
                 if events.isEmpty {
                     Label(
                         "No catches on this day. A quiet spot, ready for your next focus.",

@@ -12,10 +12,10 @@ struct AnalyticsBreakdownView: View {
                 SettingsSectionHeading(
                     title: "Daily Breakdown",
                     subtitle: "Where your focus went on \(self.date.formatted(.dateTime.day().month(.wide))).")
-                Divider()
+                QyubeInkDivider()
                 HStack(alignment: .top, spacing: 24) {
                     self.column("Top Apps", items: self.apps, empty: "No app activity on this day.")
-                    Rectangle().fill(Color.qyubeLine).frame(width: 0.5)
+                    QyubeInkDivider(axis: .vertical).frame(width: 2)
                     VStack(alignment: .leading, spacing: 12) {
                         self.column("Top Websites", items: self.domains, empty: "No website activity on this day.")
                         if self.domains.isEmpty, self.permissions.automationPermissionStatus != .granted {

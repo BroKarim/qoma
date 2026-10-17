@@ -10,7 +10,7 @@ struct FishCatchCardView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             ZStack(alignment: .bottom) {
-                RoundedRectangle(cornerRadius: 3)
+                QyubeInkBorder()
                     .fill(Color.qyubeLine.opacity(0.7))
                     .frame(height: 7)
                     .padding(.horizontal, 6)
@@ -40,8 +40,7 @@ struct FishCatchCardView: View {
         }
         .padding(12)
         .frame(maxWidth: .infinity, minHeight: 154, maxHeight: 154, alignment: .topLeading)
-        .background(Color.qyubeCardBackground.opacity(0.72), in: RoundedRectangle(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.qyubeLine, lineWidth: 0.7))
+        .qyubeInkSurface()
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(
             "\(self.kind?.name ?? "Unknown find"), "

@@ -32,6 +32,8 @@ struct CatalogView: View {
                     ForEach(Filter.allCases, id: \.self) { Text($0.rawValue).tag($0) }
                 }
                 .pickerStyle(.segmented).labelsHidden().frame(maxWidth: 420)
+                .padding(3)
+                .qyubeInkSurface(fill: .qyubeSelection.opacity(0.22))
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 180), spacing: 14)], spacing: 14) {
                     ForEach(self.kinds) { kind in
                         Button { self.selected = kind } label: { self.card(kind) }
@@ -68,7 +70,7 @@ struct CatalogView: View {
         let discovered = count > 0
         return VStack(spacing: 10) {
             ZStack(alignment: .topTrailing) {
-                RoundedRectangle(cornerRadius: 10).fill(Color.qyubeSidebar.opacity(0.6))
+                QyubeInkBorder().fill(Color.qyubeSidebar.opacity(0.76))
                 QyubeCatchArt(kindID: kind.id, discovered: discovered, catalog: true)
                     .padding(18).frame(height: 174).frame(maxWidth: .infinity)
                 if discovered {
@@ -89,9 +91,8 @@ struct CatalogView: View {
                 .font(.system(size: 11)).foregroundStyle(.secondary)
         }
         .padding(10).padding(.bottom, 8).frame(maxWidth: .infinity)
-        .background(Color.white.opacity(0.65), in: RoundedRectangle(cornerRadius: 13))
-        .overlay(RoundedRectangle(cornerRadius: 13).stroke(Color.qyubeLine, lineWidth: 0.7))
-        .shadow(color: .black.opacity(0.025), radius: 5, y: 2)
+        .qyubeInkSurface(fill: .qyubeCardBackground.opacity(0.68))
+        .shadow(color: Color.qyubeAccent.opacity(0.055), radius: 5, y: 2)
         .accessibilityElement(children: .ignore)
     }
 }
@@ -115,7 +116,11 @@ private struct CatalogDetail: View {
                 Text("Weight not recorded yet").font(.caption).foregroundStyle(.secondary)
             }
             Button("Done") { self.dismiss() }.keyboardShortcut(.cancelAction)
-        }.padding(28).frame(width: 300).background(Color.qyubeBackground)
+        }
+        .padding(28)
+        .frame(width: 300)
+        .background(Color.qyubeBackground)
+        .qyubeInkSurface(fill: .qyubeBackground, stroke: .qyubeAccent.opacity(0.65))
     }
 }
 

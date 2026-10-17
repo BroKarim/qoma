@@ -30,7 +30,6 @@ struct CatchTimelineView: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, minHeight: 340, maxHeight: 340, alignment: .topLeading)
-        .background(Color.qyubeCardBackground.opacity(0.5), in: RoundedRectangle(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.qyubeLine, lineWidth: 0.7))
+        .qyubeInkSurface(fill: .qyubeCardBackground.opacity(0.5))
     }
 }

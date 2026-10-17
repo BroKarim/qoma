@@ -81,7 +81,7 @@ struct QyubeJournalSettingsView: View {
                     } label: { Image(systemName: "play.fill") }
                         .accessibilityLabel("Preview completion sound").disabled(self.sound == "off")
                 }
-                Divider()
+                QyubeInkDivider()
                 SettingsRow(title: "Volume") {
                     Slider(value: self.$volume, in: 0...1).frame(width: 180)
                         .accessibilityLabel("Completion sound volume")
@@ -101,7 +101,7 @@ struct QyubeJournalSettingsView: View {
                         get: { !self.focus.hideFloatingTimer }, set: { self.focus.hideFloatingTimer = !$0 }))
                         .labelsHidden().toggleStyle(.switch)
                 }
-                Divider()
+                QyubeInkDivider()
                 ViewThatFits(in: .horizontal) {
                     HStack {
                         Text("Timer color"); Spacer(); self.themePicker.fixedSize(horizontal: true, vertical: false)
@@ -111,7 +111,7 @@ struct QyubeJournalSettingsView: View {
                         vertical: false) }
                 }
                 if #available(macOS 26.0, *) {
-                    Divider()
+                    QyubeInkDivider()
                     SettingsRow(title: "Liquid Glass", subtitle: "A translucent surface for your timer.") {
                         Toggle("Liquid Glass", isOn: self.$glass).labelsHidden().toggleStyle(.switch)
                     }
@@ -135,8 +135,7 @@ struct QyubeJournalSettingsView: View {
             Text("24:53").font(.system(size: 25, weight: .medium, design: .serif).monospacedDigit())
                 .foregroundStyle(FloatingTheme.from(id: self.themeID).textColor)
                 .padding(.horizontal, 16).padding(.vertical, 10)
-                .background(.white, in: RoundedRectangle(cornerRadius: 10))
-                .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.qyubeLine, lineWidth: 0.7))
+                .qyubeInkSurface(fill: .white, stroke: .qyubeLine)
                 .lineLimit(1).fixedSize()
                 .accessibilityLabel("Timer color preview")
         }
@@ -149,7 +148,7 @@ struct QyubeJournalSettingsView: View {
                 SettingsRow(title: "Reduce motion", subtitle: "Gentler penguin movement and quiet visual cues.") {
                     Toggle("Reduce motion", isOn: self.$reduceMotion).labelsHidden().toggleStyle(.switch)
                 }
-                Divider()
+                QyubeInkDivider()
                 SettingsRow(title: "Distraction sound effects") {
                     Toggle("Distraction sound effects", isOn: self.$distractionSounds).labelsHidden()
                         .toggleStyle(.switch)
@@ -161,7 +160,7 @@ struct QyubeJournalSettingsView: View {
     private func heading(_ title: String) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(title).font(.system(size: 23, design: .serif))
-            Divider()
+            QyubeInkDivider()
         }
     }
 }
