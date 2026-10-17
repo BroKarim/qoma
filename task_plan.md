@@ -1136,3 +1136,11 @@ Auto-open normal completion tetap berlaku seperti permintaan pengguna. Jika comp
 - Reset mengakhiri sesi ke idle dan Start berikutnya membuat UUID baru. Finalisasi menyimpan terminal intent lebih dahulu, membekukan waktu saat gagal, dan menyediakan retry idempotent.
 - Completion card dan jalur Focus rules lama di Settings dihapus. Completion alami me-refresh data, memainkan sound existing, lalu membuka kontrol idle.
 - QA native membuktikan mode menu tidak menutup parent, pencarian/checkbox memperbarui pilihan langsung, dan Done hanya menutup popover. Build Debug dan seluruh test suite macOS lulus; warning lint/concurrency yang tersisa berasal dari baseline di luar scope ini.
+
+### 22.15 Redesign Ink & Ice — 17 Oktober 2026
+
+- Semua perubahan branch sebelumnya disimpan dalam `5990f1a`, lalu redesign dikerjakan di `codex/menubar-ink-and-ice`.
+- Panel 310 pt mengikuti draft `output/imagegen/menubar-draft-03/01-ink-and-ice.png`: header qyube/gelombang/gear, penguin watercolor bergerak lembut, dropdown durasi, mode dan ringkasan app, ikan harian, serta footer Start atau Pause/Resume dan Stop dengan proporsi 4:1. Permukaan warna polos dengan border tinta, tanpa background image.
+- Editor app tetap popover terpisah. Header `list` dan `Allow List`/`Block List`, pencarian, baris app bercheckbox, akses Choose application, serta footer Done mengikuti referensi Kiki dan palette yang sama. Callback live update, guard Allowing kosong, error, dan persistence tetap memakai alur existing.
+- Build Debug macOS, tes coordinator/reset/live rules, daily catch summary, dan menu-bar timer lulus. Render AppKit memeriksa idle timer-only/Allowing, active, paused, serta kedua editor; screenshot tersimpan di `output/menubar-ink-and-ice/`. Harness render sementara dihapus sesudah inspeksi.
+- Klik/keyboard native pada panel, pencarian, NSOpenPanel, dan multi-monitor belum diuji ulang pada redesign ini; hasil render tidak dianggap bukti event routing.

@@ -172,56 +172,77 @@ struct QyubeAppRuleEditor: View {
   }
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 14) {
-      Text(mode == .allowing ? "Allowed apps" : "Blocked apps").font(.headline)
-      Text("Changes apply immediately").font(.callout).foregroundStyle(.secondary)
-      HStack(spacing: 8) {
-        Image(systemName: "magnifyingglass").foregroundStyle(Color.qyubeAccent)
-        TextField("Search apps", text: $search).textFieldStyle(.plain)
+    VStack(spacing: 0) {
+      QyubeInkHeader(title: "list") {
+        Text(mode == .allowing ? "Allow List" : "Block List")
       }
-      .padding(.horizontal, 10).frame(height: 34)
-      .background(Color.qyubeSelection.opacity(0.55), in: RoundedRectangle(cornerRadius: 8))
-      .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.qyubeAccent.opacity(0.55)))
+      VStack(alignment: .leading, spacing: 16) {
+        Text(mode == .allowing ? "What apps do you need?" : "What apps are blocked?")
+          .font(.headline)
+        HStack(spacing: 9) {
+          Image(systemName: "magnifyingglass").foregroundStyle(Color.qyubeAccent)
+          TextField("Search apps…", text: $search).textFieldStyle(.plain)
+            .accessibilityLabel("Search applications")
+          if !search.isEmpty {
+            Button("Clear search", systemImage: "xmark.circle.fill") { search = "" }
+              .labelStyle(.iconOnly).foregroundStyle(Color.qyubeAccent)
+          }
+        }
+        .padding(.horizontal, 12).frame(height: 42)
+        .overlay(QyubeInkBorder().stroke(Color.qyubeMenuInk, lineWidth: 1))
+        Text("Changes apply immediately").font(.caption).foregroundStyle(Color.qyubeAccent)
+      }
+      .padding(18)
+      Rectangle().fill(Color.qyubeMenuInk).frame(height: 1)
       ScrollView {
-        LazyVStack(alignment: .leading, spacing: 4) {
+        LazyVStack(alignment: .leading, spacing: 0) {
           ForEach(filteredApps) { app in
-            Toggle(
-              isOn: Binding(
-                get: { selectedApps.contains(app.id) },
-                set: { setApp(app.id, selected: $0) })
-            ) {
-              HStack {
-                AppIcon(bundleID: app.id).frame(width: 24, height: 24)
-                Text(app.name)
+            Button { setApp(app.id, selected: !selectedApps.contains(app.id)) } label: {
+              HStack(spacing: 12) {
+                AppIcon(bundleID: app.id).frame(width: 27, height: 27)
+                Text(app.name).lineLimit(1)
+                Spacer(minLength: 4)
+                Text("App").font(.callout).foregroundStyle(Color.qyubeAccent)
+                Image(systemName: selectedApps.contains(app.id) ? "checkmark.square.fill" : "square")
+                  .font(.title3).foregroundStyle(Color.qyubeAccent)
               }
-              .padding(.vertical, 6).padding(.horizontal, 8)
+              .padding(.horizontal, 18).frame(height: 51)
+              .frame(maxWidth: .infinity).contentShape(Rectangle())
+              .background(selectedApps.contains(app.id) ? Color.qyubeSelection.opacity(0.55) : .clear)
             }
-            .toggleStyle(.checkbox)
-            .background(
-              selectedApps.contains(app.id) ? Color.qyubeSelection.opacity(0.55) : .clear,
-              in: RoundedRectangle(cornerRadius: 7))
+            .accessibilityLabel(app.name)
+            .accessibilityValue(selectedApps.contains(app.id) ? "Selected" : "Not selected")
+            .accessibilityHint("Toggle application in this list")
+            .overlay(alignment: .bottom) {
+              Rectangle().fill(Color.qyubeAccent.opacity(0.45)).frame(height: 1)
+            }
           }
           if loading {
             ProgressView().frame(maxWidth: .infinity).padding()
           } else if filteredApps.isEmpty {
-            Text("No matching applications.").foregroundStyle(.secondary).padding()
+            Text("No matching applications.").foregroundStyle(.secondary).padding(18)
           }
         }
       }
-      .scrollIndicators(.hidden)
       if let errorMessage {
-        Text(errorMessage).font(.callout).foregroundStyle(.red)
+        Text(errorMessage).font(.callout).foregroundStyle(.red).padding(.horizontal, 18).padding(.top, 8)
       }
-      Divider()
-      HStack {
-        Button("Choose application…", systemImage: "plus", action: chooseApplication)
-          .buttonStyle(.plain).foregroundStyle(Color.qyubeAccent)
-        Spacer()
-        Button("Done") { dismiss() }.keyboardShortcut(.defaultAction)
-          .buttonStyle(.borderedProminent).tint(Color.qyubeAccent)
+      Button("Choose application…", systemImage: "plus", action: chooseApplication)
+        .foregroundStyle(Color.qyubeAccent)
+        .frame(maxWidth: .infinity).padding(12)
+      Button { dismiss() } label: {
+        Text("DONE").font(.headline).tracking(1.3)
+          .frame(maxWidth: .infinity).frame(height: 48)
+          .foregroundStyle(.white).background(Color.qyubeMenuInk)
       }
+      .keyboardShortcut(.defaultAction)
     }
-    .padding(18).frame(width: 310, height: 410).background(Color.qyubeBackground)
+    .buttonStyle(.plain)
+    .foregroundStyle(Color.qyubeMenuInk)
+    .frame(width: 330, height: 490).background(Color.qyubeBackground)
+    .clipShape(RoundedRectangle(cornerRadius: 12))
+    .overlay(QyubeInkBorder().stroke(Color.qyubeMenuInk, lineWidth: 1.3).allowsHitTesting(false))
+    .environment(\.colorScheme, .light)
     .task { await loadApps() }
   }
 
