@@ -1185,3 +1185,47 @@ Auto-open normal completion tetap berlaku seperti permintaan pengguna. Jika comp
 - Settings standalone/in-app, Analytics, Catalog, sidebar selection, kartu tangkapan, timeline, dan theme preview memakai bahasa Ink & Ice yang konsisten.
 - Palette memakai nilai Arctic v1 persis, termasuk `Interrupted` dan rarity; native controls serta geometri chart tetap dipertahankan.
 - Build Debug macOS, 49 tes Analytics/Daily Catch, visual render pada ukuran minimum/normal, lint seluruh Swift yang berubah, dan `git diff --check` lulus.
+
+## 24. Storage lokal, persetujuan analytics, dan kesiapan rilis — 18 Oktober 2026
+
+**Status:** sedang dikerjakan. Pekerjaan dipisah dalam branch bertingkat pada worktree yang sama; tidak membuat worktree baru.
+
+### 24.1 Batas scope
+
+- Termasuk: SQLite untuk catch/session/analytics, query berbasis indeks, migrasi JSON non-destruktif, persistence analytics yang dapat gagal secara eksplisit, opt-in analytics, koreksi deteksi idle, penyamaan target macOS, tes migrasi/data besar/disk failure/reopen, dan pembersihan prototype yang terbukti tidak terpakai.
+- Tidak termasuk pada tahap ini sesuai keputusan pengguna: paywall wajib sebelum login/billing siap, pemisahan data antar akun riil, serta jalur produksi download dan auto-update.
+- Tetap gunakan `accountID` sebagai ownership key di database untuk struktur dan query lokal; nilai aktif masih `local`. Ini bukan implementasi multi-account atau autentikasi.
+- Jangan menghapus source JSON setelah migrasi. UUID tetap menjadi kunci idempotensi; marker migrasi hanya ditulis setelah transaksi import berhasil.
+
+### 24.2 Branch dan hasil yang diharapkan
+
+1. `codex/sqlite-storage-foundation` — connection SQLite bersama, transaksi, schema/index awal dan strategi WAL/FULL sync.
+2. `codex/legacy-data-migration` — catch/session JSON lama masuk ke database tanpa menghapus sumber, query repository memakai account/session/date/kind.
+3. `codex/analytics-safety-consent` — AnalyticsStore SQLite, penulisan mengembalikan sukses/gagal, analytics nonaktif sampai opt-in pada pembukaan Home pertama; pilihan dapat diubah dari Settings.
+4. `codex/storage-load-and-platform-tests` — checkpoint analytics, failure/reopen recovery, tes volume/migrasi/disk penuh atau lokasi tak dapat ditulis, target test disamakan dengan minimum aplikasi, dan idle detection mencakup keyboard serta interaksi mouse.
+5. `codex/remove-obsolete-prototypes` — hapus hanya implementasi prototype yang tidak memiliki caller, resource reference, test harness aktif, atau jalur debug yang masih dipakai.
+
+Setiap branch harus dapat dibangun dari parent branch sebelumnya dan memiliki catatan hasil/risiko yang terlihat di commit. Perubahan lokal yang sudah ada sebelum pekerjaan ini tetap milik pengguna dan tidak dimasukkan ke commit implementasi.
+
+### 24.3 Urutan migrasi dan ketahanan
+
+- [x] Satu database `Application Support/Qoma/qoma.sqlite3`, WAL, `synchronous=FULL`, foreign keys, timeout busy, tabel record bertipe dengan kolom payload Codable dan kolom indeks yang dibutuhkan query.
+- [ ] Catch: indeks `(account_id, deposited_at)`, `(account_id, kind_id)`, `(account_id, session_id, banked_at)`; provisional dan banked tetap event yang sama, UUID idempotent.
+- [ ] Session: simpan active snapshot dan history terpisah menurut `record_type`; finalisasi satu transaksi/upsert idempotent dan dapat dipulihkan.
+- [ ] Analytics: indeks per account/tanggal dan account/session; app activity serta website visit checkpoint agar crash tidak menghilangkan seluruh sesi aktivitas.
+- [ ] Migrasi legacy aggregate dan per-event catch JSON, active/history session JSON, serta tiga JSON Analytics; marker berada dalam database dan sumber legacy dipertahankan sebagai backup sampai ada proses backup/cleanup eksplisit.
+- [ ] Jika decode, transaksi, atau disk write gagal, jangan menulis marker sukses atau melaporkan operasi berhasil. Operasi dapat dicoba ulang saat aplikasi dibuka lagi.
+- [ ] Terapkan consent opt-in; dashboard tetap membaca histori yang sudah ada, sementara tracker baru tidak merekam sebelum izin diberikan.
+- [ ] Uji reopen setelah committed state, duplikasi migrasi, dataset besar, gagal membuka/menulis database, dan finalisasi recovery.
+
+### 24.4 Platform dan validasi
+
+- [ ] Aplikasi sudah memakai macOS 14.0 pada Debug/Release; target test sekarang 15.7. Samakan target test ke minimum app bila kode test mendukungnya.
+- [ ] Perbaiki idle detection yang saat ini hanya memakai `mouseMoved`; keyboard, click, dan scroll harus mengatur ulang idle timer.
+- [ ] Build Debug macOS dan tes suite terkait lulus pada target minimum; laporan harus memisahkan warning baseline yang tidak termasuk perubahan.
+- [ ] Audit reference sebelum menghapus file prototype; pertahankan visual guide/design archive yang masih menjadi dokumentasi arah aset.
+- [ ] Tinjau `git diff --check`, perubahan tidak menyertakan imagegen user yang telah ada, dan dokumentasikan file/behavior yang berubah per branch.
+
+### 24.5 Persiapan setelah pekerjaan ini
+
+Setelah storage, consent, recovery, serta platform tests stabil, lanjutkan finalisasi aset ikan/penguin dan konsistensi visual. Landing page, login, backend, payment, akun riil, direct download produksi, serta auto-update tetap fase berikutnya dan bukan gate untuk menilai branch storage ini.
