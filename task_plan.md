@@ -1223,8 +1223,8 @@ Setiap branch harus dapat dibangun dari parent branch sebelumnya dan memiliki ca
 - [x] Aplikasi dan test target disamakan ke deployment target macOS 14.0 (build memakai macOS SDK 26.2).
 - [x] Idle detection memakai event input umum CoreGraphics, tidak lagi hanya `mouseMoved`.
 - [x] Build Debug macOS dan seluruh 185 tes lulus; test dijalankan pada macOS 26.5.2, sehingga runtime langsung di macOS 14 masih perlu QA terpisah. Warning SwiftLint/concurrency dan Info.plist resource tetap dicatat sebagai warning, bukan dianggap error build.
-- [ ] Audit reference sebelum menghapus file prototype; pertahankan visual guide/design archive yang masih menjadi dokumentasi arah aset.
-- [ ] Tinjau `git diff --check`, perubahan tidak menyertakan imagegen user yang telah ada, dan dokumentasikan file/behavior yang berubah per branch.
+- [x] Audit reference sebelum menghapus file prototype; pertahankan visual guide/design archive yang masih menjadi dokumentasi arah aset.
+- [x] Tinjau `git diff --check`, perubahan tidak menyertakan imagegen user yang telah ada, dan dokumentasikan file/behavior yang berubah per branch.
 
 ### 24.5 Persiapan setelah pekerjaan ini
 
@@ -1237,3 +1237,10 @@ Setelah storage, consent, recovery, serta platform tests stabil, lanjutkan final
 - Build Debug berhasil pada target deployment 14.0; seluruh 185 tes lulus pada macOS 26.5.2. Cakupan meliputi volume 5.000 tangkapan, migrasi idempotent/retry, file JSON sumber tetap ada, disk/database failure, commit/reopen, rollback, recovery terminal session, serta consent dan checkpoint analytics.
 - Warning SwiftLint/concurrency dan peringatan Info.plist dalam Copy Bundle Resources masih ada; semuanya nonfatal. Tes runtime langsung pada macOS 14 dan QA fisik/UX tetap perlu dilakukan.
 - Perubahan UI analytics dan folder ilustrasi collectible yang sudah ada sebelum pekerjaan ini tetap tidak dimasukkan ke commit implementasi.
+
+### 24.7 Audit prototype tak terpakai — 18 Oktober 2026
+
+- Branch `codex/remove-obsolete-prototypes` telah diaudit terhadap source call sites, test/debug routes, SwiftUI previews, dan referensi proyek.
+- `Qoma/UI/Aquarium/` tidak memiliki caller di alur produk dan user sudah mengeluarkan Aquarium dari scope fitur. Namun `AquariumView.swift` serta `AquariumArtwork.swift` masih dipakai oleh `#Preview("Aquarium • standalone")` sebagai harness ilustrasi interaktif. Karena preview itu masih berguna dan belum ada persetujuan eksplisit untuk menghapus prototype visualnya, tiga file Aquarium tidak dihapus.
+- `CompanionVisualCheck` dan `DistractionVisualCheck` tidak dihapus: keduanya dirujuk oleh argument routes `AppDelegate` untuk render-check visual.
+- Tidak ada file prototype yang terbukti aman dihapus setelah audit; branch ini berisi dokumentasi keputusan saja. Aset dan folder desain user tetap dipertahankan.
