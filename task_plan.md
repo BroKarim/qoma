@@ -1216,16 +1216,24 @@ Setiap branch harus dapat dibangun dari parent branch sebelumnya dan memiliki ca
 - [x] Migrasi legacy aggregate dan per-event catch JSON, active/history session JSON, serta tiga JSON Analytics; marker berada dalam database dan sumber legacy dipertahankan sebagai backup sampai ada proses backup/cleanup eksplisit.
 - [x] Jika decode, transaksi, atau disk write gagal, jangan menulis marker sukses atau melaporkan operasi berhasil. Operasi dapat dicoba ulang saat aplikasi dibuka lagi.
 - [x] Terapkan consent opt-in pada pembukaan Home pertama; dashboard tetap membaca histori yang sudah ada, sementara tracker baru tidak merekam sebelum izin diberikan. User dapat mengubah pilihan di Settings; pencabutan izin menghentikan tracker dan menghapus aktivitas sesi yang sedang berjalan.
-- [ ] Uji reopen setelah committed state, duplikasi migrasi, dataset besar, gagal membuka/menulis database, dan finalisasi recovery.
+- [x] Uji reopen setelah committed state, duplikasi migrasi, dataset besar, gagal membuka/menulis database, transaksi rollback, dan finalisasi recovery.
 
 ### 24.4 Platform dan validasi
 
-- [ ] Aplikasi sudah memakai macOS 14.0 pada Debug/Release; target test sekarang 15.7. Samakan target test ke minimum app bila kode test mendukungnya.
-- [ ] Perbaiki idle detection yang saat ini hanya memakai `mouseMoved`; keyboard, click, dan scroll harus mengatur ulang idle timer.
-- [ ] Build Debug macOS dan tes suite terkait lulus pada target minimum; laporan harus memisahkan warning baseline yang tidak termasuk perubahan.
+- [x] Aplikasi dan test target disamakan ke deployment target macOS 14.0 (build memakai macOS SDK 26.2).
+- [x] Idle detection memakai event input umum CoreGraphics, tidak lagi hanya `mouseMoved`.
+- [x] Build Debug macOS dan seluruh 185 tes lulus; test dijalankan pada macOS 26.5.2, sehingga runtime langsung di macOS 14 masih perlu QA terpisah. Warning SwiftLint/concurrency dan Info.plist resource tetap dicatat sebagai warning, bukan dianggap error build.
 - [ ] Audit reference sebelum menghapus file prototype; pertahankan visual guide/design archive yang masih menjadi dokumentasi arah aset.
 - [ ] Tinjau `git diff --check`, perubahan tidak menyertakan imagegen user yang telah ada, dan dokumentasikan file/behavior yang berubah per branch.
 
 ### 24.5 Persiapan setelah pekerjaan ini
 
 Setelah storage, consent, recovery, serta platform tests stabil, lanjutkan finalisasi aset ikan/penguin dan konsistensi visual. Landing page, login, backend, payment, akun riil, direct download produksi, serta auto-update tetap fase berikutnya dan bukan gate untuk menilai branch storage ini.
+
+### 24.6 Hasil implementasi — 18 Oktober 2026
+
+- Branch 1–3 telah dicommit berurutan: `598a742` SQLite foundation, `aee02b1` migrasi legacy, dan `640aca7` analytics consent/checkpoint.
+- Pada branch 4, migrasi catch memakai lokasi legacy yang benar dan tanggal ISO-8601 konsisten; migrasi analytics JSON memakai tipe record yang tepat; transaksi SQLite rollback tetap atomic. Test histori tidak lagi bergantung pada urutan dua sesi dengan timestamp sama.
+- Build Debug berhasil pada target deployment 14.0; seluruh 185 tes lulus pada macOS 26.5.2. Cakupan meliputi volume 5.000 tangkapan, migrasi idempotent/retry, file JSON sumber tetap ada, disk/database failure, commit/reopen, rollback, recovery terminal session, serta consent dan checkpoint analytics.
+- Warning SwiftLint/concurrency dan peringatan Info.plist dalam Copy Bundle Resources masih ada; semuanya nonfatal. Tes runtime langsung pada macOS 14 dan QA fisik/UX tetap perlu dilakukan.
+- Perubahan UI analytics dan folder ilustrasi collectible yang sudah ada sebelum pekerjaan ini tetap tidak dimasukkan ke commit implementasi.

@@ -89,8 +89,8 @@ struct SessionCoordinatorTests {
         #expect(coordinator.snapshot == nil)
         let history = repositories.sessions.loadHistory(accountID: "test")
         #expect(history.count == 2)
-        #expect(history.first?.id == legacy.id)
-        #expect(history.first?.draftSnapshot.domainBrowserBundleID == "com.apple.Safari")
+        let migratedLegacy = history.first { $0.id == legacy.id }
+        #expect(migratedLegacy?.draftSnapshot.domainBrowserBundleID == "com.apple.Safari")
         #expect(coordinator.startSession(draft: SessionDraft())?.status == .active)
     }
 

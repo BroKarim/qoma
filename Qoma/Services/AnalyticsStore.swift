@@ -134,13 +134,13 @@ final class AnalyticsStore {
         guard let database, (try? database.hasMigration("analytics-json-v1")) == false else { return }
         do {
             try database.transaction {
-                try importJSON([FocusSessionRecord].self, file: AppConstants.AnalyticsSettings.focusSessionsFile) { records in
+                try importJSON(FocusSessionRecord.self, file: AppConstants.AnalyticsSettings.focusSessionsFile) { records in
                     for record in records { try insert(record) }
                 }
-                try importJSON([AppActivityEvent].self, file: AppConstants.AnalyticsSettings.appActivityFile) { events in
+                try importJSON(AppActivityEvent.self, file: AppConstants.AnalyticsSettings.appActivityFile) { events in
                     try insert(events)
                 }
-                try importJSON([WebsiteVisitRecord].self, file: AppConstants.AnalyticsSettings.websiteVisitsFile) { visits in
+                try importJSON(WebsiteVisitRecord.self, file: AppConstants.AnalyticsSettings.websiteVisitsFile) { visits in
                     try insert(visits)
                 }
                 try database.markMigration("analytics-json-v1")
@@ -169,6 +169,10 @@ final class AnalyticsStore {
                 started_at = excluded.started_at, payload = excluded.payload
             """, [.text(record.id.uuidString), .text(accountID), .real(record.startedAt.timeIntervalSince1970),
                   .blob(try encoder.encode(record))])
+    }
+
+    private func insert(_ records: [FocusSessionRecord]) throws {
+        for record in records { try insert(record) }
     }
 
     private func insert(_ events: [AppActivityEvent]) throws {

@@ -116,6 +116,20 @@ struct QomaDatabaseTests {
         #expect(repository.saveProvisional(event) == false)
     }
 
+    @Test func failedTransactionRollsBackEveryRecord() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let database = try QomaDatabase(url: directory.appendingPathComponent("qoma.sqlite3"))
+        try database.execute("CREATE TABLE transaction_probe(value INTEGER NOT NULL)")
+        do {
+            try database.transaction {
+                try database.execute("INSERT INTO transaction_probe(value) VALUES(?)", [.integer(1)])
+                throw QomaDatabase.error("simulated interruption before commit")
+            }
+        } catch {}
+        #expect(try database.query("SELECT value FROM transaction_probe").isEmpty)
+    }
+
     @Test func committedStateSurvivesDatabaseReopen() throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: directory) }

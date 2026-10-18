@@ -186,8 +186,10 @@ final class ActivityTracker: NSObject, ObservableObject {
     }
 
     private func getSystemIdleTime() -> TimeInterval {
-        let anyInput = CGEventType(rawValue: UInt32.max)
-        let idleTime = CGEventSource.secondsSinceLastEventType(.combinedSessionState, eventType: anyInput)
+        let idleTime = CGEventSource.secondsSinceLastEventType(
+            .combinedSessionState,
+            eventType: CGEventType(rawValue: UInt32.max)!
+        )
         return TimeInterval(idleTime)
     }
 

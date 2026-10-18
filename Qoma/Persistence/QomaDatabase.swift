@@ -99,7 +99,7 @@ final class QomaDatabase: @unchecked Sendable {
         defer { lock.unlock() }
         var message: UnsafeMutablePointer<CChar>?
         guard sqlite3_exec(connection, sql, nil, nil, &message) == SQLITE_OK else {
-            let detail = message.map(String.init(cString:)) ?? String(cString: sqlite3_errmsg(connection))
+            let detail = message.map { String(cString: $0) } ?? String(cString: sqlite3_errmsg(connection))
             sqlite3_free(message)
             throw Self.error(detail)
         }

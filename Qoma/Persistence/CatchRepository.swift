@@ -16,12 +16,16 @@ final class CatchRepository: CatchRepositoryProtocol, @unchecked Sendable {
     static let shared = CatchRepository()
 
     private let database: QomaDatabase?
+    private let storageDirectory: URL?
     private let shouldMigrateLegacyJSON: Bool
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
 
     init(storageDirectory: URL? = nil, database: QomaDatabase? = nil) {
+        self.storageDirectory = storageDirectory
         shouldMigrateLegacyJSON = storageDirectory != nil || database == nil
+        encoder.dateEncodingStrategy = .iso8601
+        decoder.dateDecodingStrategy = .iso8601
         if let database {
             self.database = database
         } else if let storageDirectory {
@@ -104,14 +108,18 @@ final class CatchRepository: CatchRepositoryProtocol, @unchecked Sendable {
 
     func listBanked(accountID: String) -> [CatchEvent] {
         guard migrateLegacyJSON(accountID: accountID) else { return [] }
-        list("SELECT payload FROM catches WHERE account_id = ? AND banked_at IS NOT NULL ORDER BY deposited_at",
-             [.text(accountID)])
+        return list(
+            "SELECT payload FROM catches WHERE account_id = ? AND banked_at IS NOT NULL ORDER BY deposited_at",
+            [.text(accountID)]
+        )
     }
 
     func listProvisional(sessionID: UUID, accountID: String) -> [CatchEvent] {
         guard migrateLegacyJSON(accountID: accountID) else { return [] }
-        list("SELECT payload FROM catches WHERE account_id = ? AND session_id = ? AND banked_at IS NULL ORDER BY deposited_at",
-             [.text(accountID), .text(sessionID.uuidString)])
+        return list(
+            "SELECT payload FROM catches WHERE account_id = ? AND session_id = ? AND banked_at IS NULL ORDER BY deposited_at",
+            [.text(accountID), .text(sessionID.uuidString)]
+        )
     }
 
     func countByKind(accountID: String) -> [String: Int] {
@@ -214,7 +222,8 @@ final class CatchRepository: CatchRepositoryProtocol, @unchecked Sendable {
     }
 
     private func directoryURL() -> URL {
-        storageDirectory ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        if let storageDirectory { return storageDirectory }
+        return FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("Qoma/Catches")
     }
 

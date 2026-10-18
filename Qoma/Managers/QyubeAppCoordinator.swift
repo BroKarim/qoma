@@ -1,6 +1,7 @@
 import Cocoa
 import Combine
 import SwiftUI
+import OSLog
 
 /// Owns the qyube runtime: home window, session coordinator, timer panel, companion panel, overlay, and menu bar status.
 @MainActor
