@@ -15,17 +15,62 @@ struct AnalyticsStoreTests {
 
     // MARK: - Analytics Enabled Setting
 
-    @Test func analyticsEnabledDefaultsToTrue() {
-        let key = AppConstants.AnalyticsSettings.analyticsEnabledKey
-        UserDefaults.standard.removeObject(forKey: key)
-        #expect(AppConstants.AnalyticsSettings.isAnalyticsEnabled == true)
+    @Test func analyticsEnabledDefaultsToOffUntilConsent() {
+        let defaults = UserDefaults.standard
+        let enabledKey = AppConstants.AnalyticsSettings.analyticsEnabledKey
+        let consentKey = AppConstants.AnalyticsSettings.analyticsConsentDecidedKey
+        let previousEnabled = defaults.object(forKey: enabledKey)
+        let previousConsent = defaults.object(forKey: consentKey)
+        defer {
+            if let previousEnabled { defaults.set(previousEnabled, forKey: enabledKey) }
+            else { defaults.removeObject(forKey: enabledKey) }
+            if let previousConsent { defaults.set(previousConsent, forKey: consentKey) }
+            else { defaults.removeObject(forKey: consentKey) }
+        }
+        defaults.removeObject(forKey: enabledKey)
+        defaults.removeObject(forKey: consentKey)
+        #expect(AppConstants.AnalyticsSettings.isAnalyticsEnabled == false)
     }
 
     @Test func analyticsEnabledCanBeToggled() {
+        let defaults = UserDefaults.standard
+        let enabledKey = AppConstants.AnalyticsSettings.analyticsEnabledKey
+        let consentKey = AppConstants.AnalyticsSettings.analyticsConsentDecidedKey
+        let previousEnabled = defaults.object(forKey: enabledKey)
+        let previousConsent = defaults.object(forKey: consentKey)
+        defer {
+            if let previousEnabled { defaults.set(previousEnabled, forKey: enabledKey) }
+            else { defaults.removeObject(forKey: enabledKey) }
+            if let previousConsent { defaults.set(previousConsent, forKey: consentKey) }
+            else { defaults.removeObject(forKey: consentKey) }
+        }
         AppConstants.AnalyticsSettings.isAnalyticsEnabled = false
         #expect(AppConstants.AnalyticsSettings.isAnalyticsEnabled == false)
         AppConstants.AnalyticsSettings.isAnalyticsEnabled = true
         #expect(AppConstants.AnalyticsSettings.isAnalyticsEnabled == true)
+    }
+
+    @Test func activityCheckpointUpdatesOneDurableRecord() throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let url = directory.appendingPathComponent("qoma.sqlite3")
+        let eventID = UUID()
+        let sessionID = UUID()
+        do {
+            let store = AnalyticsStore(database: try QomaDatabase(url: url))
+            let checkpoint = AppActivityEvent(id: eventID, sessionID: sessionID,
+                                              appBundleID: "com.apple.Terminal", appName: "Terminal",
+                                              startedAt: .now, endedAt: .now, durationSeconds: 10)
+            #expect(store.appendAppActivityEvents([checkpoint]))
+        }
+        let store = AnalyticsStore(database: try QomaDatabase(url: url))
+        let finalEvent = AppActivityEvent(id: eventID, sessionID: sessionID,
+                                          appBundleID: "com.apple.Terminal", appName: "Terminal",
+                                          startedAt: .now, endedAt: .now, durationSeconds: 20)
+        #expect(store.appendAppActivityEvents([finalEvent]))
+        let saved = store.loadAppActivityEvents()
+        #expect(saved.count == 1)
+        #expect(saved.first?.durationSeconds == 20)
     }
 
     // MARK: - File Constants

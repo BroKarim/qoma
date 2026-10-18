@@ -168,9 +168,14 @@ final class FocusSessionManager: ObservableObject {
         sessionRecord.completed = completed
         sessionRecord.interruptedReason = interruptedReason
 
-        self.analyticsStore.updateFocusSession(sessionRecord)
-        self.analyticsStore.appendAppActivityEvents(appEvents)
-        self.analyticsStore.appendWebsiteVisits(websiteVisits)
+        let sessionSaved = self.analyticsStore.updateFocusSession(sessionRecord)
+        let appsSaved = appEvents.isEmpty || self.analyticsStore.appendAppActivityEvents(appEvents)
+        let websitesSaved = websiteVisits.isEmpty || self.analyticsStore.appendWebsiteVisits(websiteVisits)
+        guard sessionSaved, appsSaved, websitesSaved else {
+            Logger.session.error("Analytics data could not be fully persisted; retry is required")
+            self.activeSessionRecord = sessionRecord
+            return
+        }
 
         self.activeSessionRecord = nil
         Logger.session.info("Finalized analytics session: \(focusSeconds / 60, privacy: .public) min focus")

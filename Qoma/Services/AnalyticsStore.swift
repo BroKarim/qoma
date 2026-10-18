@@ -4,158 +4,236 @@ import OSLog
 final class AnalyticsStore {
     static let shared = AnalyticsStore()
 
+    private let database: QomaDatabase?
+    private let storageDirectory: URL?
+    private let shouldMigrateLegacyJSON: Bool
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
-    private let ioQueue = DispatchQueue(label: "com.dzulkiram.qoma.analyticsstore.io")
-    private let queueKey = DispatchSpecificKey<Void>()
+    private let accountID = "local"
 
-    init() {
+    init(storageDirectory: URL? = nil, database: QomaDatabase? = nil) {
+        self.storageDirectory = storageDirectory
+        shouldMigrateLegacyJSON = storageDirectory != nil || database == nil
+        if let database {
+            self.database = database
+        } else if let storageDirectory {
+            self.database = try? QomaDatabase(url: storageDirectory.appendingPathComponent("qoma.sqlite3"))
+        } else {
+            self.database = QomaDatabase.shared
+        }
         encoder.dateEncodingStrategy = .iso8601
         decoder.dateDecodingStrategy = .iso8601
-        ioQueue.setSpecific(key: queueKey, value: ())
-        bootstrapDirectory()
     }
-
-    // MARK: - Directory
-
-    private func bootstrapDirectory() {
-        let url = AppConstants.AnalyticsSettings.analyticsDirectoryURL
-        if !FileManager.default.fileExists(atPath: url.path) {
-            try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
-        }
-    }
-
-    private func fileURL(for filename: String) -> URL {
-        AppConstants.AnalyticsSettings.analyticsDirectoryURL.appendingPathComponent(filename)
-    }
-
-    // MARK: - Focus Sessions
 
     func loadFocusSessions() -> [FocusSessionRecord] {
-        load(from: AppConstants.AnalyticsSettings.focusSessionsFile) ?? []
+        migrateLegacyAnalyticsJSON()
+        return query("SELECT payload FROM analytics_sessions WHERE account_id = ? ORDER BY started_at", [.text(accountID)])
     }
 
     func readFocusSessionsForMigration() throws -> [FocusSessionRecord]? {
         let url = fileURL(for: AppConstants.AnalyticsSettings.focusSessionsFile)
         guard FileManager.default.fileExists(atPath: url.path) else { return nil }
-        do {
-            let data = try Data(contentsOf: url)
-            return try decoder.decode([FocusSessionRecord].self, from: data)
-        } catch {
+        do { return try decoder.decode([FocusSessionRecord].self, from: Data(contentsOf: url)) }
+        catch {
             Logger.store.error("Read legacy focus sessions failed: \(error.localizedDescription, privacy: .public)")
             throw error
         }
     }
 
-    func saveFocusSessions(_ records: [FocusSessionRecord]) {
-        save(records, to: AppConstants.AnalyticsSettings.focusSessionsFile)
-    }
-
-    func appendFocusSession(_ record: FocusSessionRecord) {
-        var records = loadFocusSessions()
-        records.append(record)
-        saveFocusSessions(records)
-    }
-
-    func updateFocusSession(_ record: FocusSessionRecord) {
-        var records = loadFocusSessions()
-        if let index = records.firstIndex(where: { $0.id == record.id }) {
-            records[index] = record
-        } else {
-            records.append(record)
+    @discardableResult
+    func saveFocusSessions(_ records: [FocusSessionRecord]) -> Bool {
+        migrateLegacyAnalyticsJSON()
+        guard let database else { return false }
+        do {
+            try database.transaction {
+                try database.execute("DELETE FROM analytics_sessions WHERE account_id = ?", [.text(accountID)])
+                for record in records { try insert(record) }
+            }
+            return true
+        } catch {
+            Logger.store.error("Save analytics sessions failed: \(error.localizedDescription, privacy: .public)")
+            return false
         }
-        saveFocusSessions(records)
     }
 
-    // MARK: - App Activity
+    @discardableResult
+    func appendFocusSession(_ record: FocusSessionRecord) -> Bool { save(record) }
+
+    @discardableResult
+    func updateFocusSession(_ record: FocusSessionRecord) -> Bool { save(record) }
 
     func loadAppActivityEvents() -> [AppActivityEvent] {
-        load(from: AppConstants.AnalyticsSettings.appActivityFile) ?? []
+        migrateLegacyAnalyticsJSON()
+        return query("SELECT payload FROM app_activity WHERE account_id = ? ORDER BY started_at", [.text(accountID)])
     }
 
-    func saveAppActivityEvents(_ events: [AppActivityEvent]) {
-        save(events, to: AppConstants.AnalyticsSettings.appActivityFile)
+    @discardableResult
+    func saveAppActivityEvents(_ events: [AppActivityEvent]) -> Bool {
+        migrateLegacyAnalyticsJSON()
+        return replace(events, table: "app_activity")
     }
 
-    func appendAppActivityEvents(_ events: [AppActivityEvent]) {
-        var existing = loadAppActivityEvents()
-        existing.append(contentsOf: events)
-        saveAppActivityEvents(existing)
+    @discardableResult
+    func appendAppActivityEvents(_ events: [AppActivityEvent]) -> Bool {
+        batch { try insert(events) }
     }
-
-    // MARK: - Website Visits
 
     func loadWebsiteVisits() -> [WebsiteVisitRecord] {
-        let visits: [WebsiteVisitRecord] = load(from: AppConstants.AnalyticsSettings.websiteVisitsFile) ?? []
-        Logger.store.debug("loadWebsiteVisits — found \(visits.count) records")
-        return visits
+        migrateLegacyAnalyticsJSON()
+        return query("SELECT payload FROM website_visits WHERE account_id = ? ORDER BY started_at", [.text(accountID)])
     }
 
-    func saveWebsiteVisits(_ records: [WebsiteVisitRecord]) {
-        save(records, to: AppConstants.AnalyticsSettings.websiteVisitsFile)
+    @discardableResult
+    func saveWebsiteVisits(_ records: [WebsiteVisitRecord]) -> Bool {
+        migrateLegacyAnalyticsJSON()
+        return replace(records, table: "website_visits")
     }
 
-    func appendWebsiteVisits(_ records: [WebsiteVisitRecord]) {
-        Logger.store.debug("appendWebsiteVisits — saving \(records.count) new records")
-        var existing = loadWebsiteVisits()
-        existing.append(contentsOf: records)
-        saveWebsiteVisits(existing)
-        Logger.store.debug("appendWebsiteVisits — total saved: \(existing.count) records")
+    @discardableResult
+    func appendWebsiteVisits(_ records: [WebsiteVisitRecord]) -> Bool {
+        batch { try insert(records) }
     }
 
-    // MARK: - Prune
-
-    func pruneOldData() {
-        let days = AppConstants.AnalyticsSettings.retentionDays
-        let cutoff = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? Date()
-
-        var sessions = loadFocusSessions()
-        sessions.removeAll { $0.startedAt < cutoff }
-        saveFocusSessions(sessions)
-
-        var appEvents = loadAppActivityEvents()
-        appEvents.removeAll { $0.startedAt < cutoff }
-        saveAppActivityEvents(appEvents)
-
-        var webVisits = loadWebsiteVisits()
-        webVisits.removeAll { $0.startedAt < cutoff }
-        saveWebsiteVisits(webVisits)
-    }
-
-    // MARK: - Generic Load/Save
-
-    private func load<T: Decodable>(from filename: String) -> T? {
-        syncIO {
-            let url = fileURL(for: filename)
-            guard let data = try? Data(contentsOf: url) else { return nil }
-            do {
-                return try decoder.decode(T.self, from: data)
-            } catch {
-                Logger.store.error(
-                    "Decode error for \(filename, privacy: .public): \(error.localizedDescription, privacy: .public)")
-                return nil
+    @discardableResult
+    func deleteActivity(sessionID: UUID) -> Bool {
+        guard let database else { return false }
+        do {
+            try database.transaction {
+                try database.execute("DELETE FROM app_activity WHERE account_id = ? AND session_id = ?",
+                                     [.text(accountID), .text(sessionID.uuidString)])
+                try database.execute("DELETE FROM website_visits WHERE account_id = ? AND session_id = ?",
+                                     [.text(accountID), .text(sessionID.uuidString)])
             }
-        }
+            return true
+        } catch { log(error, action: "Remove activity after consent withdrawal"); return false }
     }
 
-    private func save<T: Encodable>(_ value: T, to filename: String) {
-        syncIO {
-            let url = self.fileURL(for: filename)
-            do {
-                let data = try self.encoder.encode(value)
-                try data.write(to: url, options: .atomic)
-            } catch {
-                Logger.store.error(
-                    "Save error for \(filename, privacy: .public): \(error.localizedDescription, privacy: .public)")
+    @discardableResult
+    func pruneOldData(now: Date = Date()) -> Bool {
+        migrateLegacyAnalyticsJSON()
+        guard let database else { return false }
+        let cutoff = Calendar.current.date(
+            byAdding: .day, value: -AppConstants.AnalyticsSettings.retentionDays, to: now
+        )?.timeIntervalSince1970 ?? now.timeIntervalSince1970
+        do {
+            try database.transaction {
+                for table in ["analytics_sessions", "app_activity", "website_visits"] {
+                    try database.execute("DELETE FROM \(table) WHERE account_id = ? AND started_at < ?",
+                                         [.text(accountID), .real(cutoff)])
+                }
             }
+            return true
+        } catch {
+            Logger.store.error("Prune analytics failed: \(error.localizedDescription, privacy: .public)")
+            return false
         }
     }
 
-    private func syncIO<T>(_ work: () -> T) -> T {
-        if DispatchQueue.getSpecific(key: queueKey) != nil {
-            return work()
+    private func migrateLegacyAnalyticsJSON() {
+        guard shouldMigrateLegacyJSON else { return }
+        guard let database, (try? database.hasMigration("analytics-json-v1")) == false else { return }
+        do {
+            try database.transaction {
+                try importJSON([FocusSessionRecord].self, file: AppConstants.AnalyticsSettings.focusSessionsFile) { records in
+                    for record in records { try insert(record) }
+                }
+                try importJSON([AppActivityEvent].self, file: AppConstants.AnalyticsSettings.appActivityFile) { events in
+                    try insert(events)
+                }
+                try importJSON([WebsiteVisitRecord].self, file: AppConstants.AnalyticsSettings.websiteVisitsFile) { visits in
+                    try insert(visits)
+                }
+                try database.markMigration("analytics-json-v1")
+            }
+        } catch {
+            Logger.store.error("Migrate analytics JSON failed: \(error.localizedDescription, privacy: .public)")
         }
+    }
 
-        return ioQueue.sync(execute: work)
+    private func importJSON<T: Decodable>(_ type: T.Type, file: String, importRecords: ([T]) throws -> Void) throws {
+        let url = fileURL(for: file)
+        guard FileManager.default.fileExists(atPath: url.path) else { return }
+        let records = try decoder.decode([T].self, from: Data(contentsOf: url))
+        try importRecords(records)
+    }
+
+    private func save(_ record: FocusSessionRecord) -> Bool {
+        do { try insert(record); return true }
+        catch { log(error, action: "Save analytics session"); return false }
+    }
+
+    private func insert(_ record: FocusSessionRecord) throws {
+        try execute("""
+            INSERT INTO analytics_sessions(id, account_id, started_at, payload) VALUES(?, ?, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET account_id = excluded.account_id,
+                started_at = excluded.started_at, payload = excluded.payload
+            """, [.text(record.id.uuidString), .text(accountID), .real(record.startedAt.timeIntervalSince1970),
+                  .blob(try encoder.encode(record))])
+    }
+
+    private func insert(_ events: [AppActivityEvent]) throws {
+        for event in events {
+            try execute("""
+                INSERT INTO app_activity(id, account_id, session_id, started_at, payload) VALUES(?, ?, ?, ?, ?)
+                ON CONFLICT(id) DO UPDATE SET payload = excluded.payload
+                """, [.text(event.id.uuidString), .text(accountID), .text(event.sessionID.uuidString),
+                      .real(event.startedAt.timeIntervalSince1970), .blob(try encoder.encode(event))])
+        }
+    }
+
+    private func insert(_ visits: [WebsiteVisitRecord]) throws {
+        for visit in visits {
+            try execute("""
+                INSERT INTO website_visits(id, account_id, session_id, started_at, payload) VALUES(?, ?, ?, ?, ?)
+                ON CONFLICT(id) DO UPDATE SET payload = excluded.payload
+                """, [.text(visit.id.uuidString), .text(accountID), .text(visit.sessionID.uuidString),
+                      .real(visit.startedAt.timeIntervalSince1970), .blob(try encoder.encode(visit))])
+        }
+    }
+
+    private func batch(_ work: () throws -> Void) -> Bool {
+        guard let database else { return false }
+        migrateLegacyAnalyticsJSON()
+        do { try database.transaction(work); return true }
+        catch { log(error, action: "Save analytics batch"); return false }
+    }
+
+    private func replace<T: Encodable>(_ records: [T], table: String) -> Bool {
+        guard let database else { return false }
+        do {
+            try database.transaction {
+                try database.execute("DELETE FROM \(table) WHERE account_id = ?", [.text(accountID)])
+                if let events = records as? [AppActivityEvent] { try insert(events) }
+                else if let visits = records as? [WebsiteVisitRecord] { try insert(visits) }
+                else if let sessions = records as? [FocusSessionRecord] {
+                    for session in sessions { try insert(session) }
+                }
+            }
+            return true
+        } catch { log(error, action: "Replace analytics records"); return false }
+    }
+
+    private func query<T: Decodable>(_ sql: String, _ values: [QomaDatabase.Value]) -> [T] {
+        guard let database else { return [] }
+        do {
+            let rows = try database.query(sql, values)
+            return rows.compactMap { row in
+            guard case .blob(let data)? = row["payload"] else { return nil }
+            return try? decoder.decode(T.self, from: data)
+            }
+        } catch { log(error, action: "Read analytics records"); return [] }
+    }
+
+    private func execute(_ sql: String, _ values: [QomaDatabase.Value]) throws {
+        guard let database else { throw QomaDatabase.error("Database unavailable") }
+        try database.execute(sql, values)
+    }
+
+    private func fileURL(for filename: String) -> URL {
+        (storageDirectory ?? AppConstants.AnalyticsSettings.analyticsDirectoryURL).appendingPathComponent(filename)
+    }
+
+    private func log(_ error: Error, action: String) {
+        Logger.store.error("\(action, privacy: .public) failed: \(error.localizedDescription, privacy: .public)")
     }
 }

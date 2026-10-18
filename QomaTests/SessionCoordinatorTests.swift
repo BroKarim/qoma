@@ -332,14 +332,29 @@ struct SessionCoordinatorTests {
     }
 
     @Test
-    func stopPersistsTerminalSnapshotWhenHistoryWriteFailsAndRestoresItLater() {
+    func terminalSnapshotRecoversIntoSQLiteHistoryAfterReopen() throws {
         let accountID = UUID().uuidString
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        let repository = SessionRepository(
-            storageDirectory: directory.appendingPathComponent("sessions"),
-            historyDirectoryURL: directory.appendingPathComponent("missing-history-parent")
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let databaseURL = directory.appendingPathComponent("qoma.sqlite3")
+        let start = Date.now
+        let snapshot = ActiveSessionSnapshot(
+            accountID: accountID,
+            startedAt: start,
+            deadline: start.addingTimeInterval(600),
+            accumulatedActiveSeconds: CatchEngine.bankThresholdSeconds,
+            draft: SessionDraft(plannedMinutes: 10),
+            status: .interrupted,
+            endedAt: start.addingTimeInterval(300),
+            interruptedReason: "test"
         )
-        let catches = CatchRepository(storageDirectory: directory.appendingPathComponent("catches"))
+        do {
+            let database = try QomaDatabase(url: databaseURL)
+            #expect(SessionRepository(database: database).saveActive(snapshot))
+        }
+        let database = try QomaDatabase(url: databaseURL)
+        let repository = SessionRepository(database: database)
+        let catches = CatchRepository(database: database)
         let coordinator = SessionCoordinator(
             accountID: accountID,
             sessionRepository: repository,
@@ -347,21 +362,8 @@ struct SessionCoordinatorTests {
             now: Date.init,
             autoCatchEnabled: false
         )
-        coordinator.startSession(draft: SessionDraft(plannedMinutes: 10))
-
-        let session = coordinator.stopSession(reason: "test")
-        #expect(session?.status == .interrupted)
-        #expect(repository.loadActive(accountID: accountID)?.status == .interrupted)
-        try? FileManager.default.createDirectory(at: directory.appendingPathComponent("missing-history-parent"), withIntermediateDirectories: true)
-        let restoredCoordinator = SessionCoordinator(
-            accountID: accountID,
-            sessionRepository: repository,
-            catchRepository: catches,
-            autoCatchEnabled: false
-        )
-        restoredCoordinator.restore()
+        coordinator.restore()
         #expect(repository.loadActive(accountID: accountID) == nil)
         #expect(repository.loadHistory(accountID: accountID).count == 1)
-        try? FileManager.default.removeItem(at: directory)
     }
 }

@@ -1,7 +1,6 @@
 import Foundation
 import OSLog
 
-/// Abstract repository for catch ledger persistence.
 protocol CatchRepositoryProtocol: Sendable {
     func saveProvisional(_ event: CatchEvent) -> Bool
     func bank(_ eventID: UUID, sessionID: UUID, accountID: String, at: Date) -> Bool
@@ -12,188 +11,53 @@ protocol CatchRepositoryProtocol: Sendable {
     func deleteProvisional(sessionID: UUID, accountID: String) -> Bool
 }
 
-/// JSON-backed catch ledger. Provisional events live only for the active session.
+/// SQLite-backed catch ledger. Rows are indexed by account, session, date, and kind.
 final class CatchRepository: CatchRepositoryProtocol, @unchecked Sendable {
     static let shared = CatchRepository()
 
+    private let database: QomaDatabase?
+    private let shouldMigrateLegacyJSON: Bool
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
-    private let ioQueue = DispatchQueue(label: "com.dzulkiram.qoma.catchrepository.io")
-    private let queueKey = DispatchSpecificKey<Void>()
-    private let storageDirectory: URL?
 
-    init(storageDirectory: URL? = nil) {
-        self.storageDirectory = storageDirectory
-        encoder.dateEncodingStrategy = .iso8601
-        decoder.dateDecodingStrategy = .iso8601
-        ioQueue.setSpecific(key: queueKey, value: ())
-        bootstrapDirectory()
-    }
-
-    // MARK: - Directory
-
-    private func bootstrapDirectory() {
-        let url = directoryURL()
-        if !FileManager.default.fileExists(atPath: url.path) {
-            try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+    init(storageDirectory: URL? = nil, database: QomaDatabase? = nil) {
+        shouldMigrateLegacyJSON = storageDirectory != nil || database == nil
+        if let database {
+            self.database = database
+        } else if let storageDirectory {
+            self.database = try? QomaDatabase(url: storageDirectory.appendingPathComponent("qoma.sqlite3"))
+        } else {
+            self.database = QomaDatabase.shared
         }
     }
-
-    private func directoryURL() -> URL {
-        if let storageDirectory { return storageDirectory }
-        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        return appSupport.appendingPathComponent("Qoma").appendingPathComponent("Catches")
-    }
-
-    private func provisionalFileURL(sessionID: UUID, accountID: String) -> URL {
-        directoryURL().appendingPathComponent("provisional-\(sanitized(accountID))-\(sessionID.uuidString).json")
-    }
-
-    private func bankedFileURL(accountID: String) -> URL {
-        directoryURL().appendingPathComponent("banked-\(sanitized(accountID)).json")
-    }
-
-    private func sanitized(_ accountID: String) -> String {
-        accountID.map { char -> String in
-            let scalar = String(char).unicodeScalars.first!
-            if CharacterSet.alphanumerics.contains(scalar) {
-                return String(char)
-            }
-            return "-"
-        }.joined()
-    }
-
-    // MARK: - Provisional
 
     func saveProvisional(_ event: CatchEvent) -> Bool {
-        syncIO {
-            var events = loadProvisionalSync(sessionID: event.sessionID, accountID: event.accountID)
-            events.removeAll { $0.id == event.id }
-            events.append(event)
-
-            let url = provisionalFileURL(sessionID: event.sessionID, accountID: event.accountID)
-            do {
-                let data = try encoder.encode(events)
-                try data.write(to: url, options: .atomic)
-                return true
-            } catch {
-                Logger.store.error("Save provisional catch failed: \(error.localizedDescription, privacy: .public)")
-                return false
-            }
-        }
+        guard migrateLegacyJSON(accountID: event.accountID) else { return false }
+        return save(event)
     }
-
-    func listProvisional(sessionID: UUID, accountID: String) -> [CatchEvent] {
-        syncIO {
-            loadProvisionalSync(sessionID: sessionID, accountID: accountID)
-        }
-    }
-
-    private func loadProvisionalSync(sessionID: UUID, accountID: String) -> [CatchEvent] {
-        let url = provisionalFileURL(sessionID: sessionID, accountID: accountID)
-        guard let data = try? Data(contentsOf: url) else { return [] }
-        do {
-            return try decoder.decode([CatchEvent].self, from: data)
-        } catch {
-            Logger.store.error("Decode provisional catch failed: \(error.localizedDescription, privacy: .public)")
-            return []
-        }
-    }
-
-    func deleteProvisional(sessionID: UUID, accountID: String) -> Bool {
-        syncIO {
-            let url = provisionalFileURL(sessionID: sessionID, accountID: accountID)
-            guard FileManager.default.fileExists(atPath: url.path) else { return true }
-            do {
-                try FileManager.default.removeItem(at: url)
-                return true
-            } catch {
-                Logger.store.error("Delete provisional catches failed: \(error.localizedDescription, privacy: .public)")
-                return false
-            }
-        }
-    }
-
-    // MARK: - Banked
 
     func bank(_ eventID: UUID, sessionID: UUID, accountID: String, at: Date) -> Bool {
-        syncIO {
-            guard var event = findProvisionalSync(eventID: eventID, sessionID: sessionID, accountID: accountID) else {
-                Logger.store.warning("bank called for unknown provisional \(eventID, privacy: .public)")
-                return false
-            }
-
-            event.bankedAt = at
-            guard writeBankedEvent(event) else { return false }
-            removeProvisionalEvent(eventID, sessionID: sessionID, accountID: accountID)
-            Logger.store.info("Banked catch \(eventID, privacy: .public)")
-            return true
-        }
-    }
-
-    func bankProvisional(sessionID: UUID, accountID: String, at: Date) -> Bool {
-        syncIO {
-            let events = loadProvisionalSync(sessionID: sessionID, accountID: accountID)
-            guard !events.isEmpty else { return true }
-            for var event in events {
-                event.bankedAt = at
-                guard writeBankedEvent(event) else { return false }
-            }
-            let url = provisionalFileURL(sessionID: sessionID, accountID: accountID)
-            do {
-                try FileManager.default.removeItem(at: url)
-                return true
-            } catch {
-                Logger.store.error("Clear banked provisional catches failed: \(error.localizedDescription, privacy: .public)")
-                return false
-            }
-        }
-    }
-
-    func listBanked(accountID: String) -> [CatchEvent] {
-        syncIO {
-            loadBankedSync(accountID: accountID)
-        }
-    }
-
-    private func loadBankedSync(accountID: String) -> [CatchEvent] {
-        var events: [UUID: CatchEvent] = [:]
-        if let data = try? Data(contentsOf: bankedFileURL(accountID: accountID)),
-           let legacyEvents = try? decoder.decode([CatchEvent].self, from: data) {
-            for event in legacyEvents { events[event.id] = event }
-        }
-        let prefix = "banked-event-\(sanitized(accountID))-"
-        guard let files = try? FileManager.default.contentsOfDirectory(at: directoryURL(), includingPropertiesForKeys: nil)
-        else { return Array(events.values) }
-        for url in files where url.lastPathComponent.hasPrefix(prefix) && url.pathExtension == "json" {
-            guard let data = try? Data(contentsOf: url),
-                  let event = try? decoder.decode(CatchEvent.self, from: data) else { continue }
-            events[event.id] = event
-        }
-        return Array(events.values)
-    }
-
-    func countByKind(accountID: String) -> [String: Int] {
-        let banked = listBanked(accountID: accountID)
-        var counts: [String: Int] = [:]
-        for event in banked {
-            counts[event.kindID, default: 0] += 1
-        }
-        return counts
-    }
-
-    // MARK: - Helpers
-
-    private func findProvisionalSync(eventID: UUID, sessionID: UUID, accountID: String) -> CatchEvent? {
-        loadProvisionalSync(sessionID: sessionID, accountID: accountID).first { $0.id == eventID }
-    }
-
-    private func writeBankedEvent(_ event: CatchEvent) -> Bool {
+        guard migrateLegacyJSON(accountID: accountID), let database else { return false }
+        let rows: [[String: QomaDatabase.Value]]
         do {
-            let url = directoryURL().appendingPathComponent(
-                "banked-event-\(sanitized(event.accountID))-\(event.id.uuidString).json")
-            let data = try encoder.encode(event)
-            try data.write(to: url, options: .atomic)
+            rows = try database.query(
+            "SELECT payload, banked_at FROM catches WHERE id = ? AND account_id = ? AND session_id = ?",
+            [.text(eventID.uuidString), .text(accountID), .text(sessionID.uuidString)]
+            )
+        } catch {
+            Logger.store.error("Read provisional catch failed: \(error.localizedDescription, privacy: .public)")
+            return false
+        }
+        guard let row = rows.first else { return false }
+        if case .real? = row["banked_at"] { return true }
+        guard let event = decode(CatchEvent.self, from: row["payload"]),
+              let data = try? encoder.encode(CatchEvent(
+                id: event.id, sessionID: event.sessionID, accountID: event.accountID,
+                kindID: event.kindID, depositedAt: event.depositedAt, bankedAt: at
+              )) else { return false }
+        do {
+            try database.execute("UPDATE catches SET banked_at = ?, payload = ? WHERE id = ? AND banked_at IS NULL",
+                                 [.real(at.timeIntervalSince1970), .blob(data), .text(eventID.uuidString)])
             return true
         } catch {
             Logger.store.error("Bank catch failed: \(error.localizedDescription, privacy: .public)")
@@ -201,21 +65,186 @@ final class CatchRepository: CatchRepositoryProtocol, @unchecked Sendable {
         }
     }
 
-    private func removeProvisionalEvent(_ eventID: UUID, sessionID: UUID, accountID: String) {
-        let url = provisionalFileURL(sessionID: sessionID, accountID: accountID)
-        var events = loadProvisionalSync(sessionID: sessionID, accountID: accountID)
-        events.removeAll { $0.id == eventID }
-        if events.isEmpty {
-            try? FileManager.default.removeItem(at: url)
-        } else if let data = try? encoder.encode(events) {
-            try? data.write(to: url, options: .atomic)
+    func bankProvisional(sessionID: UUID, accountID: String, at: Date) -> Bool {
+        guard let database, migrateLegacyJSON(accountID: accountID) else { return false }
+        let rows: [[String: QomaDatabase.Value]]
+        do {
+            rows = try database.query(
+                "SELECT payload FROM catches WHERE account_id = ? AND session_id = ? AND banked_at IS NULL ORDER BY deposited_at",
+                [.text(accountID), .text(sessionID.uuidString)]
+            )
+        } catch {
+            Logger.store.error("Read provisional catches failed: \(error.localizedDescription, privacy: .public)")
+            return false
+        }
+        let events = rows.compactMap { decode(CatchEvent.self, from: $0["payload"]) }
+        guard events.count == rows.count else {
+            Logger.store.error("A provisional catch row could not be decoded")
+            return false
+        }
+        do {
+            try database.transaction {
+                for event in events {
+                    let banked = CatchEvent(
+                        id: event.id, sessionID: event.sessionID, accountID: event.accountID,
+                        kindID: event.kindID, depositedAt: event.depositedAt, bankedAt: at
+                    )
+                    try database.execute(
+                        "UPDATE catches SET banked_at = ?, payload = ? WHERE id = ? AND banked_at IS NULL",
+                        [.real(at.timeIntervalSince1970), .blob(try encoder.encode(banked)), .text(event.id.uuidString)]
+                    )
+                }
+            }
+            return true
+        } catch {
+            Logger.store.error("Bank provisional catches failed: \(error.localizedDescription, privacy: .public)")
+            return false
         }
     }
 
-    private func syncIO<T>(_ work: () -> T) -> T {
-        if DispatchQueue.getSpecific(key: queueKey) != nil {
-            return work()
+    func listBanked(accountID: String) -> [CatchEvent] {
+        guard migrateLegacyJSON(accountID: accountID) else { return [] }
+        list("SELECT payload FROM catches WHERE account_id = ? AND banked_at IS NOT NULL ORDER BY deposited_at",
+             [.text(accountID)])
+    }
+
+    func listProvisional(sessionID: UUID, accountID: String) -> [CatchEvent] {
+        guard migrateLegacyJSON(accountID: accountID) else { return [] }
+        list("SELECT payload FROM catches WHERE account_id = ? AND session_id = ? AND banked_at IS NULL ORDER BY deposited_at",
+             [.text(accountID), .text(sessionID.uuidString)])
+    }
+
+    func countByKind(accountID: String) -> [String: Int] {
+        guard migrateLegacyJSON(accountID: accountID), let database else { return [:] }
+        let rows: [[String: QomaDatabase.Value]]
+        do {
+            rows = try database.query(
+                "SELECT kind_id, COUNT(*) AS total FROM catches WHERE account_id = ? AND banked_at IS NOT NULL GROUP BY kind_id",
+                [.text(accountID)]
+            )
+        } catch {
+            Logger.store.error("Count catches failed: \(error.localizedDescription, privacy: .public)")
+            return [:]
         }
-        return ioQueue.sync(execute: work)
+        return Dictionary(uniqueKeysWithValues: rows.compactMap { row in
+            guard case .text(let kind)? = row["kind_id"], case .integer(let total)? = row["total"] else { return nil }
+            return (kind, Int(total))
+        })
+    }
+
+    func deleteProvisional(sessionID: UUID, accountID: String) -> Bool {
+        guard migrateLegacyJSON(accountID: accountID) else { return false }
+        do {
+            try database?.execute("DELETE FROM catches WHERE account_id = ? AND session_id = ? AND banked_at IS NULL",
+                                  [.text(accountID), .text(sessionID.uuidString)])
+            return database != nil
+        } catch {
+            Logger.store.error("Delete provisional catches failed: \(error.localizedDescription, privacy: .public)")
+            return false
+        }
+    }
+
+    private func save(_ event: CatchEvent) -> Bool {
+        guard let database, let data = try? encoder.encode(event) else { return false }
+        do {
+            try database.execute("""
+                INSERT OR IGNORE INTO catches(id, account_id, session_id, kind_id, deposited_at, banked_at, payload)
+                VALUES(?, ?, ?, ?, ?, ?, ?)
+                """, [
+                    .text(event.id.uuidString), .text(event.accountID), .text(event.sessionID.uuidString),
+                    .text(event.kindID), .real(event.depositedAt.timeIntervalSince1970),
+                    event.bankedAt.map { .real($0.timeIntervalSince1970) } ?? .null, .blob(data)
+                ])
+            return true
+        } catch {
+            Logger.store.error("Save catch failed: \(error.localizedDescription, privacy: .public)")
+            return false
+        }
+    }
+
+    private func migrateLegacyJSON(accountID: String) -> Bool {
+        guard shouldMigrateLegacyJSON else { return true }
+        guard let database else { return false }
+        let key = "legacy.catches.v1.\(accountID)"
+        do {
+            if try database.hasMigration(key) { return true }
+            let directory = directoryURL()
+            guard FileManager.default.fileExists(atPath: directory.path) else {
+                try database.markMigration(key)
+                return true
+            }
+            let prefix = "banked-event-\(sanitized(accountID))-"
+            let provisionalPrefix = "provisional-\(sanitized(accountID))-"
+            let candidates = try FileManager.default.contentsOfDirectory(
+                at: directory, includingPropertiesForKeys: nil
+            ).filter { url in
+                url.lastPathComponent == "banked-\(sanitized(accountID)).json"
+                    || (url.lastPathComponent.hasPrefix(prefix) && url.pathExtension == "json")
+                    || (url.lastPathComponent.hasPrefix(provisionalPrefix) && url.pathExtension == "json")
+            }
+            var events: [CatchEvent] = []
+            for url in candidates {
+                let data = try Data(contentsOf: url)
+                if let event = try? decoder.decode(CatchEvent.self, from: data) {
+                    events.append(event)
+                } else {
+                    events.append(contentsOf: try decoder.decode([CatchEvent].self, from: data))
+                }
+            }
+            try database.transaction {
+                for event in events {
+                    try database.execute("""
+                        INSERT OR IGNORE INTO catches(id, account_id, session_id, kind_id, deposited_at, banked_at, payload)
+                        VALUES(?, ?, ?, ?, ?, ?, ?)
+                        """, [
+                            .text(event.id.uuidString), .text(event.accountID), .text(event.sessionID.uuidString),
+                            .text(event.kindID), .real(event.depositedAt.timeIntervalSince1970),
+                            event.bankedAt.map { .real($0.timeIntervalSince1970) } ?? .null,
+                            .blob(try encoder.encode(event))
+                        ])
+                }
+                try database.markMigration(key)
+            }
+            Logger.store.info("Migrated \(events.count) legacy catch records for local account")
+            return true
+        } catch {
+            Logger.store.error("Migrate catch JSON failed: \(error.localizedDescription, privacy: .public)")
+            return false
+        }
+    }
+
+    private func directoryURL() -> URL {
+        storageDirectory ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("Qoma/Catches")
+    }
+
+    private func sanitized(_ accountID: String) -> String {
+        accountID.map { char in
+            guard let scalar = String(char).unicodeScalars.first,
+                  CharacterSet.alphanumerics.contains(scalar) else { return "-" }
+            return String(char)
+        }.joined()
+    }
+
+    private func list(_ sql: String, _ values: [QomaDatabase.Value]) -> [CatchEvent] {
+        guard let database else { return [] }
+        let rows: [[String: QomaDatabase.Value]]
+        do { rows = try database.query(sql, values) }
+        catch {
+            Logger.store.error("Read catch records failed: \(error.localizedDescription, privacy: .public)")
+            return []
+        }
+        return rows.compactMap { row in
+            guard let event = decode(CatchEvent.self, from: row["payload"]) else {
+                Logger.store.error("A catch row could not be decoded")
+                return nil
+            }
+            return event
+        }
+    }
+
+    private func decode<T: Decodable>(_ type: T.Type, from value: QomaDatabase.Value?) -> T? {
+        guard case .blob(let data)? = value else { return nil }
+        return try? decoder.decode(type, from: data)
     }
 }

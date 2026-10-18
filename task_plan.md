@@ -1210,11 +1210,11 @@ Setiap branch harus dapat dibangun dari parent branch sebelumnya dan memiliki ca
 ### 24.3 Urutan migrasi dan ketahanan
 
 - [x] Satu database `Application Support/Qoma/qoma.sqlite3`, WAL, `synchronous=FULL`, foreign keys, timeout busy, tabel record bertipe dengan kolom payload Codable dan kolom indeks yang dibutuhkan query.
-- [ ] Catch: indeks `(account_id, deposited_at)`, `(account_id, kind_id)`, `(account_id, session_id, banked_at)`; provisional dan banked tetap event yang sama, UUID idempotent.
-- [ ] Session: simpan active snapshot dan history terpisah menurut `record_type`; finalisasi satu transaksi/upsert idempotent dan dapat dipulihkan.
+- [x] Catch: indeks `(account_id, deposited_at)`, `(account_id, kind_id)`, `(account_id, session_id, banked_at)`; provisional dan banked tetap event yang sama, UUID idempotent.
+- [x] Session: simpan active snapshot dan history terpisah menurut `record_type`; finalisasi satu transaksi/upsert idempotent dan dapat dipulihkan.
 - [ ] Analytics: indeks per account/tanggal dan account/session; app activity serta website visit checkpoint agar crash tidak menghilangkan seluruh sesi aktivitas.
-- [ ] Migrasi legacy aggregate dan per-event catch JSON, active/history session JSON, serta tiga JSON Analytics; marker berada dalam database dan sumber legacy dipertahankan sebagai backup sampai ada proses backup/cleanup eksplisit.
-- [ ] Jika decode, transaksi, atau disk write gagal, jangan menulis marker sukses atau melaporkan operasi berhasil. Operasi dapat dicoba ulang saat aplikasi dibuka lagi.
+- [x] Migrasi legacy aggregate dan per-event catch JSON, active/history session JSON, serta tiga JSON Analytics; marker berada dalam database dan sumber legacy dipertahankan sebagai backup sampai ada proses backup/cleanup eksplisit.
+- [x] Jika decode, transaksi, atau disk write gagal, jangan menulis marker sukses atau melaporkan operasi berhasil. Operasi dapat dicoba ulang saat aplikasi dibuka lagi.
 - [ ] Terapkan consent opt-in; dashboard tetap membaca histori yang sudah ada, sementara tracker baru tidak merekam sebelum izin diberikan.
 - [ ] Uji reopen setelah committed state, duplikasi migrasi, dataset besar, gagal membuka/menulis database, dan finalisasi recovery.
 

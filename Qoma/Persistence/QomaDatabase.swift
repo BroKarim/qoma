@@ -15,7 +15,11 @@ final class QomaDatabase: @unchecked Sendable {
     static let shared: QomaDatabase? = {
         let root = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("Qoma", isDirectory: true)
-        return try? QomaDatabase(url: root.appendingPathComponent("qoma.sqlite3"))
+        do { return try QomaDatabase(url: root.appendingPathComponent("qoma.sqlite3")) }
+        catch {
+            Logger.store.error("Open Qoma database failed: \(error.localizedDescription, privacy: .public)")
+            return nil
+        }
     }()
 
     private let connection: OpaquePointer
