@@ -183,6 +183,14 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
                 }
             }
             .store(in: &cancellables)
+
+        NotificationCenter.default.publisher(for: AppConstants.AnalyticsSettings.trackingPreferenceChanged)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self, let snapshot = self.sessionCoordinator.snapshot else { return }
+                self.updateAnalyticsTracking(for: snapshot)
+            }
+            .store(in: &cancellables)
     }
 
     private func bindDistractionCoordinator() {
@@ -279,7 +287,7 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
 
     private func updateAnalyticsTracking(for snapshot: ActiveSessionSnapshot) {
         guard AppConstants.AnalyticsSettings.isAnalyticsEnabled else {
-            finishAnalyticsTracking()
+            finishAnalyticsTracking(persist: false)
             return
         }
         let tracker = ActivityTracker.shared
@@ -303,12 +311,20 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
         }
     }
 
-    private func finishAnalyticsTracking() {
-        guard trackedSessionID != nil else { return }
+    private func finishAnalyticsTracking(persist: Bool = true) {
+        guard let sessionID = trackedSessionID else { return }
         trackedSessionID = nil
         let (appEvents, webVisits) = ActivityTracker.shared.stopTracking()
-        if !appEvents.isEmpty { AnalyticsStore.shared.appendAppActivityEvents(appEvents) }
-        if !webVisits.isEmpty { AnalyticsStore.shared.appendWebsiteVisits(webVisits) }
+        if persist {
+            if !appEvents.isEmpty, !AnalyticsStore.shared.appendAppActivityEvents(appEvents) {
+                Logger.store.error("Could not persist final app activity batch")
+            }
+            if !webVisits.isEmpty, !AnalyticsStore.shared.appendWebsiteVisits(webVisits) {
+                Logger.store.error("Could not persist final website activity batch")
+            }
+        } else if !AnalyticsStore.shared.deleteActivity(sessionID: sessionID) {
+            Logger.store.error("Could not remove activity after analytics consent was withdrawn")
+        }
     }
 
     private func formatTime(_ time: TimeInterval) -> String {

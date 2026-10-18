@@ -53,6 +53,9 @@ final class QyubeNavigation: ObservableObject {
 
 struct QyubeHomeView: View {
     @ObservedObject var navigation: QyubeNavigation
+    @AppStorage(AppConstants.AnalyticsSettings.analyticsConsentDecidedKey)
+    private var analyticsConsentDecided = false
+    @State private var isAnalyticsConsentPresented = false
 
     var body: some View {
         GeometryReader { geometry in
@@ -112,6 +115,12 @@ struct QyubeHomeView: View {
         .environment(\.colorScheme, .light)
         .tint(.qyubeAccent)
         .onAppear { self.navigation.refresh() }
+        .sheet(isPresented: $isAnalyticsConsentPresented) {
+            AnalyticsConsentSheet { _ in analyticsConsentDecided = true }
+        }
+        .onAppear {
+            if !analyticsConsentDecided { isAnalyticsConsentPresented = true }
+        }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             self.navigation.refresh()
         }

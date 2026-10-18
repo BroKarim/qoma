@@ -11,6 +11,8 @@ struct QyubeJournalSettingsView: View {
     @AppStorage(AppConstants.FloatingThemeSettings.liquidGlassKey) private var glass = false
     @AppStorage("qyube.reduceMotionOverride") private var reduceMotion = false
     @AppStorage(DistractionAudioPlayer.enabledKey) private var distractionSounds = true
+    @AppStorage(AppConstants.AnalyticsSettings.analyticsEnabledKey)
+    private var analyticsEnabled = AppConstants.AnalyticsSettings.defaultAnalyticsEnabled
 
     var body: some View {
         ScrollView {
@@ -24,6 +26,7 @@ struct QyubeJournalSettingsView: View {
                 self.soundSettings
                 self.floatingSettings
                 self.comfort
+                self.analyticsSettings
             }.padding(28).padding(.top, 12)
         }
         .qyubeScrollIndicator()
@@ -32,6 +35,9 @@ struct QyubeJournalSettingsView: View {
         .onChange(of: self.volume) { _, value in
             self.volume = min(1, max(0, value.isFinite ? value : AppConstants.SoundSettings.defaultVolume))
             SoundAlertPlayer.shared.stop()
+        }
+        .onChange(of: self.analyticsEnabled) { _, value in
+            AppConstants.AnalyticsSettings.isAnalyticsEnabled = value
         }
         .onAppear {
             if self.sound != "off" && !AppConstants.SoundSettings.options.contains(where: { $0.id == sound }) {
@@ -152,6 +158,20 @@ struct QyubeJournalSettingsView: View {
                 SettingsRow(title: "Distraction sound effects") {
                     Toggle("Distraction sound effects", isOn: self.$distractionSounds).labelsHidden()
                         .toggleStyle(.switch)
+                }
+            }
+        }
+    }
+
+    private var analyticsSettings: some View {
+        SettingsSurfaceCard {
+            VStack(alignment: .leading, spacing: 16) {
+                self.heading("Focus analytics")
+                SettingsRow(
+                    title: "Record app and website activity",
+                    subtitle: "Stored locally on this Mac. Website tracking also needs browser permission.") {
+                    Toggle("Record activity", isOn: self.$analyticsEnabled)
+                        .labelsHidden().toggleStyle(.switch)
                 }
             }
         }

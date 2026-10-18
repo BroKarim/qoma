@@ -17,7 +17,7 @@ final class ActivityTracker: NSObject, ObservableObject {
     private var currentWebsiteSession: WebsiteVisitRecord?
     private var pendingEvents: [AppActivityEvent] = []
     private var pendingWebsiteVisits: [WebsiteVisitRecord] = []
-    private var lastActivityTime: Date?
+    private var lastPersistenceTime = Date.distantPast
     private var activeWebsitePollTasks = 0
     private var websitePollGeneration = 0
     private var websiteGraceTimer: Timer?
@@ -36,7 +36,7 @@ final class ActivityTracker: NSObject, ObservableObject {
         currentSessionID = sessionID
         pendingEvents = []
         pendingWebsiteVisits = []
-        lastActivityTime = Date()
+        lastPersistenceTime = Date.distantPast
 
         Logger.tracking.info("Started tracking session: \(sessionID, privacy: .public)")
 
@@ -58,7 +58,7 @@ final class ActivityTracker: NSObject, ObservableObject {
         isTracking = true
         if let trackWebsites { tracksWebsites = trackWebsites }
         currentSessionID = sessionID
-        lastActivityTime = Date()
+        lastPersistenceTime = Date.distantPast
 
         Logger.tracking.info("Resumed tracking session: \(sessionID, privacy: .public)")
 
@@ -146,7 +146,6 @@ final class ActivityTracker: NSObject, ObservableObject {
             Logger.tracking.debug("Idle threshold reached (\(idleTime)s) — finalizing sessions")
             finalizeCurrentAppSession()
             finalizeCurrentWebsiteSession()
-            lastActivityTime = Date()
             return
         }
 
@@ -169,10 +168,10 @@ final class ActivityTracker: NSObject, ObservableObject {
 
         Logger.tracking.debug("Tracking: \(name, privacy: .public) (\(bundleId, privacy: .public))")
 
-        lastActivityTime = Date()
         cacheIcon(for: bundleId)
         updateAppSession(identifier: bundleId, name: name)
         scheduleWebsitePoll(bundleId: bundleId, appName: name)
+        checkpointCurrentActivityIfNeeded()
     }
 
     // MARK: - App Session
@@ -187,10 +186,8 @@ final class ActivityTracker: NSObject, ObservableObject {
     }
 
     private func getSystemIdleTime() -> TimeInterval {
-        let idleTime = CGEventSource.secondsSinceLastEventType(
-            .combinedSessionState,
-            eventType: .mouseMoved
-        )
+        let anyInput = CGEventType(rawValue: UInt32.max)
+        let idleTime = CGEventSource.secondsSinceLastEventType(.combinedSessionState, eventType: anyInput)
         return TimeInterval(idleTime)
     }
 
@@ -229,6 +226,9 @@ final class ActivityTracker: NSObject, ObservableObject {
 
         if event.durationSeconds > 0 {
             pendingEvents.append(event)
+            if !AnalyticsStore.shared.appendAppActivityEvents([event]) {
+                Logger.tracking.error("Could not persist app activity checkpoint")
+            }
         }
 
         currentAppSession = nil
@@ -372,10 +372,33 @@ final class ActivityTracker: NSObject, ObservableObject {
 
         if visit.durationSeconds > 0 {
             pendingWebsiteVisits.append(visit)
+            if !AnalyticsStore.shared.appendWebsiteVisits([visit]) {
+                Logger.tracking.error("Could not persist website activity checkpoint")
+            }
         }
 
         currentWebsiteSession = nil
         Logger.tracking.debug("Finalized website session for \(visit.domain, privacy: .public)")
+    }
+
+    private func checkpointCurrentActivityIfNeeded() {
+        let now = Date.now
+        guard now.timeIntervalSince(lastPersistenceTime) >= 10 else { return }
+        lastPersistenceTime = now
+        if var event = currentAppSession {
+            event.endedAt = now
+            event.durationSeconds = now.timeIntervalSince(event.startedAt)
+            if !AnalyticsStore.shared.appendAppActivityEvents([event]) {
+                Logger.tracking.error("Could not persist app activity checkpoint")
+            }
+        }
+        if var visit = currentWebsiteSession {
+            visit.endedAt = now
+            visit.durationSeconds = now.timeIntervalSince(visit.startedAt)
+            if !AnalyticsStore.shared.appendWebsiteVisits([visit]) {
+                Logger.tracking.error("Could not persist website activity checkpoint")
+            }
+        }
     }
 
     deinit {

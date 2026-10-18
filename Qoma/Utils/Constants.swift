@@ -62,7 +62,9 @@ enum AnalyticsSettings {
         static let analyticsDirectoryName = "Analytics"
         static let retentionDays = 180
         static let analyticsEnabledKey = "analyticsEnabled"
-        static let defaultAnalyticsEnabled = true
+        static let analyticsConsentDecidedKey = "analyticsConsentDecided"
+        static let defaultAnalyticsEnabled = false
+        static let trackingPreferenceChanged = Notification.Name("QomaAnalyticsTrackingPreferenceChanged")
         static let defaultDashboardRangeDays = 30
         static let heatmapDays = 30
         static let weeklySummaryDays = 7
@@ -116,12 +118,17 @@ enum AnalyticsSettings {
         static var isAnalyticsEnabled: Bool {
             get {
                 let defaults = UserDefaults.standard
+                guard defaults.bool(forKey: analyticsConsentDecidedKey) else { return false }
                 guard defaults.object(forKey: analyticsEnabledKey) != nil else {
                     return defaultAnalyticsEnabled
                 }
                 return defaults.bool(forKey: analyticsEnabledKey)
             }
-            set { UserDefaults.standard.set(newValue, forKey: analyticsEnabledKey) }
+            set {
+                UserDefaults.standard.set(newValue, forKey: analyticsEnabledKey)
+                UserDefaults.standard.set(true, forKey: analyticsConsentDecidedKey)
+                NotificationCenter.default.post(name: trackingPreferenceChanged, object: nil)
+            }
         }
     }
 }
