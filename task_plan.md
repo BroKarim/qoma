@@ -1327,3 +1327,11 @@ Catatan ini memperbarui status rencana tanggal 20 Oktober di atas tanpa menghapu
 - Form memakai snapshot sesi aktif; nama tugas dan daftar aplikasi bisa diubah, sementara mode dan durasi terkunci. Penyimpanan satu kali memvalidasi nama/allow-list dan mempertahankan sesi serta timer yang sama.
 - Timer only tetap dapat menyimpan perubahan nama; pembaruan aturan aplikasi untuk sesi timer only tetap ditolak.
 - Validasi otomatis belum dijalankan. Perpindahan Spaces dan tampilan form masih perlu dicoba langsung di macOS.
+
+### Catalog compact — 21 Oktober 2026
+
+- Perubahan timer/menu bar dan editor sesi aktif disimpan di branch sebelumnya sebagai `745e6c5`; pekerjaan Catalog dimulai pada branch baru `codex/qyube-catalog-screen`.
+- Catalog compact memakai sprite sheet `02-fish-collection-sheet-no-eyes.png` sebagai asset app dan menampilkan 32 crop dalam grid lima kolom yang bisa discroll tanpa scrollbar.
+- Tile memakai empat warna latar rarity (abu-abu, biru muda, lilac, emas pucat) beserta legenda ringkas. Tidak ada nama ikan, angka/jumlah koleksi, filter, atau detail ikan di grid; layar ini fokus pada artwork sesuai arahan UI.
+- Definisi katalog saat ini baru memetakan lima ikan, sedangkan sheet adalah 32 concept fish tanpa mapping species. Karena itu grid ini memakai artwork statis untuk validasi visual dan belum menghubungkan status discovery/catch ke ikan individual.
+- Validasi: `git diff --check` bersih. Build, test, dan inspeksi visual dalam window macOS belum dijalankan.

@@ -1,127 +1,120 @@
 import SwiftUI
 
 struct CatalogView: View {
-    var catches: [CatchEvent] = []
-    @State private var filter = Filter.all
-    @State private var selected: CatalogDefinitions.Kind?
-
-    private enum Filter: String, CaseIterable {
-        case all = "All"
-        case fish = "Fish"
-        case finds = "Ocean finds"
-    }
-
-    private var counts: [String: Int] {
-        let unique = Dictionary(catches.filter(\.isBanked).map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
-        return Dictionary(grouping: unique.values, by: \.kindID).mapValues(\.count)
-    }
-
-    private var kinds: [CatalogDefinitions.Kind] {
-        CatalogDefinitions.allKinds.filter { self.filter == .all || (self.filter == .fish ? $0.isFish : !$0.isFish) }
-    }
+    private let fish = Array(0..<32)
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: 7), count: 5)
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 26) {
-                JournalPageHeader(
-                    eyebrow: "YOUR LITTLE COLLECTION",
-                    title: "Catalog",
-                    subtitle: "A collection of moments well spent.")
-                self.progress
-                Picker("Category", selection: self.$filter) {
-                    ForEach(Filter.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+            VStack(alignment: .leading, spacing: 14) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("COLLECTION")
+                        .font(.caption2.weight(.medium))
+                        .tracking(1.5)
+                        .foregroundStyle(Color.qyubeAccent)
+                    Text("Catalog")
+                        .font(.system(size: 23, design: .serif))
+                        .foregroundStyle(Color.qyubeMenuInk)
                 }
-                .pickerStyle(.segmented).labelsHidden().frame(maxWidth: 420)
-                .padding(3)
-                .qyubeInkSurface(fill: .qyubeSelection.opacity(0.22))
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 180), spacing: 14)], spacing: 14) {
-                    ForEach(self.kinds) { kind in
-                        Button { self.selected = kind } label: { self.card(kind) }
-                            .buttonStyle(.plain)
-                            .accessibilityLabel(self.counts[kind.id, default: 0] > 0
-                                ? "\(kind.name), \(kind.rarity.rawValue), "
-                                + "\(self.counts[kind.id, default: 0]) caught. Weight not recorded."
-                                : "Undiscovered catch")
+
+                rarityLegend
+
+                LazyVGrid(columns: self.columns, spacing: 8) {
+                    ForEach(self.fish, id: \.self) { index in
+                        CatalogFishTile(index: index, rarity: CatalogRarity.allCases[index % 4])
                     }
                 }
-                Text("Every focused moment adds to your collection.")
-                    .font(.system(size: 14, design: .serif)).foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity).padding(.vertical, 8)
-            }.padding(28).padding(.top, 12).qyubeHideNativeScrollers()
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Fish collection artwork")
+            }
+            .padding(13)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .qyubeHideNativeScrollers()
         }
         .scrollIndicators(.hidden)
-        .sheet(item: self.$selected) { kind in
-            CatalogDetail(kind: kind, catchCount: self.counts[kind.id, default: 0])
-        }
     }
 
-    private var progress: some View {
-        let discovered = CatalogDefinitions.allKinds.count(where: { self.counts[$0.id, default: 0] > 0 })
-        return HStack(spacing: 24) {
-            Text("\(discovered) of \(CatalogDefinitions.allKinds.count) discovered")
-                .font(.system(size: 16, design: .serif))
-            ProgressView(value: Double(discovered), total: Double(CatalogDefinitions.allKinds.count))
-                .frame(maxWidth: 250).tint(.qyubeAccent)
-        }
-    }
-
-    private func card(_ kind: CatalogDefinitions.Kind) -> some View {
-        let count = self.counts[kind.id, default: 0]
-        let discovered = count > 0
-        return VStack(spacing: 10) {
-            ZStack(alignment: .topTrailing) {
-                QyubeInkBorder().fill(Color.qyubeSidebar.opacity(0.76))
-                QyubeCatchArt(kindID: kind.id, discovered: discovered, catalog: true)
-                    .padding(18).frame(height: 174).frame(maxWidth: .infinity)
-                if discovered {
-                    Text("×\(count)").font(.system(size: 12)).foregroundStyle(.secondary).padding(10)
+    private var rarityLegend: some View {
+        HStack(spacing: 8) {
+            ForEach(CatalogRarity.allCases) { rarity in
+                HStack(spacing: 4) {
+                    Circle()
+                        .fill(rarity.color)
+                        .frame(width: 8, height: 8)
+                        .overlay(Circle().stroke(Color.qyubeMenuInk.opacity(0.16), lineWidth: 0.5))
+                    Text(rarity.label)
+                        .font(.caption2.weight(.medium))
+                        .foregroundStyle(Color.qyubeMenuInk.opacity(0.78))
+                        .lineLimit(1)
+                        .fixedSize()
                 }
-            }.frame(height: 174)
-            Text(discovered ? kind.name : "???")
-                .font(.system(size: 20, design: .serif))
-                .foregroundStyle(discovered ? kind.rarity.color : .qyubeInk)
-                .lineLimit(1).minimumScaleFactor(0.75)
-            if discovered, kind.isFish {
-                Text(CatchWeightFormat.kilograms(nil)).font(.system(size: 13))
-                    .help("Weight has not been recorded for these catches yet.")
-            } else {
-                Text(discovered ? "Ocean find" : "—").font(.system(size: 13)).foregroundStyle(.secondary)
             }
-            Text(discovered ? kind.rarity.rawValue.capitalized : "Undiscovered")
-                .font(.system(size: 11)).foregroundStyle(.secondary)
+            Spacer(minLength: 0)
         }
-        .padding(10).padding(.bottom, 8).frame(maxWidth: .infinity)
-        .qyubeInkSurface(fill: .qyubeCardBackground.opacity(0.68))
-        .shadow(color: Color.qyubeAccent.opacity(0.055), radius: 5, y: 2)
-        .accessibilityElement(children: .ignore)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Rarity colors: common, uncommon, rare, legendary")
     }
 }
 
-private struct CatalogDetail: View {
-    let kind: CatalogDefinitions.Kind
-    let catchCount: Int
-    @Environment(\.dismiss) private var dismiss
+private struct CatalogFishTile: View {
+    let index: Int
+    let rarity: CatalogRarity
 
     var body: some View {
-        VStack(spacing: 18) {
-            QyubeCatchArt(kindID: self.kind.id, discovered: self.catchCount > 0, catalog: true).frame(
-                width: 160,
-                height: 180)
-            Text(self.catchCount > 0 ? self.kind.name : "???").font(.system(size: 25, design: .serif))
-            Text(self
-                .catchCount > 0 ? "\(self.kind.rarity.rawValue.capitalized) · Caught \(self.catchCount) times" :
-                "Undiscovered")
-                .font(.caption).foregroundStyle(.secondary)
-            if self.catchCount > 0, self.kind.isFish {
-                Text("Weight not recorded yet").font(.caption).foregroundStyle(.secondary)
+        CatalogFishSprite(index: self.index)
+            .padding(5)
+            .frame(maxWidth: .infinity)
+            .aspectRatio(1, contentMode: .fit)
+            .background(self.rarity.color)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .overlay {
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color.qyubeMenuInk.opacity(0.22), lineWidth: 0.7)
+                    .allowsHitTesting(false)
             }
-            Button("Done") { self.dismiss() }.keyboardShortcut(.cancelAction)
-        }
-        .padding(28)
-        .frame(width: 300)
-        .background(Color.qyubeBackground)
-        .qyubeInkSurface(fill: .qyubeBackground, stroke: .qyubeAccent.opacity(0.65))
+            .accessibilityHidden(true)
     }
 }
 
-extension CatalogDefinitions.Kind: Identifiable {}
+private struct CatalogFishSprite: View {
+    let index: Int
+
+    var body: some View {
+        GeometryReader { geometry in
+            Image("CatalogFishSheet")
+                .resizable()
+                .frame(width: geometry.size.width * 8, height: geometry.size.height * 4)
+                .offset(
+                    x: -CGFloat(self.index % 8) * geometry.size.width,
+                    y: -CGFloat(self.index / 8) * geometry.size.height)
+        }
+        .clipped()
+    }
+}
+
+private enum CatalogRarity: Int, CaseIterable, Identifiable {
+    case common
+    case uncommon
+    case rare
+    case legendary
+
+    var id: Self { self }
+
+    var label: String {
+        switch self {
+        case .common: "Common"
+        case .uncommon: "Uncommon"
+        case .rare: "Rare"
+        case .legendary: "Legendary"
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .common: Color(red: 229 / 255, green: 231 / 255, blue: 233 / 255)
+        case .uncommon: Color(red: 220 / 255, green: 232 / 255, blue: 242 / 255)
+        case .rare: Color(red: 233 / 255, green: 225 / 255, blue: 240 / 255)
+        case .legendary: Color(red: 242 / 255, green: 228 / 255, blue: 188 / 255)
+        }
+    }
+}
