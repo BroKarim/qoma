@@ -118,3 +118,10 @@ This section records the latest user decisions. Older Dzenn/Universal Purchase/A
 - Existing `SettingsSurfaceCard` is the highest-leverage seam: it is shared by Settings, Analytics, About, General, Appearance, timeline, and empty states.
 - Existing `QyubeInkBorder` deliberately varies its path but its top control point can put a 1.3 pt stroke too close to clipping. The shared replacement must inset the path safely.
 - Settings exists in two surfaces: standalone `Qoma/UI/SettingsView.swift` and in-app `QyubeJournalSettingsView`; both already reuse shared navigation/card components.
+
+## 20 Oktober 2026 — roadmap compact
+
+- Rencana lama memuat keputusan yang sudah digantikan (goal, nama tugas, menu bar, break); konteks compact terbaru menjadi acuan redesign.
+- Start/Pause/Resume/Stop, repository lokal, catches, analytics, preferences dan Sparkle memiliki fondasi existing: integrasikan sesudah UI, sebelum membangun layanan baru.
+- Atlas imagegen adalah inventaris, bukan ukuran/font presisi atau otorisasi fitur tambahan. Detail sesi terbaru memakai form + catches di bawah Mode + Start; Catalog lima kolom hanya artwork dengan latar empat rarity.
+- Rincian pekerjaan dan syarat selesai disimpan di `design/qyube-compact-roadmap.md`.

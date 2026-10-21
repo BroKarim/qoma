@@ -3,13 +3,13 @@ import SwiftUI
 struct AnalyticsHeatmapView: View {
     let cells: [AnalyticsHeatmapCell]
     @Binding var selectedDate: Date
+    @State private var gridWidth: CGFloat = 0
 
     private var weeks: [[AnalyticsHeatmapCell]] {
         self.cells.chunked(into: 7)
     }
 
-    private let cellSpacing: CGFloat = 5
-    private let minimumCellSize: CGFloat = 12
+    private let minimumCellSize: CGFloat = 8
     private let maximumCellSize: CGFloat = 17
 
     private let colors: [Color] = [
@@ -22,65 +22,87 @@ struct AnalyticsHeatmapView: View {
     ]
 
     var body: some View {
-        SettingsSurfaceCard {
-            VStack(alignment: .leading, spacing: 18) {
-                HStack(alignment: .firstTextBaseline) {
-                    Text("Focus Activity").font(.system(size: 23, design: .serif))
-                    Spacer()
-                    Text("Choose a day").font(.system(size: 11)).foregroundStyle(.secondary)
+        VStack(alignment: .leading, spacing: 10) {
+            self.legend
+            GeometryReader { geometry in
+                self.grid(availableWidth: max(0, geometry.size.width - 30))
+            }
+            .frame(height: self.gridHeight)
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { self.gridWidth = $0 }
+        }
+    }
+
+    private var legend: some View {
+        HStack(spacing: 5) {
+            Spacer()
+            Text("Less focus")
+            ForEach(0..<self.colors.count, id: \.self) { level in
+                RoundedRectangle(cornerRadius: 2).fill(self.colors[level]).frame(width: 12, height: 12)
+            }
+            Text("More focus")
+        }
+        .font(.system(size: 10, design: .serif)).foregroundStyle(.secondary)
+    }
+
+    private func grid(availableWidth: CGFloat) -> some View {
+        let spacing = self.cellSpacing(for: availableWidth)
+        let cellSize = self.cellSize(for: availableWidth, spacing: spacing)
+        let contentWidth = CGFloat(self.weeks.count) * (cellSize + spacing) - spacing + 6
+        return HStack(alignment: .top, spacing: 6) {
+            VStack(alignment: .leading, spacing: spacing) {
+                ForEach(0..<7) { row in
+                    Text(self.weekdayLabel(row))
+                        .font(.system(size: 9, design: .serif))
+                        .foregroundStyle(.secondary)
+                        .frame(height: cellSize)
                 }
-                QyubeInkDivider()
-                GeometryReader { geometry in
-                    let cellSize = self.cellSize(for: geometry.size.width)
-                    ScrollViewReader { proxy in
-                        ScrollView(.horizontal) {
-                            HStack(alignment: .top, spacing: self.cellSpacing) {
-                                ForEach(self.weeks, id: \.first?.id) { week in
-                                    VStack(spacing: self.cellSpacing) {
-                                        ForEach(week) { cell in self.cellButton(cell, size: cellSize) }
-                                        Text(self.monthLabel(week)).font(.system(size: 9)).foregroundStyle(.secondary)
-                                            .frame(height: 14).fixedSize()
-                                    }
-                                    .frame(width: cellSize)
-                                    .id(week.first?.id)
-                                }
+            }.frame(width: 24).padding(.top, 3).accessibilityHidden(true)
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal) {
+                    HStack(alignment: .top, spacing: spacing) {
+                        ForEach(self.weeks, id: \.first?.id) { week in
+                            VStack(spacing: spacing) {
+                                ForEach(week) { cell in self.cellButton(cell, size: cellSize) }
+                                Text(self.monthLabel(week)).font(.system(size: 9)).foregroundStyle(.secondary)
+                                    .frame(height: 14).fixedSize()
                             }
-                            .padding(3)
+                            .frame(width: cellSize)
+                            .id(week.first?.id)
                         }
-                        .qyubeHorizontalScrollIndicator()
-                        .onAppear { proxy.scrollTo(self.weeks.last?.first?.id, anchor: .trailing) }
                     }
+                    .padding(3)
                 }
-                .frame(height: 7 * self.maximumCellSize + 6 * self.cellSpacing + 14 + 6)
-                HStack(spacing: 5) {
-                    Text("Less")
-                    ForEach(0..<self.colors.count, id: \.self) { level in
-                        RoundedRectangle(cornerRadius: 2).fill(self.colors[level]).frame(width: 12, height: 12)
-                    }
-                    Text("More focus")
-                    Spacer()
-                    Button("First day") {
-                        self.selectedDate = self.cells.first?.date ?? Calendar.current.startOfDay(for: Date())
-                    }
-                        .buttonStyle(.plain).foregroundStyle(Color.qyubeAccent)
-                }
-                .font(.system(size: 10)).foregroundStyle(.secondary)
+                .scrollIndicators(contentWidth > availableWidth + 0.5 ? .visible : .hidden)
+                .onAppear { proxy.scrollTo(self.weeks.last?.first?.id, anchor: .trailing) }
             }
         }
     }
 
+    private func weekdayLabel(_ row: Int) -> String {
+        guard let date = self.weeks.first?[safe: row]?.date else { return "" }
+        return date.formatted(.dateTime.weekday(.abbreviated))
+    }
+
+    private var gridHeight: CGFloat {
+        let width = max(0, self.gridWidth - 30)
+        let spacing = self.cellSpacing(for: width)
+        let size = self.cellSize(for: width, spacing: spacing)
+        let contentWidth = CGFloat(self.weeks.count) * (size + spacing) - spacing + 6
+        return 7 * size + 7 * spacing + 20 + (contentWidth > width + 0.5 ? 12 : 0)
+    }
+
     private func monthLabel(_ week: [AnalyticsHeatmapCell]) -> String {
-        guard let day = week.first?.date else { return "" }
-        if day == self.cells.first?.date {
-            return day.formatted(.dateTime.month(.abbreviated))
-        }
         return week.first { Calendar.current.component(.day, from: $0.date) == 1 }?
             .date.formatted(.dateTime.month(.abbreviated)) ?? ""
     }
 
-    private func cellSize(for availableWidth: CGFloat) -> CGFloat {
+    private func cellSpacing(for availableWidth: CGFloat) -> CGFloat {
+        min(5, max(2, (availableWidth - 6) / CGFloat(max(self.weeks.count, 1)) * 0.22))
+    }
+
+    private func cellSize(for availableWidth: CGFloat, spacing: CGFloat) -> CGFloat {
         let weekCount = CGFloat(max(self.weeks.count, 1))
-        let availableForCells = availableWidth - 6 - (weekCount - 1) * self.cellSpacing
+        let availableForCells = availableWidth - 6 - (weekCount - 1) * spacing
         return min(self.maximumCellSize, max(self.minimumCellSize, availableForCells / weekCount))
     }
 

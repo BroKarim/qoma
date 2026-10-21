@@ -1244,3 +1244,30 @@ Setelah storage, consent, recovery, serta platform tests stabil, lanjutkan final
 - `Qoma/UI/Aquarium/` tidak memiliki caller di alur produk dan user sudah mengeluarkan Aquarium dari scope fitur. Namun `AquariumView.swift` serta `AquariumArtwork.swift` masih dipakai oleh `#Preview("Aquarium • standalone")` sebagai harness ilustrasi interaktif. Karena preview itu masih berguna dan belum ada persetujuan eksplisit untuk menghapus prototype visualnya, tiga file Aquarium tidak dihapus.
 - `CompanionVisualCheck` dan `DistractionVisualCheck` tidak dihapus: keduanya dirujuk oleh argument routes `AppDelegate` untuk render-check visual.
 - Tidak ada file prototype yang terbukti aman dihapus setelah audit; branch ini berisi dokumentasi keputusan saja. Aset dan folder desain user tetap dipertahankan.
+
+## Compact UI — roadmap terbaru, 20 Oktober 2026
+
+Status: penyusunan roadmap selesai; implementasi compact UI belum dimulai dalam pekerjaan ini.
+
+Acuan keputusan terbaru: `design/qyube-compact-flow-context.md`. Rencana eksekusi: `design/qyube-compact-roadmap.md`. Keduanya mengungguli keputusan lama yang bertentangan mengenai ukuran window, goal, nama tugas wajib, break, repeat, routing menu bar, dan presentasi Catalog. Kebijakan bisnis/backend lama perlu diselaraskan sebelum integrasi layanan; redesign UI tidak otomatis menggantinya.
+
+- [x] Gabungkan keputusan dan inventaris screen terbaru.
+- [x] Susun urutan UI, milestone, integrasi lokal, perilaku baru, backend, dan QA.
+- [ ] Fase 1: UI-01–UI-11 (mulai Batch 1: fondasi, Today, form/editor, detail sesi).
+- [ ] Fase 2: wiring runtime/data lokal existing.
+- [ ] Fase 3: daily goal, break, repeat dan transisi baru.
+- [ ] Fase 4: integrasi layanan/backend yang diperlukan.
+- [ ] Fase 5: QA menyeluruh dan persiapan rilis.
+
+Checkbox fase implementasi adalah pekerjaan masa depan, bukan permintaan untuk mulai coding pada turn perencanaan ini.
+
+## Compact UI — mulai Batch 1, 21 Oktober 2026
+
+Catatan ini memperbarui status rencana tanggal 20 Oktober di atas tanpa menghapus keputusan historisnya.
+
+- Pengguna mengizinkan implementasi **fondasi + Today** setelah mempelajari `Qoma/UI/MenuBar/MenuBarView.swift` sebagai rujukan visual dan pola UI.
+- Sebelum coding, simpan semua perubahan yang sudah ada pada branch `codex/remove-obsolete-prototypes` dalam commit; majukan checkpoint `codex/storage-load-and-platform-tests`, lalu kerjakan Batch 1 pada branch terpisah `codex/qyube-foundation-today`.
+- Scope kode Batch 1: kerangka window awal 420 × sekitar 700 pt yang tetap resizable, header bersama dengan qyube/coretan dan navigasi, gaya Ink & Ice serta komponen seperlunya, lalu Today dengan progress daily goal, penguin, daftar sesi hari ini, dan footer Create new session.
+- Reuse komponen atau perilaku `MenuBarView` yang memang sama; Today tidak mengambil alih form Start atau memulai session baru sebagai bagian dari tahap ini.
+- Implementasi masih UI-first. Gunakan data contoh/fallback lokal secukupnya untuk meninjau layar; integrasi timer, histori penuh, goal persistence, dan layanan tetap mengikuti fase roadmap.
+- Status: checkpoint + branch implementasi sedang disiapkan. UI fondasi dan Today belum selesai.

@@ -34,8 +34,17 @@ struct AnalyticsDashboardView: View {
                         Image("JournalArcticPenguin").resizable().scaledToFit()
                             .frame(width: 220, height: 147).accessibilityHidden(true)
                     }
-                    SettingsSurfaceCard { self.overview }
-                    AnalyticsHeatmapView(cells: self.heatmapCells, selectedDate: self.$selectedDay)
+                    VStack(spacing: 0) {
+                        self.overview
+                            .padding(20)
+                            .background(Color.qyubeSelection.opacity(0.42))
+                        Rectangle().fill(Color.qyubeLine).frame(height: 0.7)
+                        AnalyticsHeatmapView(cells: self.heatmapCells, selectedDate: self.$selectedDay)
+                            .padding(20)
+                    }
+                    .background(Color.qyubeCardBackground.opacity(0.58))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.qyubeLine, lineWidth: 0.7))
                     self.breakdown
                     // bagian daily-catch
                     self.dailyCatches.id("daily-catches")
@@ -61,40 +70,50 @@ struct AnalyticsDashboardView: View {
 
     private var overview: some View {
         ViewThatFits(in: .horizontal) {
-            HStack(alignment: .top, spacing: 0) { self.stats }
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) { self.stats }
+            HStack(alignment: .center, spacing: 0) { self.stats(showDividers: true) }
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+                self.stats(showDividers: false)
+            }
         }
         .fixedSize(horizontal: false, vertical: true)
         .padding(.vertical, 6)
         .accessibilityElement(children: .contain)
     }
 
-    @ViewBuilder private var stats: some View {
+    @ViewBuilder private func stats(showDividers: Bool) -> some View {
         self.stat(
             "Total focus",
             value: QyubeFormat.duration(self.daySessions.reduce(0) { $0 + $1.actualFocusSeconds }),
-            symbol: "leaf",
+            symbol: "clock",
             color: .qyubeAccent)
-        QyubeInkDivider(axis: .vertical).frame(width: 2)
-        self.stat("Sessions", value: "\(self.daySessions.count)", symbol: "chart.bar", color: .qyubeAccent)
-        QyubeInkDivider(axis: .vertical).frame(width: 2)
+        if showDividers { Rectangle().fill(Color.qyubeLine).frame(width: 0.7, height: 58) }
+        self.stat("Sessions", value: "\(self.daySessions.count)", symbol: "chart.bar.fill", color: .qyubeAccent)
+        if showDividers { Rectangle().fill(Color.qyubeLine).frame(width: 0.7, height: 58) }
         self.stat(
             "Completed",
             value: "\(self.daySessions.filter(\.completed).count)",
-            symbol: "checkmark.circle",
+            symbol: "checkmark",
             color: .qyubeAccent)
-        QyubeInkDivider(axis: .vertical).frame(width: 2)
+        if showDividers { Rectangle().fill(Color.qyubeLine).frame(width: 0.7, height: 58) }
         self.stat(
             "Interrupted",
             value: "\(self.daySessions.count(where: { !$0.completed }))",
-            symbol: "xmark.circle",
+            symbol: "xmark",
             color: .qyubeInterrupted)
     }
 
     private func stat(_ title: String, value: String, symbol: String, color: Color) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Label(title, systemImage: symbol).font(.system(size: 12)).foregroundStyle(color)
-            Text(value).font(.system(size: 34, design: .serif)).minimumScaleFactor(0.7).lineLimit(1)
+        HStack(spacing: 12) {
+            Image(systemName: symbol)
+                .font(.system(size: 21, weight: .medium))
+                .foregroundStyle(color)
+                .frame(width: 44, height: 44)
+                .background(color.opacity(0.12), in: Circle())
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title).font(.system(size: 13, design: .serif)).fixedSize()
+                Text(value).font(.system(size: 34, design: .serif)).minimumScaleFactor(0.7).lineLimit(1)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 12)

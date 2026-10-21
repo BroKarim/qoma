@@ -251,3 +251,7 @@
 - Built the Debug macOS app successfully and ran the affected Analytics/Daily Catch suite successfully (49 tests).
 - Replaced the first unsupported `ImageRenderer` visual harness with a temporary AppKit-hosted capture, inspected Settings, Catalog, and Analytics at representative sizes, then removed the harness.
 - Targeted SwiftLint completed with no warnings for all changed Swift files.
+
+## 20 Oktober 2026 — penyusunan roadmap compact
+
+Selesai menyusun `design/qyube-compact-roadmap.md`: 11 langkah UI native, integrasi runtime lokal, perilaku baru, layanan/backend, dan QA. Task plan mendapat pointer acuan terbaru agar keputusan lama tidak dipakai tanpa penyelarasan. Tidak mengubah source aplikasi atau menjalankan build/test; deliverable turn ini berupa dokumentasi. Implementasi belum dimulai.
