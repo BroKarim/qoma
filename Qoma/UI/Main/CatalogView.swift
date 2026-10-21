@@ -47,9 +47,9 @@ struct CatalogView: View {
                 Text("Every focused moment adds to your collection.")
                     .font(.system(size: 14, design: .serif)).foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity).padding(.vertical, 8)
-            }.padding(28).padding(.top, 12)
+            }.padding(28).padding(.top, 12).qyubeHideNativeScrollers()
         }
-        .qyubeScrollIndicator()
+        .scrollIndicators(.hidden)
         .sheet(item: self.$selected) { kind in
             CatalogDetail(kind: kind, catchCount: self.counts[kind.id, default: 0])
         }

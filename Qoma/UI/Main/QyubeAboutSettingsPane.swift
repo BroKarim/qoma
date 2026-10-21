@@ -42,8 +42,8 @@ struct QyubeAboutSettingsPane: View {
                             .font(.system(size: 13, design: .serif)).foregroundStyle(.secondary)
                     }
                 }
-            }.padding(28).padding(.top, 12)
+            }.padding(28).padding(.top, 12).qyubeHideNativeScrollers()
         }
-        .qyubeScrollIndicator()
+        .scrollIndicators(.hidden)
     }
 }

@@ -30,6 +30,8 @@ Hasil: daftar komponen/aset yang dipakai dan baseline yang aman untuk pengerjaan
 
 ### UI-02 — fondasi tampilan dan kerangka window
 
+**Ukuran implementasi terbaru, 21 Oktober 2026:** panel utama tetap 310 × 510 pt tanpa resize; konten panjang discroll dengan indikator tersembunyi. Rujukan 420 × 700 pt di roadmap ini mencatat rencana awal.
+
 - Token warna Draft 1, tipografi, spacing, radius, outline ink, separator, disabled/error state.
 - Header bersama: qyube di kiri, coretan gelombang di tengah, Analytics/Catalog/gear di kanan.
 - Area konten yang bisa discroll dan footer tindakan yang tetap terlihat.

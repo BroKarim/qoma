@@ -59,13 +59,16 @@ private struct QyubeScrollObserver: NSViewRepresentable {
                     }
                     return
                 }
-                guard self.scrollView !== scrollView else { return }
-
-                self.scrollView = scrollView
                 scrollView.hasVerticalScroller = false
                 scrollView.hasHorizontalScroller = false
                 scrollView.autohidesScrollers = true
+                scrollView.verticalScroller?.alphaValue = 0
+                scrollView.horizontalScroller?.alphaValue = 0
+                scrollView.scrollerStyle = .overlay
                 scrollView.drawsBackground = false
+                guard self.scrollView !== scrollView else { return }
+
+                self.scrollView = scrollView
 
                 guard self.tracksMetrics else { return }
                 scrollView.contentView.postsBoundsChangedNotifications = true

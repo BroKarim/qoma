@@ -6,6 +6,7 @@ struct TodayView: View {
     let remainingTime: TimeInterval
     let onCreateSession: () -> Void
     let onBackToSession: () -> Void
+    let onSelectSession: (FocusSession) -> Void
 
     private var todaySessions: [FocusSession] {
         self.sessions
@@ -64,10 +65,14 @@ struct TodayView: View {
                         }
 
                         ForEach(self.todaySessions) { session in
-                            TodaySessionRow(
-                                title: session.taskTitle.isEmpty ? "Focus session" : session.taskTitle,
-                                detail: self.sessionDetail(for: session),
-                                status: session.status)
+                            Button { self.onSelectSession(session) } label: {
+                                TodaySessionRow(
+                                    title: session.taskTitle.isEmpty ? "Focus session" : session.taskTitle,
+                                    detail: self.sessionDetail(for: session),
+                                    status: session.status)
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityHint("Open session details")
                         }
 
                         if self.todaySessions.isEmpty && self.activeSession == nil {
@@ -81,7 +86,9 @@ struct TodayView: View {
                 }
                 .padding(16)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .qyubeHideNativeScrollers()
             }
+            .scrollIndicators(.hidden)
 
             Button(action: self.activeSession == nil ? self.onCreateSession : self.onBackToSession) {
                 Text(self.actionTitle)
@@ -140,6 +147,7 @@ struct TodayView: View {
         activeSession: nil,
         remainingTime: 0,
         onCreateSession: {},
-        onBackToSession: {})
-        .frame(width: 310, height: 700)
+        onBackToSession: {},
+        onSelectSession: { _ in })
+        .frame(width: 310, height: 510)
 }

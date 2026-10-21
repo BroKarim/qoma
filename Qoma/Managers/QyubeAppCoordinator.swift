@@ -67,7 +67,7 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
             onSessionStarted: { [weak self] in self?.homeWindowController?.close() },
             onBackToSession: { [weak self] in self?.returnToSession() })
         let window = QyubeHomeWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 310, height: 700),
+            contentRect: NSRect(x: 0, y: 0, width: 310, height: 510),
             styleMask: [.borderless],
             backing: .buffered,
             defer: false

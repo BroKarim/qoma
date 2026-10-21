@@ -1292,3 +1292,20 @@ Catatan ini memperbarui status rencana tanggal 20 Oktober di atas tanpa menghapu
 
 - Tinggi panel dinaikkan dari 470 menjadi 700 pt; lebar tetap 310 pt, tanpa traffic light dan tanpa resize.
 - Jarak border tinta dari tepi dikurangi sekitar 2 pt (dari sekitar 6 menjadi 4 pt). Ukuran preview Today mengikuti panel.
+
+### New Session dan detail sesi — 21 Oktober 2026
+
+- Fondasi Today di-commit sebagai `c3604f4` pada `codex/qyube-foundation-today`; pekerjaan berikutnya dilakukan di branch baru `codex/qyube-new-session-detail`.
+- Panel utama diturunkan menjadi 310 × 510 pt. Scrollbar Today, form, dan editor aturan disembunyikan, tetapi konten tetap bisa discroll.
+- New Session memakai area konten panel utama dengan header dan border yang sama. Nama sesi wajib diisi; Duration dropdown, Mode, dan baris aplikasi mengikuti pola MenuBarView. Footer Start tetap terlihat.
+- Baris histori Today membuka detail sesi terpilih: status, durasi aktual/rencana, draft konfigurasi asal, serta tangkapan milik sesi itu di bawah Mode. Start memakai draft baru dan tidak mengubah histori asal.
+- Pilihan durasi dan mode terakhir disimpan setelah sesi baru berhasil Start. Saat membuka ulang app ketika sesi aktif, Today ditampilkan kembali.
+- Validasi: build Debug arm64 berhasil; `git diff --check` bersih. Percobaan test suite penuh berhenti dengan `BUILD INTERRUPTED` (exit 143), sehingga hasil test belum dapat diklaim lulus. Inspeksi visual langsung belum dilakukan.
+- Test terarah `QomaTests/DailyCatchSummaryTests` lulus (exit 0); test suite penuh tetap belum lulus karena interupsi di atas.
+
+### Koreksi scrollbar panel compact — 21 Oktober 2026
+
+- Indikator di Today dan New Session masih terlihat pada sistem pengguna. Penyebab lain yang ditemukan: Analytics, Catalog, Settings, About, dan timeline tangkapan memakai indikator custom `qyubeScrollIndicator()`.
+- Helper AppKit yang sudah ada dipasang pada konten ScrollView agar `NSScrollView` terdekat mematikan scroller native meski preferensi macOS menampilkannya selalu. Helper mengulang pengaturan saat view diperbarui.
+- Indikator custom pada halaman panel utama dilepas; scroll vertikal dan horizontal tetap tersedia. Editor aturan aplikasi dan daftar tangkapan dalam detail juga memakai helper yang sama.
+- Validasi: build Debug arm64 berhasil dan `git diff --check` bersih. Perilaku pada preferensi macOS “Show scroll bars: Always” belum diuji langsung di layar.

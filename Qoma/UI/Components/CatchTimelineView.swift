@@ -25,8 +25,9 @@ struct CatchTimelineView: View {
                         CatchTimelineRowView(event: event, isLast: event.id == self.latestFirst.last?.id)
                     }
                 }
+                .qyubeHideNativeScrollers()
             }
-            .qyubeScrollIndicator()
+            .scrollIndicators(.hidden)
         }
         .padding(16)
         .frame(maxWidth: .infinity, minHeight: 340, maxHeight: 340, alignment: .topLeading)

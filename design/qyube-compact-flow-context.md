@@ -117,6 +117,8 @@ Pertahankan fitur yang ada dan aturan penyimpanan/tangkapan yang sebenarnya. Per
 
 ### 2. Ukuran window dan bahasa visual
 
+**Keputusan implementasi terbaru, 21 Oktober 2026:** panel utama memakai ukuran tetap **310 × 510 pt**, tanpa traffic light dan tanpa resize. Konten panjang tetap dapat discroll dengan indikator tersembunyi. Border tinta berada sekitar 4 pt di dalam tepi panel. Angka 420 × 700 pt di bawah adalah rancangan awal dan sudah digantikan keputusan ini.
+
 - Ukuran awal area konten window utama: **420 pt lebar × sekitar 700 pt tinggi**; sesuaikan tinggi dengan ruang layar yang tersedia.
 - Window tetap dapat diresize. Ingat ukuran pilihan pengguna; jangan memaksa kembali ke ukuran awal setiap dibuka.
 - Konten panjang dapat discroll. Header dan tombol utama bawah dipertahankan terlihat pada ukuran awal; jangan mengharuskan scroll untuk Start atau Create new session.

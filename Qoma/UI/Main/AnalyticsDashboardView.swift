@@ -51,8 +51,9 @@ struct AnalyticsDashboardView: View {
                 }
                 .padding(28)
                 .padding(.top, 12)
+                .qyubeHideNativeScrollers()
             }
-            .qyubeScrollIndicator()
+            .scrollIndicators(.hidden)
             .onAppear {
                 self.loadData()
                 if self.catchRequest != nil { proxy.scrollTo("daily-catches", anchor: .top) }
@@ -164,8 +165,9 @@ struct AnalyticsDashboardView: View {
                                         FishCatchCardView(summary: group)
                                     }
                                 }
+                                .qyubeHideNativeScrollers()
                             }
-                            .qyubeScrollIndicator()
+                            .scrollIndicators(.hidden)
                             .frame(minWidth: 540, maxWidth: .infinity, minHeight: 340, maxHeight: 340)
 
                             CatchTimelineView(events: events)
@@ -179,8 +181,9 @@ struct AnalyticsDashboardView: View {
                                         FishCatchCardView(summary: group)
                                     }
                                 }
+                                .qyubeHideNativeScrollers()
                             }
-                            .qyubeScrollIndicator()
+                            .scrollIndicators(.hidden)
                             .frame(height: 340)
 
                             CatchTimelineView(events: events)

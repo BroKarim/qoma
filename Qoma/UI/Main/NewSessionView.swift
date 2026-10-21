@@ -3,140 +3,277 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct NewSessionView: View {
-  @ObservedObject var coordinator: SessionCoordinator
-  @Binding var draft: SessionDraft
-  let onStarted: () -> Void
-  @State private var editingApps = false
-  @State private var startFailed = false
+    @ObservedObject var coordinator: SessionCoordinator
+    @Binding var draft: SessionDraft
+    let sourceSession: FocusSession?
+    let catches: [CatchEvent]
+    let onBack: () -> Void
+    let onStarted: () -> Void
 
-  var body: some View {
-    VStack(spacing: 0) {
-      ScrollView {
-        VStack(alignment: .leading, spacing: 19) {
-          QyubePenguinArt().frame(height: 112).frame(maxWidth: .infinity)
-          Text("New session").font(.system(size: 22, weight: .medium))
-            .frame(maxWidth: .infinity)
-          VStack(alignment: .leading, spacing: 8) {
-            Text("What are you working on?").font(.system(size: 13))
-            TextField("Task name (optional)", text: $draft.taskTitle)
-              .textFieldStyle(.plain).padding(11)
-              .overlay(RoundedRectangle(cornerRadius: 7).stroke(Color.qyubeLine))
-          }
-          VStack(alignment: .leading, spacing: 8) {
-            Text("Mode").font(.system(size: 13))
-            Menu {
-              Button("Timer only") { draft.policy.mode = .timerOnly }
-              Button("Allowing") { draft.policy.mode = .allowing }
-              Button("Blocking") { draft.policy.mode = .blocking }
-            } label: {
-              HStack {
-                Text(draft.policy.mode == .timerOnly ? "Timer only" : draft.policy.mode.rawValue.capitalized)
-                Spacer()
-                Image(systemName: "chevron.down").font(.system(size: 11))
-              }.padding(11).frame(maxWidth: .infinity)
-                .overlay(RoundedRectangle(cornerRadius: 7).stroke(Color.qyubeLine))
-            }.menuStyle(.button).buttonStyle(.plain).menuIndicator(.hidden).accessibilityLabel("Focus mode")
-            if draft.policy.mode != .timerOnly {
-              HStack(spacing: 6) {
-                ForEach(Array(apps.sorted().prefix(5)), id: \.self) { bundleID in
-                  AppIcon(bundleID: bundleID).frame(width: 24, height: 24)
+    @AppStorage(AppConstants.MenuBarSettings.selectedPresetMinutesKey)
+    private var selectedPresetMinutes = AppConstants.MenuBarSettings.defaultPresetMinutes
+    @State private var editingApps = false
+    @State private var startFailed = false
+
+    private var apps: Set<String> {
+        self.draft.policy.mode == .allowing ? self.draft.policy.allowedApps : self.draft.policy.blockedApps
+    }
+
+    private var canStart: Bool {
+        !self.draft.taskTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && self.coordinator.snapshot == nil
+            && (self.draft.policy.mode != .allowing || !self.apps.isEmpty)
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 15) {
+                    Button(action: self.onBack) {
+                        Label("Today", systemImage: "chevron.left")
+                            .font(.callout.weight(.medium))
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(Color.qyubeAccent)
+
+                    Text(self.sourceSession == nil ? "NEW SESSION" : "SESSION DETAIL")
+                        .font(.caption.weight(.medium))
+                        .tracking(1.5)
+                        .foregroundStyle(Color.qyubeAccent)
+                    QyubeMenuBarPenguin()
+                        .frame(height: 76)
+                        .frame(maxWidth: .infinity)
+                        .accessibilityHidden(true)
+
+                    if let sourceSession {
+                        HStack(spacing: 6) {
+                            Text(sourceSession.status == .completed ? "Completed" : "Interrupted")
+                                .fontWeight(.semibold)
+                            Text("·")
+                            Text("\(QyubeFormat.duration(sourceSession.actualActiveSeconds)) actual")
+                            Text("·")
+                            Text("\(sourceSession.plannedMinutes)m planned")
+                        }
+                        .font(.caption)
+                        .foregroundStyle(Color.qyubeAccent)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                    }
+
+                    VStack(alignment: .leading, spacing: 7) {
+                        self.sectionTitle("Session name")
+                        TextField("What are you working on?", text: self.$draft.taskTitle)
+                            .textFieldStyle(.plain)
+                            .padding(.horizontal, 14)
+                            .frame(height: 40)
+                            .qyubeInkSurface(fill: .white.opacity(0.72), stroke: .qyubeMenuInk)
+                            .accessibilityLabel("Session name")
+                    }
+
+                    VStack(alignment: .leading, spacing: 7) {
+                        self.sectionTitle("Duration")
+                        Menu {
+                            ForEach(self.durationChoices, id: \.self) { value in
+                                Button("\(value) minutes") { self.draft.plannedMinutes = value }
+                            }
+                        } label: {
+                            HStack {
+                                Text("\(self.draft.plannedMinutes) minutes")
+                                Spacer()
+                                Image(systemName: "chevron.down").font(.callout)
+                            }
+                            .padding(.horizontal, 14)
+                            .frame(height: 40)
+                            .contentShape(Rectangle())
+                        }
+                        .menuStyle(.button)
+                        .buttonStyle(.plain)
+                        .menuIndicator(.hidden)
+                        .accessibilityLabel("Focus duration")
+                        .qyubeInkSurface(fill: .white.opacity(0.72), stroke: .qyubeMenuInk)
+                    }
+
+                    VStack(alignment: .leading, spacing: 7) {
+                        self.sectionTitle("Mode")
+                        VStack(spacing: 0) {
+                            Menu {
+                                Button("Timer only") { self.draft.policy.mode = .timerOnly }
+                                Button("Allowing") { self.draft.policy.mode = .allowing }
+                                Button("Blocking") { self.draft.policy.mode = .blocking }
+                            } label: {
+                                HStack(spacing: 10) {
+                                    Image(systemName: self.modeSymbol)
+                                    Text(self.modeTitle)
+                                    Spacer()
+                                    Image(systemName: "chevron.down").font(.callout)
+                                }
+                                .padding(.horizontal, 14)
+                                .frame(height: 40)
+                                .contentShape(Rectangle())
+                            }
+                            .menuStyle(.button)
+                            .buttonStyle(.plain)
+                            .menuIndicator(.hidden)
+                            .accessibilityLabel("Focus mode, \(self.modeTitle)")
+
+                            if self.draft.policy.mode != .timerOnly {
+                                QyubeInkDivider().frame(height: 3).padding(.leading, 14)
+                                HStack(spacing: 7) {
+                                    ForEach(Array(self.apps.sorted().prefix(5)), id: \.self) { bundleID in
+                                        AppIcon(bundleID: bundleID).frame(width: 24, height: 24)
+                                    }
+                                    if self.apps.count > 5 {
+                                        Text("+\(self.apps.count - 5)").font(.caption)
+                                    } else if self.apps.isEmpty {
+                                        Text(self.draft.policy.mode == .allowing
+                                             ? "Choose at least one app" : "No apps blocked")
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    Spacer(minLength: 2)
+                                    Button("Edit apps", systemImage: "pencil") { self.editingApps = true }
+                                        .labelStyle(.iconOnly)
+                                        .foregroundStyle(Color.qyubeAccent)
+                                }
+                                .padding(.horizontal, 14)
+                                .frame(height: 44)
+                            }
+                        }
+                        .qyubeInkSurface(fill: .white.opacity(0.72), stroke: .qyubeMenuInk)
+                    }
+
+                    if self.sourceSession != nil {
+                        VStack(alignment: .leading, spacing: 7) {
+                            self.sectionTitle("Session catches")
+                            if self.catches.isEmpty {
+                                Text("No catches from this session.")
+                                    .font(.callout)
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                ScrollView(.horizontal) {
+                                    HStack(spacing: 8) {
+                                        ForEach(self.catches) { event in
+                                            QyubeCatchArt(kindID: event.kindID)
+                                                .frame(width: 43, height: 36)
+                                                .accessibilityElement(children: .ignore)
+                                                .accessibilityLabel(
+                                                    CatalogDefinitions.kind(id: event.kindID)?.name ?? "Catch")
+                                        }
+                                    }
+                                    .qyubeHideNativeScrollers()
+                                }
+                                .scrollIndicators(.hidden)
+                                .frame(height: 40)
+                            }
+                        }
+                    }
+
+                    if self.draft.policy.mode == .allowing && self.apps.isEmpty {
+                        Text("Choose at least one app to start.")
+                            .font(.caption)
+                            .foregroundStyle(Color.qyubeInterrupted)
+                    }
+                    if self.draft.taskTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        Text("Enter a session name to start.")
+                            .font(.caption)
+                            .foregroundStyle(Color.qyubeInterrupted)
+                    }
+                    if self.coordinator.snapshot != nil {
+                        Text("Finish the current session before starting another.")
+                            .font(.caption)
+                            .foregroundStyle(Color.qyubeInterrupted)
+                    }
+                    if self.startFailed {
+                        Text("This session could not start. Check your access and try again.")
+                            .font(.caption)
+                            .foregroundStyle(Color.qyubeInterrupted)
+                    }
                 }
-                if apps.isEmpty {
-                  Text("Choose apps").font(.system(size: 12)).foregroundStyle(.secondary)
-                }
-                Spacer()
-                Button("Edit") { editingApps = true }.buttonStyle(.plain)
-              }.padding(.vertical, 5)
+                .padding(16)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .qyubeHideNativeScrollers()
             }
-          }
-          VStack(alignment: .leading, spacing: 9) {
-            HStack {
-              Text("Duration")
-              Spacer()
-              Text("\(draft.plannedMinutes) min").monospacedDigit()
-            }.font(.system(size: 13))
-            DurationRuler(selection: $draft.plannedMinutes)
-          }
-          if startFailed {
-            Text("This session could not start. Check your access and try again.")
-              .font(.caption).foregroundStyle(.secondary)
-          }
-        }.padding(.horizontal, 22).padding(.bottom, 8)
-      }
-      .qyubeScrollIndicator()
-      QyubePrimaryButton(title: "Start session") {
-        guard coordinator.snapshot == nil else { return }
-        if coordinator.startSession(draft: draft) != nil { onStarted() } else { startFailed = true }
-      }
-      .keyboardShortcut(.defaultAction)
-      .disabled(coordinator.snapshot != nil || (draft.policy.mode == .allowing && apps.isEmpty))
-      .padding(22)
-    }
-    .sheet(isPresented: $editingApps) {
-      QyubeAppRuleEditor(
-        mode: draft.policy.mode,
-        selectedApps: apps,
-        onToggle: { id, selected in
-          setApp(id, selected: selected)
-          return true
-        })
-    }
-  }
+            .scrollIndicators(.hidden)
 
-  private var apps: Set<String> {
-    draft.policy.mode == .allowing ? draft.policy.allowedApps : draft.policy.blockedApps
-  }
-
-  private func setApp(_ id: String, selected: Bool) {
-    if draft.policy.mode == .allowing {
-      if selected { draft.policy.allowedApps.insert(id) } else { draft.policy.allowedApps.remove(id) }
-    } else {
-      if selected { draft.policy.blockedApps.insert(id) } else { draft.policy.blockedApps.remove(id) }
-    }
-  }
-}
-
-struct DurationRuler: View {
-  @Binding var selection: Int
-  private let choices = [180] + Array(10...60)
-
-  var body: some View {
-    ScrollViewReader { proxy in
-      ScrollView(.horizontal) {
-        HStack(alignment: .bottom, spacing: 0) {
-          ForEach(choices, id: \.self) { minute in
-            Button {
-              selection = minute
-            } label: {
-              VStack(spacing: 6) {
-                Capsule().fill(selection == minute ? Color.qyubeInk : Color.qyubeLine)
-                  .frame(
-                    width: selection == minute ? 3 : 1.5,
-                    height: minute == 180 || minute.isMultiple(of: 5) ? 22 : 12)
-                Text(minute == 180 || minute.isMultiple(of: 5) ? "\(minute)" : " ")
-                  .font(.system(size: 10)).foregroundStyle(.secondary)
-              }.frame(width: minute == 180 ? 38 : 20, height: 48, alignment: .bottom)
-                .contentShape(Rectangle())
-            }.buttonStyle(.plain).id(minute)
-              .accessibilityLabel("\(minute) minutes")
-              .accessibilityAddTraits(selection == minute ? .isSelected : [])
-          }
+            Button("START", action: self.start)
+                .font(.headline)
+                .tracking(1.2)
+                .frame(maxWidth: .infinity)
+                .frame(height: 46)
+                .foregroundStyle(.white)
+                .background(Color.qyubeMenuInk)
+                .buttonStyle(.plain)
+                .keyboardShortcut(.defaultAction)
+                .disabled(!self.canStart)
+                .opacity(self.canStart ? 1 : 0.55)
+                .overlay(alignment: .top) { QyubeInkDivider().frame(height: 3) }
         }
-      }.qyubeHideNativeScrollers()
-        .onAppear { proxy.scrollTo(selection == 10 ? 180 : selection, anchor: .leading) }
-        .onChange(of: selection) { withAnimation { proxy.scrollTo(selection, anchor: .center) } }
+        .foregroundStyle(Color.qyubeMenuInk)
+        .background(Color.qyubeBackground)
+        .sheet(isPresented: self.$editingApps) {
+            QyubeAppRuleEditor(
+                mode: self.draft.policy.mode,
+                selectedApps: self.apps,
+                onToggle: { id, selected in
+                    self.setApp(id, selected: selected)
+                    return true
+                })
+        }
     }
-    .accessibilityElement(children: .ignore).accessibilityLabel("Session duration")
-    .accessibilityValue("\(selection) minutes")
-    .accessibilityAdjustableAction { direction in
-      guard let index = choices.firstIndex(of: selection) else { return }
-      if direction == .increment {
-        selection = choices[min(choices.count - 1, index + 1)]
-      } else if direction == .decrement {
-        selection = choices[max(0, index - 1)]
-      }
+
+    private var modeTitle: String {
+        switch self.draft.policy.mode {
+        case .timerOnly: "Timer only"
+        case .allowing: "Allowing"
+        case .blocking: "Blocking"
+        }
     }
-  }
+
+    private var durationChoices: [Int] {
+        Array(Set([10, 15, 20, 25, 30, 45, 60, self.draft.plannedMinutes])).sorted()
+    }
+
+    private var modeSymbol: String {
+        switch self.draft.policy.mode {
+        case .timerOnly: "timer"
+        case .allowing: "checkmark.shield"
+        case .blocking: "shield.slash"
+        }
+    }
+
+    private func sectionTitle(_ title: String) -> some View {
+        Text(title.uppercased())
+            .font(.caption.weight(.medium))
+            .tracking(1.5)
+            .foregroundStyle(Color.qyubeAccent)
+    }
+
+    private func start() {
+        guard self.canStart else { return }
+        self.draft.taskTitle = self.draft.taskTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        if self.coordinator.startSession(draft: self.draft) != nil {
+            self.selectedPresetMinutes = self.draft.plannedMinutes
+            var preferredPolicy = self.draft.policy
+            preferredPolicy.allowedDomains = []
+            preferredPolicy.blockedDomains = []
+            FocusPreferences.shared.policy = preferredPolicy
+            self.onStarted()
+        } else {
+            self.startFailed = true
+        }
+    }
+
+    private func setApp(_ id: String, selected: Bool) {
+        if self.draft.policy.mode == .allowing {
+            if selected { self.draft.policy.allowedApps.insert(id) } else {
+                self.draft.policy.allowedApps.remove(id)
+            }
+        } else {
+            if selected { self.draft.policy.blockedApps.insert(id) } else {
+                self.draft.policy.blockedApps.remove(id)
+            }
+        }
+    }
 }
 
 struct AppIcon: View {
@@ -193,7 +330,7 @@ struct QyubeAppRuleEditor: View {
         Text("Changes apply immediately").font(.caption).foregroundStyle(Color.qyubeAccent)
       }
       .padding(18)
-      Rectangle().fill(Color.qyubeMenuInk).frame(height: 1)
+      QyubeInkDivider().frame(height: 3)
       ScrollView {
         LazyVStack(alignment: .leading, spacing: 0) {
           ForEach(filteredApps) { app in
@@ -223,7 +360,9 @@ struct QyubeAppRuleEditor: View {
             Text("No matching applications.").foregroundStyle(.secondary).padding(18)
           }
         }
+        .qyubeHideNativeScrollers()
       }
+      .scrollIndicators(.hidden)
       if let errorMessage {
         Text(errorMessage).font(.callout).foregroundStyle(.red).padding(.horizontal, 18).padding(.top, 8)
       }
@@ -239,9 +378,10 @@ struct QyubeAppRuleEditor: View {
     }
     .buttonStyle(.plain)
     .foregroundStyle(Color.qyubeMenuInk)
-    .frame(width: 330, height: 490).background(Color.qyubeBackground)
+    .frame(width: 310, height: 510).background(Color.qyubeBackground)
     .clipShape(RoundedRectangle(cornerRadius: 12))
-    .overlay(QyubeInkBorder().stroke(Color.qyubeMenuInk, lineWidth: 1.3).allowsHitTesting(false))
+    .overlay(QyubeInkBorder().stroke(Color.qyubeMenuInk, lineWidth: 1.3)
+      .padding(2).allowsHitTesting(false))
     .environment(\.colorScheme, .light)
     .task { await loadApps() }
   }

@@ -27,9 +27,9 @@ struct QyubeJournalSettingsView: View {
                 self.floatingSettings
                 self.comfort
                 self.analyticsSettings
-            }.padding(28).padding(.top, 12)
+            }.padding(28).padding(.top, 12).qyubeHideNativeScrollers()
         }
-        .qyubeScrollIndicator()
+        .scrollIndicators(.hidden)
         .onDisappear { SoundAlertPlayer.shared.stop() }
         .onChange(of: self.sound) { _, _ in SoundAlertPlayer.shared.stop() }
         .onChange(of: self.volume) { _, value in

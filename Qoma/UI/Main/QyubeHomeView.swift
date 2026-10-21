@@ -55,8 +55,11 @@ struct QyubeHomeView: View {
 
     @AppStorage(AppConstants.AnalyticsSettings.analyticsConsentDecidedKey)
     private var analyticsConsentDecided = false
+    @AppStorage(AppConstants.MenuBarSettings.selectedPresetMinutesKey)
+    private var selectedPresetMinutes = AppConstants.MenuBarSettings.defaultPresetMinutes
     @State private var isAnalyticsConsentPresented = false
-    @State private var isNewSessionPresented = false
+    @State private var isSessionFormPresented = false
+    @State private var selectedSession: FocusSession?
     @State private var sessionDraft = SessionDraft(plannedMinutes: 25, policy: .timerOnly)
 
     private var activeSession: ActiveSessionSnapshot? {
@@ -68,10 +71,10 @@ struct QyubeHomeView: View {
     var body: some View {
         VStack(spacing: 0) {
             QyubeCompactHeader(
-                onToday: { self.navigation.page = nil },
-                onAnalytics: { self.navigation.page = .analytics },
-                onCatalog: { self.navigation.page = .catalog },
-                onSettings: { self.navigation.page = .settings })
+                onToday: { self.isSessionFormPresented = false; self.navigation.page = nil },
+                onAnalytics: { self.isSessionFormPresented = false; self.navigation.page = .analytics },
+                onCatalog: { self.isSessionFormPresented = false; self.navigation.page = .catalog },
+                onSettings: { self.isSessionFormPresented = false; self.navigation.page = .settings })
             self.detail
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .background(Color.qyubeBackground)
@@ -82,7 +85,7 @@ struct QyubeHomeView: View {
             QyubeInkBorder().stroke(Color.qyubeMenuInk, lineWidth: 1.3)
                 .padding(2).allowsHitTesting(false)
         }
-        .frame(width: 310, height: 700)
+        .frame(width: 310, height: 510)
         .environment(\.colorScheme, .light)
         .tint(.qyubeAccent)
         .onAppear { self.navigation.refresh() }
@@ -92,23 +95,26 @@ struct QyubeHomeView: View {
         .sheet(isPresented: self.$isAnalyticsConsentPresented) {
             AnalyticsConsentSheet { _ in self.analyticsConsentDecided = true }
         }
-        .sheet(isPresented: self.$isNewSessionPresented) {
-            NewSessionView(
-                coordinator: self.sessionCoordinator,
-                draft: self.$sessionDraft,
-                onStarted: {
-                    self.isNewSessionPresented = false
-                    self.onSessionStarted()
-                })
-                .frame(minWidth: 360, minHeight: 520)
-        }
         .onAppear {
             if !self.analyticsConsentDecided { self.isAnalyticsConsentPresented = true }
         }
     }
 
     @ViewBuilder private var detail: some View {
-        switch self.navigation.page {
+        if self.isSessionFormPresented {
+            NewSessionView(
+                coordinator: self.sessionCoordinator,
+                draft: self.$sessionDraft,
+                sourceSession: self.selectedSession,
+                catches: self.navigation.catches.filter { $0.sessionID == self.selectedSession?.id },
+                onBack: { self.isSessionFormPresented = false },
+                onStarted: {
+                    self.isSessionFormPresented = false
+                    self.selectedSession = nil
+                    self.navigation.page = nil
+                    self.onSessionStarted()
+                })
+        } else { switch self.navigation.page {
         case .analytics:
             AnalyticsDashboardView(
                 selectedDay: self.$navigation.selectedDay,
@@ -125,12 +131,25 @@ struct QyubeHomeView: View {
                 activeSession: self.activeSession,
                 remainingTime: self.sessionCoordinator.remainingTime,
                 onCreateSession: self.createSession,
-                onBackToSession: self.onBackToSession)
+                onBackToSession: self.onBackToSession,
+                onSelectSession: self.openSession)
+        }
         }
     }
 
     private func createSession() {
-        self.sessionDraft = FocusPreferences.shared.draft(minutes: 25)
-        self.isNewSessionPresented = true
+        self.sessionDraft = FocusPreferences.shared.draft(minutes: self.selectedPresetMinutes)
+        self.sessionDraft.taskTitle = ""
+        self.selectedSession = nil
+        self.isSessionFormPresented = true
+    }
+
+    private func openSession(_ session: FocusSession) {
+        self.sessionDraft = session.draftSnapshot
+        if self.sessionDraft.taskTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            self.sessionDraft.taskTitle = session.taskTitle.isEmpty ? "Focus session" : session.taskTitle
+        }
+        self.selectedSession = session
+        self.isSessionFormPresented = true
     }
 }
