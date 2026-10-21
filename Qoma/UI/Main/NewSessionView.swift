@@ -6,8 +6,11 @@ struct NewSessionView: View {
     @ObservedObject var coordinator: SessionCoordinator
     @Binding var draft: SessionDraft
     let sourceSession: FocusSession?
+    let isEditingActiveSession: Bool
     let catches: [CatchEvent]
+    let breakRemaining: TimeInterval?
     let onBack: () -> Void
+    let onSaved: () -> Void
     let onStarted: () -> Void
 
     @AppStorage(AppConstants.MenuBarSettings.selectedPresetMinutesKey)
@@ -22,6 +25,12 @@ struct NewSessionView: View {
     private var canStart: Bool {
         !self.draft.taskTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             && self.coordinator.snapshot == nil
+            && self.breakRemaining == nil
+            && (self.draft.policy.mode != .allowing || !self.apps.isEmpty)
+    }
+
+    private var canSaveActiveSession: Bool {
+        !self.draft.taskTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             && (self.draft.policy.mode != .allowing || !self.apps.isEmpty)
     }
 
@@ -36,7 +45,8 @@ struct NewSessionView: View {
                     .buttonStyle(.plain)
                     .foregroundStyle(Color.qyubeAccent)
 
-                    Text(self.sourceSession == nil ? "NEW SESSION" : "SESSION DETAIL")
+                    Text(self.isEditingActiveSession ? "EDIT ACTIVE SESSION"
+                         : self.sourceSession == nil ? "NEW SESSION" : "SESSION DETAIL")
                         .font(.caption.weight(.medium))
                         .tracking(1.5)
                         .foregroundStyle(Color.qyubeAccent)
@@ -80,7 +90,8 @@ struct NewSessionView: View {
                             HStack {
                                 Text("\(self.draft.plannedMinutes) minutes")
                                 Spacer()
-                                Image(systemName: "chevron.down").font(.callout)
+                                Image(systemName: self.isEditingActiveSession ? "lock.fill" : "chevron.down")
+                                    .font(.callout)
                             }
                             .padding(.horizontal, 14)
                             .frame(height: 40)
@@ -89,7 +100,10 @@ struct NewSessionView: View {
                         .menuStyle(.button)
                         .buttonStyle(.plain)
                         .menuIndicator(.hidden)
-                        .accessibilityLabel("Focus duration")
+                        .disabled(self.isEditingActiveSession)
+                        .accessibilityLabel(self.isEditingActiveSession
+                                             ? "Focus duration, \(self.draft.plannedMinutes) minutes, locked"
+                                             : "Focus duration")
                         .qyubeInkSurface(fill: .white.opacity(0.72), stroke: .qyubeMenuInk)
                     }
 
@@ -105,7 +119,8 @@ struct NewSessionView: View {
                                     Image(systemName: self.modeSymbol)
                                     Text(self.modeTitle)
                                     Spacer()
-                                    Image(systemName: "chevron.down").font(.callout)
+                                    Image(systemName: self.isEditingActiveSession ? "lock.fill" : "chevron.down")
+                                        .font(.callout)
                                 }
                                 .padding(.horizontal, 14)
                                 .frame(height: 40)
@@ -114,7 +129,10 @@ struct NewSessionView: View {
                             .menuStyle(.button)
                             .buttonStyle(.plain)
                             .menuIndicator(.hidden)
-                            .accessibilityLabel("Focus mode, \(self.modeTitle)")
+                            .accessibilityLabel(self.isEditingActiveSession
+                                                ? "Focus mode, \(self.modeTitle), locked"
+                                                : "Focus mode, \(self.modeTitle)")
+                            .disabled(self.isEditingActiveSession)
 
                             if self.draft.policy.mode != .timerOnly {
                                 QyubeInkDivider().frame(height: 3).padding(.leading, 14)
@@ -169,22 +187,33 @@ struct NewSessionView: View {
                     }
 
                     if self.draft.policy.mode == .allowing && self.apps.isEmpty {
-                        Text("Choose at least one app to start.")
+                        Text(self.isEditingActiveSession
+                             ? "Choose at least one app before saving."
+                             : "Choose at least one app to start.")
                             .font(.caption)
                             .foregroundStyle(Color.qyubeInterrupted)
                     }
                     if self.draft.taskTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                        Text("Enter a session name to start.")
+                        Text(self.isEditingActiveSession
+                             ? "Enter a session name before saving."
+                             : "Enter a session name to start.")
                             .font(.caption)
                             .foregroundStyle(Color.qyubeInterrupted)
                     }
-                    if self.coordinator.snapshot != nil {
+                    if self.coordinator.snapshot != nil && !self.isEditingActiveSession {
                         Text("Finish the current session before starting another.")
                             .font(.caption)
                             .foregroundStyle(Color.qyubeInterrupted)
                     }
+                    if self.breakRemaining != nil {
+                        Text("Finish or skip the break before starting another session.")
+                            .font(.caption)
+                            .foregroundStyle(Color.qyubeInterrupted)
+                    }
                     if self.startFailed {
-                        Text("This session could not start. Check your access and try again.")
+                        Text(self.isEditingActiveSession
+                             ? "Changes could not be saved. Check your access and try again."
+                             : "This session could not start. Check your access and try again.")
                             .font(.caption)
                             .foregroundStyle(Color.qyubeInterrupted)
                     }
@@ -195,7 +224,8 @@ struct NewSessionView: View {
             }
             .scrollIndicators(.hidden)
 
-            Button("START", action: self.start)
+            Button(self.isEditingActiveSession ? "SAVE CHANGES" : "START", action: self.isEditingActiveSession
+                   ? self.saveActiveSession : self.start)
                 .font(.headline)
                 .tracking(1.2)
                 .frame(maxWidth: .infinity)
@@ -204,8 +234,8 @@ struct NewSessionView: View {
                 .background(Color.qyubeMenuInk)
                 .buttonStyle(.plain)
                 .keyboardShortcut(.defaultAction)
-                .disabled(!self.canStart)
-                .opacity(self.canStart ? 1 : 0.55)
+                .disabled(self.isEditingActiveSession ? !self.canSaveActiveSession : !self.canStart)
+                .opacity((self.isEditingActiveSession ? self.canSaveActiveSession : self.canStart) ? 1 : 0.55)
                 .overlay(alignment: .top) { QyubeInkDivider().frame(height: 3) }
         }
         .foregroundStyle(Color.qyubeMenuInk)
@@ -261,6 +291,18 @@ struct NewSessionView: View {
         } else {
             self.startFailed = true
         }
+    }
+
+    private func saveActiveSession() {
+        guard self.canSaveActiveSession else { return }
+        guard self.coordinator.updateActiveSession(
+            taskTitle: self.draft.taskTitle,
+            allowedApps: self.draft.policy.allowedApps,
+            blockedApps: self.draft.policy.blockedApps) else {
+            self.startFailed = true
+            return
+        }
+        self.onSaved()
     }
 
     private func setApp(_ id: String, selected: Bool) {

@@ -296,7 +296,23 @@ final class SessionCoordinator: ObservableObject {
 
     @discardableResult
     func updateAppRules(allowedApps: Set<String>, blockedApps: Set<String>) -> Bool {
+        persistActiveSession(taskTitle: nil, allowedApps: allowedApps, blockedApps: blockedApps)
+    }
+
+    @discardableResult
+    func updateActiveSession(taskTitle: String, allowedApps: Set<String>, blockedApps: Set<String>) -> Bool {
+        persistActiveSession(taskTitle: taskTitle, allowedApps: allowedApps, blockedApps: blockedApps)
+    }
+
+    private func persistActiveSession(
+        taskTitle: String?, allowedApps: Set<String>, blockedApps: Set<String>
+    ) -> Bool {
         guard var snap = snapshot, snap.status == .active || snap.status == .paused else { return false }
+        if let taskTitle {
+            let title = taskTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !title.isEmpty else { return false }
+            snap.draft.taskTitle = title
+        }
         let allowedApps = Self.validBundleIDs(allowedApps)
         let blockedApps = Self.validBundleIDs(blockedApps)
         switch snap.draft.policy.mode {
@@ -306,7 +322,7 @@ final class SessionCoordinator: ObservableObject {
         case .blocking:
             snap.draft.policy.blockedApps = blockedApps
         case .timerOnly:
-            return false
+            guard taskTitle != nil else { return false }
         }
         snap.draft.policy.allowedDomains = []
         snap.draft.policy.blockedDomains = []

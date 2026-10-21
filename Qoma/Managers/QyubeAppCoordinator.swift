@@ -29,14 +29,15 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
         menuBarController.configure(
             coordinator: self.sessionCoordinator,
             preferences: self.focusPreferences,
-            onStart: { [weak self] minutes in await self?.startFromMenuBar(minutes: minutes) ?? false },
-            onOpen: { [weak self] in self?.navigation.page = nil; self?.showHomeWindow() },
-            onSettings: { [weak self] in self?.navigation.page = .settings; self?.showHomeWindow() },
-            onShowTimer: { [weak self] in self?.restoreTimerPanel() },
-            loadCatches: { [weak self] in
-                guard let self else { return [] }
-                return CatchRepository.shared.listBanked(accountID: self.sessionCoordinator.sessionAccountID)
-            }
+            onOpen: { [weak self] in
+                self?.navigation.todayRequest = UUID()
+                self?.showHomeWindow()
+            },
+            onEditActiveSession: { [weak self] in
+                self?.navigation.editActiveSessionRequest = UUID()
+                self?.showHomeWindow()
+            },
+            onSettings: { [weak self] in self?.navigation.page = .settings; self?.showHomeWindow() }
         )
 
         configurePanels()
@@ -55,6 +56,8 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
             if !mainWindowIsVisible {
                 mainWindowIsVisible = true
                 AppActivationPolicy.enter()
+            } else {
+                NSApp.activate(ignoringOtherApps: true)
             }
             existing.deminiaturize(nil)
             existing.makeKeyAndOrderFront(nil)
@@ -82,6 +85,7 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
         window.backgroundColor = .clear
         window.hasShadow = true
         window.isMovableByWindowBackground = true
+        window.collectionBehavior = [.moveToActiveSpace, .fullScreenAuxiliary]
         window.delegate = self
         window.center()
         window.contentView = NSHostingView(rootView: contentView)
@@ -99,9 +103,12 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
 
     func restoreTimerPanel() {
         guard sessionCoordinator.isActive || sessionCoordinator.isPaused else { return }
+        guard !focusPreferences.hideFloatingTimer else { return }
         guard !timerController.isVisible else { return }
         timerController.show(
-            remainingTime: sessionCoordinator.remainingTime
+            remainingTime: sessionCoordinator.remainingTime,
+            title: sessionCoordinator.currentTaskTitle,
+            isPaused: sessionCoordinator.isPaused
         )
     }
 
@@ -118,13 +125,32 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
 
     private var homeWindowController: NSWindowController?
 
-    private func startFromMenuBar(minutes: Int) async -> Bool {
-        guard sessionCoordinator.snapshot == nil else { return false }
-        let draft = focusPreferences.draft(minutes: minutes)
-        return sessionCoordinator.startSession(draft: draft) != nil
-    }
-
     private func configurePanels() {
+        timerController.configure(
+            onTogglePause: { [weak self] in
+                guard let self else { return false }
+                let wasPaused = self.sessionCoordinator.isPaused
+                if wasPaused { self.sessionCoordinator.resumeSession() } else {
+                    self.sessionCoordinator.pauseSession()
+                }
+                return wasPaused != self.sessionCoordinator.isPaused
+            },
+            onEdit: { [weak self] in
+                self?.navigation.editActiveSessionRequest = UUID()
+                self?.showHomeWindow()
+            },
+            onStop: { [weak self] in
+                _ = self?.sessionCoordinator.stopSession(reason: "Stopped from floating timer")
+            },
+            onRepeat: { [weak self] session in self?.repeatSession(session) ?? false },
+            onReview: { [weak self] session in self?.reviewSession(session) })
+        timerController.onBreakChanged = { [weak self] in
+            guard let self else { return }
+            self.navigation.breakRemaining = self.timerController.isOnBreak
+                ? self.timerController.breakRemaining : nil
+            self.updateStatusItem()
+        }
+
         overlayController.onVisualStateChanged = { [weak self] visual in
             self?.companionController.setDistractionVisual(visual)
         }
@@ -179,7 +205,7 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
             .sink { [weak self] state in
                 guard let self, state != .idle else { return }
                 self.finishAnalyticsTracking()
-                self.timerController.hide()
+                self.timerController.hideFocus()
                 self.companionController.hide()
                 self.distractionCoordinator.stop()
                 self.overlayController.hide()
@@ -194,8 +220,9 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] hidden in
                 if hidden {
-                    self?.timerController.hide()
+                    self?.timerController.hideFocus()
                 } else {
+                    self?.menuBarController.dismissPopover()
                     self?.restoreTimerPanel()
                 }
             }
@@ -231,15 +258,19 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
                 updateAnalyticsTracking(for: snapshot)
                 companionController.show(sessionID: snapshot.id, paused: snapshot.status == .paused)
                 if focusPreferences.hideFloatingTimer {
-                    timerController.hide()
+                    timerController.hideFocus()
                 } else if visibleSessionID != snapshot.id {
                     visibleSessionID = snapshot.id
                     timerController.show(
-                        remainingTime: sessionCoordinator.remainingTime
+                        remainingTime: sessionCoordinator.remainingTime,
+                        title: sessionCoordinator.currentTaskTitle,
+                        isPaused: snapshot.status == .paused
                     )
                 } else {
                     timerController.update(
-                        remainingTime: sessionCoordinator.remainingTime
+                        remainingTime: sessionCoordinator.remainingTime,
+                        title: sessionCoordinator.currentTaskTitle,
+                        isPaused: snapshot.status == .paused
                     )
                 }
                 visibleSessionID = snapshot.id
@@ -255,7 +286,7 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
             } else {
                 finishAnalyticsTracking()
                 visibleSessionID = nil
-                timerController.hide()
+                timerController.hideFocus()
                 companionController.hide()
                 distractionCoordinator.stop()
                 overlayController.hide()
@@ -263,7 +294,7 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
         } else {
             finishAnalyticsTracking()
             visibleSessionID = nil
-            timerController.hide()
+            timerController.hideFocus()
             companionController.hide()
             distractionCoordinator.stop()
             overlayController.hide()
@@ -274,14 +305,22 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
     private func updateTimerPanel() {
         guard sessionCoordinator.snapshot != nil else { return }
         timerController.update(
-            remainingTime: sessionCoordinator.remainingTime
+            remainingTime: sessionCoordinator.remainingTime,
+            title: sessionCoordinator.currentTaskTitle,
+            isPaused: sessionCoordinator.isPaused
         )
     }
 
     private func updateStatusItem() {
         let title: String
-        if let snapshot = sessionCoordinator.snapshot, snapshot.status == .active || snapshot.status == .paused {
-            title = formatTime(sessionCoordinator.remainingTime)
+        if timerController.isOnBreak {
+            title = timerController.isBreakFinished
+                ? "Break done" : "Break \(formatTime(timerController.breakRemaining))"
+        } else if let snapshot = sessionCoordinator.snapshot,
+                  snapshot.status == .active || snapshot.status == .paused {
+            title = snapshot.status == .paused
+                ? "Ⅱ \(formatTime(sessionCoordinator.remainingTime))"
+                : formatTime(sessionCoordinator.remainingTime)
         } else {
             title = ""
         }
@@ -290,6 +329,7 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
 
     private func onSessionEnded(_ session: FocusSession) {
         finishAnalyticsTracking()
+        menuBarController.dismissPopover()
         navigation.refresh()
         NotificationCenter.default.post(name: .qyubeCollectionChanged, object: nil)
         guard session.status == .completed else { return }
@@ -299,7 +339,29 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
                 ?? AppConstants.SoundSettings.defaultSoundID,
             volume: defaults.object(forKey: AppConstants.SoundSettings.volumeKey) as? Double
                 ?? AppConstants.SoundSettings.defaultVolume)
-        menuBarController.showIdleAfterCompletion()
+        let catches = CatchRepository.shared.listBanked(accountID: sessionCoordinator.sessionAccountID)
+            .filter { $0.sessionID == session.id }
+        timerController.showCompletion(session: session, catches: catches)
+    }
+
+    private func repeatSession(_ session: FocusSession) -> Bool {
+        guard sessionCoordinator.snapshot == nil, sessionCoordinator.finalizationState == .idle else { return false }
+        guard let draft = Self.repeatDraft(for: session) else { return false }
+        return sessionCoordinator.startSession(draft: draft) != nil
+    }
+
+    static func repeatDraft(for session: FocusSession) -> SessionDraft? {
+        var draft = session.draftSnapshot
+        draft.taskTitle = draft.taskTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !draft.taskTitle.isEmpty else { return nil }
+        guard draft.policy.mode != .allowing || !draft.policy.allowedApps.isEmpty else { return nil }
+        return draft
+    }
+
+    private func reviewSession(_ session: FocusSession) {
+        navigation.page = nil
+        navigation.sessionToReview = session
+        showHomeWindow()
     }
 
     private func updateAnalyticsTracking(for snapshot: ActiveSessionSnapshot) {

@@ -1309,3 +1309,21 @@ Catatan ini memperbarui status rencana tanggal 20 Oktober di atas tanpa menghapu
 - Helper AppKit yang sudah ada dipasang pada konten ScrollView agar `NSScrollView` terdekat mematikan scroller native meski preferensi macOS menampilkannya selalu. Helper mengulang pengaturan saat view diperbarui.
 - Indikator custom pada halaman panel utama dilepas; scroll vertikal dan horizontal tetap tersedia. Editor aturan aplikasi dan daftar tangkapan dalam detail juga memakai helper yang sama.
 - Validasi: build Debug arm64 berhasil dan `git diff --check` bersih. Perilaku pada preferensi macOS “Show scroll bars: Always” belum diuji langsung di layar.
+
+### Timer, menu bar, dan akhir sesi — 21 Oktober 2026
+
+- Branch `codex/qyube-new-session-detail` di-commit sebagai `ca78b00`; kerja UI-06/UI-07 berada di branch baru `codex/qyube-timer-menubar-completion`.
+- Floating timer memakai konsep `prompt-v2.md`: panel 200 × 110 pt, countdown serif normal; hover/klik mengganti isi dengan judul bold satu baris terpotong dan ikon Pause/Resume serta Stop. Stop meminta konfirmasi.
+- Klik menu bar saat idle atau floating timer ON membawa ke Today. Saat sesi aktif/paused dan timer OFF, klik membuka popover kontrol yang memakai komponen judul/tombol sama. Klik kanan menyediakan Open Qyube, Settings, Quit.
+- Setelah finalisasi sukses, sesi completed membuka panel Nice work tanpa membuka window utama: fokus aktual, tangkapan sesi, Break 5 min, Repeat session, Done. Stop lebih awal tetap interrupted tanpa panel sukses. Error finalisasi tetap punya Retry.
+- Break berjalan di panel yang sama dengan countdown dan Skip break; sesudahnya Repeat/Done. Break tidak memengaruhi focus goal atau catches. Break disimpan di memori selama aplikasi hidup; recovery break setelah relaunch masih pekerjaan berikutnya.
+- Repeat menggunakan draft tersimpan, membuat sesi baru, dan menolak nama kosong atau allow-list kosong. New Session dinonaktifkan selama break, dengan pesan penjelas. Today menunjukkan status break.
+- Validasi: build Debug arm64 berhasil; test terarah `SessionRepeatDraftTests`, `MenuBarTimerDisplayTests`, dan `MenuBarRoutingTests` lulus; `git diff --check` bersih. Tampilan dan interaksi panel di layar macOS belum diuji langsung.
+
+### Edit sesi aktif dan pemanggilan window — 21 Oktober 2026
+
+- Klik menu bar saat sesi berjalan kini mengaktifkan kembali window utama walau sebelumnya sudah terbuka di belakang aplikasi lain. Window utama memakai perilaku `.moveToActiveSpace` agar berpindah ke desktop aktif saat dimunculkan.
+- Tombol Edit ditambahkan ke kontrol floating timer dan panel kontrol menu bar. Keduanya membuka window utama langsung ke form edit sesi aktif.
+- Form memakai snapshot sesi aktif; nama tugas dan daftar aplikasi bisa diubah, sementara mode dan durasi terkunci. Penyimpanan satu kali memvalidasi nama/allow-list dan mempertahankan sesi serta timer yang sama.
+- Timer only tetap dapat menyimpan perubahan nama; pembaruan aturan aplikasi untuk sesi timer only tetap ditolak.
+- Validasi otomatis belum dijalankan. Perpindahan Spaces dan tampilan form masih perlu dicoba langsung di macOS.

@@ -29,12 +29,6 @@ private final class EdgeToEdgeHostingController<Content: View>: NSHostingControl
 }
 
 @MainActor
-final class MenuBarPanelState: ObservableObject {
-    @Published var panelHeight = AppConstants.MenuBarSettings.panelHeight
-    @Published var isEditorPresented = false
-}
-
-@MainActor
 final class MenuBarController: NSObject {
     static var shared: MenuBarController?
     private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
@@ -49,10 +43,13 @@ final class MenuBarController: NSObject {
         backing: .buffered,
         defer: false
     )
-    private let panelState = MenuBarPanelState()
+    private weak var coordinator: SessionCoordinator?
+    private var preferences: FocusPreferences?
+    private var onOpen: (() -> Void)?
+    private var onEditActiveSession: (() -> Void)?
+    private var onSettings: (() -> Void)?
     private var latestTitle = ""
     private var preferencesObserver: AnyCancellable?
-    private var heightObserver: AnyCancellable?
     private var localClickMonitor: Any?
     private var globalClickMonitor: Any?
 
@@ -60,6 +57,7 @@ final class MenuBarController: NSObject {
         super.init()
         statusItem.button?.target = self
         statusItem.button?.action = #selector(togglePopover)
+        statusItem.button?.sendAction(on: [.leftMouseUp, .rightMouseUp])
         panel.isFloatingPanel = true
         panel.level = .popUpMenu
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
@@ -77,10 +75,6 @@ final class MenuBarController: NSObject {
                 guard let self else { return }
                 self.updateTitle(self.latestTitle)
             }
-        heightObserver = panelState.$panelHeight.removeDuplicates().sink { [weak self] _ in
-            guard self?.panel.isVisible == true else { return }
-            self?.positionPanelBelowStatusItem()
-        }
         Self.shared = self
     }
 
@@ -91,26 +85,22 @@ final class MenuBarController: NSObject {
     func configure(
         coordinator: SessionCoordinator,
         preferences: FocusPreferences,
-        onStart: @escaping (Int) async -> Bool,
         onOpen: @escaping () -> Void,
-        onSettings: @escaping () -> Void,
-        onShowTimer: @escaping () -> Void,
-        loadCatches: @escaping () -> [CatchEvent]
+        onEditActiveSession: @escaping () -> Void,
+        onSettings: @escaping () -> Void
     ) {
-        let rootView = MenuBarView(
+        self.coordinator = coordinator
+        self.preferences = preferences
+        self.onOpen = onOpen
+        self.onEditActiveSession = onEditActiveSession
+        self.onSettings = onSettings
+        let rootView = MenuBarSessionPopover(
             coordinator: coordinator,
-            panelState: panelState,
-            preferences: preferences,
-            onStart: { [weak self] minutes in
-                let success = await onStart(minutes)
-                if success { self?.closePanel() }
-                return success
-            },
-            onOpen: { [weak self] in self?.closePanel(); onOpen() },
-            onSettings: { [weak self] in self?.closePanel(); onSettings() },
-            onShowTimer: { [weak self] in self?.closePanel(); onShowTimer() },
-            loadCatches: loadCatches
-        )
+            onEdit: { [weak self] in self?.closePanel(); self?.onEditActiveSession?() },
+            onStop: { [weak self, weak coordinator] in
+                self?.closePanel()
+                _ = coordinator?.stopSession(reason: "Stopped from menu bar")
+            })
         let hostingController = EdgeToEdgeHostingController(rootView: rootView)
         hostingController.view.wantsLayer = true
         hostingController.view.layer?.backgroundColor = NSColor.clear.cgColor
@@ -125,36 +115,67 @@ final class MenuBarController: NSObject {
         button.image = nil
         button.imagePosition = .noImage
         button.font = .monospacedDigitSystemFont(ofSize: 13, weight: .regular)
-        button.setAccessibilityLabel("Open qyube controls, \(title)")
+        let action = preferences?.hideFloatingTimer == true &&
+            (coordinator?.isActive == true || coordinator?.isPaused == true)
+            ? "Open session controls" : "Open Qyube"
+        button.setAccessibilityLabel("\(action), \(title)")
         statusItem.length = NSStatusItem.variableLength
-    }
-
-    func showIdleAfterCompletion() {
-        panelState.isEditorPresented = false
-        showPopover()
     }
 
     func showPopover() {
         positionPanelBelowStatusItem()
         panel.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
     }
+
+    func dismissPopover() { closePanel() }
 
     private func closePanel() {
         panel.orderOut(nil)
-        panelState.isEditorPresented = false
     }
 
     @objc private func togglePopover() {
-        if panel.isVisible { closePanel() } else { showPopover() }
+        if NSApp.currentEvent?.type == .rightMouseUp {
+            showContextMenu()
+        } else if panel.isVisible {
+            closePanel()
+        } else if Self.shouldShowPopover(
+            isRunning: coordinator?.isActive == true || coordinator?.isPaused == true,
+            timerHidden: preferences?.hideFloatingTimer == true,
+            finalization: coordinator?.finalizationState ?? .idle) {
+            showPopover()
+        } else {
+            onOpen?()
+        }
+    }
+
+    private func showContextMenu() {
+        let menu = NSMenu()
+        let open = NSMenuItem(title: "Open Qyube", action: #selector(openQyube), keyEquivalent: "")
+        let settings = NSMenuItem(title: "Settings…", action: #selector(openSettings), keyEquivalent: "")
+        let quit = NSMenuItem(title: "Quit Qyube", action: #selector(quitQyube), keyEquivalent: "")
+        for item in [open, settings, quit] { item.target = self; menu.addItem(item) }
+        guard let button = statusItem.button else { return }
+        menu.popUp(positioning: nil, at: NSPoint(x: 0, y: button.bounds.minY), in: button)
+    }
+
+    @objc private func openQyube() { closePanel(); onOpen?() }
+    @objc private func openSettings() { closePanel(); onSettings?() }
+    @objc private func quitQyube() { NSApp.terminate(nil) }
+
+    static func shouldShowPopover(
+        isRunning: Bool, timerHidden: Bool, finalization: SessionFinalizationState
+    ) -> Bool {
+        finalization != .idle || (isRunning && timerHidden)
     }
 
     private func positionPanelBelowStatusItem() {
         guard let buttonFrame = self.statusButtonFrameInScreen() else { return }
 
-        let panelSize = NSSize(
-            width: AppConstants.MenuBarSettings.panelWidth,
-            height: panelState.panelHeight)
+        let panelSize = coordinator?.finalizationState == .idle
+            ? NSSize(
+                width: AppConstants.FloatingLayoutSettings.timerOnlyWidth,
+                height: AppConstants.FloatingLayoutSettings.timerOnlyHeight)
+            : NSSize(width: 260, height: 130)
         let spacing: CGFloat = 6
         var origin = NSPoint(
             x: buttonFrame.midX - (panelSize.width / 2),
@@ -208,7 +229,6 @@ final class MenuBarController: NSObject {
 
     private func dismissPanelIfNeeded(for event: NSEvent) {
         guard self.panel.isVisible else { return }
-        if panelState.isEditorPresented { return }
         if let eventWindow = event.window,
            eventWindow !== panel,
            eventWindow.level == .popUpMenu {

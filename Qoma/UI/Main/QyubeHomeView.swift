@@ -23,6 +23,10 @@ final class QyubeNavigation: ObservableObject {
     @Published var page: Page?
     @Published var selectedDay = Calendar.current.startOfDay(for: Date())
     @Published var catchRequest: UUID?
+    @Published var sessionToReview: FocusSession?
+    @Published var breakRemaining: TimeInterval?
+    @Published var todayRequest: UUID?
+    @Published var editActiveSessionRequest: UUID?
     @Published private(set) var history: [FocusSession] = []
     @Published private(set) var catches: [CatchEvent] = []
 
@@ -59,6 +63,7 @@ struct QyubeHomeView: View {
     private var selectedPresetMinutes = AppConstants.MenuBarSettings.defaultPresetMinutes
     @State private var isAnalyticsConsentPresented = false
     @State private var isSessionFormPresented = false
+    @State private var isEditingActiveSession = false
     @State private var selectedSession: FocusSession?
     @State private var sessionDraft = SessionDraft(plannedMinutes: 25, policy: .timerOnly)
 
@@ -92,6 +97,28 @@ struct QyubeHomeView: View {
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             self.navigation.refresh()
         }
+        .onReceive(self.navigation.$sessionToReview.compactMap { $0 }) { session in
+            self.openSession(session)
+            self.navigation.sessionToReview = nil
+        }
+        .onReceive(self.navigation.$todayRequest.compactMap { $0 }) { _ in
+            self.isSessionFormPresented = false
+            self.isEditingActiveSession = false
+            self.navigation.page = nil
+            self.navigation.todayRequest = nil
+        }
+        .onReceive(self.navigation.$editActiveSessionRequest.compactMap { $0 }) { _ in
+            guard let snapshot = self.activeSession else { return }
+            self.sessionDraft = snapshot.draft
+            self.selectedSession = nil
+            self.isEditingActiveSession = true
+            self.isSessionFormPresented = true
+            self.navigation.page = nil
+            self.navigation.editActiveSessionRequest = nil
+        }
+        .onReceive(self.navigation.$page.dropFirst()) { page in
+            if page != nil { self.isSessionFormPresented = false }
+        }
         .sheet(isPresented: self.$isAnalyticsConsentPresented) {
             AnalyticsConsentSheet { _ in self.analyticsConsentDecided = true }
         }
@@ -106,10 +133,21 @@ struct QyubeHomeView: View {
                 coordinator: self.sessionCoordinator,
                 draft: self.$sessionDraft,
                 sourceSession: self.selectedSession,
+                isEditingActiveSession: self.isEditingActiveSession,
                 catches: self.navigation.catches.filter { $0.sessionID == self.selectedSession?.id },
-                onBack: { self.isSessionFormPresented = false },
+                breakRemaining: self.navigation.breakRemaining,
+                onBack: {
+                    self.isSessionFormPresented = false
+                    self.isEditingActiveSession = false
+                },
+                onSaved: {
+                    self.isSessionFormPresented = false
+                    self.isEditingActiveSession = false
+                    self.navigation.refresh()
+                },
                 onStarted: {
                     self.isSessionFormPresented = false
+                    self.isEditingActiveSession = false
                     self.selectedSession = nil
                     self.navigation.page = nil
                     self.onSessionStarted()
@@ -130,6 +168,7 @@ struct QyubeHomeView: View {
                 sessions: self.navigation.history,
                 activeSession: self.activeSession,
                 remainingTime: self.sessionCoordinator.remainingTime,
+                breakRemaining: self.navigation.breakRemaining,
                 onCreateSession: self.createSession,
                 onBackToSession: self.onBackToSession,
                 onSelectSession: self.openSession)
@@ -138,6 +177,7 @@ struct QyubeHomeView: View {
     }
 
     private func createSession() {
+        self.isEditingActiveSession = false
         self.sessionDraft = FocusPreferences.shared.draft(minutes: self.selectedPresetMinutes)
         self.sessionDraft.taskTitle = ""
         self.selectedSession = nil
@@ -145,6 +185,7 @@ struct QyubeHomeView: View {
     }
 
     private func openSession(_ session: FocusSession) {
+        self.isEditingActiveSession = false
         self.sessionDraft = session.draftSnapshot
         if self.sessionDraft.taskTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             self.sessionDraft.taskTitle = session.taskTitle.isEmpty ? "Focus session" : session.taskTitle

@@ -239,6 +239,8 @@ Semua item masuk dalam mockup UI. Pengelompokan dengan separator boleh digunakan
 
 ### 8. Floating timer saat sesi aktif/paused
 
+**Implementasi UI terbaru, 21 Oktober 2026:** konsep `output/imagegen/floating-timer-concepts/prompt-v2.md` dipakai untuk panel fokus 200 × 110 pt. Normal menampilkan waktu serif; hover/klik menampilkan judul bold satu baris dan ikon Pause/Resume serta Stop. Kontrol yang sama dipakai di popover menu bar ketika floating timer OFF.
+
 - Usulan ukuran **200 × 110 pt**, persegi panjang horizontal dengan rounded corners, mengikuti konsep v2. Ukuran akhir masih dapat disesuaikan saat QA visual, tanpa mengubah perilaku yang disepakati.
 - **Normal aktif:** hanya countdown sebagai fokus utama.
 - **Hover aktif:** countdown diganti nama tugas yang besar dan **bold**, satu baris dengan end truncation `...`; di bawahnya ikon Pause dan Stop.
@@ -293,6 +295,7 @@ Break:
 - Tidak menerapkan aturan distraksi fokus, tidak menghasilkan tangkapan, dan tidak menambah waktu goal.
 - Saat break berakhir, tampilkan **Repeat session / Done**; jangan otomatis Start fokus.
 - Detail visual panel break berjalan perlu dirancang; aturan Pause/Stop untuk break tidak otomatis disamakan dengan sesi fokus.
+- Keputusan UI setelah konsep v2: break berjalan menampilkan label Break, countdown, dan **Skip break**. Skip atau waktu habis membawa pengguna ke **Repeat session / Done**; break tidak memiliki Pause.
 - Rute app yang dibuka saat break perlu memperlihatkan status break. Transisi jika pengguna memilih New session saat break masih berlangsung merupakan detail lanjutan yang belum ditentukan; jangan menjalankan break dan fokus bersamaan secara diam-diam.
 
 Repeat:

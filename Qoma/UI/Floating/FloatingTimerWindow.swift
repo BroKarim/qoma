@@ -2,62 +2,86 @@ import SwiftUI
 
 struct FloatingTimerView: View {
     @ObservedObject var timer: TimerReadoutModel
+    let onTogglePause: () -> Bool
+    let onEdit: () -> Void
+    let onStop: () -> Void
 
     @AppStorage(AppConstants.FloatingThemeSettings.selectedThemeKey)
-    private var selectedThemeID: String = AppConstants.FloatingThemeSettings.defaultThemeID
+    private var selectedThemeID = AppConstants.FloatingThemeSettings.defaultThemeID
     @AppStorage(AppConstants.FloatingThemeSettings.liquidGlassKey)
     private var liquidGlass = false
 
-    private let panelShape = RoundedRectangle(cornerRadius: 13, style: .continuous)
+    @State private var isHovered = false
+    @State private var controlsPinned = false
+    @State private var confirmingStop = false
+    @State private var actionError: String?
+
+    private var showingControls: Bool { isHovered || controlsPinned || confirmingStop }
 
     var body: some View {
-        self.panel
-            .environment(\.colorScheme, .light)
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel("Time remaining")
-            .accessibilityValue(self.format(self.timer.remainingTime))
-    }
-
-    @ViewBuilder private var panel: some View {
-        if #available(macOS 26.0, *), self.liquidGlass {
-            self.timerContent
-                .glassEffect(.regular, in: self.panelShape)
-        } else {
-            self.timerContent
-                .background(self.softPanelBackground)
-                .clipShape(self.panelShape)
+        Group {
+            if showingControls {
+                SessionControlView(
+                    title: timer.taskTitle,
+                    isPaused: timer.isPaused,
+                    onTogglePause: {
+                        if !onTogglePause() { actionError = "Could not save the change." } else {
+                            actionError = nil
+                        }
+                    },
+                    onEdit: onEdit,
+                    onStop: { controlsPinned = true; confirmingStop = true })
+            } else {
+                VStack(spacing: 2) {
+                    Text(QyubeFormat.countdown(timer.remainingTime))
+                        .font(.system(
+                            size: AppConstants.FloatingLayoutSettings.timerOnlyFontSize,
+                            weight: .medium,
+                            design: .serif).monospacedDigit())
+                        .foregroundStyle(FloatingTheme.from(id: selectedThemeID).textColor)
+                        .lineLimit(1)
+                    if timer.isPaused {
+                        Text("PAUSED")
+                            .font(.caption2.weight(.semibold))
+                            .tracking(1.3)
+                            .foregroundStyle(Color.qyubeInterrupted)
+                    }
+                }
+                .frame(
+                    width: AppConstants.FloatingLayoutSettings.timerOnlyWidth,
+                    height: AppConstants.FloatingLayoutSettings.timerOnlyHeight)
+                .contentShape(Rectangle())
+                .onTapGesture { controlsPinned = true }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(timer.isPaused ? "Paused, time remaining" : "Time remaining")
+                .accessibilityValue(QyubeFormat.countdown(timer.remainingTime))
+                .accessibilityAction(named: "Show session controls") { controlsPinned = true }
+            }
         }
-    }
-
-    private var timerContent: some View {
-        Text(self.format(self.timer.remainingTime))
-            .font(.system(
-                size: AppConstants.FloatingLayoutSettings.timerOnlyFontSize,
-                weight: .medium,
-                design: .serif).monospacedDigit())
-            .foregroundStyle(FloatingTheme.from(id: self.selectedThemeID).textColor)
-            .lineLimit(1)
-            .minimumScaleFactor(0.6)
-            .frame(
-                width: AppConstants.FloatingLayoutSettings.timerOnlyWidth,
-                height: AppConstants.FloatingLayoutSettings.timerOnlyHeight)
-    }
-
-    private var softPanelBackground: some View {
-        self.panelShape
-            .fill(LinearGradient(
-                colors: [.white, Color(white: 0.97)],
-                startPoint: .top,
-                endPoint: .bottom))
-            .overlay(self.panelShape.strokeBorder(Color.black.opacity(0.10), lineWidth: 0.5))
-            .overlay(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .strokeBorder(Color.black.opacity(0.07), lineWidth: 0.7)
-                    .padding(3))
-    }
-
-    private func format(_ time: TimeInterval) -> String {
-        let total = max(0, Int(time.rounded(.down)))
-        return String(format: "%02d:%02d", total / 60, total % 60)
+        .background {
+            if #available(macOS 26.0, *), liquidGlass {
+                RoundedRectangle(cornerRadius: 16).fill(.clear)
+                    .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 16))
+            } else {
+                RoundedRectangle(cornerRadius: 16).fill(.white)
+            }
+        }
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.qyubeLine, lineWidth: 1))
+        .shadow(color: .black.opacity(0.13), radius: 12, y: 5)
+        .onHover { isHovered = $0; if $0 { controlsPinned = false } }
+        .alert("End this session?", isPresented: $confirmingStop) {
+            Button("End session", role: .destructive, action: onStop)
+            Button("Keep focusing", role: .cancel) { controlsPinned = false }
+        } message: {
+            Text("Your focused time will be saved as an interrupted session.")
+        }
+        .alert("Could not pause or resume", isPresented: Binding(
+            get: { actionError != nil },
+            set: { if !$0 { actionError = nil } })) {
+            Button("OK") { actionError = nil }
+        } message: {
+            Text(actionError ?? "Try again.")
+        }
+        .environment(\.colorScheme, .light)
     }
 }
