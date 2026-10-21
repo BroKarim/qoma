@@ -30,7 +30,7 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
             coordinator: self.sessionCoordinator,
             preferences: self.focusPreferences,
             onStart: { [weak self] minutes in await self?.startFromMenuBar(minutes: minutes) ?? false },
-            onOpen: { [weak self] in self?.navigation.page = .analytics; self?.showHomeWindow() },
+            onOpen: { [weak self] in self?.navigation.page = nil; self?.showHomeWindow() },
             onSettings: { [weak self] in self?.navigation.page = .settings; self?.showHomeWindow() },
             onShowTimer: { [weak self] in self?.restoreTimerPanel() },
             loadCatches: { [weak self] in
@@ -61,10 +61,14 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
             return
         }
 
-        let contentView = QyubeHomeView(navigation: navigation)
-        let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 1180, height: 820),
-            styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
+        let contentView = QyubeHomeView(
+            navigation: navigation,
+            sessionCoordinator: sessionCoordinator,
+            onSessionStarted: { [weak self] in self?.homeWindowController?.close() },
+            onBackToSession: { [weak self] in self?.returnToSession() })
+        let window = QyubeHomeWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 310, height: 700),
+            styleMask: [.borderless],
             backing: .buffered,
             defer: false
         )
@@ -74,7 +78,10 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
         window.titlebarAppearsTransparent = true
         window.titlebarSeparatorStyle = .none
         window.isReleasedWhenClosed = false
-        window.minSize = NSSize(width: 640, height: 580)
+        window.isOpaque = false
+        window.backgroundColor = .clear
+        window.hasShadow = true
+        window.isMovableByWindowBackground = true
         window.delegate = self
         window.center()
         window.contentView = NSHostingView(rootView: contentView)
@@ -96,6 +103,15 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
         timerController.show(
             remainingTime: sessionCoordinator.remainingTime
         )
+    }
+
+    private func returnToSession() {
+        homeWindowController?.close()
+        if focusPreferences.hideFloatingTimer {
+            menuBarController.showPopover()
+        } else {
+            restoreTimerPanel()
+        }
     }
 
     // MARK: - Private

@@ -6,13 +6,9 @@ final class QyubeNavigation: ObservableObject {
     enum Page: String, CaseIterable, Identifiable {
         case analytics, catalog, settings, about
 
-        var id: Self {
-            self
-        }
+        var id: Self { self }
 
-        var title: String {
-            rawValue.capitalized
-        }
+        var title: String { self.rawValue.capitalized }
 
         var symbol: String {
             switch self {
@@ -24,7 +20,7 @@ final class QyubeNavigation: ObservableObject {
         }
     }
 
-    @Published var page: Page = .analytics
+    @Published var page: Page?
     @Published var selectedDay = Calendar.current.startOfDay(for: Date())
     @Published var catchRequest: UUID?
     @Published private(set) var history: [FocusSession] = []
@@ -53,76 +49,61 @@ final class QyubeNavigation: ObservableObject {
 
 struct QyubeHomeView: View {
     @ObservedObject var navigation: QyubeNavigation
+    @ObservedObject var sessionCoordinator: SessionCoordinator
+    let onSessionStarted: () -> Void
+    let onBackToSession: () -> Void
+
     @AppStorage(AppConstants.AnalyticsSettings.analyticsConsentDecidedKey)
     private var analyticsConsentDecided = false
     @State private var isAnalyticsConsentPresented = false
+    @State private var isNewSessionPresented = false
+    @State private var sessionDraft = SessionDraft(plannedMinutes: 25, policy: .timerOnly)
+
+    private var activeSession: ActiveSessionSnapshot? {
+        guard let snapshot = self.sessionCoordinator.snapshot,
+              snapshot.status == .active || snapshot.status == .paused else { return nil }
+        return snapshot
+    }
 
     var body: some View {
-        GeometryReader { geometry in
-            let compact = geometry.size.width < 760
-            HStack(spacing: 0) {
-                VStack(spacing: 0) {
-                    Color.clear.frame(height: 52)
-                    if !compact {
-                        Text("qyube")
-                            .font(.system(size: 32, design: .serif))
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal, 16)
-                            .padding(.bottom, 8)
-                        Text("A CALMER\nFOCUS AHEAD")
-                            .font(.system(size: 9, design: .serif)).tracking(2.5).lineSpacing(5)
-                            .foregroundStyle(.secondary).frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal, 18).padding(.bottom, 32)
-                    }
-                    VStack(spacing: 5) {
-                        ForEach(QyubeNavigation.Page.allCases) { page in
-                            Button {
-                                self.navigation.page = page
-                                self.navigation.catchRequest = nil
-                                self.navigation.refresh()
-                            } label: {
-                                SettingsNavigationRow(
-                                    title: compact ? "" : page.title,
-                                    symbol: page.symbol,
-                                    isSelected: self.navigation.page == page)
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityLabel(page.title)
-                            .accessibilityAddTraits(self.navigation.page == page ? .isSelected : [])
-                        }
-                    }
-                    .padding(.horizontal, compact ? 6 : 10)
-                    Spacer()
-                    if !compact {
-                        SettingsSidebarFooter()
-                            .padding(.horizontal, 16)
-                            .padding(.bottom, 16)
-                    }
-                }
-                .frame(width: compact ? 52 : 220)
-                .frame(maxHeight: .infinity)
-                .background(Color.qyubeSidebar)
-                QyubeInkDivider(axis: .vertical).frame(width: 2)
-                self.detail
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                    .background(Color.qyubeBackground)
-            }
-            .animation(.easeInOut(duration: 0.18), value: compact)
+        VStack(spacing: 0) {
+            QyubeCompactHeader(
+                onToday: { self.navigation.page = nil },
+                onAnalytics: { self.navigation.page = .analytics },
+                onCatalog: { self.navigation.page = .catalog },
+                onSettings: { self.navigation.page = .settings })
+            self.detail
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                .background(Color.qyubeBackground)
         }
-        .frame(minWidth: 640, minHeight: 580)
         .background(Color.qyubeBackground)
-        .ignoresSafeArea(.container, edges: .top)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay {
+            QyubeInkBorder().stroke(Color.qyubeMenuInk, lineWidth: 1.3)
+                .padding(2).allowsHitTesting(false)
+        }
+        .frame(width: 310, height: 700)
         .environment(\.colorScheme, .light)
         .tint(.qyubeAccent)
         .onAppear { self.navigation.refresh() }
-        .sheet(isPresented: $isAnalyticsConsentPresented) {
-            AnalyticsConsentSheet { _ in analyticsConsentDecided = true }
-        }
-        .onAppear {
-            if !analyticsConsentDecided { isAnalyticsConsentPresented = true }
-        }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             self.navigation.refresh()
+        }
+        .sheet(isPresented: self.$isAnalyticsConsentPresented) {
+            AnalyticsConsentSheet { _ in self.analyticsConsentDecided = true }
+        }
+        .sheet(isPresented: self.$isNewSessionPresented) {
+            NewSessionView(
+                coordinator: self.sessionCoordinator,
+                draft: self.$sessionDraft,
+                onStarted: {
+                    self.isNewSessionPresented = false
+                    self.onSessionStarted()
+                })
+                .frame(minWidth: 360, minHeight: 520)
+        }
+        .onAppear {
+            if !self.analyticsConsentDecided { self.isAnalyticsConsentPresented = true }
         }
     }
 
@@ -138,17 +119,18 @@ struct QyubeHomeView: View {
             QyubeJournalSettingsView()
         case .about:
             QyubeAboutSettingsPane()
+        case nil:
+            TodayView(
+                sessions: self.navigation.history,
+                activeSession: self.activeSession,
+                remainingTime: self.sessionCoordinator.remainingTime,
+                onCreateSession: self.createSession,
+                onBackToSession: self.onBackToSession)
         }
     }
-}
 
-extension Color {
-    static let qyubeBackground = Color(red: 251 / 255, green: 250 / 255, blue: 248 / 255)
-    static let qyubeSidebar = Color(red: 243 / 255, green: 243 / 255, blue: 240 / 255)
-    static let qyubeCardBackground = Color.white
-    static let qyubeInk = Color(red: 33 / 255, green: 33 / 255, blue: 33 / 255)
-    static let qyubeLine = Color(red: 224 / 255, green: 224 / 255, blue: 224 / 255)
-    static let qyubeSelection = Color(red: 220 / 255, green: 232 / 255, blue: 237 / 255)
-    static let qyubeAccent = Color(red: 82 / 255, green: 115 / 255, blue: 134 / 255)
-    static let qyubeInterrupted = Color(red: 171 / 255, green: 102 / 255, blue: 92 / 255)
+    private func createSession() {
+        self.sessionDraft = FocusPreferences.shared.draft(minutes: 25)
+        self.isNewSessionPresented = true
+    }
 }

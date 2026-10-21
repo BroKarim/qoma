@@ -2,11 +2,25 @@ import SwiftUI
 
 struct QyubeInkHeader<Trailing: View>: View {
     let title: String
+    var titleAction: (() -> Void)?
     @ViewBuilder let trailing: () -> Trailing
+
+    init(title: String, titleAction: (() -> Void)? = nil, @ViewBuilder trailing: @escaping () -> Trailing) {
+        self.title = title
+        self.titleAction = titleAction
+        self.trailing = trailing
+    }
 
     var body: some View {
         HStack(spacing: 12) {
-            Text(title).font(.title3.weight(.semibold))
+            if let titleAction {
+                Button(title, action: titleAction)
+                    .buttonStyle(.plain)
+                    .font(.title3.weight(.semibold))
+                    .accessibilityLabel("Go to Today")
+            } else {
+                Text(title).font(.title3.weight(.semibold))
+            }
             Spacer(minLength: 8)
             Canvas { context, size in
                 var wave = Path()
@@ -29,6 +43,6 @@ struct QyubeInkHeader<Trailing: View>: View {
         }
         .foregroundStyle(Color.qyubeMenuInk)
         .padding(.horizontal, 18).frame(height: 42)
-        .overlay(alignment: .bottom) { Rectangle().fill(Color.qyubeMenuInk).frame(height: 1) }
+        .overlay(alignment: .bottom) { QyubeInkDivider().frame(height: 3) }
     }
 }

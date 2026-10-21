@@ -1268,6 +1268,27 @@ Catatan ini memperbarui status rencana tanggal 20 Oktober di atas tanpa menghapu
 - Pengguna mengizinkan implementasi **fondasi + Today** setelah mempelajari `Qoma/UI/MenuBar/MenuBarView.swift` sebagai rujukan visual dan pola UI.
 - Sebelum coding, simpan semua perubahan yang sudah ada pada branch `codex/remove-obsolete-prototypes` dalam commit; majukan checkpoint `codex/storage-load-and-platform-tests`, lalu kerjakan Batch 1 pada branch terpisah `codex/qyube-foundation-today`.
 - Scope kode Batch 1: kerangka window awal 420 × sekitar 700 pt yang tetap resizable, header bersama dengan qyube/coretan dan navigasi, gaya Ink & Ice serta komponen seperlunya, lalu Today dengan progress daily goal, penguin, daftar sesi hari ini, dan footer Create new session.
-- Reuse komponen atau perilaku `MenuBarView` yang memang sama; Today tidak mengambil alih form Start atau memulai session baru sebagai bagian dari tahap ini.
-- Implementasi masih UI-first. Gunakan data contoh/fallback lokal secukupnya untuk meninjau layar; integrasi timer, histori penuh, goal persistence, dan layanan tetap mengikuti fase roadmap.
-- Status: checkpoint + branch implementasi sedang disiapkan. UI fondasi dan Today belum selesai.
+- Reuse komponen atau perilaku `MenuBarView` yang memang sama. Today tetap layar mandiri; CTA membuka `NewSessionView` yang sudah ada, jadi desain ulang form tetap berada di UI-04.
+- Data Today memakai histori lokal yang sudah tersedia. Goal 2 jam masih default presentasi; goal yang bisa diedit dan persistence mengikuti fase roadmap. CTA memakai alur Start lokal yang ada dan menutup main window setelah sukses; backend tidak disentuh.
+- [x] Checkpoint commit `916c4d5` menyimpan semua perubahan pending pada branch `codex/remove-obsolete-prototypes`; branch `codex/storage-load-and-platform-tests` fast-forward ke commit yang sama.
+- [x] Branch kerja `codex/qyube-foundation-today` dibuat dari checkpoint.
+- [x] Fondasi UI: window dibuka pada 420 × 700 pt, tetap resizable dengan minimum 360 × 480 pt, menyimpan ukuran/frame, memakai header ink-wave yang sama dengan MenuBar, dan memulai di Today.
+- [x] Today: ringkasan progress goal default 2 jam dengan ilustrasi penguin, daftar sesi lokal hari ini dengan status, empty state, footer Create new session, serta Back to session saat sesi aktif/paused.
+- [x] CTA Today memakai form sesi yang sudah ada; keberhasilan Start menutup window utama, dan Back to session memilih floating timer atau popover menu bar sesuai preferensi.
+- [x] Build Debug macOS berhasil dengan Xcode/macOS SDK 26.2; test suite tidak dijalankan. Warning SwiftLint/concurrency lama pada file lain tetap ada.
+- Status: fondasi + Today selesai pada working tree branch `codex/qyube-foundation-today`; perubahan UI belum di-commit. Redesign New Session dan pengaturan daily goal tetap tahap berikut.
+
+
+### Revisi kepadatan Today — 21 Oktober 2026
+
+- Arahan terbaru menggantikan ukuran 420 × 700 pt: panel tetap 310 × 470 pt, tanpa traffic light dan tanpa resize. Isi tetap dapat discroll.
+- Window borderless tetap menerima fokus/keyboard, bisa digeser dari area kosong, dan dapat ditutup dengan Escape. Ukuran frame lama tidak dipulihkan.
+- Border tinta masuk sekitar 6 pt dari tepi panel; contour dan divider organik deterministik diperjelas, header/goal/ilustrasi dirapatkan.
+- Palette diselaraskan: porcelain #FAFBF8, ink #253E4A, ice #E4EFF2, accent #386779.
+- Penghapusan gambar draft 02/03 yang sudah ada pada working tree tidak disentuh.
+- Validasi revisi: build Debug arm64 berhasil dan `git diff --check` bersih. Inspeksi visual langsung serta test suite belum dijalankan.
+
+### Penyesuaian ukuran Today — 21 Oktober 2026
+
+- Tinggi panel dinaikkan dari 470 menjadi 700 pt; lebar tetap 310 pt, tanpa traffic light dan tanpa resize.
+- Jarak border tinta dari tepi dikurangi sekitar 2 pt (dari sekitar 6 menjadi 4 pt). Ukuran preview Today mengikuti panel.
