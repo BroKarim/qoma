@@ -1335,3 +1335,12 @@ Catatan ini memperbarui status rencana tanggal 20 Oktober di atas tanpa menghapu
 - Tile memakai empat warna latar rarity (abu-abu, biru muda, lilac, emas pucat) beserta legenda ringkas. Tidak ada nama ikan, angka/jumlah koleksi, filter, atau detail ikan di grid; layar ini fokus pada artwork sesuai arahan UI.
 - Definisi katalog saat ini baru memetakan lima ikan, sedangkan sheet adalah 32 concept fish tanpa mapping species. Karena itu grid ini memakai artwork statis untuk validasi visual dan belum menghubungkan status discovery/catch ke ikan individual.
 - Validasi: `git diff --check` bersih. Build, test, dan inspeksi visual dalam window macOS belum dijalankan.
+
+#### Revisi UI Catalog — 21 Oktober 2026
+
+- Grid 32 concept fish diganti dengan delapan item `CatalogDefinitions` agar status koleksi merujuk pada jenis yang benar-benar didukung aplikasi.
+- Progress menampilkan persentase jenis unik yang pernah didapat dan dibank; denominator seluruh jenis katalog. Hasil tangkapan berulang tidak menaikkan persentase.
+- Tab All, Fish, dan Ocean finds memfilter grid. Item diurutkan stabil berdasarkan rarity Common, Uncommon, Rare, lalu Legendary.
+- Item yang belum ditemukan memakai aset spesies yang sama dengan template rendering hitam; satu artwork per item cukup, siluet tidak memerlukan file kedua. Artwork berwarna existing tetap dipakai sementara sampai aset ikan final dibuat.
+- Batas saat ini: rarity masih memakai definisi aplikasi yang sudah ada dan bisa direvisi setelah sistem rarity dikunci. Asset source opaque dari concept sheet tidak dipakai untuk discovery; background ikan final masih menunggu artwork transparan.
+- Validasi kode: `git diff --check` bersih. Build, test, dan inspeksi visual belum dijalankan.

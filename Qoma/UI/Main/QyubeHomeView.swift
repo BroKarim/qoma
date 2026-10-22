@@ -158,7 +158,7 @@ struct QyubeHomeView: View {
                 selectedDay: self.$navigation.selectedDay,
                 catchRequest: self.navigation.catchRequest)
         case .catalog:
-            CatalogView()
+            CatalogView().environmentObject(self.navigation)
         case .settings:
             QyubeJournalSettingsView()
         case .about:
