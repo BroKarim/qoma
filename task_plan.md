@@ -1522,3 +1522,15 @@ Catatan ini memperbarui status simulator di atas: pengguna menyetujui kandidat *
 - Simulator dijalankan ulang dengan sumber config bersama; median 100% tetap **292,56 jam**, P10 **206,61 jam**, P90 **438,74 jam**, mean duplikat **18.480,32**. Laporan dan hasil penuh tetap di `design/rarity-simulation/README.md` serta `results.json`.
 
 **Belum selesai:** species manifest/nama final dan artwork 150 item; aturan jumlah/bobot fish vs ocean finds; test suite; evaluasi perilaku UI koleksi setelah data item baru tampil. Semua entri baru saat ini memakai placeholder.
+
+### Investigasi dan perbaikan crash saat memulai sesi — 22 Oktober 2026
+
+Crash report menunjukkan `EXC_BREAKPOINT` di `CatchRarityRules.config` baris 75. `Config` mendekode `[CatalogDefinitions.Rarity: Value]` langsung dari JSON object. `JSONDecoder` memperlakukan dictionary ber-key enum sebagai representasi array, sehingga `baseOdds` gagal dibaca; `try?` menyamarkan detail error lalu `preconditionFailure` menutup aplikasi saat konfigurasi pertama kali diakses ketika sesi/catch mulai.
+
+Perbaikan dan temuan lanjutan:
+
+- `Config` sekarang mendekode object rarity sebagai `[String: Value]`, mengonversi key ke `Rarity`, dan mengembalikan decoding error jika ada nama rarity yang tidak dikenal. Ini berlaku untuk `baseOdds` dan `itemCounts`.
+- Setelah decoding lolos, test katalog menemukan akses `legacyKinds[rarity]?[index]` tetap trap ketika config meminta 60 Common tetapi daftar legacy hanya berisi 4. Lookup sekarang memeriksa indeks dan memakai ID/nama fallback bagi entri katalog yang baru.
+- Test hard pity juga menemukan probabilitas Rare+ dapat melewati 1 ketika Legendary dipaksa 100% (`baseRare + legendary`), sehingga roll deterministik memilih Rare sebelum mencapai Legendary. Nilai Rare+ sekarang dibatasi maksimum 1.
+- Test `CatchEngineTests` lulus, termasuk memuat konfigurasi rarity, jumlah katalog, odds/interval, hard pity Legendary, dan interval catch. Build macOS sukses. Full test suite sempat gagal karena crash pada `QomaDatabaseTests.committedStateSurvivesDatabaseReopen()` yang membuat test lain ikut tercatat gagal; suite penuh belum berhasil diverifikasi.
+- Perubahan ada di commit `099e0be` pada branch `codex/pixel-floating-panel`; working tree saat dokumentasi ditulis berisi folder prototype collectibles `output/imagegen/common-collectibles-v1/` yang belum dilacak.

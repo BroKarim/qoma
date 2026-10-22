@@ -1,0 +1,686 @@
+[
+  {
+    "id": "fish-source-01",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      1,
+      1
+    ],
+    "crop": [
+      0,
+      0,
+      242,
+      230
+    ],
+    "path": "fish/fish-source-01.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "fish-source-02",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      1,
+      2
+    ],
+    "crop": [
+      242,
+      0,
+      458,
+      230
+    ],
+    "path": "fish/fish-source-02.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "fish-source-03",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      1,
+      3
+    ],
+    "crop": [
+      458,
+      0,
+      680,
+      230
+    ],
+    "path": "fish/fish-source-03.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "fish-source-04",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      1,
+      4
+    ],
+    "crop": [
+      680,
+      0,
+      895,
+      230
+    ],
+    "path": "fish/fish-source-04.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "fish-source-05",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      1,
+      5
+    ],
+    "crop": [
+      895,
+      0,
+      1114,
+      230
+    ],
+    "path": "fish/fish-source-05.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "fish-source-06",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      1,
+      6
+    ],
+    "crop": [
+      1114,
+      0,
+      1330,
+      230
+    ],
+    "path": "fish/fish-source-06.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "fish-source-07",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      1,
+      7
+    ],
+    "crop": [
+      1330,
+      0,
+      1550,
+      230
+    ],
+    "path": "fish/fish-source-07.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "fish-source-08",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      1,
+      8
+    ],
+    "crop": [
+      1550,
+      0,
+      1774,
+      230
+    ],
+    "path": "fish/fish-source-08.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "fish-source-09",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      2,
+      1
+    ],
+    "crop": [
+      0,
+      230,
+      242,
+      450
+    ],
+    "path": "fish/fish-source-09.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "fish-source-10",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      2,
+      2
+    ],
+    "crop": [
+      242,
+      230,
+      458,
+      450
+    ],
+    "path": "fish/fish-source-10.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "fish-source-11",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      2,
+      3
+    ],
+    "crop": [
+      458,
+      230,
+      680,
+      450
+    ],
+    "path": "fish/fish-source-11.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "fish-source-12",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      2,
+      4
+    ],
+    "crop": [
+      680,
+      230,
+      895,
+      450
+    ],
+    "path": "fish/fish-source-12.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "fish-source-13",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      2,
+      5
+    ],
+    "crop": [
+      895,
+      230,
+      1114,
+      450
+    ],
+    "path": "fish/fish-source-13.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "fish-source-14",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      2,
+      6
+    ],
+    "crop": [
+      1114,
+      230,
+      1330,
+      450
+    ],
+    "path": "fish/fish-source-14.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "fish-source-15",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      2,
+      7
+    ],
+    "crop": [
+      1330,
+      230,
+      1550,
+      450
+    ],
+    "path": "fish/fish-source-15.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "fish-source-16",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      2,
+      8
+    ],
+    "crop": [
+      1550,
+      230,
+      1774,
+      450
+    ],
+    "path": "fish/fish-source-16.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "fish-source-17",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      3,
+      1
+    ],
+    "crop": [
+      0,
+      450,
+      242,
+      648
+    ],
+    "path": "fish/fish-source-17.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "fish-source-18",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      3,
+      2
+    ],
+    "crop": [
+      242,
+      450,
+      458,
+      648
+    ],
+    "path": "fish/fish-source-18.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "fish-source-19",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      3,
+      3
+    ],
+    "crop": [
+      458,
+      450,
+      680,
+      648
+    ],
+    "path": "fish/fish-source-19.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "fish-source-20",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      3,
+      4
+    ],
+    "crop": [
+      680,
+      450,
+      895,
+      648
+    ],
+    "path": "fish/fish-source-20.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "fish-source-21",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      3,
+      5
+    ],
+    "crop": [
+      895,
+      450,
+      1114,
+      648
+    ],
+    "path": "fish/fish-source-21.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "fish-source-22",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      3,
+      6
+    ],
+    "crop": [
+      1114,
+      450,
+      1330,
+      648
+    ],
+    "path": "fish/fish-source-22.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "fish-source-23",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      3,
+      7
+    ],
+    "crop": [
+      1330,
+      450,
+      1550,
+      648
+    ],
+    "path": "fish/fish-source-23.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "fish-source-24",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      3,
+      8
+    ],
+    "crop": [
+      1550,
+      450,
+      1774,
+      648
+    ],
+    "path": "fish/fish-source-24.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "fish-source-25",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      4,
+      1
+    ],
+    "crop": [
+      0,
+      648,
+      242,
+      887
+    ],
+    "path": "fish/fish-source-25.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "fish-source-26",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      4,
+      2
+    ],
+    "crop": [
+      242,
+      648,
+      458,
+      887
+    ],
+    "path": "fish/fish-source-26.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "fish-source-27",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      4,
+      3
+    ],
+    "crop": [
+      458,
+      648,
+      680,
+      887
+    ],
+    "path": "fish/fish-source-27.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "fish-source-28",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      4,
+      4
+    ],
+    "crop": [
+      680,
+      648,
+      895,
+      887
+    ],
+    "path": "fish/fish-source-28.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "fish-source-29",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      4,
+      5
+    ],
+    "crop": [
+      895,
+      648,
+      1114,
+      887
+    ],
+    "path": "fish/fish-source-29.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "fish-source-30",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      4,
+      6
+    ],
+    "crop": [
+      1114,
+      648,
+      1330,
+      887
+    ],
+    "path": "fish/fish-source-30.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "fish-source-31",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      4,
+      7
+    ],
+    "crop": [
+      1330,
+      648,
+      1550,
+      887
+    ],
+    "path": "fish/fish-source-31.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "fish-source-32",
+    "rarity": null,
+    "category": "fish",
+    "sheet": "fish-sheet-transparent-v1.png",
+    "cell": [
+      4,
+      8
+    ],
+    "crop": [
+      1550,
+      648,
+      1774,
+      887
+    ],
+    "path": "fish/fish-source-32.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "common-sea-pebble",
+    "rarity": "common",
+    "category": "ocean-finds",
+    "sheet": "common-ocean-finds-sheet-v1.png",
+    "cell": [
+      1,
+      1
+    ],
+    "crop": [
+      0,
+      0,
+      512,
+      512
+    ],
+    "path": "ocean-finds/common-sea-pebble.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "common-clam-shell",
+    "rarity": "common",
+    "category": "ocean-finds",
+    "sheet": "common-ocean-finds-sheet-v1.png",
+    "cell": [
+      1,
+      2
+    ],
+    "crop": [
+      512,
+      0,
+      1024,
+      512
+    ],
+    "path": "ocean-finds/common-clam-shell.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "common-spiral-shell",
+    "rarity": "common",
+    "category": "ocean-finds",
+    "sheet": "common-ocean-finds-sheet-v1.png",
+    "cell": [
+      1,
+      3
+    ],
+    "crop": [
+      1024,
+      0,
+      1536,
+      512
+    ],
+    "path": "ocean-finds/common-spiral-shell.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "common-driftwood",
+    "rarity": "common",
+    "category": "ocean-finds",
+    "sheet": "common-ocean-finds-sheet-v1.png",
+    "cell": [
+      2,
+      1
+    ],
+    "crop": [
+      0,
+      512,
+      512,
+      1024
+    ],
+    "path": "ocean-finds/common-driftwood.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "common-shell-shard",
+    "rarity": "common",
+    "category": "ocean-finds",
+    "sheet": "common-ocean-finds-sheet-v1.png",
+    "cell": [
+      2,
+      2
+    ],
+    "crop": [
+      512,
+      512,
+      1024,
+      1024
+    ],
+    "path": "ocean-finds/common-shell-shard.png",
+    "status": "draft-art"
+  },
+  {
+    "id": "common-sea-glass",
+    "rarity": "common",
+    "category": "ocean-finds",
+    "sheet": "common-ocean-finds-sheet-v1.png",
+    "cell": [
+      2,
+      3
+    ],
+    "crop": [
+      1024,
+      512,
+      1536,
+      1024
+    ],
+    "path": "ocean-finds/common-sea-glass.png",
+    "status": "draft-art"
+  }
+]
