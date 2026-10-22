@@ -47,7 +47,6 @@ struct AnalyticsHeatmapView: View {
     private func grid(availableWidth: CGFloat) -> some View {
         let spacing = self.cellSpacing(for: availableWidth)
         let cellSize = self.cellSize(for: availableWidth, spacing: spacing)
-        let contentWidth = CGFloat(self.weeks.count) * (cellSize + spacing) - spacing + 6
         return HStack(alignment: .top, spacing: 6) {
             VStack(alignment: .leading, spacing: spacing) {
                 ForEach(0..<7) { row in
@@ -72,7 +71,7 @@ struct AnalyticsHeatmapView: View {
                     }
                     .padding(3)
                 }
-                .scrollIndicators(contentWidth > availableWidth + 0.5 ? .visible : .hidden)
+                .scrollIndicators(.hidden)
                 .onAppear { proxy.scrollTo(self.weeks.last?.first?.id, anchor: .trailing) }
             }
         }
@@ -87,8 +86,7 @@ struct AnalyticsHeatmapView: View {
         let width = max(0, self.gridWidth - 30)
         let spacing = self.cellSpacing(for: width)
         let size = self.cellSize(for: width, spacing: spacing)
-        let contentWidth = CGFloat(self.weeks.count) * (size + spacing) - spacing + 6
-        return 7 * size + 7 * spacing + 20 + (contentWidth > width + 0.5 ? 12 : 0)
+        return 7 * size + 7 * spacing + 20
     }
 
     private func monthLabel(_ week: [AnalyticsHeatmapCell]) -> String {

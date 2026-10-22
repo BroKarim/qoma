@@ -24,23 +24,25 @@ struct AnalyticsDashboardView: View {
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    HStack(alignment: .top) {
-                        JournalPageHeader(
-                            eyebrow: "YOUR FOCUS JOURNAL",
-                            title: "Analytics",
-                            subtitle: self.selectedDay.formatted(.dateTime.weekday(.wide).day().month(.wide)))
-                        Spacer(minLength: 12)
-                        Image("JournalArcticPenguin").resizable().scaledToFit()
-                            .frame(width: 220, height: 147).accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 14) {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("YOUR FOCUS JOURNAL")
+                            .font(.system(size: 9, weight: .medium))
+                            .tracking(1.5)
+                            .foregroundStyle(Color.qyubeAccent)
+                        Text("Analytics")
+                            .font(.system(size: 23, design: .serif))
+                        Text(self.selectedDay.formatted(.dateTime.weekday(.wide).day().month(.wide)))
+                            .font(.system(size: 11))
+                            .foregroundStyle(.secondary)
                     }
                     VStack(spacing: 0) {
                         self.overview
-                            .padding(20)
+                            .padding(12)
                             .background(Color.qyubeSelection.opacity(0.42))
                         Rectangle().fill(Color.qyubeLine).frame(height: 0.7)
                         AnalyticsHeatmapView(cells: self.heatmapCells, selectedDate: self.$selectedDay)
-                            .padding(20)
+                            .padding(12)
                     }
                     .background(Color.qyubeCardBackground.opacity(0.58))
                     .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -49,8 +51,7 @@ struct AnalyticsDashboardView: View {
                     // bagian daily-catch
                     self.dailyCatches.id("daily-catches")
                 }
-                .padding(28)
-                .padding(.top, 12)
+                .padding(13)
                 .qyubeHideNativeScrollers()
             }
             .scrollIndicators(.hidden)
@@ -72,7 +73,7 @@ struct AnalyticsDashboardView: View {
     private var overview: some View {
         ViewThatFits(in: .horizontal) {
             HStack(alignment: .center, spacing: 0) { self.stats(showDividers: true) }
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
                 self.stats(showDividers: false)
             }
         }
@@ -104,20 +105,20 @@ struct AnalyticsDashboardView: View {
     }
 
     private func stat(_ title: String, value: String, symbol: String, color: Color) -> some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 8) {
             Image(systemName: symbol)
-                .font(.system(size: 21, weight: .medium))
+                .font(.system(size: 15, weight: .medium))
                 .foregroundStyle(color)
-                .frame(width: 44, height: 44)
+                .frame(width: 30, height: 30)
                 .background(color.opacity(0.12), in: Circle())
                 .accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: 3) {
-                Text(title).font(.system(size: 13, design: .serif)).fixedSize()
-                Text(value).font(.system(size: 34, design: .serif)).minimumScaleFactor(0.7).lineLimit(1)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.system(size: 10, design: .serif)).lineLimit(1)
+                Text(value).font(.system(size: 20, design: .serif)).minimumScaleFactor(0.7).lineLimit(1)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 12)
+        .padding(.horizontal, 5)
         .accessibilityElement(children: .combine)
     }
 
@@ -131,7 +132,8 @@ struct AnalyticsDashboardView: View {
                 endDate: interval?.end,
                 limit: 5),
             domains: AnalyticsEngine.shared.buildTopDomains(
-                from: self.websites, startDate: interval?.start, endDate: interval?.end, limit: 5))
+                from: self.websites, startDate: interval?.start, endDate: interval?.end, limit: 5),
+            showsDomains: false)
     }
 
     private var dailyCatches: some View {

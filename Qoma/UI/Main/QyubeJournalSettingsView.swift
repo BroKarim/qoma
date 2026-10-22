@@ -2,185 +2,322 @@ import SwiftUI
 
 struct QyubeJournalSettingsView: View {
     @ObservedObject private var focus = FocusPreferences.shared
+    @AppStorage("qyube.dailyFocusGoal.hours") private var goalHours = 2
+    @AppStorage("qyube.dailyFocusGoal.minutes") private var goalMinutes = 0
+    @AppStorage(AppConstants.QuickPresets.preset1Key)
+    private var quickPreset1 = AppConstants.QuickPresets.defaultValues[0]
+    @AppStorage(AppConstants.QuickPresets.preset2Key)
+    private var quickPreset2 = AppConstants.QuickPresets.defaultValues[1]
+    @AppStorage(AppConstants.QuickPresets.preset3Key)
+    private var quickPreset3 = AppConstants.QuickPresets.defaultValues[2]
     @AppStorage(AppConstants.SoundSettings.selectedSoundKey)
     private var sound = AppConstants.SoundSettings.defaultSoundID
     @AppStorage(AppConstants.SoundSettings.volumeKey)
     private var volume = AppConstants.SoundSettings.defaultVolume
+    @AppStorage(AppConstants.SoundSettings.autoMuteAfter5SecondsKey) private var autoMute = true
     @AppStorage(AppConstants.FloatingThemeSettings.selectedThemeKey)
     private var themeID = AppConstants.FloatingThemeSettings.defaultThemeID
     @AppStorage(AppConstants.FloatingThemeSettings.liquidGlassKey) private var glass = false
+    @AppStorage(AppConstants.FloatingThemeSettings.opacityKey)
+    private var opacity = AppConstants.FloatingThemeSettings.defaultOpacity
     @AppStorage("qyube.reduceMotionOverride") private var reduceMotion = false
     @AppStorage(DistractionAudioPlayer.enabledKey) private var distractionSounds = true
     @AppStorage(AppConstants.AnalyticsSettings.analyticsEnabledKey)
     private var analyticsEnabled = AppConstants.AnalyticsSettings.defaultAnalyticsEnabled
+    @State private var isResetConfirmationPresented = false
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
-                JournalPageHeader(
-                    eyebrow: "MAKE YOURSELF AT HOME",
-                    title: "Settings",
-                    subtitle: "A few small comforts for your focus.")
-                    .padding(.bottom, 8)
-                self.account
-                self.soundSettings
-                self.floatingSettings
-                self.comfort
-                self.analyticsSettings
-            }.padding(28).padding(.top, 12).qyubeHideNativeScrollers()
+            VStack(alignment: .leading, spacing: 10) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("SETTINGS")
+                        .font(.system(size: 9, weight: .medium))
+                        .tracking(1.5)
+                        .foregroundStyle(Color.qyubeAccent)
+                    Text("Settings")
+                        .font(.system(size: 23, design: .serif))
+                        .foregroundStyle(Color.qyubeMenuInk)
+                }
+
+                self.goalSection
+                self.presetsSection
+                self.soundSection
+                self.floatingSection
+                self.appearanceSection
+                self.privacySection
+                self.aboutSection
+                self.resetSection
+            }
+            .padding(13)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .qyubeHideNativeScrollers()
         }
         .scrollIndicators(.hidden)
+        .foregroundStyle(Color.qyubeMenuInk)
         .onDisappear { SoundAlertPlayer.shared.stop() }
         .onChange(of: self.sound) { _, _ in SoundAlertPlayer.shared.stop() }
         .onChange(of: self.volume) { _, value in
             self.volume = min(1, max(0, value.isFinite ? value : AppConstants.SoundSettings.defaultVolume))
             SoundAlertPlayer.shared.stop()
         }
+        .onChange(of: self.goalHours) { _, value in self.goalHours = min(24, max(0, value)) }
+        .onChange(of: self.goalMinutes) { _, value in self.goalMinutes = min(59, max(0, value)) }
+        .onChange(of: self.quickPreset1) { _, value in self.quickPreset1 = self.clampPreset(value) }
+        .onChange(of: self.quickPreset2) { _, value in self.quickPreset2 = self.clampPreset(value) }
+        .onChange(of: self.quickPreset3) { _, value in self.quickPreset3 = self.clampPreset(value) }
+        .onChange(of: self.opacity) { _, value in
+            self.opacity = min(
+                AppConstants.FloatingThemeSettings.maxOpacity,
+                max(AppConstants.FloatingThemeSettings.minOpacity, value.isFinite ? value : 1))
+        }
         .onChange(of: self.analyticsEnabled) { _, value in
             AppConstants.AnalyticsSettings.isAnalyticsEnabled = value
         }
         .onAppear {
-            if self.sound != "off" && !AppConstants.SoundSettings.options.contains(where: { $0.id == sound }) {
+            if self.sound != "off" && !AppConstants.SoundSettings.options.contains(where: { $0.id == self.sound }) {
                 self.sound = AppConstants.SoundSettings.defaultSoundID
             }
-            if !self.volume.isFinite || !(0...1)
-                .contains(self.volume) { self.volume = AppConstants.SoundSettings.defaultVolume }
-            if !FloatingTheme.allCases.contains(where: { $0.id == themeID }) {
+            if !self.volume.isFinite { self.volume = AppConstants.SoundSettings.defaultVolume }
+            if !FloatingTheme.allCases.contains(where: { $0.id == self.themeID }) {
                 self.themeID = AppConstants.FloatingThemeSettings.defaultThemeID
             }
         }
+        .alert("Reset settings?", isPresented: self.$isResetConfirmationPresented) {
+            Button("Cancel", role: .cancel) {}
+            Button("Reset", role: .destructive) { self.resetSettings() }
+        } message: {
+            Text("Your Qyube preferences will return to their defaults.")
+        }
     }
 
-    private var account: some View {
-        SettingsSurfaceCard {
-            VStack(alignment: .leading, spacing: 14) {
-                self.heading("Account")
-                HStack(spacing: 16) {
-                    Image(systemName: "person.crop.circle").font(.system(size: 34, weight: .ultraLight))
-                        .foregroundStyle(Color.qyubeAccent)
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Your quiet corner").font(.system(size: 17, design: .serif))
-                        Text("Using qyube offline on this Mac.").font(.system(size: 12)).foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                    Button("Log in") {}.disabled(true).help("Account login is not enabled yet.")
+    private var goalSection: some View {
+        self.card {
+            VStack(alignment: .leading, spacing: 8) {
+                self.sectionLabel("DAILY FOCUS GOAL")
+                HStack(spacing: 7) {
+                    self.numberField(value: self.$goalHours, label: "Daily goal hours")
+                    Text("h").font(.system(size: 11)).foregroundStyle(.secondary)
+                    self.numberField(value: self.$goalMinutes, label: "Daily goal minutes")
+                    Text("m").font(.system(size: 11)).foregroundStyle(.secondary)
+                    Spacer(minLength: 0)
                 }
-                Text("Account login will be available later. Your collection stays on this Mac.")
-                    .font(.system(size: 11)).foregroundStyle(.secondary)
+                Text("0h 0m means no target.")
+                    .font(.system(size: 10)).foregroundStyle(.secondary)
             }
         }
     }
 
-    private var soundSettings: some View {
-        SettingsSurfaceCard {
-            VStack(alignment: .leading, spacing: 16) {
-                self.heading("Sound")
-                SettingsRow(title: "Session ends") {
+    private var presetsSection: some View {
+        self.card {
+            VStack(alignment: .leading, spacing: 8) {
+                self.sectionLabel("QUICK PRESETS")
+                HStack(spacing: 6) {
+                    self.presetField(value: self.$quickPreset1)
+                    self.presetField(value: self.$quickPreset2)
+                    self.presetField(value: self.$quickPreset3)
+                }
+            }
+        }
+    }
+
+    private var soundSection: some View {
+        self.card {
+            VStack(alignment: .leading, spacing: 9) {
+                self.sectionLabel("COMPLETION SOUND")
+                HStack(spacing: 8) {
                     Picker("Completion sound", selection: self.$sound) {
                         Text("Off").tag("off")
                         ForEach(AppConstants.SoundSettings.options) { Text($0.title).tag($0.id) }
-                    }.labelsHidden().frame(width: 180)
+                    }
+                    .labelsHidden()
+                    .pickerStyle(.menu)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
                     Button {
-                        SoundAlertPlayer.shared.play(
-                            soundID: self.sound,
-                            volume: self.volume)
-                    } label: { Image(systemName: "play.fill") }
-                        .accessibilityLabel("Preview completion sound").disabled(self.sound == "off")
+                        SoundAlertPlayer.shared.play(soundID: self.sound, volume: self.volume)
+                    } label: {
+                        Image(systemName: "play.fill")
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Preview completion sound")
+                    .disabled(self.sound == "off")
                 }
-                QyubeInkDivider()
-                SettingsRow(title: "Volume") {
-                    Slider(value: self.$volume, in: 0...1).frame(width: 180)
-                        .accessibilityLabel("Completion sound volume")
-                    Text("\(Int(self.volume * 100))%").monospacedDigit().frame(width: 38, alignment: .trailing)
+                HStack(spacing: 8) {
+                    Text("Volume").font(.system(size: 10))
+                    Slider(value: self.$volume, in: 0...1)
+                    Text("\(Int(self.volume * 100))%")
+                        .font(.system(size: 10).monospacedDigit())
+                        .frame(width: 30, alignment: .trailing)
                 }
-                Text("Sounds stop automatically after 5 seconds.").font(.system(size: 11)).foregroundStyle(.secondary)
+                self.toggleRow("Auto mute after 5 seconds", isOn: self.$autoMute)
             }
         }
     }
 
-    private var floatingSettings: some View {
-        SettingsSurfaceCard {
-            VStack(alignment: .leading, spacing: 16) {
-                self.heading("Floating timer")
-                SettingsRow(title: "Show floating timer") {
-                    Toggle("Show floating timer", isOn: Binding(
-                        get: { !self.focus.hideFloatingTimer }, set: { self.focus.hideFloatingTimer = !$0 }))
-                        .labelsHidden().toggleStyle(.switch)
-                }
-                QyubeInkDivider()
-                ViewThatFits(in: .horizontal) {
-                    HStack {
-                        Text("Timer color"); Spacer(); self.themePicker.fixedSize(horizontal: true, vertical: false)
-                    }
-                    VStack(alignment: .leading, spacing: 12) { Text("Timer color"); self.themePicker.fixedSize(
-                        horizontal: true,
-                        vertical: false) }
-                }
+    private var floatingSection: some View {
+        self.card {
+            VStack(alignment: .leading, spacing: 8) {
+                self.sectionLabel("FLOATING TIMER")
+                self.toggleRow(
+                    "Show floating timer",
+                    isOn: Binding(
+                        get: { !self.focus.hideFloatingTimer },
+                        set: { self.focus.hideFloatingTimer = !$0 }))
+                Text("When off, controls move to the menu bar.")
+                    .font(.system(size: 10)).foregroundStyle(.secondary)
+                self.toggleRow("Distraction sound effects", isOn: self.$distractionSounds)
+            }
+        }
+    }
+
+    private var appearanceSection: some View {
+        self.card {
+            VStack(alignment: .leading, spacing: 9) {
+                self.sectionLabel("APPEARANCE")
+                self.toggleRow("Reduce companion motion", isOn: self.$reduceMotion)
                 if #available(macOS 26.0, *) {
-                    QyubeInkDivider()
-                    SettingsRow(title: "Liquid Glass", subtitle: "A translucent surface for your timer.") {
-                        Toggle("Liquid Glass", isOn: self.$glass).labelsHidden().toggleStyle(.switch)
+                    self.toggleRow("Liquid Glass", isOn: self.$glass)
+                }
+                HStack(spacing: 8) {
+                    Text("Opacity").font(.system(size: 10))
+                    Slider(value: self.$opacity, in: AppConstants.FloatingThemeSettings.minOpacity...1)
+                    Text("\(Int((self.opacity * 100).rounded()))%")
+                        .font(.system(size: 10).monospacedDigit())
+                        .frame(width: 30, alignment: .trailing)
+                }
+                HStack(spacing: 7) {
+                    Text("Timer color").font(.system(size: 10))
+                    Spacer(minLength: 0)
+                    ForEach(FloatingTheme.allCases) { theme in
+                        Button { self.themeID = theme.id } label: {
+                            Circle().fill(theme.textColor).frame(width: 15, height: 15)
+                                .overlay(Circle().stroke(
+                                    self.themeID == theme.id ? Color.qyubeMenuInk : .clear,
+                                    lineWidth: 1.5))
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(theme.title)
+                        .accessibilityAddTraits(self.themeID == theme.id ? .isSelected : [])
                     }
                 }
             }
         }
     }
 
-    private var themePicker: some View {
-        HStack(spacing: 10) {
-            ForEach(FloatingTheme.allCases) { theme in
-                Button { self.themeID = theme.id } label: {
-                    Circle().fill(theme.textColor).frame(width: 22, height: 22)
-                        .padding(4)
-                        .overlay(Circle().stroke(self.themeID == theme.id ? Color.qyubeAccent : .clear, lineWidth: 1.5))
-                }
-                .buttonStyle(.plain).accessibilityLabel(theme.title)
-                .accessibilityAddTraits(self.themeID == theme.id ? .isSelected : [])
-                .help(theme.title)
-            }
-            Text("24:53").font(.system(size: 25, weight: .medium, design: .serif).monospacedDigit())
-                .foregroundStyle(FloatingTheme.from(id: self.themeID).textColor)
-                .padding(.horizontal, 16).padding(.vertical, 10)
-                .qyubeInkSurface(fill: .white, stroke: .qyubeLine)
-                .lineLimit(1).fixedSize()
-                .accessibilityLabel("Timer color preview")
-        }
-    }
-
-    private var comfort: some View {
-        SettingsSurfaceCard {
-            VStack(alignment: .leading, spacing: 16) {
-                self.heading("Comfort")
-                SettingsRow(title: "Reduce motion", subtitle: "Gentler penguin movement and quiet visual cues.") {
-                    Toggle("Reduce motion", isOn: self.$reduceMotion).labelsHidden().toggleStyle(.switch)
-                }
-                QyubeInkDivider()
-                SettingsRow(title: "Distraction sound effects") {
-                    Toggle("Distraction sound effects", isOn: self.$distractionSounds).labelsHidden()
-                        .toggleStyle(.switch)
-                }
+    private var privacySection: some View {
+        self.card {
+            VStack(alignment: .leading, spacing: 8) {
+                self.sectionLabel("PRIVACY")
+                self.toggleRow("Record activity", isOn: self.$analyticsEnabled)
             }
         }
     }
 
-    private var analyticsSettings: some View {
-        SettingsSurfaceCard {
-            VStack(alignment: .leading, spacing: 16) {
-                self.heading("Focus analytics")
-                SettingsRow(
-                    title: "Record app and website activity",
-                    subtitle: "Stored locally on this Mac. Website tracking also needs browser permission.") {
-                    Toggle("Record activity", isOn: self.$analyticsEnabled)
-                        .labelsHidden().toggleStyle(.switch)
+    private var aboutSection: some View {
+        self.card {
+            VStack(alignment: .leading, spacing: 8) {
+                self.sectionLabel("ABOUT")
+                Button {
+                    UpdaterManager.shared.checkForUpdates()
+                } label: {
+                    HStack {
+                        Text("Check for Updates")
+                        Spacer()
+                        Image(systemName: "arrow.up.right")
+                    }
+                    .font(.system(size: 11, weight: .medium))
+                    .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
             }
         }
     }
 
-    private func heading(_ title: String) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(title).font(.system(size: 23, design: .serif))
-            QyubeInkDivider()
+    private var resetSection: some View {
+        self.card {
+            VStack(alignment: .leading, spacing: 8) {
+                self.sectionLabel("RESET")
+                Button("Reset settings") { self.isResetConfirmationPresented = true }
+                    .font(.system(size: 11, weight: .medium))
+                    .buttonStyle(.plain)
+                    .foregroundStyle(Color.qyubeAccent)
+                Button("Erase all data") {}
+                    .font(.system(size: 11, weight: .medium))
+                    .buttonStyle(.plain)
+                    .foregroundStyle(.secondary)
+                    .disabled(true)
+                    .help("Data erasure will be added in a later implementation stage.")
+            }
         }
     }
+
+    private func card<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 10, content: content)
+            .padding(12)
+            .qyubeInkSurface(fill: .qyubeCardBackground.opacity(0.58))
+    }
+
+    private func sectionLabel(_ title: String) -> some View {
+        Text(title)
+            .font(.system(size: 9, weight: .semibold))
+            .tracking(1)
+            .foregroundStyle(Color.qyubeAccent)
+    }
+
+    private func toggleRow(_ title: String, isOn: Binding<Bool>) -> some View {
+        HStack(spacing: 8) {
+            Text(title).font(.system(size: 11)).lineLimit(2)
+            Spacer(minLength: 4)
+            Toggle(title, isOn: isOn).labelsHidden().toggleStyle(.switch).controlSize(.small)
+        }
+    }
+
+    private func numberField(value: Binding<Int>, label: String) -> some View {
+        TextField("", value: value, formatter: Self.integerFormatter)
+            .textFieldStyle(.roundedBorder)
+            .multilineTextAlignment(.center)
+            .frame(width: 42)
+            .accessibilityLabel(label)
+    }
+
+    private func presetField(value: Binding<Int>) -> some View {
+        HStack(spacing: 3) {
+            TextField("", value: value, formatter: Self.integerFormatter)
+                .textFieldStyle(.roundedBorder)
+                .multilineTextAlignment(.center)
+                .font(.system(size: 10))
+            Text("min").font(.system(size: 9)).foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .combine)
+    }
+
+    private func clampPreset(_ value: Int) -> Int {
+        min(AppConstants.QuickPresets.maxMinutes, max(AppConstants.QuickPresets.minMinutes, value))
+    }
+
+    private func resetSettings() {
+        self.goalHours = 2
+        self.goalMinutes = 0
+        self.quickPreset1 = AppConstants.QuickPresets.defaultValues[0]
+        self.quickPreset2 = AppConstants.QuickPresets.defaultValues[1]
+        self.quickPreset3 = AppConstants.QuickPresets.defaultValues[2]
+        self.sound = AppConstants.SoundSettings.defaultSoundID
+        self.volume = AppConstants.SoundSettings.defaultVolume
+        self.autoMute = true
+        self.focus.hideFloatingTimer = false
+        self.distractionSounds = true
+        self.reduceMotion = false
+        self.glass = false
+        self.opacity = AppConstants.FloatingThemeSettings.defaultOpacity
+        self.themeID = AppConstants.FloatingThemeSettings.defaultThemeID
+        self.analyticsEnabled = AppConstants.AnalyticsSettings.defaultAnalyticsEnabled
+    }
+
+    private static let integerFormatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .none
+        formatter.maximumFractionDigits = 0
+        return formatter
+    }()
 }

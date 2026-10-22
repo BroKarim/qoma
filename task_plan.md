@@ -1344,3 +1344,13 @@ Catatan ini memperbarui status rencana tanggal 20 Oktober di atas tanpa menghapu
 - Item yang belum ditemukan memakai aset spesies yang sama dengan template rendering hitam; satu artwork per item cukup, siluet tidak memerlukan file kedua. Artwork berwarna existing tetap dipakai sementara sampai aset ikan final dibuat.
 - Batas saat ini: rarity masih memakai definisi aplikasi yang sudah ada dan bisa direvisi setelah sistem rarity dikunci. Asset source opaque dari concept sheet tidak dipakai untuk discovery; background ikan final masih menunggu artwork transparan.
 - Validasi kode: `git diff --check` bersih. Build, test, dan inspeksi visual belum dijalankan.
+
+## Analytics dan Settings compact — 22 Oktober 2026
+
+- Semua perubahan Catalog di branch `codex/qyube-catalog-screen` disimpan sebelum pekerjaan ini dalam commit `f633990`; pekerjaan Analytics/Settings berjalan di branch baru `codex/analytics-settings-ui`.
+- Analytics disusun vertikal untuk panel compact: judul/tanggal, ringkasan empat metrik dua kolom, heatmap, Top Apps, lalu Daily Catches. Indikator scroll vertikal dan heatmap horizontal disembunyikan.
+- UI Top Websites disembunyikan sementara melalui flag tampilan. Pembacaan data website, pemeringkatan domain, permission check, dan modelnya tetap dipertahankan untuk tahap lanjutan.
+- Settings mengikuti kelompok prototype: daily goal dua field jam/menit (default 2h 0m; 0h 0m berarti tanpa target), quick presets 15/25/45 menit, completion sound/volume/auto mute, floating timer, appearance, privacy, update, dan reset.
+- Goal disimpan di AppStorage dan dipakai Today untuk target/progress; nilai nol menyembunyikan progress bar. Reset settings mengembalikan preferensi yang tersedia ke default. Aksi Erase all data ditampilkan nonaktif karena alur penghapusan data berada di tahap lain.
+- Ukuran window tetap 310 × 510 pt sesuai keputusan flow terbaru; halaman Analytics dan Settings di-scroll. Tidak ada perubahan ke ukuran atau navigasi window.
+- Validasi build macOS berhasil dengan Xcode. SwiftLint masih melaporkan warning lama di beberapa file lain, termasuk CatalogView dari milestone sebelumnya; tidak ada warning lint pada file yang diubah dalam pekerjaan ini.

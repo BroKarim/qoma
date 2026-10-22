@@ -4,6 +4,7 @@ struct AnalyticsBreakdownView: View {
     let date: Date
     let apps: [AnalyticsBreakdownItem]
     let domains: [AnalyticsBreakdownItem]
+    let showsDomains: Bool
     @ObservedObject private var permissions = AnalyticsPermissionsManager.shared
 
     var body: some View {
@@ -13,19 +14,25 @@ struct AnalyticsBreakdownView: View {
                     title: "Daily Breakdown",
                     subtitle: "Where your focus went on \(self.date.formatted(.dateTime.day().month(.wide))).")
                 QyubeInkDivider()
-                HStack(alignment: .top, spacing: 24) {
-                    self.column("Top Apps", items: self.apps, empty: "No app activity on this day.")
-                    QyubeInkDivider(axis: .vertical).frame(width: 2)
-                    VStack(alignment: .leading, spacing: 12) {
-                        self.column("Top Websites", items: self.domains, empty: "No website activity on this day.")
-                        if self.domains.isEmpty, self.permissions.automationPermissionStatus != .granted {
-                            Text("Website tracking needs Automation permission. App activity works without it.")
-                                .font(.system(size: 11)).foregroundStyle(.secondary)
-                            Button("Open Automation Settings") { self.permissions.openSystemPreferences() }
-                                .font(.system(size: 11))
+                if self.showsDomains {
+                    HStack(alignment: .top, spacing: 24) {
+                        self.column("Top Apps", items: self.apps, empty: "No app activity on this day.")
+                        QyubeInkDivider(axis: .vertical).frame(width: 2)
+                        VStack(alignment: .leading, spacing: 12) {
+                            self.column("Top Websites", items: self.domains, empty: "No website activity on this day.")
+                            if self.domains.isEmpty, self.permissions.automationPermissionStatus != .granted {
+                                Text("Website tracking needs Automation permission. App activity works without it.")
+                                    .font(.system(size: 11)).foregroundStyle(.secondary)
+                                Button("Open Automation Settings") { self.permissions.openSystemPreferences() }
+                                    .font(.system(size: 11))
+                            }
                         }
-                    }.frame(maxWidth: .infinity, alignment: .leading)
-                }.fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .fixedSize(horizontal: false, vertical: true)
+                } else {
+                    self.column("Top Apps", items: self.apps, empty: "No app activity on this day.")
+                }
             }
         }
     }
