@@ -22,7 +22,9 @@ enum CatalogDefinitions {
     // shortcut: generated entries use numbered names and shared fish art, replace when the species manifest is approved.
     static let allKinds: [Kind] = Rarity.allCases.flatMap { rarity in
         (0..<(counts[rarity] ?? 0)).map { index in
-            let legacy = legacyKinds[rarity]?[index]
+            let legacy = legacyKinds[rarity].flatMap { kinds in
+                kinds.indices.contains(index) ? kinds[index] : nil
+            }
             let id = legacy?.id ?? "\(rarity.rawValue)-\(String(format: "%02d", index + 1))"
             return Kind(
                 id: id,

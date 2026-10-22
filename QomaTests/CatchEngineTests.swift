@@ -45,6 +45,10 @@ struct CatchEngineTests {
     @Test
     func approvedCatalogAndPityBoundariesAreUsed() {
         #expect(CatalogDefinitions.allKinds.count == 150)
+        #expect(CatchRarityRules.baseOdds == [
+            .common: 0.701, .uncommon: 0.24, .rare: 0.055, .legendary: 0.004
+        ])
+        #expect(CatchRarityRules.intervalSeconds == 50...70)
         #expect(CatalogDefinitions.Rarity.allCases.map { rarity in
             CatalogDefinitions.allKinds.filter { $0.rarity == rarity }.count
         } == [60, 36, 24, 30])

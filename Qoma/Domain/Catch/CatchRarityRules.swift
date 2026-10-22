@@ -63,6 +63,37 @@ enum CatchRarityRules {
         let pity: Pity
         let itemCounts: [CatalogDefinitions.Rarity: Int]
         let itemWeights: ItemWeights
+
+        private enum CodingKeys: String, CodingKey {
+            case version, intervalSeconds, baseOdds, pity, itemCounts, itemWeights
+        }
+
+        init(from decoder: Decoder) throws {
+            let values = try decoder.container(keyedBy: CodingKeys.self)
+            version = try values.decode(Int.self, forKey: .version)
+            intervalSeconds = try values.decode(Interval.self, forKey: .intervalSeconds)
+            pity = try values.decode(Pity.self, forKey: .pity)
+            itemWeights = try values.decode(ItemWeights.self, forKey: .itemWeights)
+            baseOdds = try Self.decodeRarityValues(from: values, key: .baseOdds)
+            itemCounts = try Self.decodeRarityValues(from: values, key: .itemCounts)
+        }
+
+        private static func decodeRarityValues<Value: Decodable>(
+            from values: KeyedDecodingContainer<CodingKeys>,
+            key: CodingKeys
+        ) throws -> [CatalogDefinitions.Rarity: Value] {
+            let rawValues = try values.decode([String: Value].self, forKey: key)
+            var result: [CatalogDefinitions.Rarity: Value] = [:]
+            for (name, value) in rawValues {
+                guard let rarity = CatalogDefinitions.Rarity(rawValue: name) else {
+                    throw DecodingError.dataCorruptedError(
+                        forKey: key, in: values, debugDescription: "Unknown rarity: \(name)"
+                    )
+                }
+                result[rarity] = value
+            }
+            return result
+        }
     }
 
     private final class BundleToken: NSObject {}
@@ -112,10 +143,10 @@ enum CatchRarityRules {
         let legendary = legendaryBoost == 1
             ? 1
             : min(1 - baseRare, baseLegendary + (1 - baseLegendary) * legendaryBoost)
-        let rarePlus = max(
+        let rarePlus = min(1, max(
             baseRare + legendary,
             baseRarePlus + (1 - baseRarePlus) * rarePlusBoost
-        )
+        ))
         let rare = rarePlus - legendary
         let commonUncommon = max(0, 1 - rarePlus)
         let commonBase = baseOdds[.common]!
