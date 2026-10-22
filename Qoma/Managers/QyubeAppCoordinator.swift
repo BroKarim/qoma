@@ -143,7 +143,13 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
                 _ = self?.sessionCoordinator.stopSession(reason: "Stopped from floating timer")
             },
             onRepeat: { [weak self] session in self?.repeatSession(session) ?? false },
-            onReview: { [weak self] session in self?.reviewSession(session) })
+            onReview: { [weak self] session in self?.reviewSession(session) },
+            onToday: { [weak self] in
+                self?.navigation.page = nil
+                self?.navigation.sessionToReview = nil
+                self?.navigation.todayRequest = UUID()
+                self?.showHomeWindow()
+            })
         timerController.onBreakChanged = { [weak self] in
             guard let self else { return }
             self.navigation.breakRemaining = self.timerController.isOnBreak

@@ -18,8 +18,8 @@ struct MenuBarSessionPopover: View {
                     onEdit: onEdit,
                     onStop: { confirmingStop = true })
                     .frame(
-                        width: AppConstants.FloatingLayoutSettings.timerOnlyWidth,
-                        height: AppConstants.FloatingLayoutSettings.timerOnlyHeight)
+                        width: 200,
+                        height: 110)
             } else if case let .failed(message) = coordinator.finalizationState {
                 VStack(spacing: 12) {
                     Text(message).font(.callout).multilineTextAlignment(.center)
@@ -38,8 +38,8 @@ struct MenuBarSessionPopover: View {
                 Text("Open Qyube to start a session")
                     .font(.callout)
                     .frame(
-                        width: AppConstants.FloatingLayoutSettings.timerOnlyWidth,
-                        height: AppConstants.FloatingLayoutSettings.timerOnlyHeight)
+                        width: 200,
+                        height: 110)
             }
         }
         .foregroundStyle(Color.qyubeInk)

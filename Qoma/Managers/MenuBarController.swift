@@ -173,8 +173,8 @@ final class MenuBarController: NSObject {
 
         let panelSize = coordinator?.finalizationState == .idle
             ? NSSize(
-                width: AppConstants.FloatingLayoutSettings.timerOnlyWidth,
-                height: AppConstants.FloatingLayoutSettings.timerOnlyHeight)
+                width: 200,
+                height: 110)
             : NSSize(width: 260, height: 130)
         let spacing: CGFloat = 6
         var origin = NSPoint(

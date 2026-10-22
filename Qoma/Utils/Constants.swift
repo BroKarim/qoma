@@ -37,9 +37,9 @@ enum AppConstants {
     }
 
     enum FloatingLayoutSettings {
-        static let timerOnlyWidth: CGFloat = 200
-        static let timerOnlyHeight: CGFloat = 110
-        static let timerOnlyFontSize: CGFloat = 46
+        static let timerOnlyWidth: CGFloat = 136
+        static let timerOnlyHeight: CGFloat = 48
+        static let timerOnlyFontSize: CGFloat = 32
     }
 
     enum BreakDuration {

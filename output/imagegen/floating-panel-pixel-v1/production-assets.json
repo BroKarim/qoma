@@ -1,0 +1,42 @@
+[
+  {
+    "name": "head",
+    "path": "/Users/kiram/.codex/generated_images/01a14d18-1275-7fe3-bbaa-4807ee68a130/exec-8e43fe99-b894-41f7-aa0f-c410eed08dcf.png",
+    "prompt": "Use case: stylized-concept. Production transparent PNG pixel-art sprite for cozy white desktop Pomodoro app. A cute squat penguin HEAD ONLY, front facing, wearing opaque anaglyph 3D cinema glasses with red left lens and cyan right lens. Dark charcoal rounded stepped pixel silhouette, warm white cheek patches, tiny muted orange beak, no visible eyes behind opaque glasses. Crisp chunky square pixel clusters, minimal flat colors, no blur, no gradients, no text, no shadow, no body. Centered with tight transparent margins. Designed to sit on a separate squat penguin body and gently nod."
+  },
+  {
+    "name": "body",
+    "path": "/Users/kiram/.codex/generated_images/01a14d18-1275-7fe3-bbaa-4807ee68a130/exec-c51ed445-c40d-4887-b001-1b3bded94b30.png",
+    "prompt": "Use case: stylized-concept. Transparent production pixel art sprite, cute squat penguin BODY ONLY, no head, no face, no eyes. Front view, short round charcoal torso with creamy white oval belly, two little relaxed charcoal flippers at sides, tiny muted orange feet. Flat chunky crisp square pixels as a 32 pixel videogame sprite enlarged, restrained charcoal warm-white palette, no shading gradients, no text, no shadow, no ground. Torso neck upper edge hidden underneath a separately layered oversized round head. Centered and tight transparent margins."
+  },
+  {
+    "name": "edit",
+    "path": "/Users/kiram/.codex/generated_images/01a14d18-1275-7fe3-bbaa-4807ee68a130/exec-8db1d694-1456-4874-8071-073b717b3045.png",
+    "prompt": "Use case: stylized-concept. Production transparent PNG UI icon for a cozy pixel penguin Pomodoro app. Subject: one diagonal short muted teal pencil, cream wooden tip, charcoal lead. Single isolated icon centered, fills 80 percent of square canvas, generous clean transparent margin. Crisp chunky square-pixel art, simple readable silhouette at 24px, restrained warm white charcoal and muted teal palette with subject colors. Flat colors, no gradients, no realistic textures, no cast shadows, no text, no UI button container, no border around canvas."
+  },
+  {
+    "name": "pause",
+    "path": "/Users/kiram/.codex/generated_images/01a14d18-1275-7fe3-bbaa-4807ee68a130/exec-a374a9dc-ea4c-4122-ae49-e02d6435f4d8.png",
+    "prompt": "Use case: stylized-concept. Production transparent PNG UI icon for a cozy pixel penguin Pomodoro app. Subject: two equal chunky dark charcoal vertical pause bars, tiny muted teal pixel highlights. Single isolated icon centered, fills 80 percent of square canvas, generous clean transparent margin. Crisp chunky square-pixel art, simple readable silhouette at 24px, restrained warm white charcoal and muted teal palette with subject colors. Flat colors, no gradients, no realistic textures, no cast shadows, no text, no UI button container, no border around canvas."
+  },
+  {
+    "name": "play",
+    "path": "/Users/kiram/.codex/generated_images/01a14d18-1275-7fe3-bbaa-4807ee68a130/exec-758883c5-7d1b-4abe-aeb2-77fb3c85f31f.png",
+    "prompt": "Use case: stylized-concept. Production transparent PNG UI icon for a cozy pixel penguin Pomodoro app. Subject: one right-pointing stepped dark charcoal play triangle, tiny muted teal pixel highlights. Single isolated icon centered, fills 80 percent of square canvas, generous clean transparent margin. Crisp chunky square-pixel art, simple readable silhouette at 24px, restrained warm white charcoal and muted teal palette with subject colors. Flat colors, no gradients, no realistic textures, no cast shadows, no text, no UI button container, no border around canvas."
+  },
+  {
+    "name": "stop",
+    "path": "/Users/kiram/.codex/generated_images/01a14d18-1275-7fe3-bbaa-4807ee68a130/exec-722db47d-f22b-4e89-b641-9a6ceee7a4d5.png",
+    "prompt": "Use case: stylized-concept. Production transparent PNG UI icon for a cozy pixel penguin Pomodoro app. Subject: one chunky muted rust red square stop symbol, stepped corners, dark rust outline. Single isolated icon centered, fills 80 percent of square canvas, generous clean transparent margin. Crisp chunky square-pixel art, simple readable silhouette at 24px, restrained warm white charcoal and muted teal palette with subject colors. Flat colors, no gradients, no realistic textures, no cast shadows, no text, no UI button container, no border around canvas."
+  },
+  {
+    "name": "coffee",
+    "path": "/Users/kiram/.codex/generated_images/01a14d18-1275-7fe3-bbaa-4807ee68a130/exec-0a185caa-b4cb-4d96-aaf2-4f80cc747a1d.png",
+    "prompt": "Use case: stylized-concept. Production transparent PNG UI icon for a cozy pixel penguin Pomodoro app. Subject: one cute warm white coffee cup on a pale blue saucer, muted teal outline, two small pixel steam curls. Single isolated icon centered, fills 80 percent of square canvas, generous clean transparent margin. Crisp chunky square-pixel art, simple readable silhouette at 24px, restrained warm white charcoal and muted teal palette with subject colors. Flat colors, no gradients, no realistic textures, no cast shadows, no text, no UI button container, no border around canvas."
+  },
+  {
+    "name": "fishing",
+    "path": "/Users/kiram/.codex/generated_images/01a14d18-1275-7fe3-bbaa-4807ee68a130/exec-fdf2d4f9-42ac-4a1a-8fc0-1087497640c5.png",
+    "prompt": "Use case: stylized-concept. Production transparent PNG UI icon for a cozy pixel penguin Pomodoro app. Subject: one compact curved fishing rod with visible reel and short hanging line and tiny teal bobber, muted brown rod, charcoal outline. Single isolated icon centered, fills 80 percent of square canvas, generous clean transparent margin. Crisp chunky square-pixel art, simple readable silhouette at 24px, restrained warm white charcoal and muted teal palette with subject colors. Flat colors, no gradients, no realistic textures, no cast shadows, no text, no UI button container, no border around canvas."
+  }
+]

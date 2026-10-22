@@ -18,6 +18,7 @@ final class FloatingTimerController: NSObject, NSWindowDelegate {
     private var onStop: (() -> Void)?
     private var onEdit: (() -> Void)?
     private var onRepeat: ((FocusSession) -> Bool)?
+    private var onToday: (() -> Void)?
     private var onReview: ((FocusSession) -> Void)?
     var onBreakChanged: (() -> Void)?
 
@@ -32,13 +33,15 @@ final class FloatingTimerController: NSObject, NSWindowDelegate {
         onEdit: @escaping () -> Void,
         onStop: @escaping () -> Void,
         onRepeat: @escaping (FocusSession) -> Bool,
-        onReview: @escaping (FocusSession) -> Void
+        onReview: @escaping (FocusSession) -> Void,
+        onToday: @escaping () -> Void
     ) {
         self.onTogglePause = onTogglePause
         self.onEdit = onEdit
         self.onStop = onStop
         self.onRepeat = onRepeat
         self.onReview = onReview
+        self.onToday = onToday
     }
 
     func show(remainingTime: TimeInterval, title: String, isPaused: Bool) {
@@ -76,14 +79,15 @@ final class FloatingTimerController: NSObject, NSWindowDelegate {
     func showCompletion(session: FocusSession, catches: [CatchEvent]) {
         completedSession = session
         presentation = .completion
-        let panel = preparePanel(size: CGSize(width: 280, height: 280))
-        panel.contentView = NSHostingView(rootView: SessionOutcomeView(
-            session: session,
-            catches: catches,
+        let panel = preparePanel(size: CGSize(width: 208, height: 230), animate: true)
+        let content = NSHostingView(rootView: SessionOutcomeView(
             onBreak: { [weak self] in self?.startBreak() },
-            onRepeat: { [weak self] in self?.repeatSession() ?? false },
-            onDone: { [weak self] in self?.done() },
-            onReview: { [weak self] in self?.reviewSession() }))
+            onToday: { [weak self] in
+                self?.done()
+                self?.onToday?()
+            }))
+        content.sizingOptions = []
+        panel.contentView = content
         panel.orderFrontRegardless()
     }
 
@@ -176,18 +180,27 @@ final class FloatingTimerController: NSObject, NSWindowDelegate {
         onBreakChanged?()
     }
 
-    private func preparePanel(size: CGSize) -> NSPanel {
+    private func preparePanel(size: CGSize, animate: Bool = false) -> NSPanel {
         if let window {
-            let top = window.frame.maxY
-            let screen = window.screen ?? NSScreen.main
-            let visible = screen?.visibleFrame ?? window.frame
-            let x = min(max(window.frame.minX, visible.minX), visible.maxX - size.width)
-            let y = min(max(top - size.height, visible.minY), visible.maxY - size.height)
-            window.setFrame(NSRect(
-                x: x,
-                y: y,
-                width: size.width,
-                height: size.height), display: true)
+            let frame = window.frame
+            let visible = (window.screen ?? NSScreen.main)?.visibleFrame ?? frame
+            let anchorRight = abs(visible.maxX - frame.maxX) < abs(frame.minX - visible.minX)
+            let anchorTop = abs(visible.maxY - frame.maxY) < abs(frame.minY - visible.minY)
+            let x = anchorRight ? frame.maxX - size.width : frame.minX
+            let y = anchorTop ? frame.maxY - size.height : frame.minY
+            let target = NSRect(
+                x: min(max(x, visible.minX), max(visible.minX, visible.maxX - size.width)),
+                y: min(max(y, visible.minY), max(visible.minY, visible.maxY - size.height)),
+                width: size.width, height: size.height)
+            assert(target.width > 0 && target.height > 0 && target.origin.x.isFinite && target.origin.y.isFinite)
+            if animate && window.isVisible && !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
+                NSAnimationContext.runAnimationGroup { context in
+                    context.duration = 0.25
+                    window.animator().setFrame(target, display: true)
+                }
+            } else {
+                window.setFrame(target, display: true)
+            }
             return window
         }
         let panel = QyubeTimerPanel(

@@ -12,16 +12,17 @@ struct FloatingTimerView: View {
     private var liquidGlass = false
 
     @State private var isHovered = false
-    @State private var controlsPinned = false
-    @State private var confirmingStop = false
+    @State private var pointerInside = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var blink = false
     @State private var actionError: String?
 
-    private var showingControls: Bool { isHovered || controlsPinned || confirmingStop }
+    private var showingControls: Bool { isHovered }
 
     var body: some View {
         Group {
             if showingControls {
-                SessionControlView(
+                PixelSessionControlView(
                     title: timer.taskTitle,
                     isPaused: timer.isPaused,
                     onTogglePause: {
@@ -30,32 +31,34 @@ struct FloatingTimerView: View {
                         }
                     },
                     onEdit: onEdit,
-                    onStop: { controlsPinned = true; confirmingStop = true })
+                    onStop: onStop)
             } else {
                 VStack(spacing: 2) {
                     Text(QyubeFormat.countdown(timer.remainingTime))
                         .font(.system(
                             size: AppConstants.FloatingLayoutSettings.timerOnlyFontSize,
                             weight: .medium,
-                            design: .serif).monospacedDigit())
+                            design: .rounded).monospacedDigit())
                         .foregroundStyle(FloatingTheme.from(id: selectedThemeID).textColor)
                         .lineLimit(1)
-                    if timer.isPaused {
-                        Text("PAUSED")
-                            .font(.caption2.weight(.semibold))
-                            .tracking(1.3)
-                            .foregroundStyle(Color.qyubeInterrupted)
-                    }
+
                 }
                 .frame(
                     width: AppConstants.FloatingLayoutSettings.timerOnlyWidth,
                     height: AppConstants.FloatingLayoutSettings.timerOnlyHeight)
                 .contentShape(Rectangle())
-                .onTapGesture { controlsPinned = true }
+                .opacity(timer.isPaused && blink && !reduceMotion ? 0.35 : 1)
+                .animation(timer.isPaused && !reduceMotion ? .easeInOut(duration: 1).repeatForever(autoreverses: true) : nil, value: blink)
+                .onChange(of: timer.isPaused, initial: true) { blink = timer.isPaused }
+                .onDisappear { blink = false }
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(timer.isPaused ? "Paused, time remaining" : "Time remaining")
                 .accessibilityValue(QyubeFormat.countdown(timer.remainingTime))
-                .accessibilityAction(named: "Show session controls") { controlsPinned = true }
+                .accessibilityAction(named: timer.isPaused ? "Resume session" : "Pause session") {
+                    if !onTogglePause() { actionError = "Could not save the change." }
+                }
+                .accessibilityAction(named: "Edit session", onEdit)
+                .accessibilityAction(named: "Stop session", onStop)
             }
         }
         .background {
@@ -68,12 +71,13 @@ struct FloatingTimerView: View {
         }
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.qyubeLine, lineWidth: 1))
         .shadow(color: .black.opacity(0.13), radius: 12, y: 5)
-        .onHover { isHovered = $0; if $0 { controlsPinned = false } }
-        .alert("End this session?", isPresented: $confirmingStop) {
-            Button("End session", role: .destructive, action: onStop)
-            Button("Keep focusing", role: .cancel) { controlsPinned = false }
-        } message: {
-            Text("Your focused time will be saved as an interrupted session.")
+        .help(timer.taskTitle)
+        .onHover { pointerInside = $0; if $0 { isHovered = true } }
+        .task(id: pointerInside) {
+            guard !pointerInside else { return }
+            try? await Task.sleep(for: .milliseconds(150))
+            guard !Task.isCancelled else { return }
+            isHovered = false
         }
         .alert("Could not pause or resume", isPresented: Binding(
             get: { actionError != nil },
