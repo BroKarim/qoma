@@ -47,6 +47,9 @@ final class QomaDatabase: @unchecked Sendable {
                     id TEXT PRIMARY KEY, account_id TEXT NOT NULL, session_id TEXT NOT NULL,
                     kind_id TEXT NOT NULL, deposited_at REAL NOT NULL, banked_at REAL, payload BLOB NOT NULL
                 );
+                CREATE TABLE IF NOT EXISTS catch_progress (
+                    account_id TEXT PRIMARY KEY, payload BLOB NOT NULL
+                );
                 CREATE INDEX IF NOT EXISTS catches_account_date ON catches(account_id, deposited_at);
                 CREATE INDEX IF NOT EXISTS catches_account_kind ON catches(account_id, kind_id);
                 CREATE INDEX IF NOT EXISTS catches_session ON catches(account_id, session_id, banked_at);

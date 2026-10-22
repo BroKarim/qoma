@@ -37,6 +37,13 @@ struct QyubeAboutSettingsPane: View {
                     VStack(alignment: .leading, spacing: 16) {
                         Text("A little help").font(.system(size: 23, design: .serif))
                         QyubeInkDivider()
+                        Text("Fishing chances")
+                            .font(.system(size: 14, weight: .semibold))
+                        Text(CatchRarityRules.helpOddsText)
+                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .foregroundStyle(Color.qyubeMenuInk)
+                        Text("The chance of a rare catch can rise after several catches without one.")
+                            .font(.system(size: 12)).foregroundStyle(.secondary).lineSpacing(3)
                         Link("Contact support", destination: URL(string: "mailto:support@qoma.app")!)
                         Text("Made for quieter days and moments well spent.")
                             .font(.system(size: 13, design: .serif)).foregroundStyle(.secondary)

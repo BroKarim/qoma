@@ -11,38 +11,48 @@ final class CatchEngine {
         case depositing(kindID: String)
     }
 
-    private let rollKind: () -> String
+    private let customRollKind: (() -> String)?
     private let biteWait: () -> TimeInterval
     private let reelTime: () -> TimeInterval
     private var phase: Phase = .waiting
-    private var depositedThisSession = 0
+    private var plannedReelDuration: TimeInterval = 1
+    private var pendingEventID: UUID?
 
     init(
-        rollKind: @escaping () -> String = CatchEngine.defaultRoll,
-        biteWait: @escaping () -> TimeInterval = { .random(in: 6...10) },
+        rollKind: (() -> String)? = nil,
+        biteWait: @escaping () -> TimeInterval = { .random(in: CatchRarityRules.intervalSeconds) },
         reelTime: @escaping () -> TimeInterval = { .random(in: 0.9...1.5) }
     ) {
-        self.rollKind = rollKind
+        self.customRollKind = rollKind
         self.biteWait = biteWait
         self.reelTime = reelTime
     }
 
     var currentPhase: Phase { phase }
+    var currentReelDuration: TimeInterval { plannedReelDuration }
 
     /// Start the next waiting period. Returns the duration until the bite cue.
     @discardableResult
     func scheduleNextBite() -> TimeInterval {
         phase = .waiting
-        let duration = biteWait()
-        return duration
+        plannedReelDuration = reelTime()
+        return max(0.01, biteWait() - plannedReelDuration)
     }
 
     /// Called by UI when the bite cue fires. Rolls identity and begins reeling.
     @discardableResult
-    func beginReel() -> (kindID: String, duration: TimeInterval) {
-        let kindID = rollKind()
+    func beginReel(pity: CatchPityState = .init()) -> (kindID: String, eventID: UUID, duration: TimeInterval) {
+        let kindID = customRollKind?() ?? CatchRarityRules.roll(pity: pity)
+        let eventID = pendingEventID ?? UUID()
+        pendingEventID = eventID
         phase = .reeling(kindID: kindID)
-        return (kindID, reelTime())
+        return (kindID, eventID, plannedReelDuration)
+    }
+
+    func restoreInFlight(kindID: String, eventID: UUID, duration: TimeInterval) {
+        pendingEventID = eventID
+        plannedReelDuration = max(0, duration)
+        phase = .reeling(kindID: kindID)
     }
 
     /// Called by UI when the catch reaches the bucket.
@@ -51,15 +61,19 @@ final class CatchEngine {
         sessionID: UUID,
         accountID: String,
         activeSeconds: TimeInterval,
+        eventID: UUID? = nil,
         now: Date = Date()
     ) -> (event: CatchEvent, banked: Bool)? {
-        guard case .reeling(let kindID) = phase else { return nil }
+        let kindID: String
+        switch phase {
+        case .reeling(let current), .depositing(let current): kindID = current
+        case .waiting, .bite: return nil
+        }
 
         phase = .depositing(kindID: kindID)
-        depositedThisSession += 1
-
         let banked = activeSeconds >= CatchEngine.bankThresholdSeconds
         let event = CatchEvent(
+            id: eventID ?? pendingEventID ?? UUID(),
             sessionID: sessionID,
             accountID: accountID,
             kindID: kindID,
@@ -67,8 +81,13 @@ final class CatchEngine {
             bankedAt: banked ? now : nil
         )
 
-        phase = .waiting
         return (event, banked)
+    }
+
+    func confirmDeposit() {
+        guard case .depositing = phase else { return }
+        phase = .waiting
+        pendingEventID = nil
     }
 
     /// Cancel an in-flight catch. No event is produced.
@@ -76,6 +95,7 @@ final class CatchEngine {
         switch phase {
         case .reeling, .depositing:
             phase = .waiting
+            pendingEventID = nil
         default:
             break
         }
@@ -83,24 +103,4 @@ final class CatchEngine {
 
     static let bankThresholdSeconds: TimeInterval = 300 // 5 minutes
 
-    static func kind(for roll: Double, oceanFindIndex: Int = 0) -> String {
-        switch roll {
-        case 0..<0.55:
-            return "anchovy"
-        case 0.55..<0.80:
-            return "perch"
-        case 0.80..<0.92:
-            return "trout"
-        case 0.92..<0.97:
-            return "salmon"
-        case 0.97..<0.99:
-            return "narwhal"
-        default:
-            return ["stick", "pebble", "shell"][abs(oceanFindIndex) % 3]
-        }
-    }
-
-    static let defaultRoll: () -> String = {
-        kind(for: Double.random(in: 0...1), oceanFindIndex: Int.random(in: 0..<3))
-    }
 }

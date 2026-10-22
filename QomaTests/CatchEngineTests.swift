@@ -43,14 +43,22 @@ struct CatchEngineTests {
     }
 
     @Test
-    func everyCatalogKindCanBeRolled() {
-        #expect(CatchEngine.kind(for: 0.1) == "anchovy")
-        #expect(CatchEngine.kind(for: 0.6) == "perch")
-        #expect(CatchEngine.kind(for: 0.85) == "trout")
-        #expect(CatchEngine.kind(for: 0.95) == "salmon")
-        #expect(CatchEngine.kind(for: 0.98) == "narwhal")
-        #expect(CatchEngine.kind(for: 0.995, oceanFindIndex: 0) == "stick")
-        #expect(CatchEngine.kind(for: 0.995, oceanFindIndex: 1) == "pebble")
-        #expect(CatchEngine.kind(for: 0.995, oceanFindIndex: 2) == "shell")
+    func approvedCatalogAndPityBoundariesAreUsed() {
+        #expect(CatalogDefinitions.allKinds.count == 150)
+        #expect(CatalogDefinitions.Rarity.allCases.map { rarity in
+            CatalogDefinitions.allKinds.filter { $0.rarity == rarity }.count
+        } == [60, 36, 24, 30])
+        #expect(CatchRarityRules.pityBoost(30, start: 30, hard: 60) == 0)
+        #expect(CatchRarityRules.pityBoost(59, start: 30, hard: 60) == 1)
+
+        let hardLegendary = CatchRarityRules.roll(
+            pity: CatchPityState(rarePlusCount: 0, legendaryCount: 439),
+            using: { 0 }
+        )
+        #expect(CatalogDefinitions.kind(id: hardLegendary)?.rarity == .legendary)
+
+        let engine = CatchEngine()
+        let wait = engine.scheduleNextBite()
+        #expect((50...70).contains(wait + engine.currentReelDuration))
     }
 }

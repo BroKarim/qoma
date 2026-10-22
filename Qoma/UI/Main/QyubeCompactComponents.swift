@@ -34,7 +34,8 @@ struct QyubeCatchArt: View {
 
     private var assetName: String {
         guard let kind = CatalogDefinitions.kind(id: kindID) else { return "" }
-        return self.catalog && kind.isFish ? "CatalogFishPlaceholder" : "Collectible-" + self.kindID
+        let proposed = self.catalog && kind.isFish ? "CatalogFishPlaceholder" : "Collectible-" + self.kindID
+        return NSImage(named: proposed) == nil && kind.isFish ? "CatalogFishPlaceholder" : proposed
     }
 
     var body: some View {

@@ -93,13 +93,18 @@ struct QomaDatabaseTests {
         defer { try? FileManager.default.removeItem(at: directory) }
         let repository = CatchRepository(storageDirectory: directory)
         let now = Date.now
+        let sessionA = UUID()
+        let sessionB = UUID()
         for index in 0..<5_000 {
             let event = CatchEvent(
-                sessionID: UUID(), accountID: index.isMultiple(of: 2) ? "a" : "b",
-                kindID: index.isMultiple(of: 3) ? "perch" : "shell", depositedAt: now, bankedAt: now
+                sessionID: index.isMultiple(of: 2) ? sessionA : sessionB,
+                accountID: index.isMultiple(of: 2) ? "a" : "b",
+                kindID: index.isMultiple(of: 3) ? "perch" : "shell", depositedAt: now
             )
             #expect(repository.saveProvisional(event))
         }
+        #expect(repository.bankProvisional(sessionID: sessionA, accountID: "a", at: now))
+        #expect(repository.bankProvisional(sessionID: sessionB, accountID: "b", at: now))
         #expect(repository.listBanked(accountID: "a").count == 2_500)
         #expect(repository.countByKind(accountID: "a").values.reduce(0, +) == 2_500)
         #expect(repository.listBanked(accountID: "b").count == 2_500)
@@ -150,7 +155,9 @@ struct QomaDatabaseTests {
             let database = try QomaDatabase(url: url)
             #expect(SessionRepository(database: database).saveActive(snapshot))
             #expect(SessionRepository(database: database).finalizeOnce(session))
-            #expect(CatchRepository(database: database).saveProvisional(event))
+            let catches = CatchRepository(database: database)
+            #expect(catches.saveProvisional(event))
+            #expect(catches.bank(event.id, sessionID: event.sessionID, accountID: accountID, at: .now))
         }
         let reopened = try QomaDatabase(url: url)
         #expect(SessionRepository(database: reopened).loadActive(accountID: accountID)?.id == snapshot.id)

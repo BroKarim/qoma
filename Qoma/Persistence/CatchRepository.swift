@@ -8,7 +8,18 @@ protocol CatchRepositoryProtocol: Sendable {
     func listBanked(accountID: String) -> [CatchEvent]
     func listProvisional(sessionID: UUID, accountID: String) -> [CatchEvent]
     func countByKind(accountID: String) -> [String: Int]
+    func accountProgress(
+        accountID: String,
+        provisionalSessionID: UUID?
+    ) -> (progress: CatchAccountProgress, pity: CatchPityState)
+    func saveCatchCycle(_ cycle: CatchCycleState, accountID: String) -> Bool
     func deleteProvisional(sessionID: UUID, accountID: String) -> Bool
+}
+
+extension CatchRepositoryProtocol {
+    func accountProgress(accountID: String) -> (progress: CatchAccountProgress, pity: CatchPityState) {
+        accountProgress(accountID: accountID, provisionalSessionID: nil)
+    }
 }
 
 /// SQLite-backed catch ledger. Rows are indexed by account, session, date, and kind.
@@ -37,31 +48,43 @@ final class CatchRepository: CatchRepositoryProtocol, @unchecked Sendable {
 
     func saveProvisional(_ event: CatchEvent) -> Bool {
         guard migrateLegacyJSON(accountID: event.accountID) else { return false }
-        return save(event)
+        return save(CatchEvent(
+            id: event.id,
+            sessionID: event.sessionID,
+            accountID: event.accountID,
+            kindID: event.kindID,
+            depositedAt: event.depositedAt
+        ))
     }
 
     func bank(_ eventID: UUID, sessionID: UUID, accountID: String, at: Date) -> Bool {
         guard migrateLegacyJSON(accountID: accountID), let database else { return false }
-        let rows: [[String: QomaDatabase.Value]]
         do {
-            rows = try database.query(
-            "SELECT payload, banked_at FROM catches WHERE id = ? AND account_id = ? AND session_id = ?",
-            [.text(eventID.uuidString), .text(accountID), .text(sessionID.uuidString)]
-            )
-        } catch {
-            Logger.store.error("Read provisional catch failed: \(error.localizedDescription, privacy: .public)")
-            return false
-        }
-        guard let row = rows.first else { return false }
-        if case .real? = row["banked_at"] { return true }
-        guard let event = decode(CatchEvent.self, from: row["payload"]),
-              let data = try? encoder.encode(CatchEvent(
-                id: event.id, sessionID: event.sessionID, accountID: event.accountID,
-                kindID: event.kindID, depositedAt: event.depositedAt, bankedAt: at
-              )) else { return false }
-        do {
-            try database.execute("UPDATE catches SET banked_at = ?, payload = ? WHERE id = ? AND banked_at IS NULL",
-                                 [.real(at.timeIntervalSince1970), .blob(data), .text(eventID.uuidString)])
+            try database.transaction {
+                _ = loadProgress(accountID: accountID, database: database)
+                let rows = try database.query(
+                    "SELECT payload, banked_at FROM catches WHERE id = ? AND account_id = ? AND session_id = ?",
+                    [.text(eventID.uuidString), .text(accountID), .text(sessionID.uuidString)]
+                )
+                guard let row = rows.first else { throw QomaDatabase.error("Catch to bank was not found") }
+                if case .real? = row["banked_at"] { return }
+                guard let event = decode(CatchEvent.self, from: row["payload"]) else {
+                    throw QomaDatabase.error("Catch to bank could not be decoded")
+                }
+                let banked = CatchEvent(
+                    id: event.id,
+                    sessionID: event.sessionID,
+                    accountID: event.accountID,
+                    kindID: event.kindID,
+                    depositedAt: event.depositedAt,
+                    bankedAt: at
+                )
+                try database.execute(
+                    "UPDATE catches SET banked_at = ?, payload = ? WHERE id = ? AND banked_at IS NULL",
+                    [.real(at.timeIntervalSince1970), .blob(try encoder.encode(banked)), .text(eventID.uuidString)]
+                )
+                try advanceBankedPity(event, accountID: accountID, database: database)
+            }
             return true
         } catch {
             Logger.store.error("Bank catch failed: \(error.localizedDescription, privacy: .public)")
@@ -71,32 +94,35 @@ final class CatchRepository: CatchRepositoryProtocol, @unchecked Sendable {
 
     func bankProvisional(sessionID: UUID, accountID: String, at: Date) -> Bool {
         guard let database, migrateLegacyJSON(accountID: accountID) else { return false }
-        let rows: [[String: QomaDatabase.Value]]
-        do {
-            rows = try database.query(
-                "SELECT payload FROM catches WHERE account_id = ? AND session_id = ? AND banked_at IS NULL ORDER BY deposited_at",
-                [.text(accountID), .text(sessionID.uuidString)]
-            )
-        } catch {
-            Logger.store.error("Read provisional catches failed: \(error.localizedDescription, privacy: .public)")
-            return false
-        }
-        let events = rows.compactMap { decode(CatchEvent.self, from: $0["payload"]) }
-        guard events.count == rows.count else {
-            Logger.store.error("A provisional catch row could not be decoded")
-            return false
-        }
         do {
             try database.transaction {
+                _ = loadProgress(accountID: accountID, database: database)
+                let rows = try database.query(
+                    "SELECT payload FROM catches WHERE account_id = ? AND session_id = ? "
+                        + "AND banked_at IS NULL ORDER BY deposited_at, id",
+                    [.text(accountID), .text(sessionID.uuidString)]
+                )
+                let events = rows.compactMap { decode(CatchEvent.self, from: $0["payload"]) }
+                guard events.count == rows.count else {
+                    throw QomaDatabase.error("A provisional catch row could not be decoded")
+                }
                 for event in events {
                     let banked = CatchEvent(
-                        id: event.id, sessionID: event.sessionID, accountID: event.accountID,
-                        kindID: event.kindID, depositedAt: event.depositedAt, bankedAt: at
+                        id: event.id,
+                        sessionID: event.sessionID,
+                        accountID: event.accountID,
+                        kindID: event.kindID,
+                        depositedAt: event.depositedAt,
+                        bankedAt: at
                     )
                     try database.execute(
                         "UPDATE catches SET banked_at = ?, payload = ? WHERE id = ? AND banked_at IS NULL",
-                        [.real(at.timeIntervalSince1970), .blob(try encoder.encode(banked)), .text(event.id.uuidString)]
+                        [
+                            .real(at.timeIntervalSince1970), .blob(try encoder.encode(banked)),
+                            .text(event.id.uuidString)
+                        ]
                     )
+                    try advanceBankedPity(event, accountID: accountID, database: database)
                 }
             }
             return true
@@ -109,7 +135,7 @@ final class CatchRepository: CatchRepositoryProtocol, @unchecked Sendable {
     func listBanked(accountID: String) -> [CatchEvent] {
         guard migrateLegacyJSON(accountID: accountID) else { return [] }
         return list(
-            "SELECT payload FROM catches WHERE account_id = ? AND banked_at IS NOT NULL ORDER BY deposited_at",
+            "SELECT payload FROM catches WHERE account_id = ? AND banked_at IS NOT NULL ORDER BY deposited_at, id",
             [.text(accountID)]
         )
     }
@@ -117,7 +143,8 @@ final class CatchRepository: CatchRepositoryProtocol, @unchecked Sendable {
     func listProvisional(sessionID: UUID, accountID: String) -> [CatchEvent] {
         guard migrateLegacyJSON(accountID: accountID) else { return [] }
         return list(
-            "SELECT payload FROM catches WHERE account_id = ? AND session_id = ? AND banked_at IS NULL ORDER BY deposited_at",
+            "SELECT payload FROM catches WHERE account_id = ? AND session_id = ? "
+                + "AND banked_at IS NULL ORDER BY deposited_at, id",
             [.text(accountID), .text(sessionID.uuidString)]
         )
     }
@@ -127,7 +154,8 @@ final class CatchRepository: CatchRepositoryProtocol, @unchecked Sendable {
         let rows: [[String: QomaDatabase.Value]]
         do {
             rows = try database.query(
-                "SELECT kind_id, COUNT(*) AS total FROM catches WHERE account_id = ? AND banked_at IS NOT NULL GROUP BY kind_id",
+                "SELECT kind_id, COUNT(*) AS total FROM catches WHERE account_id = ? "
+                    + "AND banked_at IS NOT NULL GROUP BY kind_id",
                 [.text(accountID)]
             )
         } catch {
@@ -138,6 +166,38 @@ final class CatchRepository: CatchRepositoryProtocol, @unchecked Sendable {
             guard case .text(let kind)? = row["kind_id"], case .integer(let total)? = row["total"] else { return nil }
             return (kind, Int(total))
         })
+    }
+
+    func accountProgress(
+        accountID: String,
+        provisionalSessionID: UUID? = nil
+    ) -> (progress: CatchAccountProgress, pity: CatchPityState) {
+        guard migrateLegacyJSON(accountID: accountID), let database else {
+            return (CatchAccountProgress(), CatchPityState())
+        }
+        let progress = loadProgress(accountID: accountID, database: database)
+        var predictedPity = progress.pity
+        if let provisionalSessionID {
+            for event in listProvisional(sessionID: provisionalSessionID, accountID: accountID) {
+                CatchRarityRules.record(event.kindID, into: &predictedPity)
+            }
+        }
+        return (progress, predictedPity)
+    }
+
+    func saveCatchCycle(_ cycle: CatchCycleState, accountID: String) -> Bool {
+        guard migrateLegacyJSON(accountID: accountID), let database else { return false }
+        do {
+            try database.transaction {
+                var progress = loadProgress(accountID: accountID, database: database)
+                progress.cycle = cycle
+                try saveProgress(progress, accountID: accountID, database: database)
+            }
+            return true
+        } catch {
+            Logger.store.error("Save catch progress failed: \(error.localizedDescription, privacy: .public)")
+            return false
+        }
     }
 
     func deleteProvisional(sessionID: UUID, accountID: String) -> Bool {
@@ -168,6 +228,40 @@ final class CatchRepository: CatchRepositoryProtocol, @unchecked Sendable {
             Logger.store.error("Save catch failed: \(error.localizedDescription, privacy: .public)")
             return false
         }
+    }
+
+    private func loadProgress(accountID: String, database: QomaDatabase) -> CatchAccountProgress {
+        if let row = try? database.query(
+            "SELECT payload FROM catch_progress WHERE account_id = ?", [.text(accountID)]
+        ).first, let value = row["payload"], let saved = decode(CatchAccountProgress.self, from: value) {
+            return saved
+        }
+        var progress = CatchAccountProgress()
+        let events = list(
+            "SELECT payload FROM catches WHERE account_id = ? AND banked_at IS NOT NULL ORDER BY deposited_at, id",
+            [.text(accountID)]
+        )
+        for event in events { CatchRarityRules.record(event.kindID, into: &progress.pity) }
+        try? saveProgress(progress, accountID: accountID, database: database)
+        return progress
+    }
+
+    private func saveProgress(
+        _ progress: CatchAccountProgress,
+        accountID: String,
+        database: QomaDatabase
+    ) throws {
+        try database.execute(
+            "INSERT INTO catch_progress(account_id, payload) VALUES(?, ?) "
+                + "ON CONFLICT(account_id) DO UPDATE SET payload = excluded.payload",
+            [.text(accountID), .blob(try encoder.encode(progress))]
+        )
+    }
+
+    private func advanceBankedPity(_ event: CatchEvent, accountID: String, database: QomaDatabase) throws {
+        var progress = loadProgress(accountID: accountID, database: database)
+        CatchRarityRules.record(event.kindID, into: &progress.pity)
+        try saveProgress(progress, accountID: accountID, database: database)
     }
 
     private func migrateLegacyJSON(accountID: String) -> Bool {

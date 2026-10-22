@@ -1354,3 +1354,171 @@ Catatan ini memperbarui status rencana tanggal 20 Oktober di atas tanpa menghapu
 - Goal disimpan di AppStorage dan dipakai Today untuk target/progress; nilai nol menyembunyikan progress bar. Reset settings mengembalikan preferensi yang tersedia ke default. Aksi Erase all data ditampilkan nonaktif karena alur penghapusan data berada di tahap lain.
 - Ukuran window tetap 310 × 510 pt sesuai keputusan flow terbaru; halaman Analytics dan Settings di-scroll. Tidak ada perubahan ke ukuran atau navigasi window.
 - Validasi build macOS berhasil dengan Xcode. SwiftLint masih melaporkan warning lama di beberapa file lain, termasuk CatalogView dari milestone sebelumnya; tidak ada warning lint pada file yang diubah dalam pekerjaan ini.
+
+## Rencana sistem rarity dan koleksi — 22 Oktober 2026
+
+**Status: keputusan produk dan handoff perencanaan saja. Simulator belum dibuat/dijalankan; kode game belum diubah.** Instruksi pengguna terbaru: dokumentasikan dahulu, jangan mengeksekusi implementasi. Catatan ini mengungguli rekomendasi grill sebelumnya tentang bantuan item baru dan target penyelesaian 80–120 jam; catatan historis tetap dipertahankan.
+
+### Checkpoint dan urutan persetujuan
+
+- Semua perubahan Analytics/Settings di branch `codex/analytics-settings-ui` disimpan dalam commit `6d7e8e3` sebelum membuat branch ini: `codex/rarity-collection-plan`.
+- Tahap berikutnya, setelah pengguna mengizinkan implementasi simulator: buat simulator Bun/TypeScript, simulasikan minimal 10.000 pemain virtual per kandidat, iterasikan parameter, lalu tampilkan hasil dan parameter kandidat final untuk persetujuan pengguna.
+- **Jangan mengubah kode game, peluang produksi, jadwal catch, data koleksi, atau teks peluang Help sebelum parameter hasil simulasi disetujui.** Persetujuan rencana ini tidak sama dengan persetujuan angka final.
+- Review UI tersendiri dilakukan kemudian. Pembuatan artwork ikan final juga terpisah.
+
+### Keputusan produk yang disepakati
+
+1. Empat tier: Common, Uncommon, Rare, Legendary. Istilah UI `Legendary` dipakai konsisten untuk tier yang juga disebut pengguna sebagai legend.
+2. Auto-fishing menghasilkan satu tangkapan per interval acak merata **50–70 detik fokus aktif**, mean 60 detik. Interval dihitung deposit-ke-deposit, termasuk animasi reeling; jangan menambahkan waktu animasi di luar interval tersebut. Tangkapan pertama juga mengikuti interval, tanpa hadiah instan.
+3. Hanya fokus aktif menghasilkan catch: pause, break, sleep, aplikasi tertutup tidak menghasilkan ikan. Timer only, Allowing, Blocking mempunyai peluang sama. Countdown tick 1 detik tidak menentukan laju catch.
+4. Kemajuan menuju catch berikutnya diteruskan antar-sesi dan disimpan melewati relaunch. Contoh 40/65 detik selesai → sesi berikutnya tinggal 25 detik fokus aktif. Tidak ada hadiah retroaktif selama aplikasi tidak berjalan.
+5. Dua undian: pilih tier memakai peluang efektif setelah pity, lalu pilih item dalam tier tersebut memakai bobot item. Setiap item mempunyai satu tier tetap dan bobot positif. Ocean finds masuk pool yang sama, masing-masing mempunyai tier dan bobot; bukan hasil gagal.
+6. **Tidak ada bantuan item baru.** Kepemilikan/discovery tidak memengaruhi undian. Tidak ada reroll duplikat, bias 50%, jaminan spesies baru, atau pemilihan dari pool undiscovered.
+7. Duplikat menambah jumlah kepemilikan dan tetap tercatat sebagai event catch. Tidak menjadi currency, level, atau upgrade. Pity menjamin rarity saja, bukan item baru. Grid Catalog tetap gambar saja sesuai keputusan UI; count dapat tetap disimpan di data.
+8. Koleksi ditujukan untuk penggunaan berbulan-bulan. Target desain awal **median sekitar 300 jam fokus aktif untuk 100% koleksi**. Ini belum merupakan hasil simulasi atau janji balancing.
+9. Jumlah awal 100 item dan pembagian 60 Common / 25 Uncommon / 12 Rare / 3 Legendary adalah kandidat awal, bukan angka terkunci. Pengguna mengizinkan jumlah naik ke 150–200, pembagian tier berubah, bobot antar-item lebih ekstrem terutama Rare/Legendary, serta perubahan peluang dasar dan ambang pity untuk mendekati target.
+10. Progress koleksi = jenis unik banked yang dikenal / total jenis yang didefinisikan. Duplikat tidak menaikkan progress. Filter All/Fish/Ocean finds tidak mengubah denominator keseluruhan. Unknown legacy kind tidak menambah pembilang secara sembarang.
+11. Pity dan koleksi bertahan sepanjang akun, melewati sesi, pergantian hari, dan relaunch; akun berbeda terpisah. Reset settings tidak menghapusnya. Erase all data mengikuti cakupan penghapusan data yang nanti diimplementasikan.
+12. Pertahankan banking existing: provisional sebelum 5 menit, Stop sebelum ambang membuang provisional, sesi completed normal menyimpan hasil walau singkat. Discovery dan pity permanen berubah hanya saat banking berhasil. Simpan identitas hasil provisional agar relaunch/retry tidak mengundi ulang hasil yang sama.
+13. Satu artwork transparan per item; undiscovered memakai siluet hitam dari alpha artwork yang sama. Aset final dan mapping 100–200 item belum dibuat.
+
+### Pity linear: kontrak counter dan contoh kode
+
+Dua counter independen: `rarePlusCount` = jumlah catch berurutan tanpa Rare/Legendary; `legendaryCount` = jumlah catch berurutan tanpa Legendary. Counter adalah jumlah kegagalan **sebelum undian berikutnya**, mulai dari nol. Rare mereset Rare+ saja; Legendary mereset keduanya; Common/Uncommon menambah keduanya. Ocean finds mengikuti tier itemnya, bukan kategori fish/ocean.
+
+Kode berikut adalah spesifikasi dari pengguna, bukan implementasi yang sudah dijalankan:
+
+```ts
+function pityBoost(count: number, start: number, hard: number): number {
+  if (count >= hard - 1) return 1; // catch ke-hard dijamin
+  if (count < start) return 0;
+  return (count - start) / (hard - start);
+}
+
+const legendaryTarget = BASE.legendary
+  + (1 - BASE.legendary) * pityBoost(legendaryCount, 180, 360);
+```
+
+- Kandidat awal Rare+: start 30 / hard 60; Legendary: start 180 / hard 360. Keduanya boleh diperpanjang setelah simulasi. Pada `count == start`, boost masih nol; kenaikan positif pertama pada `start + 1`. Pada `hard - 1`, undian berikutnya dijamin; jangan menggeser batas satu catch.
+- Redistribusi peningkatan peluang diambil dari Common/Uncommon **secara proporsional terhadap peluang dasar keduanya**, bukan dari Rare selama budget memungkinkan. Total peluang harus 1 dan tidak boleh negatif.
+- **Batas matematis yang masih perlu disepakati:** `legendaryTarget == 1` tidak dapat bersamaan dengan mempertahankan peluang Rare positif. Bahkan soft ramp dapat melebihi budget Common+Uncommon sebelum hard cap. Jangan diam-diam menormalisasi semua tier karena itu mengurangi Rare tanpa terlihat.
+- Usulan penyelesaian untuk persetujuan sebelum simulator: pertahankan Rare selama budget C/U cukup; saat budget habis, Legendary memakai sisa budget Rare; hard Legendary mengalahkan semua tier. Ini pengecualian eksplisit terhadap aturan “bukan dari Rare”, belum keputusan pengguna. Pilihan lain: batasi soft Legendary pada `1 - Rare`, lalu override hanya pada hard cap.
+- Interaksi dua ramp juga perlu dipastikan: Rare+ berarti target gabungan Rare + Legendary; hasil Legendary memenuhi jaminan Rare+. Prioritaskan hard Legendary ketika kedua counter mencapai hard; jangan melakukan dua undian hadiah.
+- Kerangka kandidat untuk dibahas: hitung target gabungan Rare+ dari base Rare+Legendary dan ramp Rare+; hitung target Legendary dengan rumus pengguna; alokasikan satu distribusi valid yang memenuhi hard cap dan mempertahankan rasio Common:Uncommon pada sisa budget. Kebijakan ketika dua target bertabrakan harus tertulis dan ikut dilaporkan dalam hasil simulator.
+
+### Simulator yang harus dibuat pada tahap berikutnya
+
+**Lokasi usulan, belum dibuat:** `scripts/rarity-sim.ts` dengan konfigurasi kandidat di `design/rarity-simulation/`. Gunakan Bun/TypeScript tanpa dependensi tambahan jika runtime sudah tersedia. Parameter calon item bisa memakai ID sintetis; jangan mengarang nama/art spesies produksi.
+
+Gambaran kontrak konfigurasi dan alur, bukan kode game final:
+
+```ts
+type Tier = "common" | "uncommon" | "rare" | "legendary";
+type Item = { id: string; tier: Tier; weight: number };
+type Config = {
+  seed: number;
+  players: number; // >= 10_000 untuk setiap kandidat yang dilaporkan
+  intervalSeconds: { min: 50; max: 70 };
+  base: Record<Tier, number>;
+  pity: {
+    rarePlus: { start: number; hard: number };
+    legendary: { start: number; hard: number };
+  };
+  items: Item[];
+};
+
+// Per pemain: RNG seed tetap → interval → tier dengan/tanpa pity
+// → item weighted dalam tier → simpan milestone → update counter.
+// Tidak ada input discovery ke fungsi undian; hanya dipakai mencatat progress.
+```
+
+- PRNG seeded deterministik; catat algoritma, seed, per-player seed derivation, versi config, dan command Bun agar hasil dapat direproduksi. Jangan memakai `Math.random()` tanpa seed.
+- Gunakan stream RNG terpisah untuk interval, tier, dan item agar perbandingan pity/no-pity tidak berubah hanya karena konsumsi random number berbeda. Dua skenario memakai seed dan konfigurasi dasar sama; hanya pity yang dibedakan.
+- Waktu fokus adalah penjumlahan interval acak 50–70 detik per catch, bukan sekadar `jumlah catch × 60`; laporkan asumsi sesi ideal semua hasil dibank, tanpa pause/offline atau kehilangan provisional. Target 300 jam adalah waktu fokus produktif tersebut; kalender berbulan-bulan bergantung kebiasaan pengguna.
+- Simulasikan hingga lengkap untuk seluruh pemain. Bila perlu batas waktu/catch, laporkan jumlah censored/non-completers; jangan membuang mereka atau menghitung median hanya dari pemain yang selesai.
+- Validasi config: jumlah item/ID unik, tier tidak kosong, bobot finite positif, base finite nonnegatif dan total 1, `0 <= start < hard`, interval valid, players >=10.000.
+- Self-check bermakna: batas start/hard - 1, reset counter Rare vs Legendary, semua peluang valid pada kombinasi counter termasuk kedua hard cap, sampling item menghormati bobot, koleksi yang sudah dimiliki tidak mengubah hasil undian untuk state pity/RNG sama, seed sama menghasilkan laporan sama.
+
+**Laporan wajib untuk setiap kandidat final yang dibandingkan:**
+
+| Ukuran | Statistik yang dilaporkan |
+|---|---|
+| Koleksi 25%, 50%, 75%, 90%, 100% | Waktu fokus P10, median/P50, P90 dalam jam; milestone pertama saat mencapai `ceil(totalItems × fraction)` jenis unik |
+| Tier lengkap | Mean jam sampai seluruh jenis di masing-masing tier ditemukan, dihitung sejak awal pemain |
+| Legendary pertama | Mean, median, P10, P90 jam dengan pity dan tanpa pity; nyatakan censored bila ada |
+| Duplikat sebelum 100% | Mean jumlah catch duplikat sampai completion (setiap catch setelah kepemilikan pertama item tersebut) |
+| Parameter | Jumlah item per tier, seluruh bobot atau file konfigurasi lengkap, base probabilities, start/hard, kebijakan konflik pity, seed, jumlah pemain |
+| Audit peluang efektif | Frekuensi tier hasil simulasi; peluang efektif dengan pity berbeda dari base yang ditampilkan di Help |
+
+- Mulai dari base kandidat Common 70%, Uncommon 24%, Rare 5,5%, Legendary 0,5%. Ini baseline eksperimen, **bukan parameter produksi yang disetujui**.
+- Iterasikan parameter sampai median 100% mendekati 300 jam; usulan toleransi kerja ±10% (270–330 jam), bukan kontrak final. Jangan mengoptimalkan median saja: tampilkan distribusi milestone dan P90 agar ekor pemain sial terlihat.
+- Simpan hasil kandidat dan ringkasan alasan memilih kandidat final. Laporkan perubahan dari baseline, khususnya bobot ekstrem dan item yang mendominasi waktu penyelesaian.
+- Tampilkan tabel hasil aktual dan parameter lengkap kepada pengguna, lalu **tunggu persetujuan sebelum porting ke game**. Jangan menulis angka hasil perkiraan sebagai hasil simulator.
+
+### Gambaran integrasi game sesudah parameter disetujui
+
+| Lokasi existing / usulan | Tanggung jawab tahap implementasi nanti |
+|---|---|
+| `Qoma/Domain/Catch/CatchEngine.swift` | Ganti roll hardcoded per-kind dengan tier lalu item weighted, distribusi pity yang disetujui, interval total deposit-ke-deposit. Hindari menambah reeling di atas 50–70 detik. |
+| `Qoma/Domain/Catch/CatalogDefinitions.swift` | ID stabil, kategori fish/ocean, tier dan bobot tiap item; mapping artwork. Pertahankan ID legacy atau sediakan migrasi eksplisit. |
+| `Qoma/Domain/Focus/SessionCoordinator.swift` dan `FocusModels.swift` | Persist remaining catch progress dan hasil pending; stop/pause/resume/complete/relaunch tidak reroll atau menggandakan catch. Rekonsiliasi clock yang dapat menghitung sleep sebagai elapsed dengan aturan tidak ada fishing saat sleep. |
+| `Qoma/Persistence/CatchRepository.swift`, `QomaDatabase.swift` | Persist pity per akun dan update sekali bersama banking catch dalam transaksi idempotent. Banking batch provisional menerapkan counter menurut urutan roll/deposit, bukan waktu retry. Provisional yang dibuang tidak mengubah pity permanen. |
+| Roll provisional vs pity banked | Simpan urutan serta state prediksi untuk catch provisional, agar beberapa hasil sebelum banking tidak semuanya memakai counter permanen yang sama. Saat banking, commit hasil/counter sekali; saat discard, buang state provisional secara konsisten. |
+| Catalog dan Analytics | Discovery/count berdasarkan banked event; duplikat tetap event berbeda; progress tidak bisa lebih dari 100% karena unknown ID. |
+| Help/About | Satu bagian teks statis: persentase peluang dasar tiap rarity dan satu kalimat bahwa peluang item langka bisa meningkat setelah beberapa catch berturut-turut tanpa rarity terkait. Format angka dari konstanta/config yang sama dengan roll produksi; jangan hardcode persentase kedua kali. Tidak ada counter pity UI atau notifikasi duplikat. |
+| Konfigurasi bersama simulator/game | Satu konfigurasi canonical untuk angka final. Simulator membaca config yang sama; Swift memuat atau mendapat hasil generasi deterministik dari config itu. Jangan memelihara salinan TS/Swift/Help yang bisa berbeda; tentukan mekanisme paling sederhana saat implementasi. |
+| Tes | Boundary pity dan distribusi, save failure/retry, per-account isolation, batch banking, interrupted <5 menit, completed singkat, pause/sleep/relaunch, progress lintas sesi, legacy migration. |
+
+### Checklist handoff
+
+- [x] Simpan milestone Analytics/Settings dan buat branch dokumentasi baru.
+- [x] Dokumentasikan persetujuan, revisi pengguna, kontrak simulator dan gambaran integrasi pada tanggal pengerjaan.
+- [ ] Sepakati pengecualian/kapasitas redistribusi saat peluang Legendary melampaui budget C/U dan interaksi kedua ramp.
+- [ ] Setelah diizinkan: buat dan jalankan simulator minimal 10.000 pemain per kandidat.
+- [ ] Laporkan hasil aktual, iterasi sampai target mendekati 300 jam, ajukan parameter final.
+- [ ] Setelah parameter disetujui: implementasi game, persistence, Help dan tes.
+- [ ] Generate artwork final dan lakukan review UI pada tahap terpisah.
+
+### Pelaksanaan simulator — 22 Oktober 2026
+
+Pengguna mengizinkan tahap simulator setelah rencana di atas. Implementasi simulator berjalan di branch `codex/rarity-collection-plan`; kode game, aset, dan Help belum diubah. Aturan soft-pity di bawah adalah asumsi eksperimen yang diajukan untuk persetujuan, bukan persetujuan parameter produksi.
+
+- Simulator: `scripts/rarity-sim.ts`, Bun/TypeScript tanpa dependensi tambahan. Seed tetap `20261022`, Mulberry32, stream interval/tier/item terpisah per pemain. Interval uniform 50–70 detik dijumlahkan aktual.
+- Lima kandidat diuji masing-masing **10.000 pemain**, seluruhnya sampai lengkap tanpa censoring. Tidak ada bias item baru atau reroll duplikat. Semua hasil diasumsikan banked; kerugian provisional dan kalender penggunaan tidak disimulasikan.
+- Kebijakan pity eksperimen: Legendary soft dibatasi `1 - baseRare`; Rare dipertahankan minimal baseRare dan dinaikkan jika target Rare+ memerlukan. Peluang sisa dialokasikan C/U proporsional. **Hard Legendary satu-satunya pengecualian**, menjadi 100% dan mengalahkan Rare. Kedua counter memakai formula ramp pengguna dan reset terpisah.
+
+| Kandidat | Jumlah item | P10 100% (jam) | Median 100% (jam) | P90 100% (jam) |
+|---|---:|---:|---:|---:|
+| baseline-100 | 100 | 11,61 | 17,92 | 32,56 |
+| bottleneck-150 | 150 | 54,27 | 283,50 | 946,26 |
+| spread-150 | 150 | 264,43 | 410,07 | 665,79 |
+| tuned-spread-150 | 150 | 192,10 | 300,57 | 487,72 |
+| **progressive-150 — rekomendasi untuk persetujuan** | **150** | **206,61** | **292,56** | **438,74** |
+
+Kandidat rekomendasi memakai **60 Common / 36 Uncommon / 24 Rare / 30 Legendary**, base **70,1% / 24% / 5,5% / 0,4%**, pity Rare+ **30/60**, Legendary **220/440**. Bobot Common/Uncommon/Rare berulang 1/2/3 menurut indeks item; Legendary `1 + index × 0,01` (1–1,29). ID masih sintetis per tier dan indeks; spesies/kategori fish-ocean/art akan dipetakan sesudah persetujuan.
+
+Alasan rekomendasi: median hanya sekitar 2,5% di bawah target 300 jam; P90 lebih rendah daripada dua kandidat lain yang mendekati target, dan 90% koleksi tercapai pada median **52,26 jam**, dibanding 12,56 jam pada tuned-spread. Koleksi lengkap tetap didominasi Legendary; 30 jenis Legendary berarti 20% jumlah spesies katalog, bukan 20% peluang catch.
+
+- Mean waktu tier lengkap (jam sejak awal): Common **10,47**, Uncommon **15,98**, Rare **36,67**, Legendary **310,50**.
+- Legendary pertama dengan pity: mean **2,57 jam**, median **2,93**, P90 **4,08**. Tanpa pity: mean **4,18 jam**, median **2,93**, P90 **9,74**. Median sama karena mayoritas pencapaian median masih sebelum soft pity mulai.
+- Mean duplikat sebelum lengkap: **18.480,32** tangkapan. Pity tidak menjamin item baru dan tidak memberi batas maksimum jam penyelesaian koleksi. Mayoritas catch menjelang akhir adalah duplikat, sesuai aturan tanpa bantuan discovery.
+- Laporan seluruh milestone 25/50/75/90/100%, mean tiap tier, Legendary pertama dengan/tanpa pity, duplikat, peluang efektif dan seluruh kandidat: `design/rarity-simulation/README.md`. Parameter/bobot lengkap serta hasil presisi penuh: `design/rarity-simulation/results.json`.
+- Reproduksi dari root: `bun scripts/rarity-sim.ts` (semua kandidat), `bun scripts/rarity-sim.ts --only=progressive-150` (kandidat rekomendasi), `bun scripts/rarity-sim.ts --check` (assert checks). Hasil deterministik untuk seed/config sama.
+- Pemeriksaan meliputi batas ramp/hard cap, kedua hard cap bersamaan, total peluang dan nilai nonnegatif pada seluruh kombinasi counter kandidat, Rare tidak turun selama soft pity, reset counter Rare/Legendary, sampling bobot, dan reproduksibilitas. Tidak perlu build app karena source Swift tidak diubah.
+
+**Langkah berikutnya: tunggu persetujuan pengguna atas kandidat progressive-150 dan pengecualian hard Legendary.** Setelah disetujui, putuskan inventory species/art dan porting aturan ke game/persistence dengan konfigurasi tunggal. Belum ada perubahan kode produksi maupun komitmen balancing final.
+
+### Implementasi sistem rarity dan koleksi — 22 Oktober 2026
+
+Catatan ini memperbarui status simulator di atas: pengguna menyetujui kandidat **progressive-150**, termasuk hard pity Legendary yang menjamin Legendary 100% pada tangkapan itu. Implementasi produksi dimulai setelah persetujuan tersebut.
+
+- Satu sumber parameter produksi: `Qoma/Resources/rarity-config.json`. File ini dimuat game untuk peluang, interval, jumlah item, bobot, dan angka Help; simulator membaca file yang sama untuk kandidat progressive-150. Kandidat eksperimen lain tetap berada di simulator.
+- Katalog menjadi 150 ID stabil: 60 Common, 36 Uncommon, 24 Rare, 30 Legendary. Delapan ID lama dipertahankan agar event catch tersimpan tetap dikenali. Item yang belum punya species/art menggunakan nama bernomor dan placeholder ikan. Tiga ocean finds lama tetap ada; pembagian tambahan fish/ocean finds dan manifest spesies final belum ditentukan.
+- `CatchRarityRules` menjalankan dua undian: tier berdasarkan base odds plus pity, lalu item weighted dari tier. Bobot Common/Uncommon/Rare berulang 1/2/3; Legendary 1 sampai 1,29. Soft Legendary mempertahankan peluang Rare dasar dan mengambil kenaikan dari Common/Uncommon secara proporsional; hard Legendary mengesampingkan semua tier. Rare+ hard dipenuhi oleh Rare atau Legendary.
+- `CatchRepository` menyimpan pity dan siklus tangkapan per akun. Pity banked diperbarui dalam transaksi bersama banking catch; provisional ditambahkan hanya untuk memprediksi undian berikutnya dalam sesi aktif dan tidak mengubah counter permanen bila dibuang. Batch banking mengurutkan catch menurut waktu deposit dan ID.
+- `SessionCoordinator` memakai siklus total deposit-ke-deposit 50–70 detik, termasuk reel. Sisa waktu, ikan yang sudah tergulung, ID event, dan sisa reel dipersist; pause, resume, sleep/wake, stop, sesi baru, dan restore melanjutkan siklus tanpa undian ulang. Fishing punya penghitung fokus aktif terpisah dari elapsed Pomodoro, jadi tidur/offline tidak dihitung untuk catch maupun ambang banking 5 menit. Siklus disimpan maksimal tiap 5 detik dan langsung pada perubahan fase serta pause/sleep/stop; force quit dapat kehilangan paling banyak sekitar 5 detik progres waktu, tidak menggandakan hasil.
+- Catalog progress menghitung ID unik banked yang dikenal dari 150 item. About menampilkan peluang dasar dari konfigurasi yang sama dan satu kalimat tentang pity; UI tidak menampilkan counter atau notifikasi duplikat.
+- Tes yang sudah ada diperbarui untuk katalog, pity boundary, hard Legendary, interval 50–70 detik, dan banking ledger. **Test suite belum dijalankan.** Build aplikasi macOS berhasil dengan `xcodebuild build -project qoma.xcodeproj -scheme Qoma -configuration Debug -destination 'platform=macOS' -derivedDataPath /private/tmp/qoma-derived CODE_SIGNING_ALLOWED=NO`; berkas konfigurasi terverifikasi masuk ke app bundle. `git diff --check` juga berhasil.
+- Simulator dijalankan ulang dengan sumber config bersama; median 100% tetap **292,56 jam**, P10 **206,61 jam**, P90 **438,74 jam**, mean duplikat **18.480,32**. Laporan dan hasil penuh tetap di `design/rarity-simulation/README.md` serta `results.json`.
+
+**Belum selesai:** species manifest/nama final dan artwork 150 item; aturan jumlah/bobot fish vs ocean finds; test suite; evaluasi perilaku UI koleksi setelah data item baru tampil. Semua entri baru saat ini memakai placeholder.

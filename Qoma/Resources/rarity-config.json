@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "intervalSeconds": { "min": 50, "max": 70 },
+  "baseOdds": {
+    "common": 0.701,
+    "uncommon": 0.24,
+    "rare": 0.055,
+    "legendary": 0.004
+  },
+  "pity": {
+    "rarePlus": { "start": 30, "hard": 60 },
+    "legendary": { "start": 220, "hard": 440 }
+  },
+  "itemCounts": {
+    "common": 60,
+    "uncommon": 36,
+    "rare": 24,
+    "legendary": 30
+  },
+  "itemWeights": {
+    "cycle": [1, 2, 3],
+    "legendaryStart": 1,
+    "legendaryStep": 0.01
+  }
+}

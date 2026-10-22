@@ -1,4 +1,5 @@
 import Foundation
+import AppKit
 import Combine
 import OSLog
 
@@ -43,6 +44,11 @@ final class SessionCoordinator: ObservableObject {
     private var catchTimer: Timer?
     private var catchDeadline: Date?
     private var catchPhase: CatchEngine.Phase = .waiting
+    private var catchCycle = CatchCycleState()
+    private var catchReelEventID: UUID?
+    private var lastCatchActiveTickAt: Date?
+    private var lastCatchProgressSavedAt: Date?
+    private var workspaceObservers: [NSObjectProtocol] = []
     private let autoCatchEnabled: Bool
 
     var isActive: Bool { snapshot?.status == .active }
@@ -67,6 +73,25 @@ final class SessionCoordinator: ObservableObject {
         self.canStartSession = canStartSession
         self.now = now
         self.autoCatchEnabled = autoCatchEnabled
+        let center = NSWorkspace.shared.notificationCenter
+        workspaceObservers = [
+            center.addObserver(forName: NSWorkspace.willSleepNotification, object: nil, queue: .main) { [weak self] _ in
+                MainActor.assumeIsolated {
+                    guard let self, self.snapshot?.status == .active else { return }
+                    self.advanceCatchActiveTime()
+                    self.lastCatchActiveTickAt = nil
+                    self.persistCatchCycleProgress(force: true)
+                    self.pauseCatchTimer()
+                }
+            },
+            center.addObserver(forName: NSWorkspace.didWakeNotification, object: nil, queue: .main) { [weak self] _ in
+                MainActor.assumeIsolated {
+                    guard let self, self.snapshot?.status == .active else { return }
+                    self.lastCatchActiveTickAt = self.now()
+                    self.startCatchTimer(afterResume: false)
+                }
+            }
+        ]
     }
 
     // MARK: - Lifecycle
@@ -75,6 +100,14 @@ final class SessionCoordinator: ObservableObject {
     func restore() {
         guard snapshot == nil else { return }
         guard var stored = sessionRepository.loadActive(accountID: accountID) else { return }
+
+        catchCycle = catchRepository.accountProgress(accountID: accountID).progress.cycle
+        if catchCycle.sessionID != stored.id {
+            catchCycle.sessionID = stored.id
+            // Fishing progress starts when this tracking version first sees the session.
+            // Pomodoro elapsed time may include time spent asleep while the app was closed.
+            catchCycle.sessionActiveSeconds = 0
+        }
 
         if stored.status == .completed || stored.status == .interrupted {
             snapshot = stored
@@ -112,6 +145,7 @@ final class SessionCoordinator: ObservableObject {
         self.clock = clock
         self.snapshot = stored
         self.catchEngine = CatchEngine()
+        lastCatchActiveTickAt = now()
 
         if clock.isDue {
             completeIfDue()
@@ -162,6 +196,10 @@ final class SessionCoordinator: ObservableObject {
         )
         self.snapshot = newSnapshot
         self.catchEngine = CatchEngine()
+        self.catchCycle = catchRepository.accountProgress(accountID: accountID).progress.cycle
+        self.catchCycle.sessionID = id
+        self.catchCycle.sessionActiveSeconds = 0
+        self.lastCatchActiveTickAt = startedAt
         startTicking()
         startCatchTimer(afterResume: false)
         Logger.session.info("Started session \(id, privacy: .public)")
@@ -171,6 +209,8 @@ final class SessionCoordinator: ObservableObject {
     func pauseSession() {
         guard var snap = snapshot, snap.status == .active else { return }
         if clock?.isDue == true { _ = completeIfDue(); return }
+        advanceCatchActiveTime()
+        lastCatchActiveTickAt = nil
         clock?.pause()
         snap.status = .paused
         snap.pausedAt = now()
@@ -178,11 +218,13 @@ final class SessionCoordinator: ObservableObject {
         snap.activeSegmentStartedAt = nil
         guard sessionRepository.saveActive(snap) else {
             clock?.resume()
+            lastCatchActiveTickAt = now()
             Logger.session.error("Could not persist pause")
             return
         }
         snapshot = snap
         stopTicking()
+        persistCatchCycleProgress(force: true)
         pauseCatchTimer()
         Logger.session.info("Paused session \(snap.id, privacy: .public)")
     }
@@ -190,12 +232,14 @@ final class SessionCoordinator: ObservableObject {
     func resumeSession() {
         guard var snap = snapshot, snap.status == .paused else { return }
         clock?.resume()
+        lastCatchActiveTickAt = now()
         snap.status = .active
         snap.pausedAt = nil
         snap.deadline = clock?.deadline ?? snap.deadline
         snap.activeSegmentStartedAt = now()
         guard sessionRepository.saveActive(snap) else {
             clock?.pause()
+            lastCatchActiveTickAt = nil
             Logger.session.error("Could not persist resume")
             return
         }
@@ -220,6 +264,8 @@ final class SessionCoordinator: ObservableObject {
 
         let activeSeconds = clock?.activeSeconds ?? snap.accumulatedActiveSeconds
         let endedAt = now()
+        advanceCatchActiveTime()
+        lastCatchActiveTickAt = nil
 
         snap.status = .interrupted
         snap.accumulatedActiveSeconds = activeSeconds
@@ -248,6 +294,8 @@ final class SessionCoordinator: ObservableObject {
 
         let activeSeconds = clock.activeSeconds
         let endedAt = snap.deadline
+        advanceCatchActiveTime()
+        lastCatchActiveTickAt = nil
         snap.status = .completed
         snap.accumulatedActiveSeconds = activeSeconds
         snap.endedAt = endedAt
@@ -348,15 +396,21 @@ final class SessionCoordinator: ObservableObject {
 
     @discardableResult
     func beginReel() -> (kindID: String, duration: TimeInterval)? {
-        catchEngine?.beginReel()
+        let pity = catchRepository.accountProgress(
+            accountID: accountID, provisionalSessionID: snapshot?.id
+        ).pity
+        guard let result = catchEngine?.beginReel(pity: pity) else { return nil }
+        catchReelEventID = result.eventID
+        return (result.kindID, result.duration)
     }
 
     func depositCatch() -> (event: CatchEvent, banked: Bool)? {
-        guard let snap = snapshot, let clock else { return nil }
+        guard let snap = snapshot else { return nil }
         guard let result = catchEngine?.deposit(
             sessionID: snap.id,
             accountID: accountID,
-            activeSeconds: clock.activeSeconds,
+            activeSeconds: catchCycle.sessionActiveSeconds,
+            eventID: catchReelEventID,
             now: now()
         ) else { return nil }
 
@@ -366,12 +420,15 @@ final class SessionCoordinator: ObservableObject {
             return nil
         }
         if result.banked {
-            guard catchRepository.bank(result.event.id, sessionID: result.event.sessionID, accountID: accountID, at: now()) else {
+            guard catchRepository.bankProvisional(
+                sessionID: result.event.sessionID, accountID: accountID, at: now()
+            ) else {
                 Logger.session.error("Could not persist banked catch")
                 catchEngine?.cancelInFlight()
                 return nil
             }
         }
+        catchEngine?.confirmDeposit()
         lastCatchEvent = result.event
         if result.banked { catchesRevision += 1 }
         return result
@@ -384,6 +441,22 @@ final class SessionCoordinator: ObservableObject {
         guard catchEngine != nil else { return }
         guard snapshot?.status == .active else { return }
 
+        if let kindID = catchCycle.pendingKindID,
+           let eventID = catchCycle.pendingEventID,
+           let duration = catchCycle.remainingReel {
+            catchEngine?.restoreInFlight(
+                kindID: kindID,
+                eventID: eventID,
+                duration: catchCycle.reelDuration ?? duration
+            )
+            catchReelEventID = eventID
+            currentReelKindID = kindID
+            catchPhase = .reeling(kindID: kindID)
+            catchDeadline = now().addingTimeInterval(duration)
+            scheduleCatchTimer(after: duration)
+            return
+        }
+
         if afterResume, let deadline = catchDeadline {
             let remaining = deadline.timeIntervalSince(now())
             if remaining > 0 {
@@ -392,9 +465,21 @@ final class SessionCoordinator: ObservableObject {
             }
         }
 
-        let wait = catchEngine?.scheduleNextBite() ?? 0
+        let wait: TimeInterval
+        if let remaining = catchCycle.remainingUntilBite {
+            wait = max(0, remaining)
+            catchCycle.remainingUntilBite = nil
+        } else {
+            wait = catchEngine?.scheduleNextBite() ?? 0
+            catchCycle.reelDuration = catchEngine?.currentReelDuration
+        }
         catchDeadline = now().addingTimeInterval(wait)
         catchPhase = .waiting
+        catchCycle.remainingUntilBite = wait
+        catchCycle.pendingKindID = nil
+        catchCycle.pendingEventID = nil
+        catchCycle.remainingReel = nil
+        saveCatchCycleState()
         scheduleCatchTimer(after: wait)
     }
 
@@ -410,62 +495,129 @@ final class SessionCoordinator: ObservableObject {
 
         switch catchPhase {
         case .waiting, .bite:
-            guard let result = catchEngine?.beginReel() else {
+            let pity = catchRepository.accountProgress(
+                accountID: accountID, provisionalSessionID: snapshot?.id
+            ).pity
+            guard let result = catchEngine?.beginReel(pity: pity) else {
                 startCatchTimer(afterResume: false)
                 return
             }
             catchPhase = .reeling(kindID: result.kindID)
             currentReelKindID = result.kindID
+            catchReelEventID = result.eventID
+            catchCycle.remainingUntilBite = nil
+            catchCycle.pendingKindID = result.kindID
+            catchCycle.pendingEventID = result.eventID
+            catchCycle.reelDuration = result.duration
+            catchCycle.remainingReel = result.duration
+            saveCatchCycleState()
             catchDeadline = now().addingTimeInterval(result.duration)
             scheduleCatchTimer(after: result.duration)
         case .reeling(let kindID):
-            depositCatch(kindID: kindID)
-            currentReelKindID = nil
-            startCatchTimer(afterResume: false)
+            if depositCatch(kindID: kindID, eventID: catchReelEventID) {
+                currentReelKindID = nil
+                catchReelEventID = nil
+                scheduleNextCatchCycle()
+            } else {
+                catchPhase = .depositing(kindID: kindID)
+                scheduleCatchTimer(after: 1)
+            }
         case .depositing:
-            startCatchTimer(afterResume: false)
+            if case .depositing(let kindID) = catchPhase,
+               depositCatch(kindID: kindID, eventID: catchReelEventID) {
+                currentReelKindID = nil
+                catchReelEventID = nil
+                scheduleNextCatchCycle()
+            } else {
+                scheduleCatchTimer(after: 1)
+            }
         }
     }
 
-    private func depositCatch(kindID: String) {
-        guard let snap = snapshot, let clock else { return }
+    @discardableResult
+    private func depositCatch(kindID: String, eventID: UUID?) -> Bool {
+        guard let snap = snapshot else { return false }
         guard let result = catchEngine?.deposit(
             sessionID: snap.id,
             accountID: accountID,
-            activeSeconds: clock.activeSeconds,
+            activeSeconds: catchCycle.sessionActiveSeconds,
+            eventID: eventID,
             now: now()
-        ) else { return }
+        ) else { return false }
 
         guard catchRepository.saveProvisional(result.event) else {
             Logger.session.error("Could not persist provisional catch")
-            catchEngine?.cancelInFlight()
-            return
+            return false
         }
         if result.banked {
-            guard catchRepository.bank(
-                result.event.id, sessionID: result.event.sessionID, accountID: accountID, at: now()) else {
+            guard catchRepository.bankProvisional(
+                sessionID: result.event.sessionID, accountID: accountID, at: now()) else {
                 Logger.session.error("Could not persist banked catch")
-                catchEngine?.cancelInFlight()
-                return
+                return false
             }
         }
+        catchEngine?.confirmDeposit()
         lastCatchEvent = result.event
         if result.banked { catchesRevision += 1 }
         Logger.session.info("Deposited catch \(result.event.kindID) banked=\(result.banked, privacy: .public)")
+        return true
+    }
+
+    private func scheduleNextCatchCycle() {
+        let wait = catchEngine?.scheduleNextBite() ?? 0
+        catchCycle.remainingUntilBite = wait
+        catchCycle.reelDuration = catchEngine?.currentReelDuration
+        catchCycle.pendingKindID = nil
+        catchCycle.pendingEventID = nil
+        catchCycle.remainingReel = nil
+        catchPhase = .waiting
+        catchDeadline = now().addingTimeInterval(wait)
+        saveCatchCycleState()
+        scheduleCatchTimer(after: wait)
     }
 
     private func pauseCatchTimer() {
         catchTimer?.invalidate()
         catchTimer = nil
+        catchDeadline = nil
     }
 
     private func stopCatchTimer(discardInFlight: Bool) {
+        persistCatchCycleProgress(force: true)
         catchTimer?.invalidate()
         catchTimer = nil
         catchDeadline = nil
         currentReelKindID = nil
         if discardInFlight {
-            catchEngine?.cancelInFlight()
+            // A rolled catch remains pending across sessions until its deposit is saved.
+            if catchCycle.pendingKindID == nil { catchEngine?.cancelInFlight() }
+        }
+    }
+
+    private func persistCatchCycleProgress(force: Bool = false) {
+        guard autoCatchEnabled, let deadline = catchDeadline else { return }
+        let current = now()
+        if !force, let lastCatchProgressSavedAt,
+           current.timeIntervalSince(lastCatchProgressSavedAt) < 5 { return }
+        let remaining = max(0, deadline.timeIntervalSince(current))
+        switch catchPhase {
+        case .waiting, .bite: catchCycle.remainingUntilBite = remaining
+        case .reeling, .depositing: catchCycle.remainingReel = remaining
+        }
+        saveCatchCycleState()
+    }
+
+    private func advanceCatchActiveTime() {
+        guard snapshot?.status == .active,
+              let lastCatchActiveTickAt else { return }
+        let current = now()
+        catchCycle.sessionActiveSeconds += max(0, current.timeIntervalSince(lastCatchActiveTickAt))
+        self.lastCatchActiveTickAt = current
+    }
+
+    private func saveCatchCycleState() {
+        if catchRepository.saveCatchCycle(catchCycle, accountID: accountID) {
+            lastCatchProgressSavedAt = now()
         }
     }
 
@@ -473,13 +625,18 @@ final class SessionCoordinator: ObservableObject {
 
     private func startTicking() {
         stopTicking()
+        if snapshot?.status == .active, lastCatchActiveTickAt == nil {
+            lastCatchActiveTickAt = now()
+        }
         remainingTime = clock?.remaining ?? 0
         timerCancellable = Timer.publish(every: 1, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in
                 guard let self else { return }
                 self.remainingTime = self.clock?.remaining ?? 0
+                self.advanceCatchActiveTime()
                 self.bankIfThresholdReached()
+                self.persistCatchCycleProgress()
                 if self.clock?.isDue == true {
                     self.completeIfDue()
                 }
@@ -492,8 +649,9 @@ final class SessionCoordinator: ObservableObject {
     }
 
     private func bankIfThresholdReached() {
-        guard let snap = snapshot, let clock,
-              clock.activeSeconds >= CatchEngine.bankThresholdSeconds,
+        guard let snap = snapshot,
+              catchCycle.sessionID == snap.id,
+              catchCycle.sessionActiveSeconds >= CatchEngine.bankThresholdSeconds,
               !thresholdBankedSessionIDs.contains(snap.id) else { return }
         if catchRepository.bankProvisional(sessionID: snap.id, accountID: accountID, at: now()) {
             thresholdBankedSessionIDs.insert(snap.id)
@@ -507,7 +665,10 @@ final class SessionCoordinator: ObservableObject {
     private func recoverFinalizedSnapshot(_ snap: ActiveSessionSnapshot) -> FocusSession? {
         let endedAt = snap.endedAt ?? now()
         let status = snap.status
-        if status == .interrupted && snap.accumulatedActiveSeconds < CatchEngine.bankThresholdSeconds {
+        let catchActiveSeconds = catchCycle.sessionID == snap.id
+            ? catchCycle.sessionActiveSeconds
+            : snap.accumulatedActiveSeconds
+        if status == .interrupted && catchActiveSeconds < CatchEngine.bankThresholdSeconds {
             guard catchRepository.deleteProvisional(sessionID: snap.id, accountID: accountID) else {
                 finalizationState = .failed("Could not clean up this session. Try saving again.")
                 snapshot = snap
@@ -553,6 +714,7 @@ final class SessionCoordinator: ObservableObject {
         snapshot = nil
         clock = nil
         catchEngine = nil
+        lastCatchActiveTickAt = nil
         thresholdBankedSessionIDs.removeAll()
         pendingFinalizationSnapshot = nil
         pendingRestorationSnapshot = nil

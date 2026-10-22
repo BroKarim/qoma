@@ -7,7 +7,8 @@ struct CatalogView: View {
     @EnvironmentObject private var navigation: QyubeNavigation
 
     private var discoveredKinds: Set<String> {
-        Set(self.navigation.catches.filter(\.isBanked).map(\.kindID))
+        let knownIDs = Set(CatalogDefinitions.allKinds.map(\.id))
+        return Set(self.navigation.catches.filter(\.isBanked).map(\.kindID)).intersection(knownIDs)
     }
 
     private var kinds: [CatalogDefinitions.Kind] {
