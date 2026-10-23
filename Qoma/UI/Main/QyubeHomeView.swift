@@ -171,6 +171,7 @@ struct QyubeHomeView: View {
                 breakRemaining: self.navigation.breakRemaining,
                 onCreateSession: self.createSession,
                 onBackToSession: self.onBackToSession,
+                onEditActiveSession: { self.navigation.editActiveSessionRequest = UUID() },
                 onSelectSession: self.openSession)
         }
         }

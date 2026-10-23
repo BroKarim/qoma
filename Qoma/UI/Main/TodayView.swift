@@ -7,6 +7,7 @@ struct TodayView: View {
     let breakRemaining: TimeInterval?
     let onCreateSession: () -> Void
     let onBackToSession: () -> Void
+    let onEditActiveSession: () -> Void
     let onSelectSession: (FocusSession) -> Void
 
     private var todaySessions: [FocusSession] {
@@ -69,11 +70,15 @@ struct TodayView: View {
                         }
 
                         if let activeSession {
-                            TodaySessionRow(
-                                title: activeSession.draft.displayTitle,
-                                detail: QyubeFormat.duration(
-                                    max(0, TimeInterval(activeSession.draft.plannedMinutes * 60) - self.remainingTime)),
-                                status: activeSession.status)
+                            Button(action: self.onEditActiveSession) {
+                                TodaySessionRow(
+                                    title: activeSession.draft.displayTitle,
+                                    detail: QyubeFormat.duration(
+                                        max(0, TimeInterval(activeSession.draft.plannedMinutes * 60) - self.remainingTime)),
+                                    status: activeSession.status)
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityHint("Open active session details and edit its name or app rules")
                         }
 
                         ForEach(self.todaySessions) { session in
@@ -161,6 +166,7 @@ struct TodayView: View {
         breakRemaining: nil,
         onCreateSession: {},
         onBackToSession: {},
+        onEditActiveSession: {},
         onSelectSession: { _ in })
         .frame(width: 310, height: 510)
 }

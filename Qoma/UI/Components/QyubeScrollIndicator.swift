@@ -14,6 +14,11 @@ private struct QyubeScrollMetrics: Equatable {
 private final class QyubeScrollProbeView: NSView {
     var hierarchyDidChange: (() -> Void)?
 
+    override func viewWillMove(toWindow newWindow: NSWindow?) {
+        super.viewWillMove(toWindow: newWindow)
+        hierarchyDidChange?()
+    }
+
     override func viewDidMoveToSuperview() {
         super.viewDidMoveToSuperview()
         hierarchyDidChange?()
@@ -68,31 +73,46 @@ private struct QyubeScrollObserver: NSViewRepresentable {
         }
 
         func attach(to view: QyubeScrollProbeView) {
-            DispatchQueue.main.async { [weak self, weak view] in
-                guard let self, let view else { return }
-                guard let scrollView = view.enclosingScrollView else { return }
-                scrollView.hasVerticalScroller = false
-                scrollView.hasHorizontalScroller = false
-                scrollView.autohidesScrollers = true
-                scrollView.verticalScroller?.alphaValue = 0
-                scrollView.horizontalScroller?.alphaValue = 0
-                scrollView.scrollerStyle = .overlay
-                scrollView.drawsBackground = false
-                guard self.scrollView !== scrollView else { return }
-
-                self.scrollView = scrollView
-
-                guard self.tracksMetrics else { return }
-                scrollView.contentView.postsBoundsChangedNotifications = true
-                self.observer = NotificationCenter.default.addObserver(
-                    forName: NSView.boundsDidChangeNotification,
-                    object: scrollView.contentView,
-                    queue: .main
-                ) { [weak self] _ in
-                    self?.updateMetrics()
+            guard let scrollView = view.enclosingScrollView else {
+                DispatchQueue.main.async { [weak self, weak view] in
+                    guard let self, let view, let scrollView = view.enclosingScrollView else { return }
+                    self.configure(scrollView)
                 }
-                self.updateMetrics()
+                return
             }
+
+            self.configure(scrollView)
+        }
+
+        private func configure(_ scrollView: NSScrollView) {
+            var changed = false
+            if scrollView.scrollerStyle != .overlay { scrollView.scrollerStyle = .overlay; changed = true }
+            if scrollView.hasVerticalScroller { scrollView.hasVerticalScroller = false; changed = true }
+            if scrollView.hasHorizontalScroller { scrollView.hasHorizontalScroller = false; changed = true }
+            if !scrollView.autohidesScrollers { scrollView.autohidesScrollers = true; changed = true }
+            if scrollView.drawsBackground { scrollView.drawsBackground = false; changed = true }
+
+            if changed {
+                scrollView.tile()
+                scrollView.needsLayout = true
+                scrollView.superview?.needsLayout = true
+                scrollView.layoutSubtreeIfNeeded()
+                scrollView.reflectScrolledClipView(scrollView.contentView)
+            }
+
+            guard self.scrollView !== scrollView else { return }
+            if let observer { NotificationCenter.default.removeObserver(observer) }
+            self.scrollView = scrollView
+            guard self.tracksMetrics else { return }
+            scrollView.contentView.postsBoundsChangedNotifications = true
+            self.observer = NotificationCenter.default.addObserver(
+                forName: NSView.boundsDidChangeNotification,
+                object: scrollView.contentView,
+                queue: .main
+            ) { [weak self] _ in
+                self?.updateMetrics()
+            }
+            self.updateMetrics()
         }
 
         private func updateMetrics() {

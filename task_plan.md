@@ -1603,3 +1603,12 @@ Perbaikan dan temuan lanjutan:
 - `QyubeCatchArt` tidak lagi menggambar ikon atau gambar fallback jika artwork tidak tersedia. Tangkapan dengan art memakai warna asli; item Catalog yang belum ditemukan memakai alpha artwork sebagai siluet tinta. Catch lama tanpa aset tidak menampilkan gambar placeholder.
 - `rarity-config.json` mengikuti jumlah roster aktif. Simulator 10.000 pemain `artwork-backed-96`: median lengkap 292,56 jam, P10 206,61, P90 438,74, rata-rata duplikat 18.534,28 tangkapan. Peluang dasar, pity, dan interval 50–70 detik tetap; hasil ini dekat target median awal sekitar 300 jam.
 - Tes `CatchEngineTests` lulus, termasuk inventory semua 96 image set dalam bundle, jumlah per rarity cocok dengan config, serta resolusi ID catch lama. Build Debug macOS melalui test target berhasil; simulator `--check` dan `git diff --check` lulus.
+
+
+### Perbaikan lebar awal halaman scroll — 23 Oktober 2026
+
+- Gejala: saat halaman pertama kali tampil, konten tampak menyempit beberapa point di sisi kanan, lalu melebar setelah pengguna scroll. Ini terjadi lintas halaman karena layar Today, Catalog, Analytics, New Session, dan beberapa Settings berbagi helper `QyubeScrollObserver`.
+- Penyebab: macOS dengan scrollbar `Always` atau scroller legacy dapat menyisihkan sekitar 15pt untuk scroller vertikal. Helper sebelumnya mengatur `NSScrollView` hanya lewat `DispatchQueue.main.async`; frame awal SwiftUI kadang sudah memakai lebar clip view lama sebelum scroller dinonaktifkan. Scroll berikutnya memicu bounds/layout pass sehingga lebar baru tampak setelah interaksi.
+- Perbaikan di `Qoma/UI/Components/QyubeScrollIndicator.swift`: probe kini memanggil coordinator pada `viewWillMove(toWindow:)`, `viewDidMoveToWindow()`, dan `viewDidMoveToSuperview()`. `attach` mengonfigurasi scroll view secara sinkron jika ancestor sudah tersedia dan memakai satu fallback async bila hierarchy belum lengkap.
+- Konfigurasi dipusatkan pada `configure(_:)`, hanya mengubah style/flags yang berbeda. Jika ada perubahan, helper memanggil `tile()`, menandai layout, menjalankan `layoutSubtreeIfNeeded()`, lalu `reflectScrolledClipView(_:)`; observer bounds untuk indikator custom tetap dipasang seperti sebelumnya.
+- Perubahan berhasil diverifikasi dengan `swiftc -frontend -parse` dan `git diff --check`. Pengguna mengonfirmasi gejala sudah hilang. Build penuh dan QA di beberapa pengaturan scrollbar macOS belum dijalankan.
