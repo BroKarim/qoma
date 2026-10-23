@@ -39,5 +39,3 @@ python3 output/imagegen/rare-legend-collectibles-v1/crop_assets.py
 ```
 
 Use the source sheets for future edits. One color asset per item remains sufficient; the app renders locked silhouettes from alpha. Re-exporting crops recreates the draft manifest: preserve the `productionGameID` mappings when doing so and copy revised PNGs to their matching Xcode asset sets.
-
-\n

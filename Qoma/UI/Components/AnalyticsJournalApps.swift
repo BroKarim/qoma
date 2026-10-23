@@ -46,5 +46,3 @@ struct AnalyticsJournalApps: View {
         }
     }
 }
-
-\n

@@ -16,5 +16,3 @@ struct AnalyticsJournalHeading: View {
         }
     }
 }
-
-\n

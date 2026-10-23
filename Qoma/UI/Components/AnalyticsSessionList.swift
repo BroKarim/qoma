@@ -54,5 +54,3 @@ struct AnalyticsSessionList: View {
         return title
     }
 }
-
-\n

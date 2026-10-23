@@ -34,6 +34,11 @@ struct CatchEngineTests {
         for kind in kinds {
             #expect(kind.artworkID.map { NSImage(named: "Collectible-" + $0) != nil } == true)
         }
+        #expect(CatalogDefinitions.allKinds.count == 96)
+        #expect(CatalogDefinitions.allKinds.allSatisfy { kind in
+            guard let artworkID = kind.artworkID else { return false }
+            return NSImage(named: "Collectible-" + artworkID) != nil
+        })
     }
 
     @Test
@@ -77,14 +82,18 @@ struct CatchEngineTests {
 
     @Test
     func approvedCatalogAndPityBoundariesAreUsed() {
-        #expect(CatalogDefinitions.allKinds.count == 150)
+        #expect(CatalogDefinitions.knownKinds.count == 150)
+        #expect(CatalogDefinitions.allKinds.count == 96)
         #expect(CatchRarityRules.baseOdds == [
             .common: 0.701, .uncommon: 0.24, .rare: 0.055, .legendary: 0.004
         ])
         #expect(CatchRarityRules.intervalSeconds == 50...70)
         #expect(CatalogDefinitions.Rarity.allCases.map { rarity in
             CatalogDefinitions.allKinds.filter { $0.rarity == rarity }.count
-        } == [60, 36, 24, 30])
+        } == [8, 35, 23, 30])
+        #expect(CatalogDefinitions.Rarity.allCases.map { rarity in
+            CatchRarityRules.config.itemCounts[rarity]
+        } == [8, 35, 23, 30])
         #expect(CatchRarityRules.pityBoost(30, start: 30, hard: 60) == 0)
         #expect(CatchRarityRules.pityBoost(59, start: 30, hard: 60) == 1)
 
@@ -93,6 +102,7 @@ struct CatchEngineTests {
             using: { 0 }
         )
         #expect(CatalogDefinitions.kind(id: hardLegendary)?.rarity == .legendary)
+        #expect(CatalogDefinitions.allKinds.contains { $0.id == hardLegendary })
 
         let engine = CatchEngine()
         let wait = engine.scheduleNextBite()

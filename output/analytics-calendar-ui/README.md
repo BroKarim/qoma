@@ -7,5 +7,3 @@ Component renders using synthetic QA data, not user history. These images exerci
 - `empty-six-week-month.png`: empty state and August 2026 with six calendar rows in the test locale.
 
 App build and temporary ImageRenderer QA harness passed. Harness removed after visual inspection. Existing Analytics repositories, tracking, heatmap/domain calculations and rarity configuration were not changed. Website UI stays hidden; legacy Heatmap and Breakdown components remain available elsewhere in source.
-
-\n

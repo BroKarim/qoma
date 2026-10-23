@@ -26,7 +26,7 @@ struct QyubePrimaryButton: View {
     }
 }
 
-/// Uses each item's own artwork silhouette when available, with a neutral silhouette fallback.
+/// Uses original item art when available and keeps undiscovered catalog art as a dark silhouette.
 struct QyubeCatchArt: View {
     var kindID: String = "uncommon-03"
     var discovered = true
@@ -37,20 +37,14 @@ struct QyubeCatchArt: View {
         return NSImage(named: proposed) == nil ? nil : proposed
     }
 
+    @ViewBuilder
     var body: some View {
-        Group {
-            if let assetName = self.assetName {
-                Image(assetName).renderingMode(self.discovered ? .original : .template)
-                    .resizable().scaledToFit()
-            } else if let kind = CatalogDefinitions.kind(id: self.kindID) {
-                Image(systemName: kind.isFish ? "fish.fill" : "shippingbox.fill")
-                    .resizable().scaledToFit().padding(7)
-            } else {
-                Image(systemName: "questionmark.diamond").resizable().scaledToFit().padding(8)
-            }
+        if let assetName = self.assetName {
+            Image(assetName).renderingMode(self.discovered ? .original : .template)
+                .resizable().scaledToFit()
+                .foregroundStyle(self.discovered ? Color.qyubeAccent : Color.qyubeInk)
+                .accessibilityHidden(true)
         }
-        .foregroundStyle(Color.qyubeInk.opacity(self.discovered ? 0.72 : 0.48))
-        .accessibilityHidden(true)
     }
 }
 

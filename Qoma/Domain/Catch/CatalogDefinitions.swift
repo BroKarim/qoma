@@ -18,11 +18,9 @@ enum CatalogDefinitions {
         case legendary
     }
 
-    static let counts = CatchRarityRules.config.itemCounts
-
-    // shortcut: generated entries use numbered names and shared fish art, replace when the species manifest is approved.
-    static let allKinds: [Kind] = Rarity.allCases.flatMap { rarity in
-        (0..<(counts[rarity] ?? 0)).map { index in
+    /// Keeps old generated IDs readable in saved catch history; only `allKinds` is collectible.
+    static let knownKinds: [Kind] = Rarity.allCases.flatMap { rarity in
+        (0..<(historicalSlotCounts[rarity] ?? 0)).map { index in
             let legacy = legacyKinds[rarity].flatMap { kinds in
                 kinds.indices.contains(index) ? kinds[index] : nil
             }
@@ -34,10 +32,29 @@ enum CatalogDefinitions {
                 rarity: rarity,
                 isFish: artwork?.isFish ?? legacy?.isFish ?? true,
                 weight: CatchRarityRules.itemWeight(for: rarity, index: index),
-                artworkID: artwork?.id ?? (artworklessLegacyKindIDs.contains(id) ? nil : id)
+                artworkID: artwork?.id ?? (directArtworkKindIDs.contains(id) ? id : nil)
             )
         }
     }
+
+    static let allKinds: [Kind] = Rarity.allCases.flatMap { rarity in
+        knownKinds.filter { $0.rarity == rarity && $0.artworkID != nil }
+            .enumerated()
+            .map { index, kind in
+                Kind(
+                    id: kind.id,
+                    name: kind.name,
+                    rarity: kind.rarity,
+                    isFish: kind.isFish,
+                    weight: CatchRarityRules.itemWeight(for: rarity, index: index),
+                    artworkID: kind.artworkID
+                )
+            }
+    }
+
+    private static let historicalSlotCounts: [Rarity: Int] = [
+        .common: 60, .uncommon: 36, .rare: 24, .legendary: 30
+    ]
 
     private static let legacyKinds: [Rarity: [(id: String, name: String, isFish: Bool)]] = [
         .common: [
@@ -55,7 +72,10 @@ enum CatalogDefinitions {
         .legendary: [("narwhal", "Narwhal", true)]
     ]
 
-    private static let artworklessLegacyKindIDs: Set<String> = ["anchovy", "perch", "trout", "salmon"]
+    private static let directArtworkKindIDs: Set<String> = [
+        "stick", "pebble", "shell", "common-sea-pebble", "common-clam-shell",
+        "common-spiral-shell", "common-driftwood", "common-shell-shard", "common-sea-glass"
+    ]
 
     // Artwork IDs can change without invalidating persisted catch IDs.
     private static let artworkByKindID: [String: (name: String, id: String, isFish: Bool)] = [
@@ -149,7 +169,7 @@ enum CatalogDefinitions {
     ]
 
     static func kind(id: String) -> Kind? {
-        allKinds.first { $0.id == id }
+        knownKinds.first { $0.id == id }
     }
 }
 

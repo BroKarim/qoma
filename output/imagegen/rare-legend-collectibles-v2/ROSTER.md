@@ -71,5 +71,3 @@
 | 28 | legendary-frost-archive | Arsip Embun Beku | artifact |
 | 29 | legendary-tide-astrolabe | Astrolab Pasang | artifact |
 | 30 | legendary-winter-music-box | Kotak Musik Musim Dingin | artifact |
-
-\n

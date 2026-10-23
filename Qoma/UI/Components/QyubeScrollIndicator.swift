@@ -11,6 +11,20 @@ private struct QyubeScrollMetrics: Equatable {
     var offset: CGFloat = 0
 }
 
+private final class QyubeScrollProbeView: NSView {
+    var hierarchyDidChange: (() -> Void)?
+
+    override func viewDidMoveToSuperview() {
+        super.viewDidMoveToSuperview()
+        hierarchyDidChange?()
+    }
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        hierarchyDidChange?()
+    }
+}
+
 private struct QyubeScrollObserver: NSViewRepresentable {
     @Binding var metrics: QyubeScrollMetrics
     let axis: QyubeScrollAxis
@@ -21,12 +35,17 @@ private struct QyubeScrollObserver: NSViewRepresentable {
     }
 
     func makeNSView(context: Context) -> NSView {
-        let view = NSView(frame: .zero)
+        let view = QyubeScrollProbeView(frame: .zero)
+        view.hierarchyDidChange = { [weak coordinator = context.coordinator, weak view] in
+            guard let view else { return }
+            coordinator?.attach(to: view)
+        }
         context.coordinator.attach(to: view)
         return view
     }
 
     func updateNSView(_ view: NSView, context: Context) {
+        guard let view = view as? QyubeScrollProbeView else { return }
         context.coordinator.metrics = self.$metrics
         context.coordinator.attach(to: view)
     }
@@ -48,17 +67,10 @@ private struct QyubeScrollObserver: NSViewRepresentable {
             if let observer { NotificationCenter.default.removeObserver(observer) }
         }
 
-        func attach(to view: NSView, attemptsRemaining: Int = 6) {
+        func attach(to view: QyubeScrollProbeView) {
             DispatchQueue.main.async { [weak self, weak view] in
                 guard let self, let view else { return }
-                guard let scrollView = view.enclosingScrollView else {
-                    if attemptsRemaining > 0 {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                            self.attach(to: view, attemptsRemaining: attemptsRemaining - 1)
-                        }
-                    }
-                    return
-                }
+                guard let scrollView = view.enclosingScrollView else { return }
                 scrollView.hasVerticalScroller = false
                 scrollView.hasHorizontalScroller = false
                 scrollView.autohidesScrollers = true

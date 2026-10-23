@@ -12,9 +12,9 @@
     "legendary": { "start": 220, "hard": 440 }
   },
   "itemCounts": {
-    "common": 60,
-    "uncommon": 36,
-    "rare": 24,
+    "common": 8,
+    "uncommon": 35,
+    "rare": 23,
     "legendary": 30
   },
   "itemWeights": {

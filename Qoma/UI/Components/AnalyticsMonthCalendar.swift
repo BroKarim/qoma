@@ -121,5 +121,3 @@ struct AnalyticsMonthCalendar: View {
         selectedDay = date
     }
 }
-
-\n

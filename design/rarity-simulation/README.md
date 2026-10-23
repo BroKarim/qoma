@@ -1,6 +1,6 @@
-# Simulasi rarity dan koleksi — 22 Oktober 2026
+# Simulasi rarity dan koleksi — 23 Oktober 2026
 
-Status: progressive-150 disetujui dan dipakai oleh game. Setiap kandidat memakai 10.000 pemain, seed 20261022, Bun 1.3.10. Semua pemain disimulasikan sampai lengkap, tanpa censoring.
+Roster production memakai 96 item dengan artwork terintegrasi. Setiap kandidat memakai 10.000 pemain, seed 20261022, Bun 1.3.10. Semua pemain disimulasikan sampai lengkap, tanpa censoring. Hasil ini mengukur roster saat ini; belum ada penyesuaian parameter untuk mengejar target 300 jam.
 
 Satu catch memakai interval uniform 50–70 detik yang benar-benar dijumlahkan. Hanya jam fokus aktif; semua hasil dianggap banked, tanpa kehilangan provisional. Tidak ada bantuan item baru. Pity hanya menjamin tier.
 
@@ -15,12 +15,13 @@ P10 berarti 10% pemain mencapai milestone sebelum waktu itu; P90 berarti 90% sud
 | spread-150 | 150 | 264.43 | 410.07 | 665.79 | 26453.55 |
 | tuned-spread-150 | 150 | 192.10 | 300.57 | 487.72 | 19297.71 |
 | progressive-150 | 150 | 206.61 | 292.56 | 438.74 | 18480.32 |
+| artwork-backed-96 | 96 | 206.61 | 292.56 | 438.74 | 18534.28 |
 
 ## Konfigurasi produksi yang disetujui
 
-**progressive-150**: 60 Common, 36 Uncommon, 24 Rare, 30 Legendary. Dibanding tuned-spread-150, lebih banyak jenis Legendary membuat penemuan item baru tersebar lebih lama; bukan satu item dengan bobot ekstrem yang menahan completion. Legendary tetap jarang per catch walau jumlah jenisnya 20% katalog.
+**artwork-backed-96**: 8 Common, 35 Uncommon, 23 Rare, 30 Legendary. Angka mengikuti roster artwork aktif dan dapat berubah saat aset baru disetujui.
 
-Peluang dasar C/U/R/L: **70,1% / 24% / 5,5% / 0,4%**. Rare+ soft/hard **30/60**, Legendary **220/440**. Bobot C/U/R berulang **1,2,3** menurut indeks nol; bobot Legendary **1 + indeks × 0,01**, dari 1 sampai 1,29. ID sintetis: tier + indeks nol; mapping spesies/art belum diputuskan.
+Peluang dasar C/U/R/L: **70,1% / 24% / 5,5% / 0,4%**. Rare+ soft/hard **30/60**, Legendary **220/440**. Bobot C/U/R berulang **1,2,3** menurut urutan item aktif; bobot Legendary **1 + indeks × 0,01**. Roster produksi memakai ID stabil yang sudah dipetakan ke artwork.
 
 Ini tetap memiliki ekor panjang: banyak duplikat dan sebagian besar jam akhir mengejar Legendary tersisa. Pity tidak membatasi waktu menuju spesies baru; tidak ada jaminan 100% katalog selesai pada jam tertentu.
 
@@ -160,10 +161,36 @@ Jumlah C/U/R/L: 60 / 36 / 24 / 30. Base (%): 70.10 / 24.00 / 5.50 / 0.40. Pity R
 
 Mean duplikat: **18480.32**. Censored: **0**. Frekuensi tier efektif sepanjang simulasi (% C/U/R/L): **69.44 / 23.78 / 6.13 / 0.65**. Frekuensi ini mencakup penghentian pemain saat lengkap, bukan estimasi steady-state tanpa batas.
 
+### artwork-backed-96
+
+Jumlah C/U/R/L: 8 / 35 / 23 / 30. Base (%): 70.10 / 24.00 / 5.50 / 0.40. Pity Rare+ 30/60 dan Legendary 220/440.
+
+| Koleksi | P10 jam | Median jam | P90 jam |
+|---|---:|---:|---:|
+| 25% | 0.82 | 1.07 | 1.37 |
+| 50% | 3.51 | 4.26 | 5.22 |
+| 75% | 17.29 | 21.94 | 27.39 |
+| 90% | 69.94 | 88.75 | 111.66 |
+| 100% | 206.61 | 292.56 | 438.74 |
+
+| Tier lengkap | Mean jam dari awal |
+|---|---:|
+| common | 0.71 |
+| uncommon | 15.29 |
+| rare | 34.20 |
+| legendary | 310.50 |
+
+| Legendary pertama | Mean jam | P10 jam | Median jam | P90 jam |
+|---|---:|---:|---:|---:|
+| withPity | 2.57 | 0.43 | 2.93 | 4.08 |
+| withoutPity | 4.18 | 0.43 | 2.93 | 9.74 |
+
+Mean duplikat: **18534.28**. Censored: **0**. Frekuensi tier efektif sepanjang simulasi (% C/U/R/L): **69.44 / 23.78 / 6.13 / 0.65**. Frekuensi ini mencakup penghentian pemain saat lengkap, bukan estimasi steady-state tanpa batas.
+
 ## Reproduksi dan validasi
 
-`bun scripts/rarity-sim.ts --check` menjalankan assert checks. `bun scripts/rarity-sim.ts` menjalankan semua kandidat. `bun scripts/rarity-sim.ts --only=progressive-150` mengganti hasil kandidat itu dalam laporan existing.
+`bun scripts/rarity-sim.ts --check` menjalankan assert checks. `bun scripts/rarity-sim.ts` menjalankan semua kandidat. `bun scripts/rarity-sim.ts --only=artwork-backed-96` menghitung ulang roster artwork aktif.
 
 Jalankan dari root repository. PRNG Mulberry32 dengan stream terpisah interval/tier/item. Seed stream = seed XOR imul(player+1,0x9E3779B1) XOR imul(channel,0x85EBCA6B), channel 1/2/3. Pemain di setiap kandidat memakai seed yang sama. Perbandingan Legendary pertama memakai stream interval/tier sama dengan dan tanpa pity.
 
-Seluruh bobot, parameter, hasil presisi penuh dan statistik disimpan di [results.json](results.json). [rarity-config.json](../../Qoma/Resources/rarity-config.json) menjadi sumber parameter untuk game, Help dan kandidat progressive-150 di simulator.
+Seluruh bobot, parameter, hasil presisi penuh dan statistik disimpan di [results.json](results.json). [rarity-config.json](../../Qoma/Resources/rarity-config.json) menjadi sumber parameter untuk game, Help dan kandidat roster artwork aktif di simulator.

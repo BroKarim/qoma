@@ -71,6 +71,7 @@ const production = JSON.parse(readFileSync('Qoma/Resources/rarity-config.json', 
   itemWeights: { cycle: number[]; legendaryStart: number; legendaryStep: number };
 };
 const productionCounts = tiers.map(tier => production.itemCounts[tier]);
+const productionName = `artwork-backed-${productionCounts.reduce((sum, count) => sum + count, 0)}`;
 const productionWeights = productionCounts.map((count, tierIndex) => Array.from({ length: count }, (_, index) =>
   tierIndex === 3
     ? production.itemWeights.legendaryStart + index * production.itemWeights.legendaryStep
@@ -93,7 +94,7 @@ const candidates = [
       Array.from({ length: 36 }, (_, i) => 1 + (i % 3)),
       Array.from({ length: 18 }, (_, i) => 1 + (i % 3)),
       Array.from({ length: 12 }, (_, i) => 1 + i * .03)]),
-  config('progressive-150', productionCounts,
+  config(productionName, productionCounts,
     tiers.map(tier => production.baseOdds[tier]),
     [production.pity.legendary.start, production.pity.legendary.hard],
     productionWeights,
@@ -216,8 +217,8 @@ type Result = ReturnType<typeof simulate> & {
 async function writeReport(results: Result[]) {
   const f = (n: number) => n.toFixed(2);
   const lines = [
-    '# Simulasi rarity dan koleksi — 22 Oktober 2026', '',
-    'Status: progressive-150 disetujui dan dipakai oleh game. Setiap kandidat memakai 10.000 pemain, seed 20261022, Bun 1.3.10. Semua pemain disimulasikan sampai lengkap, tanpa censoring.', '',
+    '# Simulasi rarity dan koleksi — 23 Oktober 2026', '',
+    `Roster production memakai ${productionCounts.reduce((sum, count) => sum + count, 0)} item dengan artwork terintegrasi. Setiap kandidat memakai 10.000 pemain, seed 20261022, Bun 1.3.10. Semua pemain disimulasikan sampai lengkap, tanpa censoring. Hasil ini mengukur roster saat ini; belum ada penyesuaian parameter untuk mengejar target 300 jam.`, '',
     'Satu catch memakai interval uniform 50–70 detik yang benar-benar dijumlahkan. Hanya jam fokus aktif; semua hasil dianggap banked, tanpa kehilangan provisional. Tidak ada bantuan item baru. Pity hanya menjamin tier.', '',
     'P10 berarti 10% pemain mencapai milestone sebelum waktu itu; P90 berarti 90% sudah mencapainya. Quantile menggunakan interpolasi linear pada posisi (n−1) × p.', '',
     '## Perbandingan penyelesaian 100%', '',
@@ -225,8 +226,8 @@ async function writeReport(results: Result[]) {
     '|---|---:|---:|---:|---:|---:|',
     ...results.map(r => `| ${r.config.name} | ${r.config.counts.reduce((a,b)=>a+b,0)} | ${f(r.milestones['1'].p10)} | ${f(r.milestones['1'].median)} | ${f(r.milestones['1'].p90)} | ${f(r.meanDuplicates)} |`), '',
     '## Konfigurasi produksi yang disetujui', '',
-    '**progressive-150**: 60 Common, 36 Uncommon, 24 Rare, 30 Legendary. Dibanding tuned-spread-150, lebih banyak jenis Legendary membuat penemuan item baru tersebar lebih lama; bukan satu item dengan bobot ekstrem yang menahan completion. Legendary tetap jarang per catch walau jumlah jenisnya 20% katalog.', '',
-    'Peluang dasar C/U/R/L: **70,1% / 24% / 5,5% / 0,4%**. Rare+ soft/hard **30/60**, Legendary **220/440**. Bobot C/U/R berulang **1,2,3** menurut indeks nol; bobot Legendary **1 + indeks × 0,01**, dari 1 sampai 1,29. ID sintetis: tier + indeks nol; mapping spesies/art belum diputuskan.', '',
+    `**${productionName}**: ${productionCounts[0]} Common, ${productionCounts[1]} Uncommon, ${productionCounts[2]} Rare, ${productionCounts[3]} Legendary. Angka mengikuti roster artwork aktif dan dapat berubah saat aset baru disetujui.`, '',
+    'Peluang dasar C/U/R/L: **70,1% / 24% / 5,5% / 0,4%**. Rare+ soft/hard **30/60**, Legendary **220/440**. Bobot C/U/R berulang **1,2,3** menurut urutan item aktif; bobot Legendary **1 + indeks × 0,01**. Roster produksi memakai ID stabil yang sudah dipetakan ke artwork.', '',
     'Ini tetap memiliki ekor panjang: banyak duplikat dan sebagian besar jam akhir mengejar Legendary tersisa. Pity tidak membatasi waktu menuju spesies baru; tidak ada jaminan 100% katalog selesai pada jam tertentu.', '',
     '## Kebijakan pity yang diterapkan', '',
     'Counter adalah kegagalan sebelum undian. Formula ramp mengikuti pengguna. Rare+ menghitung target peluang gabungan Rare+Legendary; Rare mereset counter Rare+ saja, Legendary mereset keduanya. Peluang Legendary soft dibatasi 1−baseRare, lalu Rare=max(baseRare,targetRarePlus−Legendary). Sisa peluang dibagi Common/Uncommon secara proporsional. Hard Legendary menang dan menetapkan Legendary=1, Rare=0 sebagai pengecualian eksplisit. Hard Rare+ dipenuhi oleh Rare atau Legendary.', '',
@@ -244,9 +245,9 @@ async function writeReport(results: Result[]) {
       `Mean duplikat: **${f(r.meanDuplicates)}**. Censored: **${r.censored}**. Frekuensi tier efektif sepanjang simulasi (% C/U/R/L): **${r.effectiveTierRates.map(p=>f(p*100)).join(' / ')}**. Frekuensi ini mencakup penghentian pemain saat lengkap, bukan estimasi steady-state tanpa batas.`, '');
   }
   lines.push('## Reproduksi dan validasi', '',
-    '`bun scripts/rarity-sim.ts --check` menjalankan assert checks. `bun scripts/rarity-sim.ts` menjalankan semua kandidat. `bun scripts/rarity-sim.ts --only=progressive-150` mengganti hasil kandidat itu dalam laporan existing.', '',
+    '`bun scripts/rarity-sim.ts --check` menjalankan assert checks. `bun scripts/rarity-sim.ts` menjalankan semua kandidat. `bun scripts/rarity-sim.ts --only=' + productionName + '` menghitung ulang roster artwork aktif.', '',
     'Jalankan dari root repository. PRNG Mulberry32 dengan stream terpisah interval/tier/item. Seed stream = seed XOR imul(player+1,0x9E3779B1) XOR imul(channel,0x85EBCA6B), channel 1/2/3. Pemain di setiap kandidat memakai seed yang sama. Perbandingan Legendary pertama memakai stream interval/tier sama dengan dan tanpa pity.', '',
-    'Seluruh bobot, parameter, hasil presisi penuh dan statistik disimpan di [results.json](results.json). [rarity-config.json](../../Qoma/Resources/rarity-config.json) menjadi sumber parameter untuk game, Help dan kandidat progressive-150 di simulator.', '');
+    'Seluruh bobot, parameter, hasil presisi penuh dan statistik disimpan di [results.json](results.json). [rarity-config.json](../../Qoma/Resources/rarity-config.json) menjadi sumber parameter untuk game, Help dan kandidat roster artwork aktif di simulator.', '');
   await Bun.write('design/rarity-simulation/README.md', lines.join('\n'));
 }
 selfCheck();

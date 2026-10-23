@@ -1589,3 +1589,17 @@ Perbaikan dan temuan lanjutan:
 - Memetakan ID `narwhal` ke art baru `legendary-spirit-narwhal`; aset transparan dibundel sebagai `Collectible-legendary-spirit-narwhal`. Pool, bobot, peluang rarity, pity, dan jumlah item tidak berubah.
 - Manifest/README batch Rare & Legendary diperbarui untuk status integrasi Narwhal. Dokumentasi generation pada `output/` dan `design/` tetap dipertahankan.
 - Build Debug macOS berhasil; `git diff --check` dan validasi JSON manifest/asset catalog bersih. Suite tes tidak dijalankan.
+
+
+### Perbaikan rendering artwork koleksi — 23 Oktober 2026
+
+- Membuat tint fallback shared renderer mengikuti `discovered`: tampilan tangkapan (default true) memakai aksen berwarna saat asset item belum tersedia; item terkunci di Catalog tetap memakai siluet tinta gelap. Jika asset tersedia, tampilan tangkapan memakai warna asli dan item Catalog belum ditemukan memakai alpha artwork sebagai siluet.
+- Batas yang diketahui: 54 dari 150 item belum memiliki ilustrasi individual (52 Common, Trout, Salmon), jadi siluet untuk item tersebut belum dapat mengambil bentuk dari ilustrasi spesifik sampai asset tersedia. Tidak mengubah catch ID, pool, odds, atau rarity.
+
+
+### Roster koleksi hanya dari artwork terintegrasi — 23 Oktober 2026
+
+- Koreksi keputusan sebelumnya: 150 adalah jumlah kandidat simulator, bukan jumlah aset yang harus dipenuhi. Roster aktif sekarang hanya memuat image set yang benar-benar terintegrasi: 96 item (8 Common, 35 Uncommon, 23 Rare, 30 Legendary). `knownKinds` masih mengenali ID lama untuk membaca catch history; ID tanpa art tidak ditampilkan di Catalog atau dipilih oleh CatchRarityRules.
+- `QyubeCatchArt` tidak lagi menggambar ikon atau gambar fallback jika artwork tidak tersedia. Tangkapan dengan art memakai warna asli; item Catalog yang belum ditemukan memakai alpha artwork sebagai siluet tinta. Catch lama tanpa aset tidak menampilkan gambar placeholder.
+- `rarity-config.json` mengikuti jumlah roster aktif. Simulator 10.000 pemain `artwork-backed-96`: median lengkap 292,56 jam, P10 206,61, P90 438,74, rata-rata duplikat 18.534,28 tangkapan. Peluang dasar, pity, dan interval 50–70 detik tetap; hasil ini dekat target median awal sekitar 300 jam.
+- Tes `CatchEngineTests` lulus, termasuk inventory semua 96 image set dalam bundle, jumlah per rarity cocok dengan config, serta resolusi ID catch lama. Build Debug macOS melalui test target berhasil; simulator `--check` dan `git diff --check` lulus.

@@ -55,5 +55,3 @@ struct AnalyticsCatchGrid: View {
         return CatalogDefinitions.Rarity.allCases.firstIndex(of: rarity) ?? 4
     }
 }
-
-\n

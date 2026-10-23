@@ -5,5 +5,3 @@
 The manifest records `productionGameID`, separate from the artwork `id`. The app uses `Collectible-<artwork id>` image sets; no randomizer changes are needed. Uncommon Silverfish Garis Tembaga (`uncommon-silverfish-stripe`) and Lanternfish Bulat (`uncommon-lanternfish-round`) remain reserved without pool slots. They were not discarded.
 
 Existing catches with numbered IDs now resolve to the new names and artwork. Further generation should fill unmapped slots in other tiers or explicitly revisit pool size before adding Uncommon items. Keep the decoder fixes documented in `task_plan.md`.
-
-\n
