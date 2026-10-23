@@ -40,37 +40,9 @@ final class AnalyticsStore {
         }
     }
 
-    @discardableResult
-    func saveFocusSessions(_ records: [FocusSessionRecord]) -> Bool {
-        migrateLegacyAnalyticsJSON()
-        guard let database else { return false }
-        do {
-            try database.transaction {
-                try database.execute("DELETE FROM analytics_sessions WHERE account_id = ?", [.text(accountID)])
-                for record in records { try insert(record) }
-            }
-            return true
-        } catch {
-            Logger.store.error("Save analytics sessions failed: \(error.localizedDescription, privacy: .public)")
-            return false
-        }
-    }
-
-    @discardableResult
-    func appendFocusSession(_ record: FocusSessionRecord) -> Bool { save(record) }
-
-    @discardableResult
-    func updateFocusSession(_ record: FocusSessionRecord) -> Bool { save(record) }
-
     func loadAppActivityEvents() -> [AppActivityEvent] {
         migrateLegacyAnalyticsJSON()
         return query("SELECT payload FROM app_activity WHERE account_id = ? ORDER BY started_at", [.text(accountID)])
-    }
-
-    @discardableResult
-    func saveAppActivityEvents(_ events: [AppActivityEvent]) -> Bool {
-        migrateLegacyAnalyticsJSON()
-        return replace(events, table: "app_activity")
     }
 
     @discardableResult
@@ -81,12 +53,6 @@ final class AnalyticsStore {
     func loadWebsiteVisits() -> [WebsiteVisitRecord] {
         migrateLegacyAnalyticsJSON()
         return query("SELECT payload FROM website_visits WHERE account_id = ? ORDER BY started_at", [.text(accountID)])
-    }
-
-    @discardableResult
-    func saveWebsiteVisits(_ records: [WebsiteVisitRecord]) -> Bool {
-        migrateLegacyAnalyticsJSON()
-        return replace(records, table: "website_visits")
     }
 
     @discardableResult
@@ -157,11 +123,6 @@ final class AnalyticsStore {
         try importRecords(records)
     }
 
-    private func save(_ record: FocusSessionRecord) -> Bool {
-        do { try insert(record); return true }
-        catch { log(error, action: "Save analytics session"); return false }
-    }
-
     private func insert(_ record: FocusSessionRecord) throws {
         try execute("""
             INSERT INTO analytics_sessions(id, account_id, started_at, payload) VALUES(?, ?, ?, ?)
@@ -169,10 +130,6 @@ final class AnalyticsStore {
                 started_at = excluded.started_at, payload = excluded.payload
             """, [.text(record.id.uuidString), .text(accountID), .real(record.startedAt.timeIntervalSince1970),
                   .blob(try encoder.encode(record))])
-    }
-
-    private func insert(_ records: [FocusSessionRecord]) throws {
-        for record in records { try insert(record) }
     }
 
     private func insert(_ events: [AppActivityEvent]) throws {
@@ -200,21 +157,6 @@ final class AnalyticsStore {
         migrateLegacyAnalyticsJSON()
         do { try database.transaction(work); return true }
         catch { log(error, action: "Save analytics batch"); return false }
-    }
-
-    private func replace<T: Encodable>(_ records: [T], table: String) -> Bool {
-        guard let database else { return false }
-        do {
-            try database.transaction {
-                try database.execute("DELETE FROM \(table) WHERE account_id = ?", [.text(accountID)])
-                if let events = records as? [AppActivityEvent] { try insert(events) }
-                else if let visits = records as? [WebsiteVisitRecord] { try insert(visits) }
-                else if let sessions = records as? [FocusSessionRecord] {
-                    for session in sessions { try insert(session) }
-                }
-            }
-            return true
-        } catch { log(error, action: "Replace analytics records"); return false }
     }
 
     private func query<T: Decodable>(_ sql: String, _ values: [QomaDatabase.Value]) -> [T] {

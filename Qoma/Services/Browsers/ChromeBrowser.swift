@@ -16,22 +16,4 @@ class ChromeBrowser: BaseBrowser {
             """
     }
 
-    override func isInPrivateBrowsingMode() -> Bool? {
-        let script = """
-            tell application "Google Chrome"
-                if (count of windows) > 0 then
-                    return mode of window 1 is equal to "incognito"
-                end if
-            end tell
-            """
-
-        let scriptResult = executeAppleScript(script)
-
-        guard let result = scriptResult.result,
-              let isIncognito = Bool(result.lowercased()) else {
-            return nil
-        }
-
-        return isIncognito
-    }
 }

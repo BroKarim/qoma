@@ -8,11 +8,6 @@ enum FocusPolicyMode: String, Codable, CaseIterable, Sendable {
     case timerOnly
 }
 
-enum FocusResource: Hashable, Codable, Sendable {
-    case app(bundleID: String)
-    case domain(host: String)
-}
-
 struct SessionPolicy: Codable, Equatable, Sendable {
     var mode: FocusPolicyMode
     var allowedApps: Set<String> = []

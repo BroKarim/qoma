@@ -14,18 +14,6 @@ enum QyubeFormat {
     }
 }
 
-struct QyubePrimaryButton: View {
-    let title: String
-    let action: () -> Void
-    var body: some View {
-        Button(action: self.action) {
-            Text(self.title).font(.system(size: 14, weight: .medium))
-                .frame(maxWidth: .infinity).frame(height: 42).foregroundStyle(.white)
-                .background(Color.qyubeInk, in: RoundedRectangle(cornerRadius: 9))
-        }.buttonStyle(.plain)
-    }
-}
-
 /// Uses original item art when available and keeps undiscovered catalog art as a dark silhouette.
 struct QyubeCatchArt: View {
     var kindID: String = "uncommon-03"
@@ -45,26 +33,6 @@ struct QyubeCatchArt: View {
                 .foregroundStyle(self.discovered ? Color.qyubeAccent : Color.qyubeInk)
                 .accessibilityHidden(true)
         }
-    }
-}
-
-struct QyubePenguinArt: View {
-    var celebratory = false
-    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @AppStorage("qyube.reduceMotionOverride") private var reduceMotion = false
-    @State private var appearedAt = Date()
-
-    var body: some View {
-        TimelineView(.animation(
-            minimumInterval: 1.0 / 20,
-            paused: self.systemReduceMotion || self.reduceMotion))
-        { context in
-            let elapsed = context.date.timeIntervalSince(self.appearedAt)
-            let movement = self.systemReduceMotion || self.reduceMotion ? 0 : sin(elapsed * 1.5)
-            Image(self.celebratory ? "CompanionPoseCompleted" : "CompanionPoseFishing")
-                .resizable().scaledToFit().scaleEffect(1.45).rotationEffect(.degrees(movement * 0.8)).offset(
-                    y: movement * 1.5)
-        }.accessibilityLabel(self.celebratory ? "Happy penguin" : "Penguin fishing")
     }
 }
 

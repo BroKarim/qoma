@@ -9,7 +9,6 @@ final class WindowManager: NSObject, ObservableObject, NSWindowDelegate {
 
     var floatingWindow: NSWindow?
     private(set) var companionScene: CompanionScene?
-    private var previewScale: CGFloat = 1
     private let positionKey = "qyube.companion.origin"
 
     func showFloating() {
@@ -72,38 +71,13 @@ final class WindowManager: NSObject, ObservableObject, NSWindowDelegate {
         self.floatingWindow = nil
     }
 
-    func updateFloatingSize() {
-        guard let window = floatingWindow else { return }
-        window.setContentSize(self.companionSize)
-        if let visible = window.screen?.visibleFrame {
-            let origin = window.frame.origin
-            window.setFrameOrigin(CGPoint(
-                x: min(max(origin.x, visible.minX), visible.maxX - window.frame.width),
-                y: min(max(origin.y, visible.minY), visible.maxY - window.frame.height)))
-        }
-    }
-
-    func pauseCompanion(_ paused: Bool) {
-        self.companionScene?.setSessionPaused(paused)
-    }
-
-    func completeCompanion() {
-        self.companionScene?.completeSession()
-    }
-
-    func stopCompanion(activeSeconds: TimeInterval) {
-        self.companionScene?.stopSession(activeSeconds: activeSeconds)
-    }
-
     func windowDidMove(_ notification: Notification) {
         guard let window = floatingWindow else { return }
         UserDefaults.standard.set(NSStringFromPoint(window.frame.origin), forKey: self.positionKey)
     }
 
     private var companionSize: CGSize {
-        CGSize(
-            width: CompanionScene.stageSize.width * self.previewScale,
-            height: CompanionScene.stageSize.height * self.previewScale)
+        CompanionScene.stageSize
     }
 
     private func initialOrigin(size: CGSize) -> CGPoint {
@@ -115,31 +89,4 @@ final class WindowManager: NSObject, ObservableObject, NSWindowDelegate {
             x: min(max(proposed.x, visible.minX), visible.maxX - size.width),
             y: min(max(proposed.y, visible.minY), visible.maxY - size.height))
     }
-
-    #if DEBUG
-    func preview(_ action: CompanionPreviewAction) {
-        if action == .start { self.showFloating(); return }
-        guard let scene = companionScene else { return }
-        switch action {
-        case .start: break
-        case .bite: scene.biteNow()
-        case .sleep: scene.setSessionPaused(true)
-        case .resume:
-            scene.setDistracted(false)
-            scene.setSessionPaused(false)
-        case .distract: scene.setDistracted(true)
-        case .complete: scene.completeSession()
-        case .stopEarly: scene.stopSession(activeSeconds: 60)
-        case .actualSize: self.previewScale = 1; self.updateFloatingSize()
-        case .largeSize: self.previewScale = 2; self.updateFloatingSize()
-        case .dismiss: self.hideFloating()
-        }
-    }
-    #endif
 }
-
-#if DEBUG
-enum CompanionPreviewAction { case start, bite, sleep, resume, distract, complete, stopEarly, actualSize, largeSize,
-                                   dismiss
-}
-#endif

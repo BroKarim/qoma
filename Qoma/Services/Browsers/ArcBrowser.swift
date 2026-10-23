@@ -25,24 +25,4 @@ class ArcBrowser: BaseBrowser {
             """
     }
 
-    override func isInPrivateBrowsingMode() -> Bool? {
-        let script = """
-            tell application "Arc"
-                if (count of windows) > 0 then
-                    tell front window
-                        return incognito
-                    end tell
-                end if
-            end tell
-            """
-
-        let scriptResult = executeAppleScript(script)
-
-        guard let result = scriptResult.result,
-              let isIncognito = Bool(result.lowercased()) else {
-            return nil
-        }
-
-        return isIncognito
-    }
 }

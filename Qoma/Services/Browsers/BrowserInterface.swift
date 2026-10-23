@@ -11,7 +11,6 @@ protocol BrowserInterface {
     var bundleId: String { get }
     var displayName: String { get }
     func getCurrentURL() -> String?
-    func isInPrivateBrowsingMode() -> Bool?
 }
 
 class BaseBrowser: BrowserInterface {
@@ -56,11 +55,6 @@ class BaseBrowser: BrowserInterface {
         }
 
         Logger.browser.debug("\(self.displayName, privacy: .public) AppleScript returned no result (no windows open?)")
-        return nil
-    }
-
-    func isInPrivateBrowsingMode() -> Bool? {
-        // Default: no private browsing detection
         return nil
     }
 

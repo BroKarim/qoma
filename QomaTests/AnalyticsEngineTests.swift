@@ -156,9 +156,7 @@ struct AnalyticsEngineTests {
         let today = calendar.startOfDay(for: now)
 
         let cells = self.engine.buildHeatmapCells(from: [], calendar: calendar, now: now)
-        let weeks = cells.chunked(into: 7)
-
-        #expect(weeks.count == 52)
+        #expect((cells.count + 6) / 7 == 52)
         #expect(cells.last?.date == today)
         #expect(cells.allSatisfy { $0.date <= today })
         #expect(calendar.component(.weekday, from: try #require(cells.first?.date)) == 1)

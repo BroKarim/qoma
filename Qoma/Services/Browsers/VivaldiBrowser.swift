@@ -16,22 +16,4 @@ class VivaldiBrowser: BaseBrowser {
             """
     }
 
-    override func isInPrivateBrowsingMode() -> Bool? {
-        let script = """
-            tell application id "com.vivaldi.Vivaldi"
-                if (count of windows) > 0 then
-                    return mode of window 1 is equal to "incognito"
-                end if
-            end tell
-            """
-
-        let scriptResult = executeAppleScript(script)
-
-        guard let result = scriptResult.result,
-              let isPrivate = Bool(result.lowercased()) else {
-            return nil
-        }
-
-        return isPrivate
-    }
 }

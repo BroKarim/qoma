@@ -9,9 +9,6 @@ import OSLog
 /// in Firefox's about:config for the accessibility tree to be available.
 class FirefoxBrowser: BaseBrowser {
 
-    /// Private browsing suffix appended to Firefox window titles
-    private static let privateBrowsingSuffix = "\u{2014} Private Browsing"
-
     init() {
         super.init(bundleId: "org.mozilla.firefox", displayName: "Firefox")
     }
@@ -120,17 +117,4 @@ class FirefoxBrowser: BaseBrowser {
         return "https://\(urlValue)"
     }
 
-    override func isInPrivateBrowsingMode() -> Bool? {
-        let script = """
-            tell application "Firefox" to return name of front window
-            """
-
-        let scriptResult = executeAppleScript(script)
-
-        guard let windowName = scriptResult.result else {
-            return nil
-        }
-
-        return windowName.hasSuffix(Self.privateBrowsingSuffix)
-    }
 }
