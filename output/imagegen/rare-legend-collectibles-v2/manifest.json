@@ -1,0 +1,1682 @@
+[
+  {
+    "id": "rare-crystal-krill",
+    "name": "Krill Kristal",
+    "category": "fish",
+    "concept": "one curled tiny krill transformed into pale rose quartz, recognizable segmented translucent shrimp body, delicate legs and short feelers, solid eyeless head, one connected silhouette",
+    "rarity": "rare",
+    "sheet": "rare-batch-01-v2.png",
+    "cell": [
+      1,
+      1
+    ],
+    "path": "rare/rare-crystal-krill.png",
+    "productionGameID": "rare-06",
+    "status": "integrated-in-catalog",
+    "crop": [
+      44,
+      188,
+      623,
+      627
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      579,
+      439
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding"
+  },
+  {
+    "id": "rare-blueflame-lanternfish",
+    "name": "Lanternfish Api Biru",
+    "category": "fish",
+    "concept": "one chubby midnight-blue lanternfish with a dorsal fin shaped like a compact painted blue flame, contained opaque turquoise fire-fin silhouette, plain eyeless head",
+    "rarity": "rare",
+    "sheet": "rare-batch-01-v2.png",
+    "cell": [
+      1,
+      2
+    ],
+    "path": "rare/rare-blueflame-lanternfish.png",
+    "productionGameID": "rare-07",
+    "status": "integrated-in-catalog",
+    "crop": [
+      674,
+      127,
+      1245,
+      643
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      571,
+      516
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding"
+  },
+  {
+    "id": "rare-origami-silverfish",
+    "name": "Silverfish Lipatan",
+    "category": "fish",
+    "concept": "one slender silverfish whose body is folded pearl-white paper with soft indigo crease planes, recognizable fish fins and forked tail, plain folded eyeless head",
+    "rarity": "rare",
+    "sheet": "rare-batch-01-v2.png",
+    "cell": [
+      2,
+      1
+    ],
+    "path": "rare/rare-origami-silverfish.png",
+    "productionGameID": "rare-08",
+    "status": "integrated-in-catalog",
+    "crop": [
+      49,
+      753,
+      752,
+      1116
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      703,
+      363
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding"
+  },
+  {
+    "id": "rare-opal-amphipod",
+    "name": "Amphipod Opal",
+    "category": "fish",
+    "concept": "one small crescent amphipod with opalescent mint and lavender plated shell, tiny tucked legs, short antennae and smooth closed eyeless head",
+    "rarity": "rare",
+    "sheet": "rare-batch-01-v2.png",
+    "cell": [
+      2,
+      2
+    ],
+    "path": "rare/rare-opal-amphipod.png",
+    "productionGameID": "rare-09",
+    "status": "integrated-in-catalog",
+    "crop": [
+      765,
+      743,
+      1236,
+      1146
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      471,
+      403
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding"
+  },
+  {
+    "id": "rare-hourglass-conch",
+    "name": "Keong Jam Pasir",
+    "category": "ocean-finds",
+    "concept": "one empty spiral conch whose cream shell contains a visible amber sand chamber, hourglass-like spiral interior as a single shell, no stand or clock face",
+    "rarity": "rare",
+    "sheet": "rare-batch-02-v2.png",
+    "cell": [
+      1,
+      1
+    ],
+    "path": "rare/rare-hourglass-conch.png",
+    "productionGameID": "rare-10",
+    "status": "integrated-in-catalog",
+    "crop": [
+      61,
+      131,
+      665,
+      569
+    ],
+    "alphaBounds": [
+      1,
+      0,
+      604,
+      438
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding"
+  },
+  {
+    "id": "rare-nebula-pebble",
+    "name": "Batu Nebula",
+    "category": "ocean-finds",
+    "concept": "one smooth oval dark navy sea pebble with a small natural cross-section window showing softly painted violet galaxy clouds and tiny stars INSIDE the stone, thick ivory rim",
+    "rarity": "rare",
+    "sheet": "rare-batch-02-v2.png",
+    "cell": [
+      1,
+      2
+    ],
+    "path": "rare/rare-nebula-pebble.png",
+    "productionGameID": "rare-11",
+    "status": "integrated-in-catalog",
+    "crop": [
+      715,
+      152,
+      1228,
+      548
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      513,
+      396
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding"
+  },
+  {
+    "id": "rare-rime-bell",
+    "name": "Lonceng Berembun Es",
+    "category": "ocean-finds",
+    "concept": "one small old rounded bronze ship bell with a connected thick frosty ice lace rim and short loop, icy white and aged teal bronze, no text",
+    "rarity": "rare",
+    "sheet": "rare-batch-02-v2.png",
+    "cell": [
+      2,
+      1
+    ],
+    "path": "rare/rare-rime-bell.png",
+    "productionGameID": null,
+    "status": "reserved-art-no-pool-slot",
+    "crop": [
+      79,
+      616,
+      566,
+      1128
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      487,
+      512
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding"
+  },
+  {
+    "id": "rare-moon-jelly",
+    "name": "Ubur Bulan",
+    "category": "fish",
+    "concept": "one compact jellyfish whose domed bell resembles pearly crescent-moon porcelain, four short curling lilac tentacles attached, plain faceless bell, no detached stars",
+    "rarity": "rare",
+    "sheet": "rare-batch-02-v2.png",
+    "cell": [
+      2,
+      2
+    ],
+    "path": "rare/rare-moon-jelly.png",
+    "productionGameID": "rare-12",
+    "status": "integrated-in-catalog",
+    "crop": [
+      680,
+      650,
+      1224,
+      1142
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      544,
+      492
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding"
+  },
+  {
+    "id": "rare-prism-driftwood",
+    "name": "Kayu Prisma",
+    "category": "ocean-finds",
+    "concept": "one forked driftwood twig transformed into frosted prismatic glass, retains wood growth grain and organic twig silhouette, restrained amber and icy mint facets",
+    "rarity": "rare",
+    "sheet": "rare-batch-03-v2.png",
+    "cell": [
+      1,
+      1
+    ],
+    "path": "rare/rare-prism-driftwood.png",
+    "productionGameID": "rare-13",
+    "status": "integrated-in-catalog",
+    "crop": [
+      51,
+      106,
+      582,
+      629
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      531,
+      523
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding"
+  },
+  {
+    "id": "rare-amber-copepod",
+    "name": "Copepod Amber",
+    "category": "fish",
+    "concept": "one rounded golden amber copepod with segmented teardrop body, fine paddle antennae and tiny fins, eyeless smooth head, no specimen trapped inside",
+    "rarity": "rare",
+    "sheet": "rare-batch-03-v2.png",
+    "cell": [
+      1,
+      2
+    ],
+    "path": "rare/rare-amber-copepod.png",
+    "productionGameID": "rare-14",
+    "status": "integrated-in-catalog",
+    "crop": [
+      662,
+      103,
+      1209,
+      598
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      546,
+      495
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding"
+  },
+  {
+    "id": "rare-aurora-lichen",
+    "name": "Lichen Aurora",
+    "category": "plant",
+    "concept": "one compact branching lichen tuft on its own tiny connected slate pebble, frilly leaf lobes striped with teal lavender and soft peach aurora minerals, no detached dust",
+    "rarity": "rare",
+    "sheet": "rare-batch-03-v2.png",
+    "cell": [
+      2,
+      1
+    ],
+    "path": "rare/rare-aurora-lichen.png",
+    "productionGameID": "rare-15",
+    "status": "integrated-in-catalog",
+    "crop": [
+      53,
+      672,
+      566,
+      1180
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      513,
+      508
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding"
+  },
+  {
+    "id": "rare-glass-toothfish",
+    "name": "Toothfish Kaca",
+    "category": "fish",
+    "concept": "one stout polar toothfish with a body of opaque pale aqua sea glass, thick matte edges, ivory belly and broad blue fins, smooth eyeless head, no bones inside",
+    "rarity": "rare",
+    "sheet": "rare-batch-03-v2.png",
+    "cell": [
+      2,
+      2
+    ],
+    "path": "rare/rare-glass-toothfish.png",
+    "productionGameID": "rare-16",
+    "status": "integrated-in-catalog",
+    "crop": [
+      613,
+      752,
+      1225,
+      1155
+    ],
+    "alphaBounds": [
+      0,
+      1,
+      611,
+      403
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding"
+  },
+  {
+    "id": "rare-frostfeather-worm",
+    "name": "Cacing Bulu Salju",
+    "category": "fish",
+    "concept": "one short curved marine worm with a fan crown of feathery white frost fronds, pale rust tubular body and sage-gray plumes, natural tiny eyeless specimen not horror",
+    "rarity": "rare",
+    "sheet": "rare-batch-04-v2.png",
+    "cell": [
+      1,
+      1
+    ],
+    "path": "rare/rare-frostfeather-worm.png",
+    "productionGameID": "rare-17",
+    "status": "integrated-in-catalog",
+    "crop": [
+      90,
+      67,
+      586,
+      616
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      496,
+      549
+    ]
+  },
+  {
+    "id": "rare-pearl-button",
+    "name": "Kancing Mutiara",
+    "category": "ocean-finds",
+    "concept": "one four-hole salvaged button grown from mother-of-pearl, chunky round raised rim with subtle lavender seafoam concentric bands, button holes clearly mechanical and not a face",
+    "rarity": "rare",
+    "sheet": "rare-batch-04-v2.png",
+    "cell": [
+      1,
+      2
+    ],
+    "path": "rare/rare-pearl-button.png",
+    "productionGameID": "rare-18",
+    "status": "integrated-in-catalog",
+    "crop": [
+      686,
+      113,
+      1209,
+      608
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      522,
+      495
+    ]
+  },
+  {
+    "id": "rare-tide-compass",
+    "name": "Kompas Pasang",
+    "category": "ocean-finds",
+    "concept": "one small weathered pocket compass with asymmetric seashell lid connected to base, a single frozen teal needle over simple painted wave lines, no letters numbers or face",
+    "rarity": "rare",
+    "sheet": "rare-batch-04-v2.png",
+    "cell": [
+      2,
+      1
+    ],
+    "path": "rare/rare-tide-compass.png",
+    "productionGameID": "rare-19",
+    "status": "integrated-in-catalog",
+    "crop": [
+      86,
+      639,
+      579,
+      1179
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      493,
+      540
+    ]
+  },
+  {
+    "id": "rare-snowflake-crab",
+    "name": "Kepiting Keping Salju",
+    "category": "fish",
+    "concept": "one little rounded crab with a snowflake-shaped frosted carapace, six short ice-blue legs and two small mitten-like claws, smooth front with no eyes or stalks",
+    "rarity": "rare",
+    "sheet": "rare-batch-04-v2.png",
+    "cell": [
+      2,
+      2
+    ],
+    "path": "rare/rare-snowflake-crab.png",
+    "productionGameID": "rare-20",
+    "status": "integrated-in-catalog",
+    "crop": [
+      649,
+      714,
+      1211,
+      1171
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      562,
+      457
+    ]
+  },
+  {
+    "id": "rare-honeycomb-shell",
+    "name": "Kerang Sarang Madu",
+    "category": "ocean-finds",
+    "concept": "one cream clam shell with its ribs transformed into amber hexagonal honeycomb chambers, softly rounded closed bivalve, no bee or face",
+    "rarity": "rare",
+    "sheet": "rare-batch-05-v2.png",
+    "cell": [
+      1,
+      1
+    ],
+    "path": "rare/rare-honeycomb-shell.png",
+    "productionGameID": null,
+    "status": "reserved-art-no-pool-slot",
+    "crop": [
+      61,
+      139,
+      613,
+      572
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      552,
+      433
+    ]
+  },
+  {
+    "id": "rare-star-map-bottle",
+    "name": "Botol Peta Bintang",
+    "category": "ocean-finds",
+    "concept": "one squat sea-glass message bottle with cork, rolled navy parchment visible inside painted with a few tiny constellations only, no writing or glow outside glass",
+    "rarity": "rare",
+    "sheet": "rare-batch-05-v2.png",
+    "cell": [
+      1,
+      2
+    ],
+    "path": "rare/rare-star-map-bottle.png",
+    "productionGameID": "rare-21",
+    "status": "integrated-in-catalog",
+    "crop": [
+      702,
+      75,
+      1187,
+      599
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      485,
+      524
+    ]
+  },
+  {
+    "id": "rare-coral-chime",
+    "name": "Karang Nada",
+    "category": "plant",
+    "concept": "one short branching pale coral with three naturally fused shell-shaped hollow tips like tiny chimes, white chalk and muted blush, coherent forked coral silhouette",
+    "rarity": "rare",
+    "sheet": "rare-batch-05-v2.png",
+    "cell": [
+      2,
+      1
+    ],
+    "path": "rare/rare-coral-chime.png",
+    "productionGameID": null,
+    "status": "reserved-art-no-pool-slot",
+    "crop": [
+      82,
+      643,
+      614,
+      1187
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      532,
+      544
+    ]
+  },
+  {
+    "id": "rare-frozen-fern",
+    "name": "Pakis Embun Beku",
+    "category": "plant",
+    "concept": "one curled fiddlehead polar fern frond transformed into frosted blue-white glass, curled top and paired scalloped leaves, short attached woody base",
+    "rarity": "rare",
+    "sheet": "rare-batch-05-v2.png",
+    "cell": [
+      2,
+      2
+    ],
+    "path": "rare/rare-frozen-fern.png",
+    "productionGameID": null,
+    "status": "reserved-art-no-pool-slot",
+    "crop": [
+      725,
+      654,
+      1171,
+      1194
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      446,
+      540
+    ]
+  },
+  {
+    "id": "rare-midnight-puffer",
+    "name": "Ikan Buntal Malam",
+    "category": "fish",
+    "concept": "one small round pufferfish with short blunt crystal quills and midnight-indigo body containing a few warm cream star flecks on back only, smooth eyeless plain face",
+    "rarity": "rare",
+    "sheet": "rare-batch-06-v2.png",
+    "cell": [
+      1,
+      1
+    ],
+    "path": "rare/rare-midnight-puffer.png",
+    "productionGameID": "rare-22",
+    "status": "integrated-in-catalog",
+    "crop": [
+      79,
+      128,
+      642,
+      591
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      563,
+      463
+    ]
+  },
+  {
+    "id": "rare-frost-fan-scallop",
+    "name": "Kerang Kipas Beku",
+    "category": "ocean-finds",
+    "concept": "one open fan-shaped scallop shell with broad translucent icy fan ribs, pale slate hinges and cream inner paint, no pearl separate from shell",
+    "rarity": "rare",
+    "sheet": "rare-batch-06-v2.png",
+    "cell": [
+      1,
+      2
+    ],
+    "path": "rare/rare-frost-fan-scallop.png",
+    "productionGameID": null,
+    "status": "reserved-art-no-pool-slot",
+    "crop": [
+      711,
+      121,
+      1249,
+      602
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      538,
+      481
+    ]
+  },
+  {
+    "id": "rare-ember-mussel",
+    "name": "Remis Bara",
+    "category": "ocean-finds",
+    "concept": "one slightly open tapered dark purple mussel with warm amber fire-opal lining, red-orange painted mineral visible only inside gap, no flames outside",
+    "rarity": "rare",
+    "sheet": "rare-batch-06-v2.png",
+    "cell": [
+      2,
+      1
+    ],
+    "path": "rare/rare-ember-mussel.png",
+    "productionGameID": null,
+    "status": "reserved-art-no-pool-slot",
+    "crop": [
+      74,
+      719,
+      629,
+      1102
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      1,
+      555,
+      383
+    ]
+  },
+  {
+    "id": "rare-crystal-sea-cucumber",
+    "name": "Teripang Kristal",
+    "category": "fish",
+    "concept": "one short plump curved sea cucumber made of softly faceted lavender quartz, small rounded mint nubs along body, unmarked ends without mouth or eyes",
+    "rarity": "rare",
+    "sheet": "rare-batch-06-v2.png",
+    "cell": [
+      2,
+      2
+    ],
+    "path": "rare/rare-crystal-sea-cucumber.png",
+    "productionGameID": "rare-23",
+    "status": "integrated-in-catalog",
+    "crop": [
+      698,
+      718,
+      1246,
+      1125
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      548,
+      407
+    ]
+  },
+  {
+    "id": "rare-silver-kelp",
+    "name": "Rumput Laut Perak",
+    "category": "plant",
+    "concept": "one flowing kelp frond of matte silver leaf with sage-blue shadow paint, three broad ribbons curl around one connected stem, no attached separate stones",
+    "rarity": "rare",
+    "sheet": "rare-batch-07-v2.png",
+    "cell": [
+      1,
+      1
+    ],
+    "path": "rare/rare-silver-kelp.png",
+    "productionGameID": null,
+    "status": "reserved-art-no-pool-slot",
+    "crop": [
+      91,
+      61,
+      649,
+      651
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      558,
+      590
+    ]
+  },
+  {
+    "id": "rare-pumice-labyrinth",
+    "name": "Batu Lorong Es",
+    "category": "ocean-finds",
+    "concept": "one small pale pumice sea stone with angular natural ice-filled channels in a maze-like cross-section, one rounded triangular silhouette, no face pattern",
+    "rarity": "rare",
+    "sheet": "rare-batch-07-v2.png",
+    "cell": [
+      1,
+      2
+    ],
+    "path": "rare/rare-pumice-labyrinth.png",
+    "productionGameID": null,
+    "status": "reserved-art-no-pool-slot",
+    "crop": [
+      690,
+      146,
+      1187,
+      607
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      497,
+      461
+    ]
+  },
+  {
+    "id": "rare-sapphire-urchin",
+    "name": "Bulu Babi Safir",
+    "category": "fish",
+    "concept": "one tiny spherical sea urchin with short thick sapphire crystal spines and warm cream core, radial compact rounded silhouette, no face",
+    "rarity": "rare",
+    "sheet": "rare-batch-07-v2.png",
+    "cell": [
+      2,
+      1
+    ],
+    "path": "rare/rare-sapphire-urchin.png",
+    "productionGameID": "rare-24",
+    "status": "integrated-in-catalog",
+    "crop": [
+      77,
+      693,
+      588,
+      1180
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      511,
+      487
+    ]
+  },
+  {
+    "id": "rare-frost-lotus-anemone",
+    "name": "Anemon Teratai Es",
+    "category": "fish",
+    "concept": "one compact sea anemone whose short tentacles resemble overlapping frosted lotus petals, pale coral pink center and blue-white outer ring on tiny connected base, no face",
+    "rarity": "rare",
+    "sheet": "rare-batch-07-v2.png",
+    "cell": [
+      2,
+      2
+    ],
+    "path": "rare/rare-frost-lotus-anemone.png",
+    "productionGameID": null,
+    "status": "reserved-art-no-pool-slot",
+    "crop": [
+      650,
+      746,
+      1207,
+      1182
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      557,
+      436
+    ]
+  },
+  {
+    "id": "rare-clockwork-seahorse",
+    "name": "Kuda Laut Roda Tembaga",
+    "category": "fish",
+    "concept": "one curled seahorse made of warm tarnished copper with a single large gear embedded in rounded abdomen, small scalloped pale blue dorsal fin, solid smooth head with no eye or socket",
+    "rarity": "rare",
+    "sheet": "rare-batch-08-v2.png",
+    "cell": [
+      1,
+      1
+    ],
+    "path": "rare/rare-clockwork-seahorse.png",
+    "productionGameID": null,
+    "status": "reserved-art-no-pool-slot",
+    "crop": [
+      167,
+      86,
+      787,
+      842
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      620,
+      756
+    ]
+  },
+  {
+    "id": "rare-pearl-seedpod",
+    "name": "Polong Mutiara",
+    "category": "plant",
+    "concept": "one small rounded drift seedpod split slightly to show three connected mother-of-pearl seeds inside, frosty sage outer husk and cream beads, no face",
+    "rarity": "rare",
+    "sheet": "rare-batch-08-v2.png",
+    "cell": [
+      1,
+      2
+    ],
+    "path": "rare/rare-pearl-seedpod.png",
+    "productionGameID": null,
+    "status": "reserved-art-no-pool-slot",
+    "crop": [
+      988,
+      199,
+      1700,
+      751
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      712,
+      552
+    ]
+  },
+  {
+    "id": "legendary-aurora-sky-dragon",
+    "name": "Naga Langit Aurora",
+    "category": "fish",
+    "concept": "one compact flowing aurora sea dragon coiled into a graceful open loop, two broad ribbon fins like curtains of mint-lilac aurora, pearly smooth closed head, delicate short antler-shaped ice horns, no eye sockets; distinct winged ribbon silhouette",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-01-v2.png",
+    "cell": [
+      1,
+      1
+    ],
+    "path": "legendary/legendary-aurora-sky-dragon.png",
+    "productionGameID": "legendary-04",
+    "status": "integrated-in-catalog",
+    "crop": [
+      79,
+      75,
+      861,
+      840
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      782,
+      765
+    ]
+  },
+  {
+    "id": "legendary-constellation-whale",
+    "name": "Paus Rasi Bintang",
+    "category": "fish",
+    "concept": "one majestic small rounded midnight-violet whale with enormous crescent flukes and a star-chart body containing tiny cream constellation lines, smooth eyeless front, broad pale belly; no external stars",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-01-v2.png",
+    "cell": [
+      1,
+      2
+    ],
+    "path": "legendary/legendary-constellation-whale.png",
+    "productionGameID": "legendary-05",
+    "status": "integrated-in-catalog",
+    "crop": [
+      913,
+      70,
+      1735,
+      819
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      822,
+      749
+    ]
+  },
+  {
+    "id": "legendary-spirit-narwhal",
+    "name": "Narwhal Roh",
+    "category": "fish",
+    "concept": "one ivory pearl spirit narwhal curled like a crescent, oversized spiraling pale blue crystal tusk and three layered translucent tail ribbons, teal belly, plain eyeless head, no floating aura",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-02-v2.png",
+    "cell": [
+      1,
+      1
+    ],
+    "path": "legendary/legendary-spirit-narwhal.png",
+    "productionGameID": "narwhal",
+    "status": "integrated-in-catalog",
+    "crop": [
+      49,
+      95,
+      790,
+      810
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      1,
+      741,
+      715
+    ]
+  },
+  {
+    "id": "legendary-rime-petrel",
+    "name": "Petrel Angin Utara",
+    "category": "fish",
+    "concept": "one mythical polar seabird with wide curved wings formed from layered snow feathers and long ribbon tail, folded feet, cream and smoky blue plumage, smooth eyeless head, gentle soaring silhouette",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-02-v2.png",
+    "cell": [
+      1,
+      2
+    ],
+    "path": "legendary/legendary-rime-petrel.png",
+    "productionGameID": "legendary-06",
+    "status": "integrated-in-catalog",
+    "crop": [
+      947,
+      35,
+      1753,
+      860
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      806,
+      825
+    ]
+  },
+  {
+    "id": "legendary-cathedral-skate",
+    "name": "Skate Katedral",
+    "category": "fish",
+    "concept": "one top-view mythical skate with two tall folded cathedral-like ice wings made of connected arched frosted ribs, short curled tail and slate body, no face marks, compact diamond silhouette",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-03-v2.png",
+    "cell": [
+      1,
+      1
+    ],
+    "path": "legendary/legendary-cathedral-skate.png",
+    "productionGameID": null,
+    "status": "reserved-art-no-pool-slot",
+    "crop": [
+      55,
+      85,
+      837,
+      787
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      782,
+      702
+    ]
+  },
+  {
+    "id": "legendary-atlas-nautilus",
+    "name": "Nautilus Atlas",
+    "category": "fish",
+    "concept": "one enormous mythical spiral nautilus with a thick stone-blue shell whose coiled cross-section resembles layered miniature glacier terraces, short pearl tentacles emerging from one side, smooth eyeless mantle",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-03-v2.png",
+    "cell": [
+      1,
+      2
+    ],
+    "path": "legendary/legendary-atlas-nautilus.png",
+    "productionGameID": "legendary-07",
+    "status": "integrated-in-catalog",
+    "crop": [
+      897,
+      110,
+      1742,
+      790
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      845,
+      680
+    ]
+  },
+  {
+    "id": "legendary-snow-hydra",
+    "name": "Hydra Salju",
+    "category": "fish",
+    "concept": "one compact gentle three-headed polar sea hydra with rounded smooth eyeless closed heads on braided icy necks, one shared plump body and small webbed feet, pale sage and ivory, no teeth or aggressive pose",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-04-v2.png",
+    "cell": [
+      1,
+      1
+    ],
+    "path": "legendary/legendary-snow-hydra.png",
+    "productionGameID": "legendary-08",
+    "status": "integrated-in-catalog",
+    "crop": [
+      24,
+      109,
+      887,
+      830
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      863,
+      721
+    ]
+  },
+  {
+    "id": "legendary-crystal-moth",
+    "name": "Ngengat Kristal Kutub",
+    "category": "fish",
+    "concept": "one mythical polar moth with four broad asymmetrical frosted glass wings arranged in a strong snowflake-like silhouette, soft cream tiny body and short antennae, no eye markings or wing eye spots",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-04-v2.png",
+    "cell": [
+      1,
+      2
+    ],
+    "path": "legendary/legendary-crystal-moth.png",
+    "productionGameID": "legendary-09",
+    "status": "integrated-in-catalog",
+    "crop": [
+      923,
+      100,
+      1756,
+      810
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      833,
+      710
+    ]
+  },
+  {
+    "id": "legendary-island-turtle",
+    "name": "Kura-Kura Pulau Salju",
+    "category": "fish",
+    "concept": "one plump mythical sea turtle whose rounded shell is a small snow-covered glacial island with three connected fir-like ice spires, wide swimming flippers, smooth eyeless head, subdued seafoam and cream",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-05-v2.png",
+    "cell": [
+      1,
+      1
+    ],
+    "path": "legendary/legendary-island-turtle.png",
+    "productionGameID": "legendary-10",
+    "status": "integrated-in-catalog",
+    "crop": [
+      74,
+      72,
+      1039,
+      853
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      965,
+      781
+    ]
+  },
+  {
+    "id": "legendary-comet-seahorse",
+    "name": "Kuda Laut Komet",
+    "category": "fish",
+    "concept": "one upright mythical seahorse with a long curled comet tail, three layered crescent silver fins and a crown of short crystal spires, dusky blue and peach watercolor, eyeless smooth head, no detached stars",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-05-v2.png",
+    "cell": [
+      1,
+      2
+    ],
+    "path": "legendary/legendary-comet-seahorse.png",
+    "productionGameID": "legendary-11",
+    "status": "integrated-in-catalog",
+    "crop": [
+      1135,
+      24,
+      1681,
+      863
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      546,
+      839
+    ]
+  },
+  {
+    "id": "legendary-abyss-bloom",
+    "name": "Bunga Palung",
+    "category": "plant",
+    "concept": "one mythical deep-sea blossom shaped like a closed chalice inside a ring of enormous curled frost petals, obsidian-teal outer petals and pearly pale center, short fused root base, magical but botanical and faceless",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-06-v2.png",
+    "cell": [
+      1,
+      1
+    ],
+    "path": "legendary/legendary-abyss-bloom.png",
+    "productionGameID": "legendary-12",
+    "status": "integrated-in-catalog",
+    "crop": [
+      78,
+      104,
+      863,
+      832
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      785,
+      728
+    ]
+  },
+  {
+    "id": "legendary-moonbell-medusa",
+    "name": "Medusa Lonceng Bulan",
+    "category": "fish",
+    "concept": "one mythical jellyfish with a large porcelain bell canopy and an attached crescent ice crest, five thick tentacles curl like a hanging candelabra, pale turquoise lavender and ivory, no face",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-06-v2.png",
+    "cell": [
+      1,
+      2
+    ],
+    "path": "legendary/legendary-moonbell-medusa.png",
+    "productionGameID": "legendary-13",
+    "status": "integrated-in-catalog",
+    "crop": [
+      988,
+      29,
+      1713,
+      862
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      724,
+      833
+    ]
+  },
+  {
+    "id": "legendary-dreamweaver-squid",
+    "name": "Cumi Penenun Mimpi",
+    "category": "fish",
+    "concept": "one mythical squid with an elongated folded cloak-like midnight-blue mantle and four broad ribbon tentacles braided into a loose compact knot, ivory painted runic-looking geometric patterns but no letters, smooth eyeless mantle",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-07-v2.png",
+    "cell": [
+      1,
+      1
+    ],
+    "path": "legendary/legendary-dreamweaver-squid.png",
+    "productionGameID": "legendary-14",
+    "status": "integrated-in-catalog",
+    "crop": [
+      62,
+      93,
+      870,
+      802
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      1,
+      808,
+      709
+    ]
+  },
+  {
+    "id": "legendary-ice-kirin",
+    "name": "Kirin Laut Es",
+    "category": "fish",
+    "concept": "one mythical polar kirin sea creature with an upright rounded horse-like neck, two coral-shaped ice antlers, seal-like round torso, four wide kelp-like fins and spiral tail, ivory sage and frosted blue, smooth eyeless face",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-07-v2.png",
+    "cell": [
+      1,
+      2
+    ],
+    "path": "legendary/legendary-ice-kirin.png",
+    "productionGameID": "legendary-15",
+    "status": "integrated-in-catalog",
+    "crop": [
+      976,
+      76,
+      1750,
+      833
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      774,
+      757
+    ]
+  },
+  {
+    "id": "legendary-snowforge-crab",
+    "name": "Kepiting Tungku Salju",
+    "category": "fish",
+    "concept": "one compact ancient crab guardian built from rounded layered glacier boulders, two huge curved mitt-like claws, six short sturdy legs, small amber crystal core sealed into its back, no face or eyes or mouth",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-08-v2.png",
+    "cell": [
+      1,
+      1
+    ],
+    "path": "legendary/legendary-snowforge-crab.png",
+    "productionGameID": "legendary-16",
+    "status": "integrated-in-catalog",
+    "crop": [
+      42,
+      208,
+      865,
+      823
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      823,
+      615
+    ]
+  },
+  {
+    "id": "legendary-wreck-hermit",
+    "name": "Penjaga Kapal Karam",
+    "category": "fish",
+    "concept": "one mythical large hermit crab carrying a single compact ancient miniature wooden ship hull fused as its shell, curled ice mast like horn and broad blue claws, smooth faceless front, cozy weathered brown and seafoam",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-08-v2.png",
+    "cell": [
+      1,
+      2
+    ],
+    "path": "legendary/legendary-wreck-hermit.png",
+    "productionGameID": null,
+    "status": "reserved-art-no-pool-slot",
+    "crop": [
+      958,
+      21,
+      1736,
+      846
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      778,
+      825
+    ]
+  },
+  {
+    "id": "legendary-blizzard-egg",
+    "name": "Telur Badai Salju",
+    "category": "artifact",
+    "concept": "one large mythical asymmetrical egg of pearl-white frosted shell, cracked narrow window with a painted swirling navy snowstorm sealed INSIDE, connected ice ridges around base, no creature inside or separate pedestal",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-09-v2.png",
+    "cell": [
+      1,
+      1
+    ],
+    "path": "legendary/legendary-blizzard-egg.png",
+    "productionGameID": "legendary-17",
+    "status": "integrated-in-catalog",
+    "crop": [
+      144,
+      82,
+      809,
+      827
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      665,
+      745
+    ]
+  },
+  {
+    "id": "legendary-frozen-sea-crown",
+    "name": "Mahkota Laut Beku",
+    "category": "artifact",
+    "concept": "one ancient crown with five rising asymmetrical glacier spires and a braided shell band, antique silver-gray metal and pale turquoise ice, central small dark blue stone, no floating sparkles",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-09-v2.png",
+    "cell": [
+      1,
+      2
+    ],
+    "path": "legendary/legendary-frozen-sea-crown.png",
+    "productionGameID": "legendary-18",
+    "status": "integrated-in-catalog",
+    "crop": [
+      976,
+      124,
+      1701,
+      782
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      725,
+      658
+    ]
+  },
+  {
+    "id": "legendary-winter-oracle-compass",
+    "name": "Kompas Peramal Musim",
+    "category": "artifact",
+    "concept": "one ancient polar oracle compass like a thick clam-shaped medallion with two offset nested ice rings and one oversized crystal needle, tarnished bronze slate and ivory, no text or numbers",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-10-v2.png",
+    "cell": [
+      1,
+      1
+    ],
+    "path": "legendary/legendary-winter-oracle-compass.png",
+    "productionGameID": "legendary-19",
+    "status": "integrated-in-catalog",
+    "crop": [
+      117,
+      103,
+      846,
+      773
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      729,
+      670
+    ]
+  },
+  {
+    "id": "legendary-tide-moon-gong",
+    "name": "Gong Bulan Pasang",
+    "category": "artifact",
+    "concept": "one crescent-shaped antique bronze gong within its own compact fused icy arch frame, single round moonlike metal disk and attached tiny clapper, ivory teal patina and pale gold, no detached stand elements",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-10-v2.png",
+    "cell": [
+      1,
+      2
+    ],
+    "path": "legendary/legendary-tide-moon-gong.png",
+    "productionGameID": "legendary-20",
+    "status": "integrated-in-catalog",
+    "crop": [
+      1003,
+      89,
+      1686,
+      776
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      683,
+      687
+    ]
+  },
+  {
+    "id": "legendary-memory-lighthouse",
+    "name": "Mercusuar Kenangan",
+    "category": "artifact",
+    "concept": "one tiny mythical lighthouse relic grown from twisted frosted sea glass, rounded tapering spiral tower with amber window sealed inside and a shell-roof cap, compact artifact without island or sea scenery",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-11-v2.png",
+    "cell": [
+      1,
+      1
+    ],
+    "path": "legendary/legendary-memory-lighthouse.png",
+    "productionGameID": "legendary-21",
+    "status": "integrated-in-catalog",
+    "crop": [
+      306,
+      53,
+      693,
+      837
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      387,
+      784
+    ]
+  },
+  {
+    "id": "legendary-aurora-harp",
+    "name": "Harpa Aurora",
+    "category": "artifact",
+    "concept": "one ancient harp made of two curved narwhal-like ivory branches joined by taut multicolored frost threads, compact crescent frame, muted peach mint and lavender strings, no creature or face",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-11-v2.png",
+    "cell": [
+      1,
+      2
+    ],
+    "path": "legendary/legendary-aurora-harp.png",
+    "productionGameID": "legendary-22",
+    "status": "integrated-in-catalog",
+    "crop": [
+      978,
+      86,
+      1684,
+      827
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      706,
+      741
+    ]
+  },
+  {
+    "id": "legendary-storm-trident",
+    "name": "Trisula Badai",
+    "category": "artifact",
+    "concept": "one short ancient trident relic with three unequal branching ice tines and a chunky driftwood grip, diagonal compact composition, pale slate ice and weathered warm wood, no magical particles",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-12-v2.png",
+    "cell": [
+      1,
+      1
+    ],
+    "path": "legendary/legendary-storm-trident.png",
+    "productionGameID": "legendary-23",
+    "status": "integrated-in-catalog",
+    "crop": [
+      150,
+      50,
+      734,
+      837
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      584,
+      787
+    ]
+  },
+  {
+    "id": "legendary-polestar-key",
+    "name": "Kunci Bintang Kutub",
+    "category": "artifact",
+    "concept": "one oversized ancient key with a six-point ice-star bow and a stepped coral-like bit, weathered pale brass and frosty blue, compact diagonal silhouette with one connected carved ribbon loop",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-12-v2.png",
+    "cell": [
+      1,
+      2
+    ],
+    "path": "legendary/legendary-polestar-key.png",
+    "productionGameID": "legendary-24",
+    "status": "integrated-in-catalog",
+    "crop": [
+      984,
+      90,
+      1719,
+      836
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      735,
+      746
+    ]
+  },
+  {
+    "id": "legendary-starlight-lantern",
+    "name": "Lentera Cahaya Bintang",
+    "category": "artifact",
+    "concept": "one squat octagonal ancient nautical lantern made of dark teal brass with a single softly painted warm star-shaped crystal trapped inside opaque frosted glass, attached handle, no outside halo",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-13-v2.png",
+    "cell": [
+      1,
+      1
+    ],
+    "path": "legendary/legendary-starlight-lantern.png",
+    "productionGameID": "legendary-25",
+    "status": "integrated-in-catalog",
+    "crop": [
+      205,
+      67,
+      683,
+      801
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      478,
+      734
+    ]
+  },
+  {
+    "id": "legendary-glacier-sailing-ship",
+    "name": "Kapal Layar Gletser",
+    "category": "artifact",
+    "concept": "one small mythical ancient ship with a smooth whale-bone-like ivory hull, two curved pale blue ice sails resembling folded feathers, one short mast, no water or sea scenery, compact side-view vessel",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-13-v2.png",
+    "cell": [
+      1,
+      2
+    ],
+    "path": "legendary/legendary-glacier-sailing-ship.png",
+    "productionGameID": "legendary-26",
+    "status": "integrated-in-catalog",
+    "crop": [
+      900,
+      79,
+      1728,
+      805
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      828,
+      726
+    ]
+  },
+  {
+    "id": "legendary-snowglass-hourglass",
+    "name": "Jam Pasir Kaca Salju",
+    "category": "artifact",
+    "concept": "one squat hourglass artifact framed by two curved frost-encrusted antler-like supports, thick pale aqua glass containing white snow grains and tiny navy cloud inside top chamber, one connected compact object",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-14-v2.png",
+    "cell": [
+      1,
+      1
+    ],
+    "path": "legendary/legendary-snowglass-hourglass.png",
+    "productionGameID": "legendary-27",
+    "status": "integrated-in-catalog",
+    "crop": [
+      87,
+      99,
+      838,
+      812
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      751,
+      713
+    ]
+  },
+  {
+    "id": "legendary-frost-archive",
+    "name": "Arsip Embun Beku",
+    "category": "artifact",
+    "concept": "one thick ancient book artifact clasped shut with a scalloped shell clasp, chunky pale ivory pages and sea-blue leather cover edged by attached ice fronds, no lettering symbols or face",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-14-v2.png",
+    "cell": [
+      1,
+      2
+    ],
+    "path": "legendary/legendary-frost-archive.png",
+    "productionGameID": "legendary-28",
+    "status": "integrated-in-catalog",
+    "crop": [
+      979,
+      126,
+      1694,
+      826
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      715,
+      700
+    ]
+  },
+  {
+    "id": "legendary-tide-astrolabe",
+    "name": "Astrolab Pasang",
+    "category": "artifact",
+    "concept": "one compact ancient astronomical instrument of three interlocking asymmetric frosted bronze rings surrounding a pearly moon disk, fused angular ice bracket at base, no text numbers or detached stars",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-15-v2.png",
+    "cell": [
+      1,
+      1
+    ],
+    "path": "legendary/legendary-tide-astrolabe.png",
+    "productionGameID": "legendary-29",
+    "status": "integrated-in-catalog",
+    "crop": [
+      126,
+      36,
+      833,
+      848
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      707,
+      812
+    ]
+  },
+  {
+    "id": "legendary-winter-music-box",
+    "name": "Kotak Musik Musim Dingin",
+    "category": "artifact",
+    "concept": "one open tiny antique hexagonal music box with a faceted sapphire ice flower fixed inside and a shell-shaped lid, warm weathered walnut and tarnished silver, short winding key attached, no ballerina or face",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-15-v2.png",
+    "cell": [
+      1,
+      2
+    ],
+    "path": "legendary/legendary-winter-music-box.png",
+    "productionGameID": "legendary-30",
+    "status": "integrated-in-catalog",
+    "crop": [
+      1043,
+      38,
+      1724,
+      822
+    ],
+    "cropMethod": "main connected silhouette, alpha >= 32, 3px padding",
+    "alphaBounds": [
+      0,
+      0,
+      681,
+      784
+    ]
+  }
+]

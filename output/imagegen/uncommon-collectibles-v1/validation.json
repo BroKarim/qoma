@@ -1,0 +1,618 @@
+{
+  "count": 36,
+  "checks": "RGBA, transparency, 512px square, minimum 36px alpha margin",
+  "assets": [
+    {
+      "id": "uncommon-icefish-fan",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        116,
+        476,
+        396
+      ]
+    },
+    {
+      "id": "uncommon-toothfish-mottle",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        119,
+        476,
+        392
+      ]
+    },
+    {
+      "id": "uncommon-silverfish-ribbon",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        158,
+        476,
+        353
+      ]
+    },
+    {
+      "id": "uncommon-lanternfish-plum",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        106,
+        476,
+        405
+      ]
+    },
+    {
+      "id": "uncommon-eelpout-curl",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        87,
+        476,
+        425
+      ]
+    },
+    {
+      "id": "uncommon-notothen-broadfin",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        106,
+        476,
+        406
+      ]
+    },
+    {
+      "id": "uncommon-icefish-sail",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        66,
+        476,
+        445
+      ]
+    },
+    {
+      "id": "uncommon-toothfish-banded",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        112,
+        476,
+        400
+      ]
+    },
+    {
+      "id": "uncommon-silverfish-deep",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        85,
+        476,
+        427
+      ]
+    },
+    {
+      "id": "uncommon-lanternfish-amber",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        84,
+        476,
+        427
+      ]
+    },
+    {
+      "id": "uncommon-eelpout-loop",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        92,
+        476,
+        419
+      ]
+    },
+    {
+      "id": "uncommon-plunderfish-flowerfin",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        106,
+        476,
+        405
+      ]
+    },
+    {
+      "id": "uncommon-icefish-wingfin",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        64,
+        476,
+        448
+      ]
+    },
+    {
+      "id": "uncommon-toothfish-speckled",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        109,
+        476,
+        402
+      ]
+    },
+    {
+      "id": "uncommon-silverfish-longtail",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        156,
+        476,
+        356
+      ]
+    },
+    {
+      "id": "uncommon-lanternfish-slate",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        66,
+        476,
+        446
+      ]
+    },
+    {
+      "id": "uncommon-eelpout-sway",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        117,
+        476,
+        394
+      ]
+    },
+    {
+      "id": "uncommon-snailfish-pebble",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        77,
+        476,
+        435
+      ]
+    },
+    {
+      "id": "uncommon-icefish-cream",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        120,
+        476,
+        391
+      ]
+    },
+    {
+      "id": "uncommon-toothfish-stone",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        116,
+        476,
+        395
+      ]
+    },
+    {
+      "id": "uncommon-silverfish-arch",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        101,
+        476,
+        410
+      ]
+    },
+    {
+      "id": "uncommon-lanternfish-copper",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        92,
+        476,
+        419
+      ]
+    },
+    {
+      "id": "uncommon-eelpout-knot",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        95,
+        476,
+        417
+      ]
+    },
+    {
+      "id": "uncommon-dragonfish-blunt",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        110,
+        476,
+        401
+      ]
+    },
+    {
+      "id": "uncommon-icefish-petal",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        95,
+        476,
+        417
+      ]
+    },
+    {
+      "id": "uncommon-toothfish-olive",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        126,
+        476,
+        386
+      ]
+    },
+    {
+      "id": "uncommon-silverfish-spindle",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        147,
+        476,
+        364
+      ]
+    },
+    {
+      "id": "uncommon-lanternfish-indigo",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        72,
+        476,
+        440
+      ]
+    },
+    {
+      "id": "uncommon-eelpout-crescent",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        97,
+        476,
+        414
+      ]
+    },
+    {
+      "id": "uncommon-rattail-taper",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        85,
+        476,
+        427
+      ]
+    },
+    {
+      "id": "uncommon-icefish-frill",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        94,
+        476,
+        417
+      ]
+    },
+    {
+      "id": "uncommon-toothfish-paddle",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        126,
+        476,
+        385
+      ]
+    },
+    {
+      "id": "uncommon-silverfish-stripe",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        142,
+        476,
+        369
+      ]
+    },
+    {
+      "id": "uncommon-lanternfish-round",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        50,
+        476,
+        462
+      ]
+    },
+    {
+      "id": "uncommon-eelpout-fan",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        64,
+        476,
+        447
+      ]
+    },
+    {
+      "id": "uncommon-skate-kite",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        50,
+        476,
+        462
+      ]
+    }
+  ]
+}

@@ -903,7 +903,6 @@ Jangan menambah dependency untuk transformasi grouping, filter, formatter, atau 
 - Rencana dan referensi prototype dicatat; belum ada implementasi main UI atau account pada branch ini.
 - Baseline sudah di-commit sebelum branch perencanaan dibuat. Validasi pembaruan ini hanya struktur dokumen, path referensi prototype, dan `git diff --check`; build/test aplikasi tidak diulang untuk perubahan Markdown.
 
-
 ## 21. Implementasi main UI — 16 Oktober 2026
 
 ### Keputusan terbaru pengguna dan scope
@@ -1534,3 +1533,59 @@ Perbaikan dan temuan lanjutan:
 - Test hard pity juga menemukan probabilitas Rare+ dapat melewati 1 ketika Legendary dipaksa 100% (`baseRare + legendary`), sehingga roll deterministik memilih Rare sebelum mencapai Legendary. Nilai Rare+ sekarang dibatasi maksimum 1.
 - Test `CatchEngineTests` lulus, termasuk memuat konfigurasi rarity, jumlah katalog, odds/interval, hard pity Legendary, dan interval catch. Build macOS sukses. Full test suite sempat gagal karena crash pada `QomaDatabaseTests.committedStateSurvivesDatabaseReopen()` yang membuat test lain ikut tercatat gagal; suite penuh belum berhasil diverifikasi.
 - Perubahan ada di commit `099e0be` pada branch `codex/pixel-floating-panel`; working tree saat dokumentasi ditulis berisi folder prototype collectibles `output/imagegen/common-collectibles-v1/` yang belum dilacak.
+
+### Integrasi enam aset Common ke Catalog — 22 Oktober 2026
+
+- Pekerjaan dibuat pada branch baru `codex/catalog-common-assets`, dari kondisi bersih branch `codex/pixel-floating-panel` yang sudah memuat perbaikan crash decoder rarity pada commit `099e0be`.
+- Enam ocean finds dari batch aset dipetakan ke slot indeks 4–9 dalam pool Common yang sebelumnya memakai fallback placeholder: `common-sea-pebble`, `common-clam-shell`, `common-spiral-shell`, `common-driftwood`, `common-shell-shard`, dan `common-sea-glass`.
+- Enam aset disalin sebagai image sets `Collectible-<id>` di `Qoma/Assets.xcassets`; `QyubeCatchArt` sudah mencari nama tersebut dari ID item. `CatalogView` dan CatchRarityRules tidak memerlukan perubahan karena keduanya memakai `CatalogDefinitions`.
+- Jumlah item dan odds tetap: 60 Common dan konfigurasi rarity tidak berubah. Item baru sekarang bisa muncul dari undian Common, tercatat dengan ID stabil, serta muncul pada tile Catalog sebagai ocean finds. Artwork ikan sumber tetap belum dipetakan ke rarity/ID game.
+- `WORKFLOW.md` dan `manifest.json` diperbarui sebagai rujukan batch; enam baris baru ditandai terintegrasi.
+- Error rarity terdahulu ditinjau: branch dasar sudah memuat decoder eksplisit rarity string → enum dan lookup legacy dengan batas indeks, sesuai catatan crash EXC_BREAKPOINT di atas. Integrasi ini tidak mengubah decoder atau JSON config.
+- Build Debug macOS berhasil: `xcodebuild build -quiet -project qoma.xcodeproj -scheme Qoma -configuration Debug -destination 'platform=macOS' -derivedDataPath /private/tmp/qoma-catalog-derived CODE_SIGNING_ALLOWED=NO`. Enam asset sets berhasil masuk target.
+- **Belum dijalankan:** test suite dan QA runtime visual/catch. Sebelum merge, buka Catalog dan lakukan satu catch Common untuk memeriksa artwork serta discovery.
+
+### Integrasi artwork seluruh rarity — 22 Oktober 2026
+
+- Melanjutkan branch `codex/catalog-common-assets`; enam Common sebelumnya tetap terpasang. Tambahan: 34 ikan Uncommon, empat Rare (termasuk Aurora Shell sebagai ocean find), dan dua Legendary. Total 46 artwork baru kini terhubung ke Catalog dan pool catch.
+- `Kind.artworkID` memisahkan nama aset dari ID event catch. Slot `uncommon-03`–`uncommon-36`, `rare-02`–`rare-05`, dan `legendary-02`–`legendary-03` tetap memakai ID serta bobot lama; hanya nama, artwork dan kategori yang diisi. Delapan ID legacy tetap dikenali dan tidak diganti spesiesnya.
+- `QyubeCatchArt` memuat `Collectible-<artworkID>` untuk Catalog, hasil sesi, dan timeline yang memakai komponen bersama. Undiscovered tetap memakai siluet dari alpha PNG yang sama. Tidak ada perubahan pada decoder rarity, base odds, ambang pity, interval atau jumlah tier 60/36/24/30 (150 item).
+- Ada 36 aset Uncommon namun hanya 34 slot kosong setelah Trout dan Seashell legacy. Silverfish Garis Tembaga dan Lanternfish Bulat disimpan sebagai cadangan dengan status `reserved-art-no-pool-slot`; 34 lainnya dipetakan lewat `productionGameID` di manifest. Tidak menambah ukuran pool tanpa simulasi ulang.
+- Manifest Uncommon dan Rare/Legendary diperbarui; rincian terdapat di `output/imagegen/uncommon-collectibles-v1/INTEGRATION.md` dan README batch Rare/Legendary. File sumber serta aset individual tetap disimpan.
+- Build dan enam tes terarah `QomaTests/CatchEngineTests` lulus melalui `xcodebuild test`, termasuk pemeriksaan 46 image sets tersedia di bundle, ID legacy, jumlah item tiap tier, hard pity dan interval catch. `git diff --check` lulus. Suite penuh dan QA visual aplikasi belum dijalankan.
+- Batas: sisa pool yang belum memiliki artwork tetap placeholder; belum menyelesaikan roster 150 item. Perubahan/penghapusan file output lain yang sudah ada di working tree tidak disentuh.
+
+### Redesign UI Analytics menjadi jurnal kalender — 22 Oktober 2026
+
+- Dikerjakan pada branch yang sama, `codex/catalog-common-assets`, sesuai permintaan. Membaca keputusan compact UI dan catatan crash rarity; tidak mengubah Services, repository, model domain atau konfigurasi rarity.
+- `AnalyticsDashboardView` sekarang menampilkan kalender bulan, ringkasan fokus tanggal terpilih, list sesi, Top Apps, lalu grid tangkapan. Heatmap tidak lagi ditampilkan di halaman ini; komponen/perhitungan heatmap dan domain lama tetap tersedia tanpa perubahan.
+- `AnalyticsMonthCalendar` mengikuti locale/first weekday sistem, menyediakan previous/next month dan Today, serta memilih tanggal lewat binding existing. Pergantian bulan mempertahankan nomor tanggal jika tersedia dan membatasi ke hari terakhir bila perlu. Durasi tiap sel dari actualFocusSeconds berdasarkan tanggal mulai sesi: kurang dari satu jam berupa `59m`, mulai satu jam berupa `1:05`, hari kosong `0m`. Tanggal hari ini diberi outline; selected diberi background accent dan accessibility selected trait.
+- List sesi tanggal terpilih diurutkan newest first, dengan jam mulai, nama tugas (dua baris), status dan durasi aktual. Top Apps memakai agregasi existing pada interval hari yang sama, limit lima, beserta ikon, durasi dan bar proporsi. Tidak menampilkan Top Domains.
+- `AnalyticsCatchGrid` memakai item banked/dedupe dari DailyCatchSummary, grouping per kind, urutan Common → Legendary, artwork shared QyubeCatchArt, background rarity dan badge jumlah duplikat. Grid adaptif menampilkan empat kolom pada panel 310pt; tidak memakai nested scroll atau timeline lama pada halaman ini.
+- Semua bagian tetap memakai palet Arctic dan border tinta shared, native scrollbar disembunyikan dengan helper existing. Empty state tersedia untuk sessions/apps/catches, VoiceOver menyebut tanggal/durasi/rarity/count.
+- Build Debug macOS berhasil. QA sementara memakai ImageRenderer pada 310pt, 500pt, judul panjang, 59m/1:05, grid rarity/duplikat, serta bulan enam baris dan empty state; dua tes render lulus. Harness QA sementara dihapus sesudah inspeksi. Hasil render data contoh tersimpan di `output/analytics-calendar-ui/`; `git diff --check` lulus. Full test suite dan klik manual aplikasi tidak dilakukan.
+
+
+### Integrasi batch Rare dan Legendary v2 — 23 Oktober 2026
+
+- Mengisi semua slot placeholder yang tersisa pada pool rarity produksi dengan 46 ilustrasi batch v2: 19 Rare (`rare-06`–`rare-24`) dan 27 Legendary (`legendary-04`–`legendary-30`). Enam aset v1, ID catch legacy, serta pemetaan 34 Uncommon tetap dipertahankan.
+- Selection Rare mencampur fauna dan ocean finds; Legendary mempertahankan variasi makhluk dan artefak. Tiga konsep redundant/cadangan (Spirit Narwhal, Cathedral Skate, Wreck Hermit) serta 14 Rare lain tetap menjadi reserved art. Manifest menandai `productionGameID` dan status untuk setiap konsep.
+- Tiap aset produksi disalin sebagai image set `Collectible-<artworkID>` dan dimasukkan ke `CatalogDefinitions.artworkByKindID`; Catalog, tangkapan sesi, dan Analytics memakai resolver shared yang sama. Test inventory diperbarui agar memeriksa jumlah mapping serta image sets.
+- Jumlah pool tetap 60/36/24/30 (150 item). Tidak ada perubahan rarity config, bobot item, odds, pity, atau simulator.
+- Build/test belum dijalankan dalam langkah ini. File output Analytics yang dihapus pada working tree sebelum pekerjaan ini tidak disentuh.
+
+
+### Audit dan pembersihan asset aplikasi — 23 Oktober 2026
+
+- Audit seluruh image set, sprite, dan sound set pada `Qoma/Assets.xcassets` terhadap pemanggilan Swift serta nama yang dibangun secara dinamis. Aset ikan/koleksi tetap dipakai melalui `CatalogDefinitions.artworkID` dan resolver `QyubeCatchArt`; sprite penguin tetap dipakai oleh SpriteKit/SwiftUI; aset kontrol pixel dan suara tetap dipakai lewat nama dinamis. `AccentColor` dan AppIcon tetap dipertahankan sebagai resource target.
+- Menghapus sembilan image set yang tidak punya pemanggil aktif: `CatalogFishSheet`, `CompanionLine`, `CompanionTree`, serta pose `Casting`, `Deposit`, `Pulling`, `Standing`, `LightsUp`, dan `LightsBow`. Garis companion sekarang digambar sebagai `SKShapeNode`; pose interaksi berjalan memakai bagian sprite penguin dan animasi prosedural.
+- `qoma.xcodeproj` hanya memasukkan root `Qoma` dan `QomaTests`; folder repo `output/` dan `design/` tidak masuk target aplikasi, jadi ukuran file dokumentasi/gambar konsep di sana tidak menambah ukuran app build.
+
+
+### Pembersihan ilustrasi katalog lama — 23 Oktober 2026
+
+- Menghapus enam image set legacy: `Collectible-anchovy`, `CatalogFishPlaceholder`, `Collectible-narwhal`, `Collectible-perch`, `Collectible-salmon`, dan `Collectible-trout`. Renderer Catalog, Analytics, dan riwayat sesi memakai `QyubeCatchArt`; tidak ada referensi langsung lain yang harus dipertahankan.
+- Mempertahankan stable kind ID `anchovy`, `perch`, `trout`, `salmon`, dan `narwhal` untuk kompatibilitas catch event tersimpan. Untuk item yang belum memiliki artwork, shared renderer menampilkan siluet netral (`fish.fill` untuk ikan, `shippingbox.fill` untuk ocean finds); huruf awal dan ikon lock tidak dipakai sebagai pengganti siluet. Item dengan artwork memakai siluet alpha artwork saat belum ditemukan.
+- Memetakan ID `narwhal` ke art baru `legendary-spirit-narwhal`; aset transparan dibundel sebagai `Collectible-legendary-spirit-narwhal`. Pool, bobot, peluang rarity, pity, dan jumlah item tidak berubah.
+- Manifest/README batch Rare & Legendary diperbarui untuk status integrasi Narwhal. Dokumentasi generation pada `output/` dan `design/` tetap dipertahankan.
+- Build Debug macOS berhasil; `git diff --check` dan validasi JSON manifest/asset catalog bersih. Suite tes tidak dijalankan.

@@ -26,28 +26,30 @@ struct QyubePrimaryButton: View {
     }
 }
 
-/// Bundled art only; the catalog fish is intentionally shared until its final art is chosen.
+/// Uses each item's own artwork silhouette when available, with a neutral silhouette fallback.
 struct QyubeCatchArt: View {
-    var kindID: String = "anchovy"
+    var kindID: String = "uncommon-03"
     var discovered = true
-    var catalog = false
 
-    private var assetName: String {
-        guard let kind = CatalogDefinitions.kind(id: kindID) else { return "" }
-        let proposed = self.catalog && kind.isFish ? "CatalogFishPlaceholder" : "Collectible-" + self.kindID
-        return NSImage(named: proposed) == nil && kind.isFish ? "CatalogFishPlaceholder" : proposed
+    private var assetName: String? {
+        guard let artworkID = CatalogDefinitions.kind(id: kindID)?.artworkID else { return nil }
+        let proposed = "Collectible-" + artworkID
+        return NSImage(named: proposed) == nil ? nil : proposed
     }
 
     var body: some View {
         Group {
-            if self.assetName.isEmpty {
-                Image(systemName: "questionmark.diamond").resizable().scaledToFit()
-            } else {
-                Image(self.assetName).renderingMode(self.discovered ? .original : .template)
+            if let assetName = self.assetName {
+                Image(assetName).renderingMode(self.discovered ? .original : .template)
                     .resizable().scaledToFit()
+            } else if let kind = CatalogDefinitions.kind(id: self.kindID) {
+                Image(systemName: kind.isFish ? "fish.fill" : "shippingbox.fill")
+                    .resizable().scaledToFit().padding(7)
+            } else {
+                Image(systemName: "questionmark.diamond").resizable().scaledToFit().padding(8)
             }
         }
-        .foregroundStyle(Color.qyubeInk)
+        .foregroundStyle(Color.qyubeInk.opacity(self.discovered ? 0.72 : 0.48))
         .accessibilityHidden(true)
     }
 }

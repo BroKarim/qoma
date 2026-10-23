@@ -1,8 +1,41 @@
 import Foundation
+import AppKit
 import Testing
 @testable import Qoma
 
 struct CatchEngineTests {
+    @Test
+    func integratedArtworkKeepsCatchIDsAndIsBundled() {
+        let mapped = CatalogDefinitions.allKinds.filter { $0.artworkID != nil && $0.artworkID != $0.id }
+        #expect(mapped.count == 87)
+        #expect(mapped.filter { $0.rarity == .uncommon }.count == 34)
+        #expect(mapped.filter { $0.rarity == .rare }.count == 23)
+        #expect(mapped.filter { $0.rarity == .legendary }.count == 30)
+        #expect(CatalogDefinitions.kind(id: "uncommon-03")?.artworkID == "uncommon-icefish-fan")
+        #expect(CatalogDefinitions.kind(id: "rare-05")?.isFish == false)
+        #expect(CatalogDefinitions.kind(id: "legendary-02")?.artworkID == "legendary-glacier-leviathan")
+        #expect(CatalogDefinitions.kind(id: "narwhal")?.artworkID == "legendary-spirit-narwhal")
+        #expect(NSImage(named: "Collectible-narwhal") == nil)
+        #expect(NSImage(named: "Collectible-legendary-spirit-narwhal") != nil)
+        for id in ["anchovy", "perch", "trout", "salmon"] {
+            #expect(CatalogDefinitions.kind(id: id)?.artworkID == nil)
+            #expect(NSImage(named: "Collectible-" + id) == nil)
+        }
+        #expect(NSImage(named: "CatalogFishPlaceholder") == nil)
+        for id in ["stick", "pebble", "shell"] {
+            #expect(CatalogDefinitions.kind(id: id)?.artworkID == id)
+        }
+        let commonIDs = [
+            "common-sea-pebble", "common-clam-shell", "common-spiral-shell",
+            "common-driftwood", "common-shell-shard", "common-sea-glass"
+        ]
+        let kinds = mapped + commonIDs.compactMap { CatalogDefinitions.kind(id: $0) }
+        #expect(kinds.count == 93)
+        for kind in kinds {
+            #expect(kind.artworkID.map { NSImage(named: "Collectible-" + $0) != nil } == true)
+        }
+    }
+
     @Test
     func depositBeforeBankThresholdIsProvisional() {
         let engine = CatchEngine(rollKind: { "trout" }, biteWait: { 1 }, reelTime: { 1 })

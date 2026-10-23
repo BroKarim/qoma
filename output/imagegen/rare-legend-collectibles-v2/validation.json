@@ -1,0 +1,1025 @@
+{
+  "count": 60,
+  "assets": [
+    {
+      "id": "rare-crystal-krill",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        89,
+        476,
+        423
+      ]
+    },
+    {
+      "id": "rare-blueflame-lanternfish",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        57,
+        476,
+        455
+      ]
+    },
+    {
+      "id": "rare-origami-silverfish",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        142,
+        476,
+        369
+      ]
+    },
+    {
+      "id": "rare-opal-amphipod",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        68,
+        476,
+        444
+      ]
+    },
+    {
+      "id": "rare-hourglass-conch",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        96,
+        476,
+        416
+      ]
+    },
+    {
+      "id": "rare-nebula-pebble",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        86,
+        476,
+        426
+      ]
+    },
+    {
+      "id": "rare-rime-bell",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        46,
+        36,
+        465,
+        476
+      ]
+    },
+    {
+      "id": "rare-moon-jelly",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        57,
+        476,
+        455
+      ]
+    },
+    {
+      "id": "rare-prism-driftwood",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        39,
+        476,
+        472
+      ]
+    },
+    {
+      "id": "rare-amber-copepod",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        56,
+        476,
+        455
+      ]
+    },
+    {
+      "id": "rare-aurora-lichen",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        38,
+        476,
+        474
+      ]
+    },
+    {
+      "id": "rare-glass-toothfish",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        111,
+        476,
+        400
+      ]
+    },
+    {
+      "id": "rare-frostfeather-worm",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        57,
+        36,
+        455,
+        476
+      ]
+    },
+    {
+      "id": "rare-pearl-button",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        47,
+        476,
+        464
+      ]
+    },
+    {
+      "id": "rare-tide-compass",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        55,
+        36,
+        457,
+        476
+      ]
+    },
+    {
+      "id": "rare-snowflake-crab",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        77,
+        476,
+        435
+      ]
+    },
+    {
+      "id": "rare-honeycomb-shell",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        83,
+        476,
+        428
+      ]
+    },
+    {
+      "id": "rare-star-map-bottle",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        52,
+        36,
+        459,
+        476
+      ]
+    },
+    {
+      "id": "rare-coral-chime",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        41,
+        36,
+        471,
+        476
+      ]
+    },
+    {
+      "id": "rare-frozen-fern",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        74,
+        36,
+        437,
+        476
+      ]
+    },
+    {
+      "id": "rare-midnight-puffer",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        75,
+        476,
+        437
+      ]
+    },
+    {
+      "id": "rare-frost-fan-scallop",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        59,
+        476,
+        452
+      ]
+    },
+    {
+      "id": "rare-ember-mussel",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        104,
+        476,
+        407
+      ]
+    },
+    {
+      "id": "rare-crystal-sea-cucumber",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        92,
+        476,
+        419
+      ]
+    },
+    {
+      "id": "rare-silver-kelp",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        48,
+        36,
+        464,
+        476
+      ]
+    },
+    {
+      "id": "rare-pumice-labyrinth",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        52,
+        476,
+        460
+      ]
+    },
+    {
+      "id": "rare-sapphire-urchin",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        46,
+        476,
+        465
+      ]
+    },
+    {
+      "id": "rare-frost-lotus-anemone",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        84,
+        476,
+        428
+      ]
+    },
+    {
+      "id": "rare-clockwork-seahorse",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        75,
+        36,
+        436,
+        476
+      ]
+    },
+    {
+      "id": "rare-pearl-seedpod",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        85,
+        476,
+        426
+      ]
+    },
+    {
+      "id": "legendary-aurora-sky-dragon",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        41,
+        476,
+        471
+      ]
+    },
+    {
+      "id": "legendary-constellation-whale",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        55,
+        476,
+        456
+      ]
+    },
+    {
+      "id": "legendary-spirit-narwhal",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        44,
+        476,
+        468
+      ]
+    },
+    {
+      "id": "legendary-rime-petrel",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        41,
+        36,
+        471,
+        476
+      ]
+    },
+    {
+      "id": "legendary-cathedral-skate",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        58,
+        476,
+        453
+      ]
+    },
+    {
+      "id": "legendary-atlas-nautilus",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        79,
+        476,
+        433
+      ]
+    },
+    {
+      "id": "legendary-snow-hydra",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        72,
+        476,
+        440
+      ]
+    },
+    {
+      "id": "legendary-crystal-moth",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        68,
+        476,
+        443
+      ]
+    },
+    {
+      "id": "legendary-island-turtle",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        78,
+        476,
+        434
+      ]
+    },
+    {
+      "id": "legendary-comet-seahorse",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        113,
+        36,
+        399,
+        476
+      ]
+    },
+    {
+      "id": "legendary-abyss-bloom",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        52,
+        476,
+        460
+      ]
+    },
+    {
+      "id": "legendary-moonbell-medusa",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        65,
+        36,
+        447,
+        476
+      ]
+    },
+    {
+      "id": "legendary-dreamweaver-squid",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        63,
+        476,
+        449
+      ]
+    },
+    {
+      "id": "legendary-ice-kirin",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        41,
+        476,
+        471
+      ]
+    },
+    {
+      "id": "legendary-snowforge-crab",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        91,
+        476,
+        420
+      ]
+    },
+    {
+      "id": "legendary-wreck-hermit",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        48,
+        36,
+        463,
+        476
+      ]
+    },
+    {
+      "id": "legendary-blizzard-egg",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        59,
+        36,
+        452,
+        476
+      ]
+    },
+    {
+      "id": "legendary-frozen-sea-crown",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        56,
+        476,
+        455
+      ]
+    },
+    {
+      "id": "legendary-winter-oracle-compass",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        54,
+        476,
+        458
+      ]
+    },
+    {
+      "id": "legendary-tide-moon-gong",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        37,
+        36,
+        474,
+        476
+      ]
+    },
+    {
+      "id": "legendary-memory-lighthouse",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        147,
+        36,
+        364,
+        476
+      ]
+    },
+    {
+      "id": "legendary-aurora-harp",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        46,
+        36,
+        465,
+        476
+      ]
+    },
+    {
+      "id": "legendary-storm-trident",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        92,
+        36,
+        419,
+        476
+      ]
+    },
+    {
+      "id": "legendary-polestar-key",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        39,
+        36,
+        473,
+        476
+      ]
+    },
+    {
+      "id": "legendary-starlight-lantern",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        112,
+        36,
+        399,
+        476
+      ]
+    },
+    {
+      "id": "legendary-glacier-sailing-ship",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        63,
+        476,
+        449
+      ]
+    },
+    {
+      "id": "legendary-snowglass-hourglass",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        47,
+        476,
+        465
+      ]
+    },
+    {
+      "id": "legendary-frost-archive",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        36,
+        40,
+        476,
+        471
+      ]
+    },
+    {
+      "id": "legendary-tide-astrolabe",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        64,
+        36,
+        447,
+        476
+      ]
+    },
+    {
+      "id": "legendary-winter-music-box",
+      "size": [
+        512,
+        512
+      ],
+      "alphaRange": [
+        0,
+        255
+      ],
+      "bounds": [
+        65,
+        36,
+        447,
+        476
+      ]
+    }
+  ]
+}

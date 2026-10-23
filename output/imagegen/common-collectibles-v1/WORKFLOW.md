@@ -11,7 +11,7 @@ Built-in imagegen was used for background extraction and generation; Python/Pill
 - `contact-sheet.jpg`: review image on porcelain background, not a game sprite.
 - `crop_assets.py`: repeatable crop/export script; requires Pillow.
 
-This is the first asset batch, not a completed 60-item Common roster. The source fish remain rarity-unassigned in the manifest: the previous design places recognizable fish in Uncommon, and the source includes tropical species as well as ocean fish. Do not assume they are Antarctic species or assign every source fish to Common. New ocean finds are Common candidates. These artwork IDs have not been mapped into the game's existing stable collectible IDs, and assets have not been wired into the app.
+This is the first asset batch, not a completed 60-item Common roster. The source fish remain rarity-unassigned in the manifest: the previous design places recognizable fish in Uncommon, and the source includes tropical species as well as ocean fish. Do not assume they are Antarctic species or assign every source fish to Common. The six new ocean finds are mapped to stable game IDs and included in the Common Catalog. Their PNGs are copied into matching Xcode asset sets. Other artwork IDs remain draft and are not mapped to production items.
 
 ## Style lock
 Read `design/qyube-collectibles-v5-fish/PROMPT-NO-EYES.md` and inspect its accompanying PNG before every batch. The reference Markdown is an eye-removal edit prompt: its ivory paper background is NOT a requirement for exported sprites.

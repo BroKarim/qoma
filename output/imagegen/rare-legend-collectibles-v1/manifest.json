@@ -1,0 +1,122 @@
+[
+  {
+    "id": "rare-golden-icefish",
+    "category": "fish",
+    "concept": "golden mutation of an elongated icefish",
+    "rarity": "rare",
+    "sheet": "rare-batch-01-v1.png",
+    "cell": [
+      1,
+      1
+    ],
+    "crop": [
+      0,
+      0,
+      800,
+      459
+    ],
+    "path": "rare/rare-golden-icefish.png",
+    "status": "integrated-in-catalog",
+    "productionGameID": "rare-02"
+  },
+  {
+    "id": "rare-skeletal-fish",
+    "category": "fish",
+    "concept": "ivory skeletal fish without eye sockets",
+    "rarity": "rare",
+    "sheet": "rare-batch-01-v1.png",
+    "cell": [
+      1,
+      2
+    ],
+    "crop": [
+      800,
+      0,
+      1536,
+      459
+    ],
+    "path": "rare/rare-skeletal-fish.png",
+    "status": "integrated-in-catalog",
+    "productionGameID": "rare-03"
+  },
+  {
+    "id": "rare-frostwing-ray",
+    "category": "fish",
+    "concept": "manta ray with crystalline ice wings",
+    "rarity": "rare",
+    "sheet": "rare-batch-01-v1.png",
+    "cell": [
+      2,
+      1
+    ],
+    "crop": [
+      0,
+      459,
+      800,
+      1024
+    ],
+    "path": "rare/rare-frostwing-ray.png",
+    "status": "integrated-in-catalog",
+    "productionGameID": "rare-04"
+  },
+  {
+    "id": "rare-aurora-shell",
+    "category": "ocean-finds",
+    "concept": "clam shell with aurora-colored mineral ribs",
+    "rarity": "rare",
+    "sheet": "rare-batch-01-v1.png",
+    "cell": [
+      2,
+      2
+    ],
+    "crop": [
+      800,
+      459,
+      1536,
+      1024
+    ],
+    "path": "rare/rare-aurora-shell.png",
+    "status": "integrated-in-catalog",
+    "productionGameID": "rare-05"
+  },
+  {
+    "id": "legendary-glacier-leviathan",
+    "category": "fish",
+    "concept": "coiled polar sea serpent with glacier dorsal plates",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-01-v1.png",
+    "cell": [
+      1,
+      1
+    ],
+    "crop": [
+      0,
+      0,
+      975,
+      887
+    ],
+    "path": "legendary/legendary-glacier-leviathan.png",
+    "status": "integrated-in-catalog",
+    "productionGameID": "legendary-02"
+  },
+  {
+    "id": "legendary-ice-kraken",
+    "category": "fish",
+    "concept": "polar kraken with frozen crown and curling tentacles",
+    "rarity": "legendary",
+    "sheet": "legendary-batch-01-v1.png",
+    "cell": [
+      1,
+      2
+    ],
+    "crop": [
+      975,
+      0,
+      1774,
+      887
+    ],
+    "path": "legendary/legendary-ice-kraken.png",
+    "status": "integrated-in-catalog",
+    "productionGameID": "legendary-03"
+  }
+]

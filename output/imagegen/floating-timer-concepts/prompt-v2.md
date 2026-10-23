@@ -1,9 +1,0 @@
-Mode: built-in image_gen
-Output: normal-hover-v2.png
-Input: normal-hover-v1.png
-Purpose: visual concept only.
-
-Use case: ui-mockup. Edit the supplied Qyube floating timer concept board. Input image is the edit target.
-Preserve the entire board composition, heading, NORMAL panel with serif 15:48 countdown, captions, footer Proposed size · 200 × 110 pt, panel dimensions, borders, white surfaces, shadow, Arctic palette and mouse cursor.
-Change ONLY the contents of the right HOVER panel: REMOVE the countdown completely. Replace the small task title with a substantially larger BOLD clean sans-serif task title, centered on ONE SINGLE LINE in the upper-middle of this panel. Demonstrate truncation of a long task title: render exactly "Write project propo..." with three visible dots at the end. Treat this as single-line end truncation: no wrapping, no second line, no tiny text, no text spilling outside panel. The title must be the primary visual in hover state, around 24 logical pt bold for a proposed 200 pt wide panel, sized visually to fit within its horizontal padding. Under the title retain the two existing icon-only buttons in a centered horizontal row: fjord blue pause icon in pale ice blue circle and terracotta stop square in pale neutral circle. Comfortable vertical space between bold title and buttons, balanced within the same rounded rectangle.
-Invariants: left NORMAL panel unchanged with time only. Right HOVER panel contains bold truncated task title and two icon buttons ONLY; absolutely no countdown or clock text in the hover panel. Both panels remain exactly the same size and horizontal rectangle shape. Snow #FBFAF8, Paper #FFFFFF, Penguin ink #212121, Fjord #527386, Ice #DCE8ED, Divider #E0E0E0, Interrupted #AB665C. Refined cozy field journal style, crisp typography. Do not add features, illustration, arrows or extra captions.

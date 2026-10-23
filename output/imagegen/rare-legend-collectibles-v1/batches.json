@@ -1,0 +1,48 @@
+[
+  {
+    "sheet": "rare-batch-01-v1.png",
+    "cols": 2,
+    "rows": 2,
+    "items": [
+      {
+        "id": "rare-golden-icefish",
+        "category": "fish",
+        "concept": "golden mutation of an elongated icefish"
+      },
+      {
+        "id": "rare-skeletal-fish",
+        "category": "fish",
+        "concept": "ivory skeletal fish without eye sockets"
+      },
+      {
+        "id": "rare-frostwing-ray",
+        "category": "fish",
+        "concept": "manta ray with crystalline ice wings"
+      },
+      {
+        "id": "rare-aurora-shell",
+        "category": "ocean-finds",
+        "concept": "clam shell with aurora-colored mineral ribs"
+      }
+    ],
+    "prompt": "Use case: stylized-concept. Asset type: qyube collectible sprite sheet. Input image 1 is STYLE REFERENCE ONLY. Match its handmade watercolor, gently mottled painted interiors, delicate irregular charcoal outlines, side-on natural-history specimen shapes, softly shaded volumes. Entire background genuinely transparent with real alpha; watercolor texture stays inside subjects. No paper backdrop, cast shadow, ground, scenery, text, labels, frames, detached particles or glow halos. Absolutely no eyes, pupils, eye rings, closed-eye strokes or empty eye sockets on any creature. All subjects completely visible with generous transparent gutters; no overlapping cells. Not glossy 3D or flat vector. Create exactly FOUR RARE mutations in an equal 2-column by 2-row grid. Each object fits in the middle 65% of its cell, similar visual footprint. TOP LEFT: elongated icefish transformed into warm matte watercolor gold, recognizable fish fins and tail, pale golden belly and delicate ochre scales, ONE mutation: golden material. TOP RIGHT: side-view ivory fish skeleton, clear curved spine, ribs and bony tail, smooth closed skull with NO sockets or eye holes, friendly specimen, not gore. BOTTOM LEFT: deep slate-blue manta ray whose two broad fins are crystalline translucent ice wings, wings form a single clear ray silhouette, muted ice-blue facets. BOTTOM RIGHT: one closed ribbed clam shell, recognizable Common clam-shell shape but ribs transformed into layered jade, lilac and pale blue aurora mineral bands, no pearl or extra objects. Keep Rare grounded in the original fish or object, not huge monsters."
+  },
+  {
+    "sheet": "legendary-batch-01-v1.png",
+    "cols": 2,
+    "rows": 1,
+    "items": [
+      {
+        "id": "legendary-glacier-leviathan",
+        "category": "fish",
+        "concept": "coiled polar sea serpent with glacier dorsal plates"
+      },
+      {
+        "id": "legendary-ice-kraken",
+        "category": "fish",
+        "concept": "polar kraken with frozen crown and curling tentacles"
+      }
+    ],
+    "prompt": "Use case: stylized-concept. Asset type: qyube collectible sprite sheet. Input image 1 is STYLE REFERENCE ONLY. Match its handmade watercolor, gently mottled painted interiors, delicate irregular charcoal outlines, side-on natural-history specimen shapes, softly shaded volumes. Entire background genuinely transparent with real alpha; watercolor texture stays inside subjects. No paper backdrop, cast shadow, ground, scenery, text, labels, frames, detached particles or glow halos. Absolutely no eyes, pupils, eye rings, closed-eye strokes or empty eye sockets on any creature. All subjects completely visible with generous transparent gutters; no overlapping cells. Not glossy 3D or flat vector. Create exactly TWO LEGENDARY polar sea monsters in an equal 2-column by 1-row landscape sheet. Center one creature per half, entire creature contained within middle 70% of its cell, generous transparent gap. LEFT: Glacier Leviathan, an ancient Arctic sea serpent coiled into a compact readable S silhouette, blue-gray whale-like head with NO eyes or sockets, ivory belly, a row of jagged pale glacier plates growing from its back, broad tail fin and two small flippers. It must read as a unique mythical polar monster, not a normal fish with a filter. RIGHT: Ice Kraken, compact ancient blue-violet squid monster, teardrop mantle capped by a small natural crown of frosted ice spires, six clearly separated thick curling tentacles gathered into a strong round silhouette, pale ice-blue undersides, no eyes or sockets, no separate objects. Restrained Arctic palette, handpainted watercolor and fine charcoal like reference, majestic and collectible but not horror. Monsters readable as thumbnail silhouettes. No aura background or floating ice debris."
+  }
+]

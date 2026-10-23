@@ -591,7 +591,8 @@
       512
     ],
     "path": "ocean-finds/common-sea-pebble.png",
-    "status": "draft-art"
+    "status": "integrated-in-catalog",
+    "gameKindID": "common-sea-pebble"
   },
   {
     "id": "common-clam-shell",
@@ -609,7 +610,8 @@
       512
     ],
     "path": "ocean-finds/common-clam-shell.png",
-    "status": "draft-art"
+    "status": "integrated-in-catalog",
+    "gameKindID": "common-clam-shell"
   },
   {
     "id": "common-spiral-shell",
@@ -627,7 +629,8 @@
       512
     ],
     "path": "ocean-finds/common-spiral-shell.png",
-    "status": "draft-art"
+    "status": "integrated-in-catalog",
+    "gameKindID": "common-spiral-shell"
   },
   {
     "id": "common-driftwood",
@@ -645,7 +648,8 @@
       1024
     ],
     "path": "ocean-finds/common-driftwood.png",
-    "status": "draft-art"
+    "status": "integrated-in-catalog",
+    "gameKindID": "common-driftwood"
   },
   {
     "id": "common-shell-shard",
@@ -663,7 +667,8 @@
       1024
     ],
     "path": "ocean-finds/common-shell-shard.png",
-    "status": "draft-art"
+    "status": "integrated-in-catalog",
+    "gameKindID": "common-shell-shard"
   },
   {
     "id": "common-sea-glass",
@@ -681,6 +686,7 @@
       1024
     ],
     "path": "ocean-finds/common-sea-glass.png",
-    "status": "draft-art"
+    "status": "integrated-in-catalog",
+    "gameKindID": "common-sea-glass"
   }
 ]

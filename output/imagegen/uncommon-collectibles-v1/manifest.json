@@ -1,0 +1,1010 @@
+[
+  {
+    "id": "uncommon-icefish-fan",
+    "name": "Icefish Sirip Kipas",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "rounded long icy ivory icefish, broad rounded head, two oversized pale powder-blue fan-shaped pectoral fins, soft low dorsal fin, tiny forked tail",
+    "sheet": "uncommon-sheet-01.png",
+    "cell": [
+      1,
+      1
+    ],
+    "path": "fish/uncommon-icefish-fan.png",
+    "productionGameID": "uncommon-03",
+    "status": "integrated-in-catalog",
+    "crop": [
+      28,
+      172,
+      509,
+      478
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      481,
+      306
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-toothfish-mottle",
+    "name": "Toothfish Berbintik",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "plump sturdy graphite and olive-brown toothfish-inspired fish, broad blunt snout, short sturdy rounded fins, broad cream belly, irregular flank mottling",
+    "sheet": "uncommon-sheet-01.png",
+    "cell": [
+      1,
+      2
+    ],
+    "path": "fish/uncommon-toothfish-mottle.png",
+    "productionGameID": "uncommon-04",
+    "status": "integrated-in-catalog",
+    "crop": [
+      536,
+      175,
+      1025,
+      478
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      489,
+      303
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-silverfish-ribbon",
+    "name": "Silverfish Pita",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "small slender silverfish-inspired fish, pearly lavender-silver body with a single pale blue longitudinal stripe, narrow forked tail and tiny translucent fins",
+    "sheet": "uncommon-sheet-01.png",
+    "cell": [
+      1,
+      3
+    ],
+    "path": "fish/uncommon-silverfish-ribbon.png",
+    "productionGameID": "uncommon-05",
+    "status": "integrated-in-catalog",
+    "crop": [
+      1049,
+      234,
+      1512,
+      439
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      463,
+      205
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-lanternfish-plum",
+    "name": "Lanternfish Plum",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "short deep-bodied dusky plum lanternfish-inspired fish, gently round head, forked tail, neat line of tiny cream flank speckles only below rear half of belly, no glowing effects",
+    "sheet": "uncommon-sheet-01.png",
+    "cell": [
+      2,
+      1
+    ],
+    "path": "fish/uncommon-lanternfish-plum.png",
+    "productionGameID": "uncommon-06",
+    "status": "integrated-in-catalog",
+    "crop": [
+      30,
+      560,
+      524,
+      896
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      494,
+      336
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-eelpout-curl",
+    "name": "Eelpout Melengkung",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "soft long seafoam-gray eelpout-inspired fish curling in a loose C shape, tiny rounded pectoral fins, continuous ribbon dorsal fin, blunt snout",
+    "sheet": "uncommon-sheet-01.png",
+    "cell": [
+      2,
+      2
+    ],
+    "path": "fish/uncommon-eelpout-curl.png",
+    "productionGameID": "uncommon-07",
+    "status": "integrated-in-catalog",
+    "crop": [
+      553,
+      555,
+      1023,
+      916
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      470,
+      361
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-notothen-broadfin",
+    "name": "Notothen Sirip Lebar",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "compact broad-bodied ochre and slate notothen-inspired fish, little raised stepped dorsal fin, wide softly rounded pectoral fins, rounded tail, pale belly",
+    "sheet": "uncommon-sheet-01.png",
+    "cell": [
+      2,
+      3
+    ],
+    "path": "fish/uncommon-notothen-broadfin.png",
+    "productionGameID": "uncommon-08",
+    "status": "integrated-in-catalog",
+    "crop": [
+      1040,
+      574,
+      1511,
+      896
+    ],
+    "alphaBounds": [
+      0,
+      1,
+      471,
+      322
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-icefish-sail",
+    "name": "Icefish Sirip Layar",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "short rounded ivory icefish with unusually tall soft blue sail dorsal fin, gently scalloped edge, blunt snout, small fork tail",
+    "sheet": "uncommon-sheet-02.png",
+    "cell": [
+      1,
+      1
+    ],
+    "path": "fish/uncommon-icefish-sail.png",
+    "productionGameID": "uncommon-09",
+    "status": "integrated-in-catalog",
+    "crop": [
+      46,
+      93,
+      509,
+      492
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      463,
+      399
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-toothfish-banded",
+    "name": "Toothfish Berpita",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "wide stout smoky blue toothfish-inspired fish with three soft gray vertical bands and a broad squared tail",
+    "sheet": "uncommon-sheet-02.png",
+    "cell": [
+      1,
+      2
+    ],
+    "path": "fish/uncommon-toothfish-banded.png",
+    "productionGameID": "uncommon-10",
+    "status": "integrated-in-catalog",
+    "crop": [
+      527,
+      158,
+      1012,
+      475
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      485,
+      317
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-silverfish-deep",
+    "name": "Silverfish Oval",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "pearl-silver oval-bodied silverfish-inspired fish, cobalt-gray dorsal wash and peach translucent lower fins, small V tail",
+    "sheet": "uncommon-sheet-02.png",
+    "cell": [
+      1,
+      3
+    ],
+    "path": "fish/uncommon-silverfish-deep.png",
+    "productionGameID": "uncommon-11",
+    "status": "integrated-in-catalog",
+    "crop": [
+      1053,
+      132,
+      1508,
+      486
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      455,
+      354
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-lanternfish-amber",
+    "name": "Lanternfish Amber",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "chubby warm amber-brown lanternfish-inspired fish, large rounded dorsal fin and tiny cream dots along rear flank, plain unmarked head",
+    "sheet": "uncommon-sheet-02.png",
+    "cell": [
+      2,
+      1
+    ],
+    "path": "fish/uncommon-lanternfish-amber.png",
+    "productionGameID": "uncommon-12",
+    "status": "integrated-in-catalog",
+    "crop": [
+      43,
+      553,
+      508,
+      916
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      465,
+      363
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-eelpout-loop",
+    "name": "Eelpout Lingkar",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "slender sandy-beige eelpout-inspired fish curled into an open U shape, continuous muted mauve ribbon fins",
+    "sheet": "uncommon-sheet-02.png",
+    "cell": [
+      2,
+      2
+    ],
+    "path": "fish/uncommon-eelpout-loop.png",
+    "productionGameID": "uncommon-13",
+    "status": "integrated-in-catalog",
+    "crop": [
+      526,
+      575,
+      1001,
+      928
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      475,
+      353
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-plunderfish-flowerfin",
+    "name": "Ikan Sirip Kelopak",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "broad short pale beige plunderfish-inspired fish with large flower-petal pectoral fins spread outward, dorsal row of small blunt spikes, sage mottling",
+    "sheet": "uncommon-sheet-02.png",
+    "cell": [
+      2,
+      3
+    ],
+    "path": "fish/uncommon-plunderfish-flowerfin.png",
+    "productionGameID": "uncommon-14",
+    "status": "integrated-in-catalog",
+    "crop": [
+      1037,
+      597,
+      1519,
+      925
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      482,
+      328
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-icefish-wingfin",
+    "name": "Icefish Sirip Sayap",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "pale blue-white icefish with two broad folded wing-shaped pectoral fins, narrow tapering body, compact fan tail, mild curved posture",
+    "sheet": "uncommon-sheet-03.png",
+    "cell": [
+      1,
+      1
+    ],
+    "path": "fish/uncommon-icefish-wingfin.png",
+    "productionGameID": "uncommon-15",
+    "status": "integrated-in-catalog",
+    "crop": [
+      31,
+      88,
+      504,
+      501
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      473,
+      413
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-toothfish-speckled",
+    "name": "Toothfish Tutul Halus",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "tubby ochre-gray toothfish-inspired fish with small faded brown spots along flank and back only, thick rounded snout, double dorsal fin",
+    "sheet": "uncommon-sheet-03.png",
+    "cell": [
+      1,
+      2
+    ],
+    "path": "fish/uncommon-toothfish-speckled.png",
+    "productionGameID": "uncommon-16",
+    "status": "integrated-in-catalog",
+    "crop": [
+      524,
+      128,
+      1023,
+      460
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      499,
+      332
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-silverfish-longtail",
+    "name": "Silverfish Ekor Panjang",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "slender silverfish-inspired fish with long thin forked tail, sage back and ivory underside, fine charcoal lateral line",
+    "sheet": "uncommon-sheet-03.png",
+    "cell": [
+      1,
+      3
+    ],
+    "path": "fish/uncommon-silverfish-longtail.png",
+    "productionGameID": "uncommon-17",
+    "status": "integrated-in-catalog",
+    "crop": [
+      1041,
+      197,
+      1513,
+      412
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      472,
+      215
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-lanternfish-slate",
+    "name": "Lanternfish Batu Tulis",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "rounded slate-blue lanternfish-inspired fish, peach belly, high triangular dorsal and tiny pale spots in a short row near tail only",
+    "sheet": "uncommon-sheet-03.png",
+    "cell": [
+      2,
+      1
+    ],
+    "path": "fish/uncommon-lanternfish-slate.png",
+    "productionGameID": "uncommon-18",
+    "status": "integrated-in-catalog",
+    "crop": [
+      37,
+      537,
+      499,
+      935
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      461,
+      398
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-eelpout-sway",
+    "name": "Eelpout Gelombang",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "long powder-blue eelpout-inspired fish in a gentle S curve, peach scalloped continuous dorsal fin, small blunt head",
+    "sheet": "uncommon-sheet-03.png",
+    "cell": [
+      2,
+      2
+    ],
+    "path": "fish/uncommon-eelpout-sway.png",
+    "productionGameID": "uncommon-19",
+    "status": "integrated-in-catalog",
+    "crop": [
+      522,
+      588,
+      1058,
+      925
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      536,
+      337
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-snailfish-pebble",
+    "name": "Snailfish Batu",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "tiny pear-shaped dusty rose snailfish-inspired fish with round oversized body tapering to small tail, wide translucent fan fins, no spots on head",
+    "sheet": "uncommon-sheet-03.png",
+    "cell": [
+      2,
+      3
+    ],
+    "path": "fish/uncommon-snailfish-pebble.png",
+    "productionGameID": "uncommon-20",
+    "status": "integrated-in-catalog",
+    "crop": [
+      1085,
+      584,
+      1509,
+      929
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      424,
+      345
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-icefish-cream",
+    "name": "Icefish Krim",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "soft cream icefish with a broad flat rounded snout, large gray-blue pectoral fins held close to body, low spiny dorsal silhouette and deep fork tail",
+    "sheet": "uncommon-sheet-04.png",
+    "cell": [
+      1,
+      1
+    ],
+    "path": "fish/uncommon-icefish-cream.png",
+    "productionGameID": "uncommon-21",
+    "status": "integrated-in-catalog",
+    "crop": [
+      29,
+      148,
+      530,
+      457
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      501,
+      309
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-toothfish-stone",
+    "name": "Toothfish Batu",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "compact heavy-bodied warm stone-gray toothfish-inspired fish with layered horizontal mottling, sturdy broad tail and rounded fins",
+    "sheet": "uncommon-sheet-04.png",
+    "cell": [
+      1,
+      2
+    ],
+    "path": "fish/uncommon-toothfish-stone.png",
+    "productionGameID": "uncommon-22",
+    "status": "integrated-in-catalog",
+    "crop": [
+      552,
+      164,
+      1019,
+      460
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      467,
+      296
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-silverfish-arch",
+    "name": "Silverfish Melengkung",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "small pearlescent pale lavender silverfish-inspired fish arching gently upward, rounded belly, thin dark blue back and split tail",
+    "sheet": "uncommon-sheet-04.png",
+    "cell": [
+      1,
+      3
+    ],
+    "path": "fish/uncommon-silverfish-arch.png",
+    "productionGameID": "uncommon-23",
+    "status": "integrated-in-catalog",
+    "crop": [
+      1056,
+      149,
+      1501,
+      462
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      445,
+      313
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-lanternfish-copper",
+    "name": "Lanternfish Tembaga",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "short round copper lanternfish-inspired fish with cream belly, fine rows of ivory speckles on lower rear flank, wide soft tail",
+    "sheet": "uncommon-sheet-04.png",
+    "cell": [
+      2,
+      1
+    ],
+    "path": "fish/uncommon-lanternfish-copper.png",
+    "productionGameID": "uncommon-24",
+    "status": "integrated-in-catalog",
+    "crop": [
+      38,
+      520,
+      508,
+      869
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      470,
+      349
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-eelpout-knot",
+    "name": "Eelpout Lengkung Ganda",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "long moss-gray eelpout-inspired fish in a loose double curve, one long terracotta dorsal ribbon and small paddle tail",
+    "sheet": "uncommon-sheet-04.png",
+    "cell": [
+      2,
+      2
+    ],
+    "path": "fish/uncommon-eelpout-knot.png",
+    "productionGameID": "uncommon-25",
+    "status": "integrated-in-catalog",
+    "crop": [
+      542,
+      538,
+      996,
+      870
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      454,
+      332
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-dragonfish-blunt",
+    "name": "Ikan Kepala Lebar",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "short broad-headed soft sand and gray dragonfish-inspired polar fish with blunt snout, rounded fins, short soft spine ridge, tapered rear body, no teeth",
+    "sheet": "uncommon-sheet-04.png",
+    "cell": [
+      2,
+      3
+    ],
+    "path": "fish/uncommon-dragonfish-blunt.png",
+    "productionGameID": "uncommon-26",
+    "status": "integrated-in-catalog",
+    "crop": [
+      1026,
+      544,
+      1506,
+      861
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      480,
+      317
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-icefish-petal",
+    "name": "Icefish Kelopak",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "short chubby pale mint icefish with four scalloped petal-like fins and broad rounded tail, thin darker mint dorsal ridge",
+    "sheet": "uncommon-sheet-05.png",
+    "cell": [
+      1,
+      1
+    ],
+    "path": "fish/uncommon-icefish-petal.png",
+    "productionGameID": "uncommon-27",
+    "status": "integrated-in-catalog",
+    "crop": [
+      67,
+      138,
+      511,
+      463
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      444,
+      325
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-toothfish-olive",
+    "name": "Toothfish Zaitun",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "elongated but chunky olive-brown toothfish-inspired fish with cream lower body, high soft rear dorsal lobe, rounded tail, two muted irregular flank patches",
+    "sheet": "uncommon-sheet-05.png",
+    "cell": [
+      1,
+      2
+    ],
+    "path": "fish/uncommon-toothfish-olive.png",
+    "productionGameID": "uncommon-28",
+    "status": "integrated-in-catalog",
+    "crop": [
+      541,
+      143,
+      1041,
+      438
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      500,
+      295
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-silverfish-spindle",
+    "name": "Silverfish Gelendong",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "tiny spindle-shaped silverfish-inspired fish, light blue silver paint, dainty rosy fins, deep split tail and compact pointed snout",
+    "sheet": "uncommon-sheet-05.png",
+    "cell": [
+      1,
+      3
+    ],
+    "path": "fish/uncommon-silverfish-spindle.png",
+    "productionGameID": "uncommon-29",
+    "status": "integrated-in-catalog",
+    "crop": [
+      1067,
+      205,
+      1502,
+      420
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      435,
+      215
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-lanternfish-indigo",
+    "name": "Lanternfish Indigo",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "plump indigo-gray lanternfish-inspired fish, large rounded rear fin, ivory belly, subtle cream speckles near rear underside only",
+    "sheet": "uncommon-sheet-05.png",
+    "cell": [
+      2,
+      1
+    ],
+    "path": "fish/uncommon-lanternfish-indigo.png",
+    "productionGameID": "uncommon-30",
+    "status": "integrated-in-catalog",
+    "crop": [
+      51,
+      491,
+      519,
+      882
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      468,
+      391
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-eelpout-crescent",
+    "name": "Eelpout Sabit",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "tapered muted lavender eelpout-inspired fish curled like a wide crescent, tiny tucked pectoral fins and continuous low powder-blue fin",
+    "sheet": "uncommon-sheet-05.png",
+    "cell": [
+      2,
+      2
+    ],
+    "path": "fish/uncommon-eelpout-crescent.png",
+    "productionGameID": "uncommon-31",
+    "status": "integrated-in-catalog",
+    "crop": [
+      542,
+      538,
+      1017,
+      880
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      475,
+      342
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-rattail-taper",
+    "name": "Ikan Ekor Pita",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "cute stout pear-shaped blue-gray polar rattail-inspired fish, rounded broad front tapering to a long thin curved tail, short peach dorsal sail",
+    "sheet": "uncommon-sheet-05.png",
+    "cell": [
+      2,
+      3
+    ],
+    "path": "fish/uncommon-rattail-taper.png",
+    "productionGameID": "uncommon-32",
+    "status": "integrated-in-catalog",
+    "crop": [
+      1042,
+      517,
+      1513,
+      883
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      471,
+      366
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-icefish-frill",
+    "name": "Icefish Rumbai",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "compact frosty ivory icefish with a row of small rounded blue dorsal frills, very wide pectoral fins and short tail, rounded snout",
+    "sheet": "uncommon-sheet-06.png",
+    "cell": [
+      1,
+      1
+    ],
+    "path": "fish/uncommon-icefish-frill.png",
+    "productionGameID": "uncommon-33",
+    "status": "integrated-in-catalog",
+    "crop": [
+      38,
+      108,
+      496,
+      444
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      458,
+      336
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-toothfish-paddle",
+    "name": "Toothfish Ekor Dayung",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "stout dusky lavender toothfish-inspired fish with oversized rounded paddle tail, two soft dorsal lobes and pale cream belly",
+    "sheet": "uncommon-sheet-06.png",
+    "cell": [
+      1,
+      2
+    ],
+    "path": "fish/uncommon-toothfish-paddle.png",
+    "productionGameID": "uncommon-34",
+    "status": "integrated-in-catalog",
+    "crop": [
+      520,
+      130,
+      1024,
+      427
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      504,
+      297
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-silverfish-stripe",
+    "name": "Silverfish Garis Tembaga",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "long oval silverfish-inspired fish with muted copper-gray longitudinal band, pearly cream body and small blue fork tail",
+    "sheet": "uncommon-sheet-06.png",
+    "cell": [
+      1,
+      3
+    ],
+    "path": "fish/uncommon-silverfish-stripe.png",
+    "productionGameID": null,
+    "status": "reserved-art-no-pool-slot",
+    "crop": [
+      1039,
+      167,
+      1515,
+      413
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      476,
+      246
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-lanternfish-round",
+    "name": "Lanternfish Bulat",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "small nearly circular smoky teal lanternfish-inspired fish with tall soft dorsal fin, broad orange-gray tail, few pale speckles on rear belly only",
+    "sheet": "uncommon-sheet-06.png",
+    "cell": [
+      2,
+      1
+    ],
+    "path": "fish/uncommon-lanternfish-round.png",
+    "productionGameID": null,
+    "status": "reserved-art-no-pool-slot",
+    "crop": [
+      57,
+      497,
+      495,
+      907
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      438,
+      410
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-eelpout-fan",
+    "name": "Eelpout Ekor Kipas",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "long warm gray-brown eelpout-inspired fish curving downward, big translucent dusty rose fan tail, scalloped continuous dorsal fin",
+    "sheet": "uncommon-sheet-06.png",
+    "cell": [
+      2,
+      2
+    ],
+    "path": "fish/uncommon-eelpout-fan.png",
+    "productionGameID": "uncommon-35",
+    "status": "integrated-in-catalog",
+    "crop": [
+      531,
+      509,
+      1021,
+      935
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      490,
+      426
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  },
+  {
+    "id": "uncommon-skate-kite",
+    "name": "Skate Layang",
+    "rarity": "uncommon",
+    "category": "fish",
+    "concept": "small cute slate-sage polar skate-inspired fish in top view, rounded diamond wing silhouette and short gently curved tail, ivory watercolor patches on wings, smooth plain central back without face marks",
+    "sheet": "uncommon-sheet-06.png",
+    "cell": [
+      2,
+      3
+    ],
+    "path": "fish/uncommon-skate-kite.png",
+    "productionGameID": "uncommon-36",
+    "status": "integrated-in-catalog",
+    "crop": [
+      1045,
+      500,
+      1512,
+      937
+    ],
+    "alphaBounds": [
+      0,
+      0,
+      467,
+      437
+    ],
+    "cropMethod": "main connected silhouette bounds with 3px padding"
+  }
+]

@@ -1,0 +1,592 @@
+[
+  {
+    "sheet": "rare-batch-01-v2.png",
+    "rarity": "rare",
+    "cols": 2,
+    "rows": 2,
+    "items": [
+      {
+        "id": "rare-crystal-krill",
+        "name": "Krill Kristal",
+        "category": "fish",
+        "concept": "one curled tiny krill transformed into pale rose quartz, recognizable segmented translucent shrimp body, delicate legs and short feelers, solid eyeless head, one connected silhouette"
+      },
+      {
+        "id": "rare-blueflame-lanternfish",
+        "name": "Lanternfish Api Biru",
+        "category": "fish",
+        "concept": "one chubby midnight-blue lanternfish with a dorsal fin shaped like a compact painted blue flame, contained opaque turquoise fire-fin silhouette, plain eyeless head"
+      },
+      {
+        "id": "rare-origami-silverfish",
+        "name": "Silverfish Lipatan",
+        "category": "fish",
+        "concept": "one slender silverfish whose body is folded pearl-white paper with soft indigo crease planes, recognizable fish fins and forked tail, plain folded eyeless head"
+      },
+      {
+        "id": "rare-opal-amphipod",
+        "name": "Amphipod Opal",
+        "category": "fish",
+        "concept": "one small crescent amphipod with opalescent mint and lavender plated shell, tiny tucked legs, short antennae and smooth closed eyeless head"
+      }
+    ],
+    "reference": "/Users/kiram/Code/dzenn/design/qyube-collectibles-v5-fish/02-fish-collection-sheet-no-eyes.png",
+    "prompt": "Use case: stylized-concept. Asset type: qyube collectible sprite sheet. Input image 1 is STYLE REFERENCE ONLY, not an edit target. Match its handmade watercolor, softly mottled painted interiors, delicate irregular charcoal contour lines and gentle tactile natural-history specimen craftsmanship. Cozy cute magical collectible art with simplified rounded shapes, restrained painterly detail readable as a small icon, never photorealistic or horror. Genuine transparent alpha background; rich paint and white/cream material INSIDE silhouettes stay opaque. No paper backdrop, ground, cast shadows, scenery, lettering, labels, frames, detached particles, or external glow halos. Absolutely ZERO EYES on all creatures: no dots, pupils, rings, eyelashes, closed eye strokes, nostrils, hollow sockets, dark head spots or replacement symbols; smooth painted eyeless heads. Objects and plants are entirely faceless. No teeth, blood, aggressive poses, human figures, glossy 3D, vector shading or pixel art. Every item is one coherent complete collectible with all attached fins/tentacles/parts visible and connected; no extra pieces. Create exactly 4 RARE collectibles in a precise 2-column by 2-row square sheet. One isolated item per cell. Each fits entirely within middle 65 percent of cell; very generous TRANSPARENT gutters separate all items. Do not overlap or cross cells. No tiny companion objects or floating effects. TOP LEFT: one curled tiny krill transformed into pale rose quartz, recognizable segmented translucent shrimp body, delicate legs and short feelers, solid eyeless head, one connected silhouette. TOP RIGHT: one chubby midnight-blue lanternfish with a dorsal fin shaped like a compact painted blue flame, contained opaque turquoise fire-fin silhouette, plain eyeless head. BOTTOM LEFT: one slender silverfish whose body is folded pearl-white paper with soft indigo crease planes, recognizable fish fins and forked tail, plain folded eyeless head. BOTTOM RIGHT: one small crescent amphipod with opalescent mint and lavender plated shell, tiny tucked legs, short antennae and smooth closed eyeless head. Rare must preserve the recognizable source fish, plant or object while giving it one distinctive magical transformation."
+  },
+  {
+    "sheet": "rare-batch-02-v2.png",
+    "rarity": "rare",
+    "cols": 2,
+    "rows": 2,
+    "items": [
+      {
+        "id": "rare-hourglass-conch",
+        "name": "Keong Jam Pasir",
+        "category": "ocean-finds",
+        "concept": "one empty spiral conch whose cream shell contains a visible amber sand chamber, hourglass-like spiral interior as a single shell, no stand or clock face"
+      },
+      {
+        "id": "rare-nebula-pebble",
+        "name": "Batu Nebula",
+        "category": "ocean-finds",
+        "concept": "one smooth oval dark navy sea pebble with a small natural cross-section window showing softly painted violet galaxy clouds and tiny stars INSIDE the stone, thick ivory rim"
+      },
+      {
+        "id": "rare-rime-bell",
+        "name": "Lonceng Berembun Es",
+        "category": "ocean-finds",
+        "concept": "one small old rounded bronze ship bell with a connected thick frosty ice lace rim and short loop, icy white and aged teal bronze, no text"
+      },
+      {
+        "id": "rare-moon-jelly",
+        "name": "Ubur Bulan",
+        "category": "fish",
+        "concept": "one compact jellyfish whose domed bell resembles pearly crescent-moon porcelain, four short curling lilac tentacles attached, plain faceless bell, no detached stars"
+      }
+    ],
+    "reference": "/Users/kiram/Code/dzenn/design/qyube-collectibles-v5-fish/02-fish-collection-sheet-no-eyes.png",
+    "prompt": "Use case: stylized-concept. Asset type: qyube collectible sprite sheet. Input image 1 is STYLE REFERENCE ONLY, not an edit target. Match its handmade watercolor, softly mottled painted interiors, delicate irregular charcoal contour lines and gentle tactile natural-history specimen craftsmanship. Cozy cute magical collectible art with simplified rounded shapes, restrained painterly detail readable as a small icon, never photorealistic or horror. Genuine transparent alpha background; rich paint and white/cream material INSIDE silhouettes stay opaque. No paper backdrop, ground, cast shadows, scenery, lettering, labels, frames, detached particles, or external glow halos. Absolutely ZERO EYES on all creatures: no dots, pupils, rings, eyelashes, closed eye strokes, nostrils, hollow sockets, dark head spots or replacement symbols; smooth painted eyeless heads. Objects and plants are entirely faceless. No teeth, blood, aggressive poses, human figures, glossy 3D, vector shading or pixel art. Every item is one coherent complete collectible with all attached fins/tentacles/parts visible and connected; no extra pieces. Create exactly 4 RARE collectibles in a precise 2-column by 2-row square sheet. One isolated item per cell. Each fits entirely within middle 65 percent of cell; very generous TRANSPARENT gutters separate all items. Do not overlap or cross cells. No tiny companion objects or floating effects. TOP LEFT: one empty spiral conch whose cream shell contains a visible amber sand chamber, hourglass-like spiral interior as a single shell, no stand or clock face. TOP RIGHT: one smooth oval dark navy sea pebble with a small natural cross-section window showing softly painted violet galaxy clouds and tiny stars INSIDE the stone, thick ivory rim. BOTTOM LEFT: one small old rounded bronze ship bell with a connected thick frosty ice lace rim and short loop, icy white and aged teal bronze, no text. BOTTOM RIGHT: one compact jellyfish whose domed bell resembles pearly crescent-moon porcelain, four short curling lilac tentacles attached, plain faceless bell, no detached stars. Rare must preserve the recognizable source fish, plant or object while giving it one distinctive magical transformation."
+  },
+  {
+    "sheet": "rare-batch-03-v2.png",
+    "rarity": "rare",
+    "cols": 2,
+    "rows": 2,
+    "items": [
+      {
+        "id": "rare-prism-driftwood",
+        "name": "Kayu Prisma",
+        "category": "ocean-finds",
+        "concept": "one forked driftwood twig transformed into frosted prismatic glass, retains wood growth grain and organic twig silhouette, restrained amber and icy mint facets"
+      },
+      {
+        "id": "rare-amber-copepod",
+        "name": "Copepod Amber",
+        "category": "fish",
+        "concept": "one rounded golden amber copepod with segmented teardrop body, fine paddle antennae and tiny fins, eyeless smooth head, no specimen trapped inside"
+      },
+      {
+        "id": "rare-aurora-lichen",
+        "name": "Lichen Aurora",
+        "category": "plant",
+        "concept": "one compact branching lichen tuft on its own tiny connected slate pebble, frilly leaf lobes striped with teal lavender and soft peach aurora minerals, no detached dust"
+      },
+      {
+        "id": "rare-glass-toothfish",
+        "name": "Toothfish Kaca",
+        "category": "fish",
+        "concept": "one stout polar toothfish with a body of opaque pale aqua sea glass, thick matte edges, ivory belly and broad blue fins, smooth eyeless head, no bones inside"
+      }
+    ],
+    "reference": "/Users/kiram/Code/dzenn/design/qyube-collectibles-v5-fish/02-fish-collection-sheet-no-eyes.png",
+    "prompt": "Use case: stylized-concept. Asset type: qyube collectible sprite sheet. Input image 1 is STYLE REFERENCE ONLY, not an edit target. Match its handmade watercolor, softly mottled painted interiors, delicate irregular charcoal contour lines and gentle tactile natural-history specimen craftsmanship. Cozy cute magical collectible art with simplified rounded shapes, restrained painterly detail readable as a small icon, never photorealistic or horror. Genuine transparent alpha background; rich paint and white/cream material INSIDE silhouettes stay opaque. No paper backdrop, ground, cast shadows, scenery, lettering, labels, frames, detached particles, or external glow halos. Absolutely ZERO EYES on all creatures: no dots, pupils, rings, eyelashes, closed eye strokes, nostrils, hollow sockets, dark head spots or replacement symbols; smooth painted eyeless heads. Objects and plants are entirely faceless. No teeth, blood, aggressive poses, human figures, glossy 3D, vector shading or pixel art. Every item is one coherent complete collectible with all attached fins/tentacles/parts visible and connected; no extra pieces. Create exactly 4 RARE collectibles in a precise 2-column by 2-row square sheet. One isolated item per cell. Each fits entirely within middle 65 percent of cell; very generous TRANSPARENT gutters separate all items. Do not overlap or cross cells. No tiny companion objects or floating effects. TOP LEFT: one forked driftwood twig transformed into frosted prismatic glass, retains wood growth grain and organic twig silhouette, restrained amber and icy mint facets. TOP RIGHT: one rounded golden amber copepod with segmented teardrop body, fine paddle antennae and tiny fins, eyeless smooth head, no specimen trapped inside. BOTTOM LEFT: one compact branching lichen tuft on its own tiny connected slate pebble, frilly leaf lobes striped with teal lavender and soft peach aurora minerals, no detached dust. BOTTOM RIGHT: one stout polar toothfish with a body of opaque pale aqua sea glass, thick matte edges, ivory belly and broad blue fins, smooth eyeless head, no bones inside. Rare must preserve the recognizable source fish, plant or object while giving it one distinctive magical transformation."
+  },
+  {
+    "sheet": "rare-batch-04-v2.png",
+    "rarity": "rare",
+    "cols": 2,
+    "rows": 2,
+    "items": [
+      {
+        "id": "rare-frostfeather-worm",
+        "name": "Cacing Bulu Salju",
+        "category": "fish",
+        "concept": "one short curved marine worm with a fan crown of feathery white frost fronds, pale rust tubular body and sage-gray plumes, natural tiny eyeless specimen not horror"
+      },
+      {
+        "id": "rare-pearl-button",
+        "name": "Kancing Mutiara",
+        "category": "ocean-finds",
+        "concept": "one four-hole salvaged button grown from mother-of-pearl, chunky round raised rim with subtle lavender seafoam concentric bands, button holes clearly mechanical and not a face"
+      },
+      {
+        "id": "rare-tide-compass",
+        "name": "Kompas Pasang",
+        "category": "ocean-finds",
+        "concept": "one small weathered pocket compass with asymmetric seashell lid connected to base, a single frozen teal needle over simple painted wave lines, no letters numbers or face"
+      },
+      {
+        "id": "rare-snowflake-crab",
+        "name": "Kepiting Keping Salju",
+        "category": "fish",
+        "concept": "one little rounded crab with a snowflake-shaped frosted carapace, six short ice-blue legs and two small mitten-like claws, smooth front with no eyes or stalks"
+      }
+    ],
+    "reference": "/Users/kiram/Code/dzenn/design/qyube-collectibles-v5-fish/02-fish-collection-sheet-no-eyes.png",
+    "prompt": "Use case: stylized-concept. Asset type: qyube collectible sprite sheet. Input image 1 is STYLE REFERENCE ONLY, not an edit target. Match its handmade watercolor, softly mottled painted interiors, delicate irregular charcoal contour lines and gentle tactile natural-history specimen craftsmanship. Cozy cute magical collectible art with simplified rounded shapes, restrained painterly detail readable as a small icon, never photorealistic or horror. Genuine transparent alpha background; rich paint and white/cream material INSIDE silhouettes stay opaque. No paper backdrop, ground, cast shadows, scenery, lettering, labels, frames, detached particles, or external glow halos. Absolutely ZERO EYES on all creatures: no dots, pupils, rings, eyelashes, closed eye strokes, nostrils, hollow sockets, dark head spots or replacement symbols; smooth painted eyeless heads. Objects and plants are entirely faceless. No teeth, blood, aggressive poses, human figures, glossy 3D, vector shading or pixel art. Every item is one coherent complete collectible with all attached fins/tentacles/parts visible and connected; no extra pieces. Create exactly 4 RARE collectibles in a precise 2-column by 2-row square sheet. One isolated item per cell. Each fits entirely within middle 65 percent of cell; very generous TRANSPARENT gutters separate all items. Do not overlap or cross cells. No tiny companion objects or floating effects. TOP LEFT: one short curved marine worm with a fan crown of feathery white frost fronds, pale rust tubular body and sage-gray plumes, natural tiny eyeless specimen not horror. TOP RIGHT: one four-hole salvaged button grown from mother-of-pearl, chunky round raised rim with subtle lavender seafoam concentric bands, button holes clearly mechanical and not a face. BOTTOM LEFT: one small weathered pocket compass with asymmetric seashell lid connected to base, a single frozen teal needle over simple painted wave lines, no letters numbers or face. BOTTOM RIGHT: one little rounded crab with a snowflake-shaped frosted carapace, six short ice-blue legs and two small mitten-like claws, smooth front with no eyes or stalks. Rare must preserve the recognizable source fish, plant or object while giving it one distinctive magical transformation."
+  },
+  {
+    "sheet": "rare-batch-05-v2.png",
+    "rarity": "rare",
+    "cols": 2,
+    "rows": 2,
+    "items": [
+      {
+        "id": "rare-honeycomb-shell",
+        "name": "Kerang Sarang Madu",
+        "category": "ocean-finds",
+        "concept": "one cream clam shell with its ribs transformed into amber hexagonal honeycomb chambers, softly rounded closed bivalve, no bee or face"
+      },
+      {
+        "id": "rare-star-map-bottle",
+        "name": "Botol Peta Bintang",
+        "category": "ocean-finds",
+        "concept": "one squat sea-glass message bottle with cork, rolled navy parchment visible inside painted with a few tiny constellations only, no writing or glow outside glass"
+      },
+      {
+        "id": "rare-coral-chime",
+        "name": "Karang Nada",
+        "category": "plant",
+        "concept": "one short branching pale coral with three naturally fused shell-shaped hollow tips like tiny chimes, white chalk and muted blush, coherent forked coral silhouette"
+      },
+      {
+        "id": "rare-frozen-fern",
+        "name": "Pakis Embun Beku",
+        "category": "plant",
+        "concept": "one curled fiddlehead polar fern frond transformed into frosted blue-white glass, curled top and paired scalloped leaves, short attached woody base"
+      }
+    ],
+    "reference": "/Users/kiram/Code/dzenn/design/qyube-collectibles-v5-fish/02-fish-collection-sheet-no-eyes.png",
+    "prompt": "Use case: stylized-concept. Asset type: qyube collectible sprite sheet. Input image 1 is STYLE REFERENCE ONLY, not an edit target. Match its handmade watercolor, softly mottled painted interiors, delicate irregular charcoal contour lines and gentle tactile natural-history specimen craftsmanship. Cozy cute magical collectible art with simplified rounded shapes, restrained painterly detail readable as a small icon, never photorealistic or horror. Genuine transparent alpha background; rich paint and white/cream material INSIDE silhouettes stay opaque. No paper backdrop, ground, cast shadows, scenery, lettering, labels, frames, detached particles, or external glow halos. Absolutely ZERO EYES on all creatures: no dots, pupils, rings, eyelashes, closed eye strokes, nostrils, hollow sockets, dark head spots or replacement symbols; smooth painted eyeless heads. Objects and plants are entirely faceless. No teeth, blood, aggressive poses, human figures, glossy 3D, vector shading or pixel art. Every item is one coherent complete collectible with all attached fins/tentacles/parts visible and connected; no extra pieces. Create exactly 4 RARE collectibles in a precise 2-column by 2-row square sheet. One isolated item per cell. Each fits entirely within middle 65 percent of cell; very generous TRANSPARENT gutters separate all items. Do not overlap or cross cells. No tiny companion objects or floating effects. TOP LEFT: one cream clam shell with its ribs transformed into amber hexagonal honeycomb chambers, softly rounded closed bivalve, no bee or face. TOP RIGHT: one squat sea-glass message bottle with cork, rolled navy parchment visible inside painted with a few tiny constellations only, no writing or glow outside glass. BOTTOM LEFT: one short branching pale coral with three naturally fused shell-shaped hollow tips like tiny chimes, white chalk and muted blush, coherent forked coral silhouette. BOTTOM RIGHT: one curled fiddlehead polar fern frond transformed into frosted blue-white glass, curled top and paired scalloped leaves, short attached woody base. Rare must preserve the recognizable source fish, plant or object while giving it one distinctive magical transformation."
+  },
+  {
+    "sheet": "rare-batch-06-v2.png",
+    "rarity": "rare",
+    "cols": 2,
+    "rows": 2,
+    "items": [
+      {
+        "id": "rare-midnight-puffer",
+        "name": "Ikan Buntal Malam",
+        "category": "fish",
+        "concept": "one small round pufferfish with short blunt crystal quills and midnight-indigo body containing a few warm cream star flecks on back only, smooth eyeless plain face"
+      },
+      {
+        "id": "rare-frost-fan-scallop",
+        "name": "Kerang Kipas Beku",
+        "category": "ocean-finds",
+        "concept": "one open fan-shaped scallop shell with broad translucent icy fan ribs, pale slate hinges and cream inner paint, no pearl separate from shell"
+      },
+      {
+        "id": "rare-ember-mussel",
+        "name": "Remis Bara",
+        "category": "ocean-finds",
+        "concept": "one slightly open tapered dark purple mussel with warm amber fire-opal lining, red-orange painted mineral visible only inside gap, no flames outside"
+      },
+      {
+        "id": "rare-crystal-sea-cucumber",
+        "name": "Teripang Kristal",
+        "category": "fish",
+        "concept": "one short plump curved sea cucumber made of softly faceted lavender quartz, small rounded mint nubs along body, unmarked ends without mouth or eyes"
+      }
+    ],
+    "reference": "/Users/kiram/Code/dzenn/design/qyube-collectibles-v5-fish/02-fish-collection-sheet-no-eyes.png",
+    "prompt": "Use case: stylized-concept. Asset type: qyube collectible sprite sheet. Input image 1 is STYLE REFERENCE ONLY, not an edit target. Match its handmade watercolor, softly mottled painted interiors, delicate irregular charcoal contour lines and gentle tactile natural-history specimen craftsmanship. Cozy cute magical collectible art with simplified rounded shapes, restrained painterly detail readable as a small icon, never photorealistic or horror. Genuine transparent alpha background; rich paint and white/cream material INSIDE silhouettes stay opaque. No paper backdrop, ground, cast shadows, scenery, lettering, labels, frames, detached particles, or external glow halos. Absolutely ZERO EYES on all creatures: no dots, pupils, rings, eyelashes, closed eye strokes, nostrils, hollow sockets, dark head spots or replacement symbols; smooth painted eyeless heads. Objects and plants are entirely faceless. No teeth, blood, aggressive poses, human figures, glossy 3D, vector shading or pixel art. Every item is one coherent complete collectible with all attached fins/tentacles/parts visible and connected; no extra pieces. Create exactly 4 RARE collectibles in a precise 2-column by 2-row square sheet. One isolated item per cell. Each fits entirely within middle 65 percent of cell; very generous TRANSPARENT gutters separate all items. Do not overlap or cross cells. No tiny companion objects or floating effects. TOP LEFT: one small round pufferfish with short blunt crystal quills and midnight-indigo body containing a few warm cream star flecks on back only, smooth eyeless plain face. TOP RIGHT: one open fan-shaped scallop shell with broad translucent icy fan ribs, pale slate hinges and cream inner paint, no pearl separate from shell. BOTTOM LEFT: one slightly open tapered dark purple mussel with warm amber fire-opal lining, red-orange painted mineral visible only inside gap, no flames outside. BOTTOM RIGHT: one short plump curved sea cucumber made of softly faceted lavender quartz, small rounded mint nubs along body, unmarked ends without mouth or eyes. Rare must preserve the recognizable source fish, plant or object while giving it one distinctive magical transformation."
+  },
+  {
+    "sheet": "rare-batch-07-v2.png",
+    "rarity": "rare",
+    "cols": 2,
+    "rows": 2,
+    "items": [
+      {
+        "id": "rare-silver-kelp",
+        "name": "Rumput Laut Perak",
+        "category": "plant",
+        "concept": "one flowing kelp frond of matte silver leaf with sage-blue shadow paint, three broad ribbons curl around one connected stem, no attached separate stones"
+      },
+      {
+        "id": "rare-pumice-labyrinth",
+        "name": "Batu Lorong Es",
+        "category": "ocean-finds",
+        "concept": "one small pale pumice sea stone with angular natural ice-filled channels in a maze-like cross-section, one rounded triangular silhouette, no face pattern"
+      },
+      {
+        "id": "rare-sapphire-urchin",
+        "name": "Bulu Babi Safir",
+        "category": "fish",
+        "concept": "one tiny spherical sea urchin with short thick sapphire crystal spines and warm cream core, radial compact rounded silhouette, no face"
+      },
+      {
+        "id": "rare-frost-lotus-anemone",
+        "name": "Anemon Teratai Es",
+        "category": "fish",
+        "concept": "one compact sea anemone whose short tentacles resemble overlapping frosted lotus petals, pale coral pink center and blue-white outer ring on tiny connected base, no face"
+      }
+    ],
+    "reference": "/Users/kiram/Code/dzenn/design/qyube-collectibles-v5-fish/02-fish-collection-sheet-no-eyes.png",
+    "prompt": "Use case: stylized-concept. Asset type: qyube collectible sprite sheet. Input image 1 is STYLE REFERENCE ONLY, not an edit target. Match its handmade watercolor, softly mottled painted interiors, delicate irregular charcoal contour lines and gentle tactile natural-history specimen craftsmanship. Cozy cute magical collectible art with simplified rounded shapes, restrained painterly detail readable as a small icon, never photorealistic or horror. Genuine transparent alpha background; rich paint and white/cream material INSIDE silhouettes stay opaque. No paper backdrop, ground, cast shadows, scenery, lettering, labels, frames, detached particles, or external glow halos. Absolutely ZERO EYES on all creatures: no dots, pupils, rings, eyelashes, closed eye strokes, nostrils, hollow sockets, dark head spots or replacement symbols; smooth painted eyeless heads. Objects and plants are entirely faceless. No teeth, blood, aggressive poses, human figures, glossy 3D, vector shading or pixel art. Every item is one coherent complete collectible with all attached fins/tentacles/parts visible and connected; no extra pieces. Create exactly 4 RARE collectibles in a precise 2-column by 2-row square sheet. One isolated item per cell. Each fits entirely within middle 65 percent of cell; very generous TRANSPARENT gutters separate all items. Do not overlap or cross cells. No tiny companion objects or floating effects. TOP LEFT: one flowing kelp frond of matte silver leaf with sage-blue shadow paint, three broad ribbons curl around one connected stem, no attached separate stones. TOP RIGHT: one small pale pumice sea stone with angular natural ice-filled channels in a maze-like cross-section, one rounded triangular silhouette, no face pattern. BOTTOM LEFT: one tiny spherical sea urchin with short thick sapphire crystal spines and warm cream core, radial compact rounded silhouette, no face. BOTTOM RIGHT: one compact sea anemone whose short tentacles resemble overlapping frosted lotus petals, pale coral pink center and blue-white outer ring on tiny connected base, no face. Rare must preserve the recognizable source fish, plant or object while giving it one distinctive magical transformation."
+  },
+  {
+    "sheet": "rare-batch-08-v2.png",
+    "rarity": "rare",
+    "cols": 2,
+    "rows": 1,
+    "items": [
+      {
+        "id": "rare-clockwork-seahorse",
+        "name": "Kuda Laut Roda Tembaga",
+        "category": "fish",
+        "concept": "one curled seahorse made of warm tarnished copper with a single large gear embedded in rounded abdomen, small scalloped pale blue dorsal fin, solid smooth head with no eye or socket"
+      },
+      {
+        "id": "rare-pearl-seedpod",
+        "name": "Polong Mutiara",
+        "category": "plant",
+        "concept": "one small rounded drift seedpod split slightly to show three connected mother-of-pearl seeds inside, frosty sage outer husk and cream beads, no face"
+      }
+    ],
+    "reference": "/Users/kiram/Code/dzenn/design/qyube-collectibles-v5-fish/02-fish-collection-sheet-no-eyes.png",
+    "prompt": "Use case: stylized-concept. Asset type: qyube collectible sprite sheet. Input image 1 is STYLE REFERENCE ONLY, not an edit target. Match its handmade watercolor, softly mottled painted interiors, delicate irregular charcoal contour lines and gentle tactile natural-history specimen craftsmanship. Cozy cute magical collectible art with simplified rounded shapes, restrained painterly detail readable as a small icon, never photorealistic or horror. Genuine transparent alpha background; rich paint and white/cream material INSIDE silhouettes stay opaque. No paper backdrop, ground, cast shadows, scenery, lettering, labels, frames, detached particles, or external glow halos. Absolutely ZERO EYES on all creatures: no dots, pupils, rings, eyelashes, closed eye strokes, nostrils, hollow sockets, dark head spots or replacement symbols; smooth painted eyeless heads. Objects and plants are entirely faceless. No teeth, blood, aggressive poses, human figures, glossy 3D, vector shading or pixel art. Every item is one coherent complete collectible with all attached fins/tentacles/parts visible and connected; no extra pieces. Create exactly 2 RARE collectibles in a precise 2-column by 1-row wide landscape sheet. One isolated item per cell. Each fits entirely within middle 65 percent of cell; very generous TRANSPARENT gutters separate all items. Do not overlap or cross cells. No tiny companion objects or floating effects. LEFT: one curled seahorse made of warm tarnished copper with a single large gear embedded in rounded abdomen, small scalloped pale blue dorsal fin, solid smooth head with no eye or socket. RIGHT: one small rounded drift seedpod split slightly to show three connected mother-of-pearl seeds inside, frosty sage outer husk and cream beads, no face. Rare must preserve the recognizable source fish, plant or object while giving it one distinctive magical transformation."
+  },
+  {
+    "sheet": "legendary-batch-01-v2.png",
+    "rarity": "legendary",
+    "cols": 2,
+    "rows": 1,
+    "items": [
+      {
+        "id": "legendary-aurora-sky-dragon",
+        "name": "Naga Langit Aurora",
+        "category": "fish",
+        "concept": "one compact flowing aurora sea dragon coiled into a graceful open loop, two broad ribbon fins like curtains of mint-lilac aurora, pearly smooth closed head, delicate short antler-shaped ice horns, no eye sockets; distinct winged ribbon silhouette"
+      },
+      {
+        "id": "legendary-constellation-whale",
+        "name": "Paus Rasi Bintang",
+        "category": "fish",
+        "concept": "one majestic small rounded midnight-violet whale with enormous crescent flukes and a star-chart body containing tiny cream constellation lines, smooth eyeless front, broad pale belly; no external stars"
+      }
+    ],
+    "reference": "/Users/kiram/Code/dzenn/design/qyube-collectibles-v5-fish/02-fish-collection-sheet-no-eyes.png",
+    "prompt": "Use case: stylized-concept. Asset type: qyube collectible sprite sheet. Input image 1 is STYLE REFERENCE ONLY, not an edit target. Match its handmade watercolor, softly mottled painted interiors, delicate irregular charcoal contour lines and gentle tactile natural-history specimen craftsmanship. Cozy cute magical collectible art with simplified rounded shapes, restrained painterly detail readable as a small icon, never photorealistic or horror. Genuine transparent alpha background; rich paint and white/cream material INSIDE silhouettes stay opaque. No paper backdrop, ground, cast shadows, scenery, lettering, labels, frames, detached particles, or external glow halos. Absolutely ZERO EYES on all creatures: no dots, pupils, rings, eyelashes, closed eye strokes, nostrils, hollow sockets, dark head spots or replacement symbols; smooth painted eyeless heads. Objects and plants are entirely faceless. No teeth, blood, aggressive poses, human figures, glossy 3D, vector shading or pixel art. Every item is one coherent complete collectible with all attached fins/tentacles/parts visible and connected; no extra pieces. Create exactly 2 LEGENDARY collectibles in a precise 2-column by 1-row wide landscape sheet. One isolated item per cell. Each fits entirely within middle 65 percent of cell; very generous TRANSPARENT gutters separate all items. Do not overlap or cross cells. No tiny companion objects or floating effects. LEFT: one compact flowing aurora sea dragon coiled into a graceful open loop, two broad ribbon fins like curtains of mint-lilac aurora, pearly smooth closed head, delicate short antler-shaped ice horns, no eye sockets; distinct winged ribbon silhouette. RIGHT: one majestic small rounded midnight-violet whale with enormous crescent flukes and a star-chart body containing tiny cream constellation lines, smooth eyeless front, broad pale belly; no external stars. Legendary must have striking unique polar-myth silhouette, majestic and charming, balanced proportions and softly painted magical material."
+  },
+  {
+    "sheet": "legendary-batch-02-v2.png",
+    "rarity": "legendary",
+    "cols": 2,
+    "rows": 1,
+    "items": [
+      {
+        "id": "legendary-spirit-narwhal",
+        "name": "Narwhal Roh",
+        "category": "fish",
+        "concept": "one ivory pearl spirit narwhal curled like a crescent, oversized spiraling pale blue crystal tusk and three layered translucent tail ribbons, teal belly, plain eyeless head, no floating aura"
+      },
+      {
+        "id": "legendary-rime-petrel",
+        "name": "Petrel Angin Utara",
+        "category": "fish",
+        "concept": "one mythical polar seabird with wide curved wings formed from layered snow feathers and long ribbon tail, folded feet, cream and smoky blue plumage, smooth eyeless head, gentle soaring silhouette"
+      }
+    ],
+    "reference": "/Users/kiram/Code/dzenn/design/qyube-collectibles-v5-fish/02-fish-collection-sheet-no-eyes.png",
+    "prompt": "Use case: stylized-concept. Asset type: qyube collectible sprite sheet. Input image 1 is STYLE REFERENCE ONLY, not an edit target. Match its handmade watercolor, softly mottled painted interiors, delicate irregular charcoal contour lines and gentle tactile natural-history specimen craftsmanship. Cozy cute magical collectible art with simplified rounded shapes, restrained painterly detail readable as a small icon, never photorealistic or horror. Genuine transparent alpha background; rich paint and white/cream material INSIDE silhouettes stay opaque. No paper backdrop, ground, cast shadows, scenery, lettering, labels, frames, detached particles, or external glow halos. Absolutely ZERO EYES on all creatures: no dots, pupils, rings, eyelashes, closed eye strokes, nostrils, hollow sockets, dark head spots or replacement symbols; smooth painted eyeless heads. Objects and plants are entirely faceless. No teeth, blood, aggressive poses, human figures, glossy 3D, vector shading or pixel art. Every item is one coherent complete collectible with all attached fins/tentacles/parts visible and connected; no extra pieces. Create exactly 2 LEGENDARY collectibles in a precise 2-column by 1-row wide landscape sheet. One isolated item per cell. Each fits entirely within middle 65 percent of cell; very generous TRANSPARENT gutters separate all items. Do not overlap or cross cells. No tiny companion objects or floating effects. LEFT: one ivory pearl spirit narwhal curled like a crescent, oversized spiraling pale blue crystal tusk and three layered translucent tail ribbons, teal belly, plain eyeless head, no floating aura. RIGHT: one mythical polar seabird with wide curved wings formed from layered snow feathers and long ribbon tail, folded feet, cream and smoky blue plumage, smooth eyeless head, gentle soaring silhouette. Legendary must have striking unique polar-myth silhouette, majestic and charming, balanced proportions and softly painted magical material."
+  },
+  {
+    "sheet": "legendary-batch-03-v2.png",
+    "rarity": "legendary",
+    "cols": 2,
+    "rows": 1,
+    "items": [
+      {
+        "id": "legendary-cathedral-skate",
+        "name": "Skate Katedral",
+        "category": "fish",
+        "concept": "one top-view mythical skate with two tall folded cathedral-like ice wings made of connected arched frosted ribs, short curled tail and slate body, no face marks, compact diamond silhouette"
+      },
+      {
+        "id": "legendary-atlas-nautilus",
+        "name": "Nautilus Atlas",
+        "category": "fish",
+        "concept": "one enormous mythical spiral nautilus with a thick stone-blue shell whose coiled cross-section resembles layered miniature glacier terraces, short pearl tentacles emerging from one side, smooth eyeless mantle"
+      }
+    ],
+    "reference": "/Users/kiram/Code/dzenn/design/qyube-collectibles-v5-fish/02-fish-collection-sheet-no-eyes.png",
+    "prompt": "Use case: stylized-concept. Asset type: qyube collectible sprite sheet. Input image 1 is STYLE REFERENCE ONLY, not an edit target. Match its handmade watercolor, softly mottled painted interiors, delicate irregular charcoal contour lines and gentle tactile natural-history specimen craftsmanship. Cozy cute magical collectible art with simplified rounded shapes, restrained painterly detail readable as a small icon, never photorealistic or horror. Genuine transparent alpha background; rich paint and white/cream material INSIDE silhouettes stay opaque. No paper backdrop, ground, cast shadows, scenery, lettering, labels, frames, detached particles, or external glow halos. Absolutely ZERO EYES on all creatures: no dots, pupils, rings, eyelashes, closed eye strokes, nostrils, hollow sockets, dark head spots or replacement symbols; smooth painted eyeless heads. Objects and plants are entirely faceless. No teeth, blood, aggressive poses, human figures, glossy 3D, vector shading or pixel art. Every item is one coherent complete collectible with all attached fins/tentacles/parts visible and connected; no extra pieces. Create exactly 2 LEGENDARY collectibles in a precise 2-column by 1-row wide landscape sheet. One isolated item per cell. Each fits entirely within middle 65 percent of cell; very generous TRANSPARENT gutters separate all items. Do not overlap or cross cells. No tiny companion objects or floating effects. LEFT: one top-view mythical skate with two tall folded cathedral-like ice wings made of connected arched frosted ribs, short curled tail and slate body, no face marks, compact diamond silhouette. RIGHT: one enormous mythical spiral nautilus with a thick stone-blue shell whose coiled cross-section resembles layered miniature glacier terraces, short pearl tentacles emerging from one side, smooth eyeless mantle. Legendary must have striking unique polar-myth silhouette, majestic and charming, balanced proportions and softly painted magical material."
+  },
+  {
+    "sheet": "legendary-batch-04-v2.png",
+    "rarity": "legendary",
+    "cols": 2,
+    "rows": 1,
+    "items": [
+      {
+        "id": "legendary-snow-hydra",
+        "name": "Hydra Salju",
+        "category": "fish",
+        "concept": "one compact gentle three-headed polar sea hydra with rounded smooth eyeless closed heads on braided icy necks, one shared plump body and small webbed feet, pale sage and ivory, no teeth or aggressive pose"
+      },
+      {
+        "id": "legendary-crystal-moth",
+        "name": "Ngengat Kristal Kutub",
+        "category": "fish",
+        "concept": "one mythical polar moth with four broad asymmetrical frosted glass wings arranged in a strong snowflake-like silhouette, soft cream tiny body and short antennae, no eye markings or wing eye spots"
+      }
+    ],
+    "reference": "/Users/kiram/Code/dzenn/design/qyube-collectibles-v5-fish/02-fish-collection-sheet-no-eyes.png",
+    "prompt": "Use case: stylized-concept. Asset type: qyube collectible sprite sheet. Input image 1 is STYLE REFERENCE ONLY, not an edit target. Match its handmade watercolor, softly mottled painted interiors, delicate irregular charcoal contour lines and gentle tactile natural-history specimen craftsmanship. Cozy cute magical collectible art with simplified rounded shapes, restrained painterly detail readable as a small icon, never photorealistic or horror. Genuine transparent alpha background; rich paint and white/cream material INSIDE silhouettes stay opaque. No paper backdrop, ground, cast shadows, scenery, lettering, labels, frames, detached particles, or external glow halos. Absolutely ZERO EYES on all creatures: no dots, pupils, rings, eyelashes, closed eye strokes, nostrils, hollow sockets, dark head spots or replacement symbols; smooth painted eyeless heads. Objects and plants are entirely faceless. No teeth, blood, aggressive poses, human figures, glossy 3D, vector shading or pixel art. Every item is one coherent complete collectible with all attached fins/tentacles/parts visible and connected; no extra pieces. Create exactly 2 LEGENDARY collectibles in a precise 2-column by 1-row wide landscape sheet. One isolated item per cell. Each fits entirely within middle 65 percent of cell; very generous TRANSPARENT gutters separate all items. Do not overlap or cross cells. No tiny companion objects or floating effects. LEFT: one compact gentle three-headed polar sea hydra with rounded smooth eyeless closed heads on braided icy necks, one shared plump body and small webbed feet, pale sage and ivory, no teeth or aggressive pose. RIGHT: one mythical polar moth with four broad asymmetrical frosted glass wings arranged in a strong snowflake-like silhouette, soft cream tiny body and short antennae, no eye markings or wing eye spots. Legendary must have striking unique polar-myth silhouette, majestic and charming, balanced proportions and softly painted magical material."
+  },
+  {
+    "sheet": "legendary-batch-05-v2.png",
+    "rarity": "legendary",
+    "cols": 2,
+    "rows": 1,
+    "items": [
+      {
+        "id": "legendary-island-turtle",
+        "name": "Kura-Kura Pulau Salju",
+        "category": "fish",
+        "concept": "one plump mythical sea turtle whose rounded shell is a small snow-covered glacial island with three connected fir-like ice spires, wide swimming flippers, smooth eyeless head, subdued seafoam and cream"
+      },
+      {
+        "id": "legendary-comet-seahorse",
+        "name": "Kuda Laut Komet",
+        "category": "fish",
+        "concept": "one upright mythical seahorse with a long curled comet tail, three layered crescent silver fins and a crown of short crystal spires, dusky blue and peach watercolor, eyeless smooth head, no detached stars"
+      }
+    ],
+    "reference": "/Users/kiram/Code/dzenn/design/qyube-collectibles-v5-fish/02-fish-collection-sheet-no-eyes.png",
+    "prompt": "Use case: stylized-concept. Asset type: qyube collectible sprite sheet. Input image 1 is STYLE REFERENCE ONLY, not an edit target. Match its handmade watercolor, softly mottled painted interiors, delicate irregular charcoal contour lines and gentle tactile natural-history specimen craftsmanship. Cozy cute magical collectible art with simplified rounded shapes, restrained painterly detail readable as a small icon, never photorealistic or horror. Genuine transparent alpha background; rich paint and white/cream material INSIDE silhouettes stay opaque. No paper backdrop, ground, cast shadows, scenery, lettering, labels, frames, detached particles, or external glow halos. Absolutely ZERO EYES on all creatures: no dots, pupils, rings, eyelashes, closed eye strokes, nostrils, hollow sockets, dark head spots or replacement symbols; smooth painted eyeless heads. Objects and plants are entirely faceless. No teeth, blood, aggressive poses, human figures, glossy 3D, vector shading or pixel art. Every item is one coherent complete collectible with all attached fins/tentacles/parts visible and connected; no extra pieces. Create exactly 2 LEGENDARY collectibles in a precise 2-column by 1-row wide landscape sheet. One isolated item per cell. Each fits entirely within middle 65 percent of cell; very generous TRANSPARENT gutters separate all items. Do not overlap or cross cells. No tiny companion objects or floating effects. LEFT: one plump mythical sea turtle whose rounded shell is a small snow-covered glacial island with three connected fir-like ice spires, wide swimming flippers, smooth eyeless head, subdued seafoam and cream. RIGHT: one upright mythical seahorse with a long curled comet tail, three layered crescent silver fins and a crown of short crystal spires, dusky blue and peach watercolor, eyeless smooth head, no detached stars. Legendary must have striking unique polar-myth silhouette, majestic and charming, balanced proportions and softly painted magical material."
+  },
+  {
+    "sheet": "legendary-batch-06-v2.png",
+    "rarity": "legendary",
+    "cols": 2,
+    "rows": 1,
+    "items": [
+      {
+        "id": "legendary-abyss-bloom",
+        "name": "Bunga Palung",
+        "category": "plant",
+        "concept": "one mythical deep-sea blossom shaped like a closed chalice inside a ring of enormous curled frost petals, obsidian-teal outer petals and pearly pale center, short fused root base, magical but botanical and faceless"
+      },
+      {
+        "id": "legendary-moonbell-medusa",
+        "name": "Medusa Lonceng Bulan",
+        "category": "fish",
+        "concept": "one mythical jellyfish with a large porcelain bell canopy and an attached crescent ice crest, five thick tentacles curl like a hanging candelabra, pale turquoise lavender and ivory, no face"
+      }
+    ],
+    "reference": "/Users/kiram/Code/dzenn/design/qyube-collectibles-v5-fish/02-fish-collection-sheet-no-eyes.png",
+    "prompt": "Use case: stylized-concept. Asset type: qyube collectible sprite sheet. Input image 1 is STYLE REFERENCE ONLY, not an edit target. Match its handmade watercolor, softly mottled painted interiors, delicate irregular charcoal contour lines and gentle tactile natural-history specimen craftsmanship. Cozy cute magical collectible art with simplified rounded shapes, restrained painterly detail readable as a small icon, never photorealistic or horror. Genuine transparent alpha background; rich paint and white/cream material INSIDE silhouettes stay opaque. No paper backdrop, ground, cast shadows, scenery, lettering, labels, frames, detached particles, or external glow halos. Absolutely ZERO EYES on all creatures: no dots, pupils, rings, eyelashes, closed eye strokes, nostrils, hollow sockets, dark head spots or replacement symbols; smooth painted eyeless heads. Objects and plants are entirely faceless. No teeth, blood, aggressive poses, human figures, glossy 3D, vector shading or pixel art. Every item is one coherent complete collectible with all attached fins/tentacles/parts visible and connected; no extra pieces. Create exactly 2 LEGENDARY collectibles in a precise 2-column by 1-row wide landscape sheet. One isolated item per cell. Each fits entirely within middle 65 percent of cell; very generous TRANSPARENT gutters separate all items. Do not overlap or cross cells. No tiny companion objects or floating effects. LEFT: one mythical deep-sea blossom shaped like a closed chalice inside a ring of enormous curled frost petals, obsidian-teal outer petals and pearly pale center, short fused root base, magical but botanical and faceless. RIGHT: one mythical jellyfish with a large porcelain bell canopy and an attached crescent ice crest, five thick tentacles curl like a hanging candelabra, pale turquoise lavender and ivory, no face. Legendary must have striking unique polar-myth silhouette, majestic and charming, balanced proportions and softly painted magical material."
+  },
+  {
+    "sheet": "legendary-batch-07-v2.png",
+    "rarity": "legendary",
+    "cols": 2,
+    "rows": 1,
+    "items": [
+      {
+        "id": "legendary-dreamweaver-squid",
+        "name": "Cumi Penenun Mimpi",
+        "category": "fish",
+        "concept": "one mythical squid with an elongated folded cloak-like midnight-blue mantle and four broad ribbon tentacles braided into a loose compact knot, ivory painted runic-looking geometric patterns but no letters, smooth eyeless mantle"
+      },
+      {
+        "id": "legendary-ice-kirin",
+        "name": "Kirin Laut Es",
+        "category": "fish",
+        "concept": "one mythical polar kirin sea creature with an upright rounded horse-like neck, two coral-shaped ice antlers, seal-like round torso, four wide kelp-like fins and spiral tail, ivory sage and frosted blue, smooth eyeless face"
+      }
+    ],
+    "reference": "/Users/kiram/Code/dzenn/design/qyube-collectibles-v5-fish/02-fish-collection-sheet-no-eyes.png",
+    "prompt": "Use case: stylized-concept. Asset type: qyube collectible sprite sheet. Input image 1 is STYLE REFERENCE ONLY, not an edit target. Match its handmade watercolor, softly mottled painted interiors, delicate irregular charcoal contour lines and gentle tactile natural-history specimen craftsmanship. Cozy cute magical collectible art with simplified rounded shapes, restrained painterly detail readable as a small icon, never photorealistic or horror. Genuine transparent alpha background; rich paint and white/cream material INSIDE silhouettes stay opaque. No paper backdrop, ground, cast shadows, scenery, lettering, labels, frames, detached particles, or external glow halos. Absolutely ZERO EYES on all creatures: no dots, pupils, rings, eyelashes, closed eye strokes, nostrils, hollow sockets, dark head spots or replacement symbols; smooth painted eyeless heads. Objects and plants are entirely faceless. No teeth, blood, aggressive poses, human figures, glossy 3D, vector shading or pixel art. Every item is one coherent complete collectible with all attached fins/tentacles/parts visible and connected; no extra pieces. Create exactly 2 LEGENDARY collectibles in a precise 2-column by 1-row wide landscape sheet. One isolated item per cell. Each fits entirely within middle 65 percent of cell; very generous TRANSPARENT gutters separate all items. Do not overlap or cross cells. No tiny companion objects or floating effects. LEFT: one mythical squid with an elongated folded cloak-like midnight-blue mantle and four broad ribbon tentacles braided into a loose compact knot, ivory painted runic-looking geometric patterns but no letters, smooth eyeless mantle. RIGHT: one mythical polar kirin sea creature with an upright rounded horse-like neck, two coral-shaped ice antlers, seal-like round torso, four wide kelp-like fins and spiral tail, ivory sage and frosted blue, smooth eyeless face. Legendary must have striking unique polar-myth silhouette, majestic and charming, balanced proportions and softly painted magical material."
+  },
+  {
+    "sheet": "legendary-batch-08-v2.png",
+    "rarity": "legendary",
+    "cols": 2,
+    "rows": 1,
+    "items": [
+      {
+        "id": "legendary-snowforge-crab",
+        "name": "Kepiting Tungku Salju",
+        "category": "fish",
+        "concept": "one compact ancient crab guardian built from rounded layered glacier boulders, two huge curved mitt-like claws, six short sturdy legs, small amber crystal core sealed into its back, no face or eyes or mouth"
+      },
+      {
+        "id": "legendary-wreck-hermit",
+        "name": "Penjaga Kapal Karam",
+        "category": "fish",
+        "concept": "one mythical large hermit crab carrying a single compact ancient miniature wooden ship hull fused as its shell, curled ice mast like horn and broad blue claws, smooth faceless front, cozy weathered brown and seafoam"
+      }
+    ],
+    "reference": "/Users/kiram/Code/dzenn/design/qyube-collectibles-v5-fish/02-fish-collection-sheet-no-eyes.png",
+    "prompt": "Use case: stylized-concept. Asset type: qyube collectible sprite sheet. Input image 1 is STYLE REFERENCE ONLY, not an edit target. Match its handmade watercolor, softly mottled painted interiors, delicate irregular charcoal contour lines and gentle tactile natural-history specimen craftsmanship. Cozy cute magical collectible art with simplified rounded shapes, restrained painterly detail readable as a small icon, never photorealistic or horror. Genuine transparent alpha background; rich paint and white/cream material INSIDE silhouettes stay opaque. No paper backdrop, ground, cast shadows, scenery, lettering, labels, frames, detached particles, or external glow halos. Absolutely ZERO EYES on all creatures: no dots, pupils, rings, eyelashes, closed eye strokes, nostrils, hollow sockets, dark head spots or replacement symbols; smooth painted eyeless heads. Objects and plants are entirely faceless. No teeth, blood, aggressive poses, human figures, glossy 3D, vector shading or pixel art. Every item is one coherent complete collectible with all attached fins/tentacles/parts visible and connected; no extra pieces. Create exactly 2 LEGENDARY collectibles in a precise 2-column by 1-row wide landscape sheet. One isolated item per cell. Each fits entirely within middle 65 percent of cell; very generous TRANSPARENT gutters separate all items. Do not overlap or cross cells. No tiny companion objects or floating effects. LEFT: one compact ancient crab guardian built from rounded layered glacier boulders, two huge curved mitt-like claws, six short sturdy legs, small amber crystal core sealed into its back, no face or eyes or mouth. RIGHT: one mythical large hermit crab carrying a single compact ancient miniature wooden ship hull fused as its shell, curled ice mast like horn and broad blue claws, smooth faceless front, cozy weathered brown and seafoam. Legendary must have striking unique polar-myth silhouette, majestic and charming, balanced proportions and softly painted magical material."
+  },
+  {
+    "sheet": "legendary-batch-09-v2.png",
+    "rarity": "legendary",
+    "cols": 2,
+    "rows": 1,
+    "items": [
+      {
+        "id": "legendary-blizzard-egg",
+        "name": "Telur Badai Salju",
+        "category": "artifact",
+        "concept": "one large mythical asymmetrical egg of pearl-white frosted shell, cracked narrow window with a painted swirling navy snowstorm sealed INSIDE, connected ice ridges around base, no creature inside or separate pedestal"
+      },
+      {
+        "id": "legendary-frozen-sea-crown",
+        "name": "Mahkota Laut Beku",
+        "category": "artifact",
+        "concept": "one ancient crown with five rising asymmetrical glacier spires and a braided shell band, antique silver-gray metal and pale turquoise ice, central small dark blue stone, no floating sparkles"
+      }
+    ],
+    "reference": "/Users/kiram/Code/dzenn/design/qyube-collectibles-v5-fish/02-fish-collection-sheet-no-eyes.png",
+    "prompt": "Use case: stylized-concept. Asset type: qyube collectible sprite sheet. Input image 1 is STYLE REFERENCE ONLY, not an edit target. Match its handmade watercolor, softly mottled painted interiors, delicate irregular charcoal contour lines and gentle tactile natural-history specimen craftsmanship. Cozy cute magical collectible art with simplified rounded shapes, restrained painterly detail readable as a small icon, never photorealistic or horror. Genuine transparent alpha background; rich paint and white/cream material INSIDE silhouettes stay opaque. No paper backdrop, ground, cast shadows, scenery, lettering, labels, frames, detached particles, or external glow halos. Absolutely ZERO EYES on all creatures: no dots, pupils, rings, eyelashes, closed eye strokes, nostrils, hollow sockets, dark head spots or replacement symbols; smooth painted eyeless heads. Objects and plants are entirely faceless. No teeth, blood, aggressive poses, human figures, glossy 3D, vector shading or pixel art. Every item is one coherent complete collectible with all attached fins/tentacles/parts visible and connected; no extra pieces. Create exactly 2 LEGENDARY collectibles in a precise 2-column by 1-row wide landscape sheet. One isolated item per cell. Each fits entirely within middle 65 percent of cell; very generous TRANSPARENT gutters separate all items. Do not overlap or cross cells. No tiny companion objects or floating effects. LEFT: one large mythical asymmetrical egg of pearl-white frosted shell, cracked narrow window with a painted swirling navy snowstorm sealed INSIDE, connected ice ridges around base, no creature inside or separate pedestal. RIGHT: one ancient crown with five rising asymmetrical glacier spires and a braided shell band, antique silver-gray metal and pale turquoise ice, central small dark blue stone, no floating sparkles. Legendary must have striking unique polar-myth silhouette, majestic and charming, balanced proportions and softly painted magical material."
+  },
+  {
+    "sheet": "legendary-batch-10-v2.png",
+    "rarity": "legendary",
+    "cols": 2,
+    "rows": 1,
+    "items": [
+      {
+        "id": "legendary-winter-oracle-compass",
+        "name": "Kompas Peramal Musim",
+        "category": "artifact",
+        "concept": "one ancient polar oracle compass like a thick clam-shaped medallion with two offset nested ice rings and one oversized crystal needle, tarnished bronze slate and ivory, no text or numbers"
+      },
+      {
+        "id": "legendary-tide-moon-gong",
+        "name": "Gong Bulan Pasang",
+        "category": "artifact",
+        "concept": "one crescent-shaped antique bronze gong within its own compact fused icy arch frame, single round moonlike metal disk and attached tiny clapper, ivory teal patina and pale gold, no detached stand elements"
+      }
+    ],
+    "reference": "/Users/kiram/Code/dzenn/design/qyube-collectibles-v5-fish/02-fish-collection-sheet-no-eyes.png",
+    "prompt": "Use case: stylized-concept. Asset type: qyube collectible sprite sheet. Input image 1 is STYLE REFERENCE ONLY, not an edit target. Match its handmade watercolor, softly mottled painted interiors, delicate irregular charcoal contour lines and gentle tactile natural-history specimen craftsmanship. Cozy cute magical collectible art with simplified rounded shapes, restrained painterly detail readable as a small icon, never photorealistic or horror. Genuine transparent alpha background; rich paint and white/cream material INSIDE silhouettes stay opaque. No paper backdrop, ground, cast shadows, scenery, lettering, labels, frames, detached particles, or external glow halos. Absolutely ZERO EYES on all creatures: no dots, pupils, rings, eyelashes, closed eye strokes, nostrils, hollow sockets, dark head spots or replacement symbols; smooth painted eyeless heads. Objects and plants are entirely faceless. No teeth, blood, aggressive poses, human figures, glossy 3D, vector shading or pixel art. Every item is one coherent complete collectible with all attached fins/tentacles/parts visible and connected; no extra pieces. Create exactly 2 LEGENDARY collectibles in a precise 2-column by 1-row wide landscape sheet. One isolated item per cell. Each fits entirely within middle 65 percent of cell; very generous TRANSPARENT gutters separate all items. Do not overlap or cross cells. No tiny companion objects or floating effects. LEFT: one ancient polar oracle compass like a thick clam-shaped medallion with two offset nested ice rings and one oversized crystal needle, tarnished bronze slate and ivory, no text or numbers. RIGHT: one crescent-shaped antique bronze gong within its own compact fused icy arch frame, single round moonlike metal disk and attached tiny clapper, ivory teal patina and pale gold, no detached stand elements. Legendary must have striking unique polar-myth silhouette, majestic and charming, balanced proportions and softly painted magical material."
+  },
+  {
+    "sheet": "legendary-batch-11-v2.png",
+    "rarity": "legendary",
+    "cols": 2,
+    "rows": 1,
+    "items": [
+      {
+        "id": "legendary-memory-lighthouse",
+        "name": "Mercusuar Kenangan",
+        "category": "artifact",
+        "concept": "one tiny mythical lighthouse relic grown from twisted frosted sea glass, rounded tapering spiral tower with amber window sealed inside and a shell-roof cap, compact artifact without island or sea scenery"
+      },
+      {
+        "id": "legendary-aurora-harp",
+        "name": "Harpa Aurora",
+        "category": "artifact",
+        "concept": "one ancient harp made of two curved narwhal-like ivory branches joined by taut multicolored frost threads, compact crescent frame, muted peach mint and lavender strings, no creature or face"
+      }
+    ],
+    "reference": "/Users/kiram/Code/dzenn/design/qyube-collectibles-v5-fish/02-fish-collection-sheet-no-eyes.png",
+    "prompt": "Use case: stylized-concept. Asset type: qyube collectible sprite sheet. Input image 1 is STYLE REFERENCE ONLY, not an edit target. Match its handmade watercolor, softly mottled painted interiors, delicate irregular charcoal contour lines and gentle tactile natural-history specimen craftsmanship. Cozy cute magical collectible art with simplified rounded shapes, restrained painterly detail readable as a small icon, never photorealistic or horror. Genuine transparent alpha background; rich paint and white/cream material INSIDE silhouettes stay opaque. No paper backdrop, ground, cast shadows, scenery, lettering, labels, frames, detached particles, or external glow halos. Absolutely ZERO EYES on all creatures: no dots, pupils, rings, eyelashes, closed eye strokes, nostrils, hollow sockets, dark head spots or replacement symbols; smooth painted eyeless heads. Objects and plants are entirely faceless. No teeth, blood, aggressive poses, human figures, glossy 3D, vector shading or pixel art. Every item is one coherent complete collectible with all attached fins/tentacles/parts visible and connected; no extra pieces. Create exactly 2 LEGENDARY collectibles in a precise 2-column by 1-row wide landscape sheet. One isolated item per cell. Each fits entirely within middle 65 percent of cell; very generous TRANSPARENT gutters separate all items. Do not overlap or cross cells. No tiny companion objects or floating effects. LEFT: one tiny mythical lighthouse relic grown from twisted frosted sea glass, rounded tapering spiral tower with amber window sealed inside and a shell-roof cap, compact artifact without island or sea scenery. RIGHT: one ancient harp made of two curved narwhal-like ivory branches joined by taut multicolored frost threads, compact crescent frame, muted peach mint and lavender strings, no creature or face. Legendary must have striking unique polar-myth silhouette, majestic and charming, balanced proportions and softly painted magical material."
+  },
+  {
+    "sheet": "legendary-batch-12-v2.png",
+    "rarity": "legendary",
+    "cols": 2,
+    "rows": 1,
+    "items": [
+      {
+        "id": "legendary-storm-trident",
+        "name": "Trisula Badai",
+        "category": "artifact",
+        "concept": "one short ancient trident relic with three unequal branching ice tines and a chunky driftwood grip, diagonal compact composition, pale slate ice and weathered warm wood, no magical particles"
+      },
+      {
+        "id": "legendary-polestar-key",
+        "name": "Kunci Bintang Kutub",
+        "category": "artifact",
+        "concept": "one oversized ancient key with a six-point ice-star bow and a stepped coral-like bit, weathered pale brass and frosty blue, compact diagonal silhouette with one connected carved ribbon loop"
+      }
+    ],
+    "reference": "/Users/kiram/Code/dzenn/design/qyube-collectibles-v5-fish/02-fish-collection-sheet-no-eyes.png",
+    "prompt": "Use case: stylized-concept. Asset type: qyube collectible sprite sheet. Input image 1 is STYLE REFERENCE ONLY, not an edit target. Match its handmade watercolor, softly mottled painted interiors, delicate irregular charcoal contour lines and gentle tactile natural-history specimen craftsmanship. Cozy cute magical collectible art with simplified rounded shapes, restrained painterly detail readable as a small icon, never photorealistic or horror. Genuine transparent alpha background; rich paint and white/cream material INSIDE silhouettes stay opaque. No paper backdrop, ground, cast shadows, scenery, lettering, labels, frames, detached particles, or external glow halos. Absolutely ZERO EYES on all creatures: no dots, pupils, rings, eyelashes, closed eye strokes, nostrils, hollow sockets, dark head spots or replacement symbols; smooth painted eyeless heads. Objects and plants are entirely faceless. No teeth, blood, aggressive poses, human figures, glossy 3D, vector shading or pixel art. Every item is one coherent complete collectible with all attached fins/tentacles/parts visible and connected; no extra pieces. Create exactly 2 LEGENDARY collectibles in a precise 2-column by 1-row wide landscape sheet. One isolated item per cell. Each fits entirely within middle 65 percent of cell; very generous TRANSPARENT gutters separate all items. Do not overlap or cross cells. No tiny companion objects or floating effects. LEFT: one short ancient trident relic with three unequal branching ice tines and a chunky driftwood grip, diagonal compact composition, pale slate ice and weathered warm wood, no magical particles. RIGHT: one oversized ancient key with a six-point ice-star bow and a stepped coral-like bit, weathered pale brass and frosty blue, compact diagonal silhouette with one connected carved ribbon loop. Legendary must have striking unique polar-myth silhouette, majestic and charming, balanced proportions and softly painted magical material."
+  },
+  {
+    "sheet": "legendary-batch-13-v2.png",
+    "rarity": "legendary",
+    "cols": 2,
+    "rows": 1,
+    "items": [
+      {
+        "id": "legendary-starlight-lantern",
+        "name": "Lentera Cahaya Bintang",
+        "category": "artifact",
+        "concept": "one squat octagonal ancient nautical lantern made of dark teal brass with a single softly painted warm star-shaped crystal trapped inside opaque frosted glass, attached handle, no outside halo"
+      },
+      {
+        "id": "legendary-glacier-sailing-ship",
+        "name": "Kapal Layar Gletser",
+        "category": "artifact",
+        "concept": "one small mythical ancient ship with a smooth whale-bone-like ivory hull, two curved pale blue ice sails resembling folded feathers, one short mast, no water or sea scenery, compact side-view vessel"
+      }
+    ],
+    "reference": "/Users/kiram/Code/dzenn/design/qyube-collectibles-v5-fish/02-fish-collection-sheet-no-eyes.png",
+    "prompt": "Use case: stylized-concept. Asset type: qyube collectible sprite sheet. Input image 1 is STYLE REFERENCE ONLY, not an edit target. Match its handmade watercolor, softly mottled painted interiors, delicate irregular charcoal contour lines and gentle tactile natural-history specimen craftsmanship. Cozy cute magical collectible art with simplified rounded shapes, restrained painterly detail readable as a small icon, never photorealistic or horror. Genuine transparent alpha background; rich paint and white/cream material INSIDE silhouettes stay opaque. No paper backdrop, ground, cast shadows, scenery, lettering, labels, frames, detached particles, or external glow halos. Absolutely ZERO EYES on all creatures: no dots, pupils, rings, eyelashes, closed eye strokes, nostrils, hollow sockets, dark head spots or replacement symbols; smooth painted eyeless heads. Objects and plants are entirely faceless. No teeth, blood, aggressive poses, human figures, glossy 3D, vector shading or pixel art. Every item is one coherent complete collectible with all attached fins/tentacles/parts visible and connected; no extra pieces. Create exactly 2 LEGENDARY collectibles in a precise 2-column by 1-row wide landscape sheet. One isolated item per cell. Each fits entirely within middle 65 percent of cell; very generous TRANSPARENT gutters separate all items. Do not overlap or cross cells. No tiny companion objects or floating effects. LEFT: one squat octagonal ancient nautical lantern made of dark teal brass with a single softly painted warm star-shaped crystal trapped inside opaque frosted glass, attached handle, no outside halo. RIGHT: one small mythical ancient ship with a smooth whale-bone-like ivory hull, two curved pale blue ice sails resembling folded feathers, one short mast, no water or sea scenery, compact side-view vessel. Legendary must have striking unique polar-myth silhouette, majestic and charming, balanced proportions and softly painted magical material."
+  },
+  {
+    "sheet": "legendary-batch-14-v2.png",
+    "rarity": "legendary",
+    "cols": 2,
+    "rows": 1,
+    "items": [
+      {
+        "id": "legendary-snowglass-hourglass",
+        "name": "Jam Pasir Kaca Salju",
+        "category": "artifact",
+        "concept": "one squat hourglass artifact framed by two curved frost-encrusted antler-like supports, thick pale aqua glass containing white snow grains and tiny navy cloud inside top chamber, one connected compact object"
+      },
+      {
+        "id": "legendary-frost-archive",
+        "name": "Arsip Embun Beku",
+        "category": "artifact",
+        "concept": "one thick ancient book artifact clasped shut with a scalloped shell clasp, chunky pale ivory pages and sea-blue leather cover edged by attached ice fronds, no lettering symbols or face"
+      }
+    ],
+    "reference": "/Users/kiram/Code/dzenn/design/qyube-collectibles-v5-fish/02-fish-collection-sheet-no-eyes.png",
+    "prompt": "Use case: stylized-concept. Asset type: qyube collectible sprite sheet. Input image 1 is STYLE REFERENCE ONLY, not an edit target. Match its handmade watercolor, softly mottled painted interiors, delicate irregular charcoal contour lines and gentle tactile natural-history specimen craftsmanship. Cozy cute magical collectible art with simplified rounded shapes, restrained painterly detail readable as a small icon, never photorealistic or horror. Genuine transparent alpha background; rich paint and white/cream material INSIDE silhouettes stay opaque. No paper backdrop, ground, cast shadows, scenery, lettering, labels, frames, detached particles, or external glow halos. Absolutely ZERO EYES on all creatures: no dots, pupils, rings, eyelashes, closed eye strokes, nostrils, hollow sockets, dark head spots or replacement symbols; smooth painted eyeless heads. Objects and plants are entirely faceless. No teeth, blood, aggressive poses, human figures, glossy 3D, vector shading or pixel art. Every item is one coherent complete collectible with all attached fins/tentacles/parts visible and connected; no extra pieces. Create exactly 2 LEGENDARY collectibles in a precise 2-column by 1-row wide landscape sheet. One isolated item per cell. Each fits entirely within middle 65 percent of cell; very generous TRANSPARENT gutters separate all items. Do not overlap or cross cells. No tiny companion objects or floating effects. LEFT: one squat hourglass artifact framed by two curved frost-encrusted antler-like supports, thick pale aqua glass containing white snow grains and tiny navy cloud inside top chamber, one connected compact object. RIGHT: one thick ancient book artifact clasped shut with a scalloped shell clasp, chunky pale ivory pages and sea-blue leather cover edged by attached ice fronds, no lettering symbols or face. Legendary must have striking unique polar-myth silhouette, majestic and charming, balanced proportions and softly painted magical material."
+  },
+  {
+    "sheet": "legendary-batch-15-v2.png",
+    "rarity": "legendary",
+    "cols": 2,
+    "rows": 1,
+    "items": [
+      {
+        "id": "legendary-tide-astrolabe",
+        "name": "Astrolab Pasang",
+        "category": "artifact",
+        "concept": "one compact ancient astronomical instrument of three interlocking asymmetric frosted bronze rings surrounding a pearly moon disk, fused angular ice bracket at base, no text numbers or detached stars"
+      },
+      {
+        "id": "legendary-winter-music-box",
+        "name": "Kotak Musik Musim Dingin",
+        "category": "artifact",
+        "concept": "one open tiny antique hexagonal music box with a faceted sapphire ice flower fixed inside and a shell-shaped lid, warm weathered walnut and tarnished silver, short winding key attached, no ballerina or face"
+      }
+    ],
+    "reference": "/Users/kiram/Code/dzenn/design/qyube-collectibles-v5-fish/02-fish-collection-sheet-no-eyes.png",
+    "prompt": "Use case: stylized-concept. Asset type: qyube collectible sprite sheet. Input image 1 is STYLE REFERENCE ONLY, not an edit target. Match its handmade watercolor, softly mottled painted interiors, delicate irregular charcoal contour lines and gentle tactile natural-history specimen craftsmanship. Cozy cute magical collectible art with simplified rounded shapes, restrained painterly detail readable as a small icon, never photorealistic or horror. Genuine transparent alpha background; rich paint and white/cream material INSIDE silhouettes stay opaque. No paper backdrop, ground, cast shadows, scenery, lettering, labels, frames, detached particles, or external glow halos. Absolutely ZERO EYES on all creatures: no dots, pupils, rings, eyelashes, closed eye strokes, nostrils, hollow sockets, dark head spots or replacement symbols; smooth painted eyeless heads. Objects and plants are entirely faceless. No teeth, blood, aggressive poses, human figures, glossy 3D, vector shading or pixel art. Every item is one coherent complete collectible with all attached fins/tentacles/parts visible and connected; no extra pieces. Create exactly 2 LEGENDARY collectibles in a precise 2-column by 1-row wide landscape sheet. One isolated item per cell. Each fits entirely within middle 65 percent of cell; very generous TRANSPARENT gutters separate all items. Do not overlap or cross cells. No tiny companion objects or floating effects. LEFT: one compact ancient astronomical instrument of three interlocking asymmetric frosted bronze rings surrounding a pearly moon disk, fused angular ice bracket at base, no text numbers or detached stars. RIGHT: one open tiny antique hexagonal music box with a faceted sapphire ice flower fixed inside and a shell-shaped lid, warm weathered walnut and tarnished silver, short winding key attached, no ballerina or face. Legendary must have striking unique polar-myth silhouette, majestic and charming, balanced proportions and softly painted magical material."
+  }
+]
