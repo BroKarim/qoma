@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "qyube-menu-sign-out.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

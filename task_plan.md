@@ -1612,3 +1612,26 @@ Perbaikan dan temuan lanjutan:
 - Perbaikan di `Qoma/UI/Components/QyubeScrollIndicator.swift`: probe kini memanggil coordinator pada `viewWillMove(toWindow:)`, `viewDidMoveToWindow()`, dan `viewDidMoveToSuperview()`. `attach` mengonfigurasi scroll view secara sinkron jika ancestor sudah tersedia dan memakai satu fallback async bila hierarchy belum lengkap.
 - Konfigurasi dipusatkan pada `configure(_:)`, hanya mengubah style/flags yang berbeda. Jika ada perubahan, helper memanggil `tile()`, menandai layout, menjalankan `layoutSubtreeIfNeeded()`, lalu `reflectScrolledClipView(_:)`; observer bounds untuk indikator custom tetap dipasang seperti sebelumnya.
 - Perubahan berhasil diverifikasi dengan `swiftc -frontend -parse` dan `git diff --check`. Pengguna mengonfirmasi gejala sudah hilang. Build penuh dan QA di beberapa pengaturan scrollbar macOS belum dijalankan.
+
+
+### Rencana popover menu header — 23 Oktober 2026
+
+- Pengguna menyetujui branch `codex/settings-menu-popover`, dibuat dari `codex/remove-dead-qoma-code`.
+- Menekan gear membuka popover standar macOS yang menempel ke tombol; isi memakai gaya cozy Qyube/Arctic dengan latar porcelain, border tinta hand-drawn, hover lembut, dan ilustrasi watercolor Concept A.
+- Isi dan urutan: Settings, Manage subscription, Sign out, Help, Give feedback, lalu Quit. Settings membuka halaman pengaturan yang sudah ada. Draft sesi yang sedang diedit/dibuat harus dipertahankan ketika berpindah ke Settings dan saat pengguna kembali.
+- Manage subscription, Sign out, Help, dan Give feedback tetap terlihat aktif, tetapi untuk tahap ini tidak menjalankan aksi. Menekannya tidak menutup popover.
+- Quit meminta aplikasi berhenti tanpa dialog konfirmasi, termasuk saat sesi aktif. Sesi tidak dihentikan oleh aksi Quit; state sesi mengikuti penyimpanan dan pemulihan existing ketika aplikasi dijalankan lagi.
+- Ikon Concept A dipilih, bukan Concept B. Enam ikon individual diintegrasikan sebagai image sets `QyubeMenuSettings`, `QyubeMenuSubscription`, `QyubeMenuSignOut`, `QyubeMenuHelp`, `QyubeMenuFeedback`, dan `QyubeMenuQuit`.
+
+### Implementasi popover menu header — 24 Oktober 2026
+
+- `QyubeCompactHeader` kini menampilkan popover pada tombol gear. Panel selebar 206pt memakai warna terang Qyube, sudut membulat dan border tinta, dengan divider hand-drawn serta row watercolor. Hover memberi highlight halus; item no-op tetap tampak seperti kontrol aktif dan tidak menutup popover.
+- Settings berpindah ke halaman Settings. Form/draft New Session disimpan dalam state `QyubeHomeView`, disembunyikan sementara, lalu dipulihkan ketika pengguna menekan judul `qyube` untuk kembali ke Today. Navigasi ke Analytics/Catalog atau keluar dari form membatalkan pemulihan itu.
+- Quit memakai jalur khusus pada `AppDelegate` untuk melewati konfirmasi sesi aktif. Aksi ini tidak memanggil stop/finalize sesi; pemulihan sesi setelah relaunch bergantung pada state persistence existing dan belum diverifikasi lewat runtime.
+- Enam aset transparan Concept A disimpan sebagai image sets pada `Qoma/Assets.xcassets`. Prompt dan pendekatan produksi ikon individual dicatat di `output/imagegen/settings-menu-icons-v1/prompts.md`.
+- Verifikasi yang dilakukan: Swift frontend parse, validasi JSON enam image sets, serta `git diff --check`. Build dan QA interaksi popover, navigasi draft, serta Quit/relaunch belum dijalankan.
+
+### Penyempurnaan ukuran popover menu — 24 Oktober 2026
+
+- Setelah review visual, ukuran popover diperkecil dari 246pt menjadi 206pt. Ini sekitar dua pertiga lebar panel utama 310pt; lebar sepertiga (sekitar 103pt) tidak memberi ruang cukup untuk enam label dan ikon yang tetap terbaca.
+- Tinggi isi ikut dipadatkan dengan row 34pt, ikon 25pt, padding lebih kecil, dan header sedikit lebih ringkas. Label tetap utuh dan terbaca.

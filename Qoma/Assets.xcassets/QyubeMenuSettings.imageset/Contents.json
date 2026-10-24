@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "qyube-menu-settings.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

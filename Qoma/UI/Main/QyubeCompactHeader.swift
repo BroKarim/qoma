@@ -5,6 +5,8 @@ struct QyubeCompactHeader: View {
     let onAnalytics: () -> Void
     let onCatalog: () -> Void
     let onSettings: () -> Void
+    let onQuit: () -> Void
+    @State private var isSettingsPopoverPresented = false
 
     var body: some View {
         QyubeInkHeader(title: "qyube", titleAction: self.onToday) {
@@ -17,10 +19,25 @@ struct QyubeCompactHeader: View {
                     .labelStyle(.iconOnly)
                     .frame(width: 24, height: 30)
                     .help("Catalog")
-                Button("Settings", systemImage: "gearshape", action: self.onSettings)
+                Button("Settings", systemImage: "gearshape") {
+                    self.isSettingsPopoverPresented.toggle()
+                }
                     .labelStyle(.iconOnly)
                     .frame(width: 24, height: 30)
-                    .help("Settings")
+                    .help("More options")
+                    .popover(isPresented: self.$isSettingsPopoverPresented, attachmentAnchor: .rect(.bounds), arrowEdge: .top) {
+                        QyubeSettingsMenuPopover(
+                            onSettings: {
+                                self.isSettingsPopoverPresented = false
+                                self.onSettings()
+                            },
+                            onQuit: {
+                                self.isSettingsPopoverPresented = false
+                                self.onQuit()
+                            })
+                            .presentationBackground(.clear)
+                            .preferredColorScheme(.light)
+                    }
             }
             .buttonStyle(.plain)
             .foregroundStyle(Color.qyubeMenuInk)

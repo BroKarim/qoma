@@ -56,6 +56,7 @@ struct QyubeHomeView: View {
     @ObservedObject var sessionCoordinator: SessionCoordinator
     let onSessionStarted: () -> Void
     let onBackToSession: () -> Void
+    let onQuit: () -> Void
 
     @AppStorage(AppConstants.AnalyticsSettings.analyticsConsentDecidedKey)
     private var analyticsConsentDecided = false
@@ -64,6 +65,7 @@ struct QyubeHomeView: View {
     @State private var isAnalyticsConsentPresented = false
     @State private var isSessionFormPresented = false
     @State private var isEditingActiveSession = false
+    @State private var shouldRestoreSessionFormAfterSettings = false
     @State private var selectedSession: FocusSession?
     @State private var sessionDraft = SessionDraft(plannedMinutes: 25, policy: .timerOnly)
 
@@ -76,10 +78,28 @@ struct QyubeHomeView: View {
     var body: some View {
         VStack(spacing: 0) {
             QyubeCompactHeader(
-                onToday: { self.isSessionFormPresented = false; self.navigation.page = nil },
-                onAnalytics: { self.isSessionFormPresented = false; self.navigation.page = .analytics },
-                onCatalog: { self.isSessionFormPresented = false; self.navigation.page = .catalog },
-                onSettings: { self.isSessionFormPresented = false; self.navigation.page = .settings })
+                onToday: {
+                    self.navigation.page = nil
+                    self.isSessionFormPresented = self.shouldRestoreSessionFormAfterSettings
+                    self.shouldRestoreSessionFormAfterSettings = false
+                },
+                onAnalytics: {
+                    self.shouldRestoreSessionFormAfterSettings = false
+                    self.isSessionFormPresented = false
+                    self.navigation.page = .analytics
+                },
+                onCatalog: {
+                    self.shouldRestoreSessionFormAfterSettings = false
+                    self.isSessionFormPresented = false
+                    self.navigation.page = .catalog
+                },
+                onSettings: {
+                    self.shouldRestoreSessionFormAfterSettings =
+                        self.isSessionFormPresented || self.shouldRestoreSessionFormAfterSettings
+                    self.isSessionFormPresented = false
+                    self.navigation.page = .settings
+                },
+                onQuit: self.onQuit)
             self.detail
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .background(Color.qyubeBackground)
@@ -104,6 +124,7 @@ struct QyubeHomeView: View {
         .onReceive(self.navigation.$todayRequest.compactMap { $0 }) { _ in
             self.isSessionFormPresented = false
             self.isEditingActiveSession = false
+            self.shouldRestoreSessionFormAfterSettings = false
             self.navigation.page = nil
             self.navigation.todayRequest = nil
         }
@@ -139,15 +160,18 @@ struct QyubeHomeView: View {
                 onBack: {
                     self.isSessionFormPresented = false
                     self.isEditingActiveSession = false
+                    self.shouldRestoreSessionFormAfterSettings = false
                 },
                 onSaved: {
                     self.isSessionFormPresented = false
                     self.isEditingActiveSession = false
+                    self.shouldRestoreSessionFormAfterSettings = false
                     self.navigation.refresh()
                 },
                 onStarted: {
                     self.isSessionFormPresented = false
                     self.isEditingActiveSession = false
+                    self.shouldRestoreSessionFormAfterSettings = false
                     self.selectedSession = nil
                     self.navigation.page = nil
                     self.onSessionStarted()

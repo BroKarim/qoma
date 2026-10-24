@@ -4,6 +4,12 @@ import SwiftUI
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var coordinator: QyubeAppCoordinator?
     private let updaterManager = UpdaterManager.shared
+    private var quitWithoutConfirmationRequested = false
+
+    func quitWithoutConfirmation() {
+        quitWithoutConfirmationRequested = true
+        NSApp.terminate(nil)
+    }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         #if DEBUG
@@ -53,6 +59,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        guard !quitWithoutConfirmationRequested else { return .terminateNow }
         guard let session = coordinator?.sessionCoordinator.snapshot,
               session.status == .active || session.status == .paused else { return .terminateNow }
         let alert = NSAlert()

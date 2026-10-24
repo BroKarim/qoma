@@ -68,7 +68,8 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
             navigation: navigation,
             sessionCoordinator: sessionCoordinator,
             onSessionStarted: { [weak self] in self?.homeWindowController?.close() },
-            onBackToSession: { [weak self] in self?.returnToSession() })
+            onBackToSession: { [weak self] in self?.returnToSession() },
+            onQuit: { [weak self] in self?.quitImmediately() })
         let window = QyubeHomeWindow(
             contentRect: NSRect(x: 0, y: 0, width: 310, height: 510),
             styleMask: [.borderless],
@@ -119,6 +120,10 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
         } else {
             restoreTimerPanel()
         }
+    }
+
+    private func quitImmediately() {
+        (NSApp.delegate as? AppDelegate)?.quitWithoutConfirmation()
     }
 
     // MARK: - Private
