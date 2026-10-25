@@ -10,6 +10,9 @@ export default function AuthPage() {
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState("")
   const { data: session } = authClient.useSession()
+  const requestId = typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("request")
+  const destination = requestId && /^[a-f0-9-]{36}$/i.test(requestId)
+    ? `/auth/complete?request=${encodeURIComponent(requestId)}` : "/account"
 
   async function requestCode(event: FormEvent) {
     event.preventDefault()
@@ -32,7 +35,7 @@ export default function AuthPage() {
     try {
       const { error } = await authClient.signIn.emailOtp({ email, otp })
       if (error) throw error
-      window.location.assign("/account")
+      window.location.assign(destination)
     } catch {
       setMessage("That code is invalid or expired.")
     } finally { setBusy(false) }
@@ -41,10 +44,10 @@ export default function AuthPage() {
   return <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-5 px-6 text-black">
     <h1 className="text-3xl font-semibold">Sign in to Qyube</h1>
     <p>Sign in to start your free seven-day trial. No card is needed.</p>
-    {session ? <a href="/account" className="underline">Continue to account</a> : <>
+    {session ? <a href={destination} className="underline">Continue to Qyube</a> : <>
       <button className="rounded-lg border p-3" disabled={busy} onClick={async () => {
         setBusy(true)
-        const { error } = await authClient.signIn.social({ provider: "google", callbackURL: "/account" })
+        const { error } = await authClient.signIn.social({ provider: "google", callbackURL: destination })
         if (error) { setBusy(false); setMessage("Google sign-in is unavailable.") }
       }}>Continue with Google</button>
       <form className="flex flex-col gap-3" onSubmit={sent ? verifyCode : requestCode}>
