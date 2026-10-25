@@ -1635,3 +1635,378 @@ Perbaikan dan temuan lanjutan:
 
 - Setelah review visual, ukuran popover diperkecil dari 246pt menjadi 206pt. Ini sekitar dua pertiga lebar panel utama 310pt; lebar sepertiga (sekitar 103pt) tidak memberi ruang cukup untuk enam label dan ikon yang tetap terbaca.
 - Tinggi isi ikut dipadatkan dengan row 34pt, ikon 25pt, padding lebih kecil, dan header sedikit lebih ringkas. Label tetap utuh dan terbaca.
+
+## Roadmap akun, trial, entitlement, dan pembayaran global — 25 Oktober 2026
+
+**Status: perencanaan saja; belum ada implementasi auth/backend/billing pada bagian ini.** Bagian ini menjadi keputusan terbaru bila bertentangan dengan catatan lama tentang Stripe, Xendit sebagai MVP, Apple login, kartu wajib untuk trial, atau trial dimulai saat sesi pertama. Seluruh bagian lama tetap dipertahankan sebagai riwayat. Contoh SQL, Swift, TypeScript, nama file baru, serta endpoint di bawah adalah rancangan kontrak untuk agent implementasi, bukan API yang sudah tersedia atau kode siap salin tanpa verifikasi versi SDK.
+
+### A. Keputusan produk dan layanan
+
+| Area | Keputusan terbaru |
+|---|---|
+| Distribusi | macOS melalui website, signing Developer ID dan notarization; update melalui jalur Sparkle existing. Tidak memakai StoreKit untuk MVP Mac. |
+| Pembayaran | Polar sebagai merchant of record MVP; Xendit setelah MVP. App hanya mengenal API entitlement Qyube. |
+| Login | Better Auth; Google dan email OTP tanpa password. Tidak ada Apple login. Identitas provider ditautkan ke satu user ID internal. |
+| Email app | Resend untuk login OTP dan email transaksional aplikasi, dari domain sendiri dengan SPF/DKIM terverifikasi; tambah DMARC. |
+| Email pembayaran | Polar mengirim struk/invoice. App tidak membuat atau mengirim ulang invoice sendiri. |
+| Website | Origin produksi `https://qyube.brokarim.com`; `/auth` adalah halaman login, `/api/auth/*` handler Better Auth. Root portfolio tidak dipindah/diubah. Pesan terakhir menyebut `brokariim.com` sekali; gunakan URL subdomain eksplisit `qyube.brokarim.com` sebagai acuan dan validasi kepemilikan/DNS sebelum deploy. |
+| Trial | 7 × 24 jam tanpa kartu, tanpa checkout wajib, tanpa auto-charge; dimulai setelah login app pertama berhasil dan server menerima konteks perangkat. Tidak menunggu Start sesi. |
+| Anti-abuse trial | Satu grant per akun dan satu per identitas instalasi Mac. Identitas dibuat/disimpan di Keychain, klaim disimpan server. Menutup reset total Mac tidak menjadi target MVP. |
+| Harga | Monthly **USD 3.99**, annual **USD 29**, lifetime **USD 49**. Nominal uang disimpan sebagai integer cents: 399, 2900, 4900. |
+| Cakupan lifetime | **Lifetime = macOS only**, ditampilkan di pricing, checkout description, dan entitlement scope. iOS kelak app terpisah dengan IAP. |
+| Beli saat trial | Tombol Buy tersedia kapan saja. Tidak ada pemilihan paket yang wajib sebelum/selama trial; pilihan paket hanya muncul jika pengguna ingin membeli. Pembelian terverifikasi langsung mengaktifkan paket berbayar, tanpa menambahkan sisa trial ke periode billing. |
+| Trial habis | App tetap dapat dibuka. Start/repeat/reset yang membuat sesi baru dikunci dan menampilkan paywall; pembayaran, login, pengelolaan perangkat, serta riwayat/koleksi lama tetap dapat diakses. Tidak menghapus/menyembunyikan koleksi. |
+| Sesi aktif | Sesi yang dimulai saat akses sah boleh selesai dan menyimpan hasil walau trial/akses berakhir di tengahnya. Sign out/pergantian akun menunggu sesi diselesaikan atau dihentikan secara eksplisit. |
+| Perangkat | Maksimal 2 Mac aktif per akun; ada daftar dan aksi melepas perangkat lama. Status Pro mengikuti akun, bukan pembelian terpisah per Mac. |
+| Offline subscription | Snapshot terverifikasi berlaku sampai akhir periode yang sudah dibayar **ditambah 3 hari**. Bukan 3 hari sejak terakhir online. |
+| Offline lifetime | Snapshot terverifikasi berlaku **30 hari sejak verifikasi server terakhir**. Refresh online memperbarui jendela tersebut. |
+| Offline trial | Tidak melebihi `trial_ends_at`; tidak mendapat tambahan toleransi subscription. Login/aktivasi pertama memerlukan internet. |
+| Pembatalan | Pembatalan biasa menghentikan renewal; akses tetap berlaku sampai periode berbayar berakhir. Refund/revocation ditangani dari status provider terverifikasi. |
+
+Annual setara sekitar $2.42/bulan dan hemat 39.4% dibanding 12 × $3.99. Lifetime $49 = 1.69 × annual, bukan 2–3 ×. Dengan biaya dasar Starter Polar 5% + $0.50 pada dokumentasi yang diperiksa 24 Oktober, biaya efektif dasar sekitar 17.5%/6.7%/6.0%; fee tambahan/pajak tidak dianggap sudah masuk hitungan tersebut. Harga diputuskan pengguna, tidak diubah oleh agent.
+
+**Resolusi alur redirect:** usulan login lalu redirect Polar tidak menjadi langkah wajib untuk trial. Login biasa → grant/restore trial atau entitlement → kembali ke app. Login dengan intent Buy → pilihan paket → backend membuat checkout → redirect ke hosted checkout Polar. Login akun yang expired → halaman pilihan pembayaran. Jangan tanpa sengaja menghidupkan kembali card-required trial dari catatan lama. Bila diminta mengubah trial menjadi checkout wajib di kemudian hari, catat sebagai keputusan produk baru.
+
+### B. Peta alur dan batas layanan
+
+```mermaid
+flowchart TD
+    A[App / menu bar] --> B{Sudah login?}
+    B -- Belum --> C[qyube.brokarim.com/auth]
+    C --> D[Better Auth: Google / email OTP via Resend]
+    D --> E[Server finalisasi login + perangkat + trial]
+    E --> F[Kode sekali pakai, ditukar app dengan PKCE]
+    B -- Sudah --> G[GET /api/me/entitlement]
+    F --> G
+    G --> H{Akses efektif}
+    H -- Trial / paid / offline sah --> I[Flow app normal]
+    H -- Expired / revoked --> J[Paywall + baca koleksi lama]
+    I -- Buy opsional --> K[Pilih monthly / annual / lifetime]
+    J --> K
+    K --> L[Backend membuat checkout Polar]
+    L --> M[Hosted checkout Polar]
+    M --> N[Webhook terverifikasi + catatan billing]
+    N --> O[Hitung ulang entitlements]
+    O --> G
+```
+
+- Mac berbicara hanya ke API Qyube dan membuka URL hosted checkout/portal yang diberikan server. Tidak membundel Polar SDK, secret, product ID atau logika fee/provider ke Swift.
+- `entitlements` adalah hasil akses efektif, bukan seluruh ledger pembayaran. Client membaca melalui API dengan otorisasi akun/perangkat, bukan koneksi database langsung.
+- Trial service, webhook processor, dan reconciliation service menulis hasil akses melalui satu fungsi `recomputeEntitlement(accountID)`.
+- Backend memiliki adapter kecil khusus Polar untuk `createCheckout`, `changeSubscription`, `cancelSubscription`, serta pembacaan status billing. Xendit nanti membutuhkan adapter checkout/management dan webhook sendiri; bukan hanya satu handler webhook. Kontrak entitlement dan Mac tidak perlu berubah.
+- Jangan membuat framework multi-provider besar sekarang. Simpan kode Polar dalam satu modul server dan gunakan nama endpoint/plan internal yang netral. Backend inti tidak memakai tipe SDK Polar sebagai model domain.
+- Redirect success dari browser bukan bukti pembayaran. Hanya webhook/API provider yang diverifikasi server yang dapat memberi akses berbayar. App mem-poll entitlement dengan batas waktu; pending bukan failed dan bukan paid.
+
+### C. Baseline kode dan benturan yang harus ditangani
+
+| File / komponen existing | Fakta baseline | Perubahan terencana |
+|---|---|---|
+| `Qoma/Auth/AccessCoordinator.swift` | Stub lokal; `refreshAccess` mengembalikan state yang sama, belum ada jaringan/login/token. | Isi dengan auth session, refresh API, evaluator snapshot offline; hapus akses bebas production. |
+| `Qoma/Domain/Focus/FocusModels.swift` | `AccessState` masih memiliki `cardRequired`, `readyForFirstSession`, serta `paid` tanpa rincian. | Pisahkan state login dari entitlement; hilangkan state trial berkartu. Snapshot menyimpan plan/scope/validitas. |
+| `Qoma/Domain/Focus/SessionCoordinator.swift` | Memiliki closure `canStartSession`, default `{ true }`, serta `accountID` default `local`. | Inject gate dan akun nyata untuk runtime; default permissive hanya untuk test/preview yang eksplisit. Uji semua jalur mulai/repeat/reset/resume/restore. |
+| `Qoma/Managers/QyubeAppCoordinator.swift` | Membuat `SessionCoordinator()` dan memulihkan sesi saat init. | Susun runtime sesuai akun sebelum restore; route onboarding/paywall; bind menu/panel ke akses yang sama. |
+| `Qoma/Managers/AppDelegate.swift` | Launch menu bar normal; belum ada callback auth. | Tambah browser-auth callback/lifecycle; token tidak ditaruh pada log atau URL permanen. |
+| `Qoma/UI/Main/QyubeHomeView.swift` / `QyubeNavigation` | `refresh()` membaca history/catch `accountID: "local"`. | Inject konteks akun; bersihkan cache view saat akun berubah. |
+| `Qoma/UI/Main/AnalyticsDashboardView.swift` | Membaca sesi/catch akun `local` secara langsung. | Gunakan akun aktif, termasuk aktivitas analytics. |
+| `Qoma/Services/AnalyticsStore.swift` | `private let accountID = "local"`. | Ubah menjadi instance ber-scope akun; jangan menukar account ID pada singleton yang masih dipakai sesi lain. |
+| `Qoma/Persistence/SessionRepository.swift`, `CatchRepository.swift`, `QomaDatabase.swift` | SQLite dan indeks sudah dipartisi `account_id`; payload juga membawa ID akun. | Pertahankan struktur; migrasi data local harus mengganti kolom dan payload secara konsisten, transaksi + marker/backups. |
+| `Qoma/UI/Main/QyubeSettingsMenuPopover.swift` | Manage subscription dan Sign out masih closure kosong. | Hubungkan ke portal/backend dan logout nyata. Label/state mengikuti akses; tambah akses Devices dari Settings/account. |
+| `website/` | Next.js marketing; belum ada Better Auth, Resend, Polar, schema DB atau API billing. | Tambahkan route server/auth/account di project existing setelah membaca `website/AGENTS.md` dan docs Next.js versi terpasang. |
+| `task_plan.md` bagian lama | Google/Apple, Stripe/card setup, first-session trial. | Ditimpa secara keputusan oleh bagian bertanggal ini; jangan hapus bagian lama. |
+
+Belum ditemukan implementasi `SecItem`/Keychain, native login handoff, server entitlement, device management atau test auth produksi. Ini bukan fitur yang tinggal diaktifkan dari menu.
+
+### D. Rancangan penyimpanan backend
+
+Gunakan PostgreSQL; vendor hosting belum dikunci. Better Auth memiliki tabel user/account/session/verification sendiri: gunakan schema yang dihasilkan versi Better Auth terpilih, jangan membuat ulang sistem password/session. `account_id` domain Qyube mengacu pada **user ID internal**, bukan baris OAuth `account` milik Better Auth. Sesuaikan tipe ID dengan adapter DB yang dipilih.
+
+```sql
+-- Gambaran schema domain; FK ke tabel user Better Auth ditambahkan saat migrasi nyata.
+CREATE TABLE entitlements (
+  account_id text NOT NULL,
+  product_scope text NOT NULL DEFAULT 'macos',
+  plan text CHECK (plan IN ('trial', 'monthly', 'annual', 'lifetime')),
+  status text NOT NULL CHECK (status IN ('active', 'expired', 'revoked')),
+  trial_ends_at timestamptz,
+  valid_until timestamptz, -- null hanya untuk lifetime aktif atau tanpa grant
+  version bigint NOT NULL DEFAULT 1,
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (account_id, product_scope)
+);
+
+CREATE TABLE trial_claims (
+  account_id text PRIMARY KEY,
+  installation_id_hash text NOT NULL UNIQUE,
+  started_at timestamptz NOT NULL,
+  ends_at timestamptz NOT NULL
+);
+
+CREATE TABLE devices (
+  id text PRIMARY KEY,
+  account_id text NOT NULL,
+  installation_id_hash text NOT NULL,
+  name text NOT NULL,
+  activated_at timestamptz NOT NULL,
+  last_seen_at timestamptz NOT NULL,
+  revoked_at timestamptz,
+  UNIQUE (account_id, installation_id_hash)
+);
+
+CREATE TABLE billing_customers (
+  account_id text NOT NULL,
+  provider text NOT NULL,
+  provider_customer_id text NOT NULL,
+  PRIMARY KEY (account_id, provider),
+  UNIQUE (provider, provider_customer_id)
+);
+
+CREATE TABLE webhook_events (
+  provider text NOT NULL,
+  event_id text NOT NULL,
+  received_at timestamptz NOT NULL DEFAULT now(),
+  processed_at timestamptz,
+  state text NOT NULL DEFAULT 'pending',
+  PRIMARY KEY (provider, event_id)
+);
+```
+
+Tabel pendukung yang harus dibuat pada tahap terkait:
+
+- `subscriptions`: account/provider/subscription ID, plan, status provider, periode mulai/akhir, cancel-at-end, versi/timestamp sumber. Unique `(provider, provider_subscription_id)`.
+- `orders`: ID provider, akun, subscription, alasan pembayaran (initial/renewal/adjustment), cents, currency, diskon, pajak, refund, waktu paid dan periode yang dibiayai. Dibutuhkan untuk kredit lifetime; jangan hanya menyimpan harga katalog terakhir.
+- `checkout_attempts`: akun, tujuan paket, quote ID, ID checkout, expiry, payment sumber kredit, cents kredit, diskon provider, status. Lock/reservasi mencegah dua checkout memakai kredit yang sama.
+- `billing_jobs`: tugas pembatalan/reconciliation yang durable, deduplication key, retry count dan waktu retry. Unique per pekerjaan bisnis. Jangan bergantung pada proses request serverless yang sudah berakhir.
+- Handoff native login: kode **di-hash**, PKCE challenge, state, perangkat, intent, expiry, consumed-at; retensi singkat. Secret/token/OTP tidak disimpan pada payload webhook atau log.
+- Trial tidak memiliki provider/customer ID; tidak membuat customer Polar sebelum diperlukan untuk membeli. `provider_*` tetap di tabel billing, bukan kontrak Swift.
+- Entitlement efektif menghormati prioritas grant yang masih valid: lifetime > subscription paid > trial. Event subscription lama tidak boleh menimpa lifetime. Refunded lifetime dihitung ulang terhadap grant lain yang sah, bukan otomatis memberi akses kembali dari transaksi yang sudah direfund.
+- `canceled` adalah keputusan renewal pada subscription, bukan alasan menutup akses sebelum akhir masa paid. `past_due`/refund dipetakan secara eksplisit; jangan menganggap seluruh event `order.refunded` berarti refund penuh.
+- Semua tabel server privat; akses user hanya melalui route berotorisasi. Client tidak boleh mengubah `trial_ends_at`, plan, atau status. Endpoint membaca waktu server dan validitas, tidak menunggu cron agar trial dianggap berakhir.
+
+### E. Better Auth, Resend, domain, dan handoff ke Mac
+
+**Bentuk file usulan** (nama pasti dapat disesuaikan terhadap Next.js/adapter, tugasnya harus tetap jelas):
+
+```text
+website/
+  lib/auth.ts                        Better Auth + Google + emailOTP
+  lib/email.ts                       Resend, template OTP/transaksional
+  lib/db.ts                          koneksi PostgreSQL server
+  lib/access/entitlements.ts         computeEffectiveAccess / recomputeEntitlement
+  lib/access/trial.ts                grantTrialOnce
+  lib/access/devices.ts              activateDevice / revokeDevice
+  lib/access/native-handoff.ts       issueHandoff / consumeHandoff
+  lib/billing/polar.ts               seluruh SDK/API Polar server-only
+  lib/billing/lifetime-upgrade.ts    quoteLifetimeUpgrade / reserveCredit
+  lib/billing/webhook-processing.ts durable processing dan entitlement update
+  lib/billing/jobs.ts                pembatalan/reconciliation dengan retry
+  app/auth/page.tsx                  Google atau kirim/isi OTP; simpan intent
+  app/auth/complete/page.tsx         callback ke Mac / tombol Open Qyube
+  app/account/page.tsx               akses, billing portal, devices
+  app/pricing/page.tsx               3 paket USD, macOS-only lifetime
+  app/billing/return/page.tsx        pending/sukses dari status server
+  app/api/auth/[...all]/route.ts     handler Better Auth
+  app/api/native-auth/*              mulai/selesaikan/tukar handoff
+  app/api/me/entitlement/route.ts    entitlement untuk akun/perangkat login
+  app/api/me/devices/*               daftar/aktivasi/revoke
+  app/api/billing/*                  checkout, quote/change plan, portal
+  app/api/webhooks/polar/route.ts    raw body + verifikasi signature
+```
+
+Contoh konfigurasi konseptual, bukan konfigurasi keamanan lengkap:
+
+```ts
+// Usulan lib/auth.ts; adapter/version/config linking divalidasi sebelum implementasi.
+export const auth = betterAuth({
+  baseURL: "https://qyube.brokarim.com",
+  database: db,
+  emailAndPassword: { enabled: false },
+  socialProviders: {
+    google: { clientId: env.GOOGLE_CLIENT_ID, clientSecret: env.GOOGLE_CLIENT_SECRET },
+  },
+  plugins: [emailOTP({
+    async sendVerificationOTP({ email, otp, type }) {
+      await sendAuthEmail({ email, otp, type }); // Resend server-only
+    },
+  })],
+});
+```
+
+- OTP 6 digit, masa berlaku usulan 5 menit, sekali pakai, batas percobaan serta resend cooldown/rate limit per IP dan email. Simpan OTP secara aman menggunakan kemampuan versi plugin terpilih; jangan log nilainya. Jangan memberi respons yang membocorkan keberadaan akun.
+- Google OAuth callback diarahkan ke `/api/auth/callback/google`; browser session cookie `Secure`, `HttpOnly`, host-only. Jangan memakai cookie domain `.brokarim.com` atau berbagi session dengan portfolio. Origin/trusted redirect allowlist eksplisit; jangan menerima `return_to` sembarang URL.
+- Linking otomatis hanya ketika email incoming **dan** existing terverifikasi. Jangan mengaktifkan opsi provider tepercaya yang justru melewati pemeriksaan sisi kedua. Uji Google-first/email-first, email belum verified, dan akun paralel; gunakan hooks/transaction bila perilaku default Better Auth tidak memenuhi kontrak.
+- Jangan strip titik/`+suffix` Gmail sebagai pengganti bukti kepemilikan. Email dapat berubah; ownership billing ditautkan ke user ID internal yang stabil.
+- Native login tidak cukup menyalin cookie browser ke Mac. Buat handoff sekali pakai dengan PKCE (`S256`) dan state, TTL pendek. Usulan callback `qyube://auth/callback?code=...&state=...`; hanya kode pendek yang diikat PKCE masuk URL, bukan access/refresh token. Verifikasi scheme final terhadap bundle signing dan opsi `ASWebAuthenticationSession` sebelum implementasi.
+- Browser mengautentikasi melalui Better Auth; Mac menukar kode dengan verifier untuk credential API device-scoped yang dikelola server, dapat di-refresh dan dicabut. Pilih fasilitas Better Auth atau bridge minimal setelah memastikan kontrak native/refresh versi terpilih; jangan mengarang dukungan OAuth desktop yang belum diuji. Logout mencabut sesi perangkat terkait dan membersihkan credential/cache Keychain.
+- Trial grant dijalankan pada finalisasi login **yang berasal dari app dan punya identitas instalasi valid**. Login web account management tanpa device context tidak boleh mengarang identitas Mac atau menghabiskan grant trial. Pengguna melihat bahwa trial mulai ketika login onboarding app selesai, bukan sesudah membeli.
+- Pengirim usulan `Qyube <hello@notify.qyube.brokarim.com>`: verifikasi subdomain email terpisah di Resend, tambahkan SPF/DKIM/Return-Path sesuai dashboard; DMARC dan uji inbox. Tidak mengubah MX portfolio atau membuat record SPF ganda pada hostname yang sama. Tracking OTP dinonaktifkan. SPF/DKIM membantu delivery tetapi tidak menjamin tidak masuk spam.
+- Resend hanya mengirim OTP, pemberitahuan trial app bila diperlukan, dan notifikasi perangkat/access; Polar mengirim invoice/receipt. Hindari email billing ganda yang berbeda nominal.
+- Kebutuhan sebelum production: akses DNS subdomain, Google OAuth credentials/domain verification sesuai console, Resend domain verified, PostgreSQL, hosting API/worker, Polar organization/webhook secret/product IDs, signing key entitlement. Semua secret server-only; tidak ditaruh di Swift/`NEXT_PUBLIC_*`/repo.
+
+### F. Kontrak API dan offline grant
+
+```text
+POST /api/native-auth/start       installation context + PKCE challenge + state + intent
+POST /api/native-auth/exchange    one-time code + verifier -> device session credentials
+POST /api/native-auth/refresh     refresh credential -> rotate credential + session status
+GET  /api/me/entitlement          signed snapshot + server time + access reason
+GET  /api/me/devices              daftar perangkat milik akun
+POST /api/me/devices/activate     aktivasi transaksional, maksimal dua
+POST /api/me/devices/:id/revoke   cabut perangkat, credential, dan aktivasi
+POST /api/billing/checkout        plan internal -> hosted checkout URL
+POST /api/billing/plan-quote      target plan -> jumlah/waktu, bila provider mendukung preview
+POST /api/billing/change-plan     konfirmasi quote atau flow portal yang sudah diverifikasi
+POST /api/billing/lifetime-quote  sumber kredit + total + expiry
+POST /api/billing/portal          hosted customer portal URL milik akun login
+POST /api/webhooks/polar          signed provider event -> durable inbox
+```
+
+```json
+{
+  "account_id": "internal-user-id",
+  "device_id": "activated-device-id",
+  "scope": "macos",
+  "plan": "annual",
+  "status": "active",
+  "access_until": "paid-period-end-from-server",
+  "offline_until": "paid-period-end-plus-3-days",
+  "issued_at": "server-issued-time",
+  "entitlement_version": 12,
+  "signature": "server-signature",
+  "key_id": "signing-key-version"
+}
+```
+
+Contoh JSON di atas memakai placeholder tanggal, bukan format payload production. Signature melindungi seluruh claims melalui format standar yang tervalidasi library; jangan membuat algoritma signature/canonicalization sendiri. Client memverifikasi signature/public key, akun, device, scope, waktu, dan versi. Credential auth berbeda dari signed entitlement: refresh token yang kedaluwarsa sementara tidak otomatis menghapus akses offline yang masih sah.
+
+```swift
+// Rancangan evaluasi lokal setelah signature, identity, dan schema tervalidasi.
+struct EntitlementSnapshot: Codable {
+    let accountID: String
+    let deviceID: String
+    let scope: String
+    let plan: String
+    let status: String
+    let accessUntil: Date?
+    let offlineUntil: Date
+    let issuedAt: Date
+    let version: Int
+}
+
+// Production memakai evaluator shared; bukan keputusan langsung dari UserDefaults.
+func permitsNewSession(_ grant: EntitlementSnapshot, trustedNow: Date) -> Bool {
+    grant.scope == "macos" && grant.status == "active" && trustedNow < grant.offlineUntil
+}
+```
+
+- Saat online, keputusan server terbaru (expired/revoked/perangkat dilepas) mengalahkan cache lama walau TTL belum habis. Request timeout/offline/5xx tidak disamakan dengan revocation. Refresh di launch, foreground, sebelum Start bila perlu, dan sesudah checkout; cegah request storm.
+- Perhitungan `offline_until` oleh server: trial = akhir trial; monthly/annual = akhir periode paid + 3 hari; lifetime = issued-at + 30 hari. UI menjelaskan kapan perlu internet lagi. Tidak ada toleransi tambahan berantai lewat refresh lokal.
+- Gunakan waktu server terakhir + monotonic elapsed selama boot yang sama; deteksi jam mundur dan minta revalidasi ketika tidak dapat dipercaya. Setelah reboot, proteksi waktu offline tetap terbatas; jangan menjanjikan anti-tamper sempurna tanpa jaringan. Jangan memperpanjang grant dari jam lokal yang diedit.
+- Snapshot dan credential disimpan per akun/perangkat di Keychain, instalasi ID tidak disinkronkan iCloud. Keychain error ditampilkan sebagai error pemulihan akses, bukan otomatis membuat instalasi/trial baru.
+- Dampak keputusan offline yang diterima: subscription tahunan bisa terus bekerja offline sampai akhir tahun paid + 3 hari. Refund, pencabutan perangkat dan batas 2 Mac **tidak dapat dipaksakan segera pada perangkat offline**. Lifetime yang dilepas dapat tetap bekerja maksimal sisa jendela 30 hari. Catat keterbatasan ini di acceptance tests/support.
+- Jika melewati batas offline tanpa revalidasi, hentikan Start baru dan tawarkan Connect/Retry; jangan menyebut pengguna belum bayar tanpa bukti. Sesi aktif tetap aman dan data tidak dihapus.
+
+### G. Trial atomik, perangkat, dan migrasi akun
+
+```ts
+// Pseudocode; dijalankan setelah auth valid, bukan memakai accountID dari body client.
+async function finalizeAppLogin(accountID, installationID) {
+  return db.transaction(async tx => {
+    await lockAccount(tx, accountID);
+    await activateDeviceWithLimit(tx, accountID, installationID, 2);
+    // Unique constraints account + installation menjamin grant paling banyak sekali.
+    await grantTrialIfBothUnclaimed(tx, accountID, installationID, /* server */ now());
+    return recomputeEntitlement(tx, accountID);
+  });
+}
+```
+
+- Batas 2 perangkat dihitung dengan account lock/transaction, bukan read-count kemudian insert tanpa lock. Perangkat ketiga diarahkan ke daftar perangkat; jangan mengonsumsi trial jika aktivasi gagal. Aktivasi perangkat yang sama idempotent.
+- Trial account yang sama pada Mac kedua hanya melanjutkan trial pertama dengan akhir yang sama; tidak membuat 7 hari baru. Mac yang sudah dipakai trial akun lain menolak **grant baru**, tetapi tidak menolak akses akun yang sudah paid. Simpan klaim perangkat yang berpartisipasi dalam trial existing juga agar akun kedua tidak mendapat trial baru dari Mac tersebut.
+- Schema `trial_claims` di bagian D mencatat perangkat pemberi grant pertama. Untuk menandai Mac kedua yang ikut menikmati trial, tambahkan ledger `trial_devices(installation_id_hash PRIMARY KEY, trial_account_id, first_seen_at)` pada migrasi trial; reserve/check bersama transaksi. Jangan menganggap satu baris trial pertama sudah cukup mengamankan seluruh perangkat.
+- Revoke perangkat tidak menghapus marker trial perangkat. Logout tidak memberi trial baru. Keterbatasan reset total diterima; server tetap menolak trial kedua untuk akun yang sama. Deletion policy harus mendefinisikan retensi marker anti-abuse yang minimal dan legal sebelum membuka fitur penghapusan akun.
+- Data `local` existing: tawarkan import satu kali pada akun pertama, simpan backup/marker dan update payload+kolom+progress secara transaksional. Migrasi otomatis pada setiap login akan memindahkan data ke akun salah, jadi dilarang. Tidak ada sync koleksi lintas Mac dalam scope billing ini.
+- Ganti akun saat sesi aktif ditunda sampai sesi dihentikan/diselesaikan dan save berhasil. Setelah switch: hentikan tracker/overlay akun lama, bangun konteks coordinator/store baru, kosongkan navigation/cache lalu load akun baru. Jangan menghapus histori pada sign out.
+
+### H. Polar: checkout, webhook, perubahan paket, lifetime
+
+**Bukti dokumentasi resmi yang diperiksa pada tahap perencanaan:**
+
+| Kemampuan | Hasil dan batas verifikasi |
+|---|---|
+| Harga USD/mata uang | Product API menyediakan nominal/mata uang. Dukungan country-price override bawaan belum dibuktikan; MVP tetap USD untuk display dan checkout. Tidak menjanjikan harga otomatis per negara. |
+| Diskon lifetime | Create Discount menyediakan fixed amount, `duration: once`, `max_redemptions: 1`, expiry dan produk; Create Checkout menerima `discount_id`. Dua request server, bukan objek diskon inline otomatis. |
+| Cancel subscription | API mendukung `cancel_at_period_end`; revoke segera terpisah. Pilihan lifetime: hentikan renewal setelah order lifetime paid terverifikasi dan simpan receipt cancellation. |
+| Prorata monthly/annual | `invoice`, `prorate`, `next_period` didokumentasikan. Endpoint quote final sebelum konfirmasi belum terverifikasi; portal/sandbox menjadi gate sebelum custom UI amount. Jangan menampilkan perhitungan lokal sebagai jumlah final provider. |
+| Webhook | Order paid/refunded serta lifecycle subscription tersedia. SDK signature validation, inbox deduplication, out-of-order handling, retry dan reconciliation diperlukan. |
+| Metode pembayaran | Kartu dan wallet serta kanal regional sesuai checkout. QRIS tidak tercantum pada daftar resmi lengkap; jangan tampilkan QRIS sebelum integrasi Xendit. |
+
+**Checkout:** server memetakan `monthly/annual/lifetime` ke product ID Polar, memeriksa kepemilikan akun, lalu membuat checkout dengan customer mapping/user ID internal (`external_customer_id` jika sesuai API terpilih). Jangan percaya email checkout atau metadata buatan browser sebagai ownership. Jangan mengaktifkan trial bawaan Polar: trial Qyube sudah dikelola server dan tidak meminta kartu. Success URL hanya ke origin allowlist; konfirmasi paid tetap melalui server.
+
+**Webhook minimum:** `order.paid`, `order.refunded`, `subscription.created`, `subscription.active`, `subscription.updated`, `subscription.canceled`, `subscription.uncanceled`, `subscription.revoked`, `subscription.past_due`, serta event pergantian siklus pada API terpilih. Event pendukung dapat dikonsolidasikan ke rekonsiliasi status; jangan menulis handler berbeda yang menduplikasi aturan akses. `customer.state_changed` dapat menjadi pemicu reconcile, bukan pengganti ledger order untuk kredit lifetime. Pin versi SDK/API yang benar; dokumentasi yang diperiksa mengarahkan beberapa endpoint ke versi 2026-10.
+
+**Proses aman:** raw body → verifikasi signature/timestamp via SDK → insert inbox unique `(provider,event_id)` → acknowledge setelah durable → worker memverifikasi/memperbarui catatan billing → `recomputeEntitlement` → job follow-up. Order customer/product/scope/currency harus cocok mapping server. Event gagal tetap dapat dicoba ulang. Data provider yang lebih tua tidak menimpa state terbaru; bila ragu fetch status canonical. Alert untuk event macet dan job cancellation gagal. Tidak memberi paid dari event `checkout.created`.
+
+**Pergantian monthly/annual:** gunakan mekanisme Polar; tampilkan biaya/pajak/waktu mulai yang benar sebelum konfirmasi. Rekomendasi annual→monthly pada akhir periode (`next_period`); monthly→annual mengikuti quote/provider dengan konfirmasi. Jika portal tidak memperlihatkan informasi cukup atau endpoint preview belum ada, hentikan delivery fitur custom switch pada gate ini dan laporkan; jangan melakukan mutation untuk sekadar memperoleh preview. Jangan membatalkan subscription lalu membuat subscription baru tanpa penjelasan sebagai pengganti prorata.
+
+**Kredit lifetime sesuai keputusan pengguna (bukan prorata sisa hari):**
+
+```text
+credit = pembayaran produk terakhir yang membiayai periode aktif,
+         setelah diskon/refund terkait, sebelum pajak; tidak dikurangi fee Polar
+due_before_tax = max(0, lifetime_price - credit)
+
+Monthly aktif dibayar $3.99 -> $49 - $3.99 = $45.01
+Annual aktif dibayar $29   -> $49 - $29   = $20
+Trial / periode habis     -> $49
+```
+
+- Simpan sumber order/currency/periode dalam quote. Adjustment invoice pergantian paket bukan otomatis pembayaran penuh paket baru: verifikasi pemetaan paid order yang membiayai periode aktif dan tampilkan kredit yang benar. Kasus prorata + upgrade lifetime menjadi acceptance test sebelum production, tidak diisi memakai list price.
+- Validasi ulang kelayakan kredit di server saat checkout; satu quote aktif per akun dan satu credit redemption per order sumber. Expiry checkout/diskon tidak melewati akhir periode paid. Jika provider memungkinkan pembayaran selesai setelah expiry, wajib uji/mitigasi (expire checkout aktif atau quote konservatif); jangan berasumsi timestamp akhir diskon sendirian menutup race.
+- Buat fixed discount API-only tanpa kode publik, dibatasi produk lifetime dan satu redemption, `allow_discount_codes: false` pada checkout upgrade. `duration: once` tidak sama dengan sekali redeem, sehingga limit tetap wajib. Pakai `amounts` atau field aktual versi SDK terpilih (field legacy amount/currency ditandai deprecated di dokumentasi tertentu).
+- Diskon lalu checkout: bila request kedua gagal, expire/hapus diskon yang tidak terpakai. Retry memakai attempt/quote yang sama untuk mencegah kredit ganda. Fallback bila jalur diskon tidak tersedia saat sandbox: server-priced checkout amount jika API mendukung dan diuji, dengan harga/kredit tercatat; jika tidak, tunda fitur upgrade kredit dan laporkan, jangan diam-diam menagih full price atau menjanjikan refund.
+- Setelah `order.paid` lifetime yang cocok: transaksi server menandai kredit consumed, mengaktifkan grant lifetime, dan memasukkan cancellation job untuk subscription lama. Pembatalan via API diulang hingga provider mengonfirmasi tidak ada renewal lagi; grant lifetime tidak ditimpa webhook revoke subscription lama.
+- Renewal yang sudah in-flight ketika lifetime dibeli tidak bisa dibatalkan secara atomik lintas sistem. Deteksi penagihan bersamaan dan sediakan jalur support/refund sesuai kebijakan; jangan menjanjikan tidak mungkin ada double charge. Jangan revoke subscription sebelum lifetime paid, karena checkout bisa dibatalkan pengguna.
+- Full refund lifetime mencabut grant lifetime terkait; partial refund tidak otomatis mencabut semua akses. Tetap pertahankan data koleksi. Dunning/grace provider dan grace offline berbeda; online status dipetakan server, bukan dibiarkan tanpa batas oleh TTL lama.
+- Portal billing diakses dari backend memakai akun login. Receipt/invoice tetap dikirim Polar; email app tidak menduplikasi dokumen tersebut.
+
+### I. Roadmap berurutan dan output setiap tahap
+
+Semua kotak implementasi berikut **belum dikerjakan**. Buat perubahan kecil dan testable, gunakan satu worktree existing, branch baru per tahap bila diminta. Jangan mengimplementasikan auth/backend hanya karena roadmap ini sudah ditulis.
+
+| Tahap | Pekerjaan | Acceptance / bukti selesai |
+|---|---|---|
+| 0. Persiapan | Pilih PostgreSQL/hosting/worker, pin Better Auth/SDK, cek DNS/email/Polar sandbox, tetapkan migration strategy dan kontrak API. | Domain eksplisit, tidak menyentuh portfolio; sandbox creds tersedia; tidak ada secret dalam repo. |
+| 1. Backend entitlement | Migrasi schema domain, satu fungsi recompute, API membaca akun dari session, signed claims. | Trial/paid/lifetime priority, expired-at-boundary, revoked, concurrent writes dan cross-account authorization tests. |
+| 2. Better Auth + Resend | Handler Google/email OTP, verified linking, Resend sender DNS, native handoff/PKCE, Keychain credential. | Email-first/Google-first, OTP replay/brute force, invalid state/verifier, expired code, token refresh/revoke, isolasi cookie portfolio. |
+| 3. Trial + aktivasi minimum | Grant trial server saat finalisasi login app, ledger akun/perangkat, aktivasi dua Mac atomik; halaman replace perangkat minimum. | Dua login serentak tidak menciptakan grant ganda; reinstall biasa sama ID; Mac ketiga ditolak; login web tanpa device tidak memulai trial palsu. |
+| 4. Akun lokal + paywall | Inject akun/gate ke coordinator/semua Start, navigasi/store scoped akun, import local aman, trial banner dan buy action. | Sesi/collection akun A tidak terlihat oleh B, migration retry aman, expiry tidak memotong sesi aktif, relaunch/paused tidak melewati gate sesi baru. |
+| 5. Polar paid MVP | Produk USD, hosted checkout/portal, webhook inbox+worker, order/subscription ledger, reconciliation. | Cancel checkout tidak membuka app; verified paid membuka app; duplicate/out-of-order webhook aman; refund penuh/sebagian benar. |
+| 6. Perubahan paket + lifetime | Quote/portal preview, switch plan, diskon sekali redeem, cancellation jobs dan monitor. | $45.01/$20/full $49 sesuai skenario; discounted/refunded order; dua tab checkout; expiry quote; renewal race; retry cancellation tanpa kehilangan lifetime. |
+| 7. Offline + UI perangkat lengkap | Signed snapshot Keychain, deadline paid+3/lifetime30/trial-end, detach UI, clock anomaly dan koneksi gagal. | Offline reboot, jam mundur, auth refresh gagal, server 5xx, explicit revoke, perangkat dilepas offline; batas stale sesuai keputusan. |
+| 8. Release gate | End-to-end sandbox dan transaksi live terkontrol setelah approval; pricing copy, support/refund/privacy, signing/notarization/update existing. | Tidak ada secret produksi di build; pricing `Lifetime = macOS only`; restore paid setelah reinstall; trial satu per akun; webhook/Resend monitoring aktif. |
+
+Pembatasan perangkat minimum masuk tahap trial/auth karena trial per perangkat tidak bisa ditunda seluruhnya. Tahap 7 menyempurnakan UI/offline; bukan pertama kali server menerapkan batas 2 Mac.
+
+### J. Checklist status dan pekerjaan lanjutan
+
+- [x] Catat keputusan terbaru, konflik baseline, diagram flow, sketch schema/API/code, dan urutan implementasi tanpa menghapus riwayat.
+- [x] Tetapkan Better Auth + Google/email OTP, Resend, Polar hosted checkout, origin produksi yang diminta, offline paid+3/lifetime30, serta batas trial instalasi MVP.
+- [ ] PostgreSQL/hosting/worker dan configuration production ditetapkan dan disiapkan.
+- [ ] DNS subdomain, callback Google, Resend SPF/DKIM/DMARC dan inbox deliverability diverifikasi.
+- [ ] Seluruh tahap implementasi 1–8 selesai beserta tes terkait.
+- [ ] Perilaku native Better Auth bridge/refresh serta account linking diverifikasi pada versi yang dipakai.
+- [ ] Preview pergantian paket, quote lifetime lintas adjustment invoice, dan expiry/race pembayaran dibuktikan di sandbox Polar.
+- [ ] Tax behavior ditetapkan pada konfigurasi checkout; usulan display harga USD dasar dengan keterangan pajak dihitung di checkout. Preview total tidak boleh berbeda tanpa konfirmasi baru.
+- [ ] Kebijakan support/refund/account deletion dan retensi marker trial ditulis sebelum rilis; audit keamanan auth/checkout/webhook.
+- [ ] Setelah MVP rilis: Xendit adapter + webhook + mapping produk/kanal, tanpa perubahan kontrak entitlement Mac. Tidak menambahkan abstraksi/simulasi Xendit sekarang.
+
+**Batas verifikasi bagian ini:** dokumen perencanaan, bukan bukti layanan sudah berfungsi. Tidak ada package install, deploy, DNS mutation, schema migration, email terkirim, checkout dibuat, ataupun kode runtime yang diubah. Tidak melakukan build untuk perubahan dokumentasi ini. Semua perubahan UI/asset existing sebelum tahap ini disimpan dalam commit baseline tersendiri; branch roadmap hanya mengubah `task_plan.md`.
+
+### K. Referensi resmi untuk agent implementasi
+
+- Better Auth [Email OTP](https://better-auth.com/docs/plugins/email-otp), [User & Accounts / linking](https://better-auth.com/docs/concepts/users-accounts), [options](https://better-auth.com/docs/reference/options).
+- Resend [verified domains dan subdomains](https://resend.com/docs/dashboard/domains/introduction). Ambil nilai SPF/DKIM aktual dari dashboard, bukan contoh internet.
+- Polar [Create Product](https://polar.sh/docs/api-reference/products/create), [Create Discount](https://polar.sh/docs/api-reference/discounts/create), [Create Checkout](https://polar.sh/docs/api-reference/checkouts/create-session).
+- Polar [subscription management](https://polar.sh/docs/features/subscriptions/manage), [proration](https://polar.sh/docs/features/subscriptions/proration), [webhook delivery](https://polar.sh/docs/integrate/webhooks/delivery).
+- Polar [order.paid](https://polar.sh/docs/api-reference/webhooks/order.paid), [order.refunded](https://polar.sh/docs/api-reference/webhooks/order.refunded), [subscription.updated dan lifecycle events](https://polar.sh/docs/api-reference/webhooks/subscription.updated).
+- Polar [metode pembayaran](https://polar.sh/docs/features/checkout/payment-methods), [pricing/fees](https://polar.sh/resources/pricing). Periksa ulang capability/fee saat implementasi; jangan menyalin API lama dari ingatan.
