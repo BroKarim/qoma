@@ -1,7 +1,7 @@
 import type { PoolClient } from "pg"
 import { database } from "@/lib/db"
 import { recomputeEntitlement } from "@/lib/access/entitlements"
-import { planForProduct } from "./polar"
+import { planForProduct, polar } from "./polar"
 
 type Event = { type: string; timestamp: string; data: unknown }
 type PolarData = Record<string, unknown>
@@ -44,8 +44,11 @@ async function applyPaidOrder(client: PoolClient, data: PolarData) {
   }
   await client.query(`INSERT INTO billing_customers(account_id, provider, provider_customer_id) VALUES($1,'polar',$2)
     ON CONFLICT (account_id, provider) DO UPDATE SET provider_customer_id = EXCLUDED.provider_customer_id`, [accountId, customer])
-  const subscription = object(data.subscription)
+  let subscription = object(data.subscription)
   const subscriptionId = string(data.subscription_id)
+  if (subscriptionId && !date(subscription.current_period_end)) {
+    subscription = object(await polar().subscriptions.get(subscriptionId))
+  }
   const periodStart = date(subscription.current_period_start)
   const periodEnd = date(subscription.current_period_end)
   if (plan !== "lifetime" && (!subscriptionId || !periodEnd)) throw new Error("Paid subscription has no period")
@@ -75,8 +78,9 @@ async function applyPaidOrder(client: PoolClient, data: PolarData) {
         plan = EXCLUDED.plan, paid_until = GREATEST(billing_subscriptions.paid_until, EXCLUDED.paid_until),
         updated_at = now()
       WHERE billing_subscriptions.account_id = EXCLUDED.account_id`,
-      [subscriptionId, accountId, plan, periodEnd, state?.cancel_at_period_end ?? false,
-        state?.revoked ? state.provider_modified_at : null, state?.provider_modified_at ?? modifiedAt])
+      [subscriptionId, accountId, plan, periodEnd, state?.cancel_at_period_end ?? subscription.cancel_at_period_end === true,
+        state?.revoked || subscription.status === "unpaid" || subscription.ended_at ? (state?.provider_modified_at ?? modifiedAt) : null,
+        state?.provider_modified_at ?? modifiedAt])
   }
   if (checkoutId) await client.query("UPDATE checkout_attempts SET completed_at = now() WHERE provider_checkout_id = $1", [checkoutId])
   if (plan === "lifetime" && (number(data.refunded_amount) === 0 || number(data.refunded_amount) < number(data.total_amount))) {
@@ -103,8 +107,13 @@ async function applyRefund(client: PoolClient, data: PolarData) {
       (provider_modified_at IS NULL OR provider_modified_at <= $4)`,
     [id, Math.max(0, amount - number(data.refunded_tax_amount)), amount, date(data.modified_at) ?? new Date()])
   if (amount > 0 && amount >= rows[0].total_cents && rows[0].subscription_id) {
-    const { rows: paid } = await client.query("SELECT 1 FROM billing_orders WHERE provider = 'polar' AND subscription_id = $1 AND status = 'paid' LIMIT 1", [rows[0].subscription_id])
-    if (!paid.length) await client.query("UPDATE billing_subscriptions SET revoked_at = now() WHERE provider = 'polar' AND provider_subscription_id = $1", [rows[0].subscription_id])
+    const { rows: paid } = await client.query<{ paid_until: Date | null }>(`
+      SELECT max(period_end) AS paid_until FROM billing_orders
+      WHERE provider = 'polar' AND subscription_id = $1 AND status = 'paid'`, [rows[0].subscription_id])
+    await client.query(`UPDATE billing_subscriptions SET paid_until = COALESCE($2, now()),
+      revoked_at = CASE WHEN $2 IS NULL THEN now() ELSE NULL END, updated_at = now()
+      WHERE provider = 'polar' AND provider_subscription_id = $1`,
+    [rows[0].subscription_id, paid[0].paid_until])
   }
   return rows[0].account_id
 }

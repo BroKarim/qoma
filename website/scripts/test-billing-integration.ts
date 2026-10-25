@@ -55,6 +55,30 @@ try {
   const access = await database().query<{ status: string }>(
     "SELECT status FROM entitlements WHERE account_id = $1", [account])
   assert.equal(access.rows[0].status, "expired")
+
+  const nextPeriodEnd = new Date(periodEnd.getTime() + 30 * 86_400_000)
+  const renewed = { ...paid, data: {
+    ...paid.data, id: randomUUID(), checkout_id: null, billing_reason: "subscription_cycle",
+    created_at: new Date(paidAt.getTime() + 2000).toISOString(),
+    modified_at: new Date(paidAt.getTime() + 2000).toISOString(),
+    subscription: { current_period_start: periodEnd.toISOString(), current_period_end: nextPeriodEnd.toISOString() },
+  } }
+  await processPolarEvent(randomUUID(), renewed)
+  const laterPeriodEnd = new Date(nextPeriodEnd.getTime() + 30 * 86_400_000)
+  const later = { ...renewed, data: {
+    ...renewed.data, id: randomUUID(),
+    created_at: new Date(paidAt.getTime() + 3000).toISOString(),
+    modified_at: new Date(paidAt.getTime() + 3000).toISOString(),
+    subscription: { current_period_start: nextPeriodEnd.toISOString(), current_period_end: laterPeriodEnd.toISOString() },
+  } }
+  await processPolarEvent(randomUUID(), later)
+  await processPolarEvent(randomUUID(), { ...later, type: "order.refunded", data: {
+    ...later.data, modified_at: new Date(paidAt.getTime() + 4000).toISOString(),
+    refunded_amount: 431, refunded_tax_amount: 32,
+  } })
+  const subscriptionAfterRefund = await database().query<{ paid_until: Date }>(
+    "SELECT paid_until FROM billing_subscriptions WHERE provider_subscription_id = $1", [subscription])
+  assert.equal(subscriptionAfterRefund.rows[0].paid_until.toISOString(), nextPeriodEnd.toISOString())
   process.stdout.write("Local billing integration checks passed\n")
 } finally {
   await database().end()
