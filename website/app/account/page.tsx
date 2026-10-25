@@ -15,5 +15,6 @@ export default async function AccountPage() {
     <p>To start your seven-day trial, finish connecting the Qyube Mac app.</p>
     <p>Returning from checkout? Your access updates after Polar confirms payment, which may take a moment. Reopen Qyube to refresh.</p>
     <Link href="/pricing" className="underline">View plans</Link>
+    <Link href="/api/billing/portal" className="underline">Manage subscription and invoices in Polar</Link>
   </main>
 }

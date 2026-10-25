@@ -1,5 +1,6 @@
 import { webhooks } from "@polar-sh/sdk/2026-10"
 import { processPolarEvent } from "@/lib/billing/webhook"
+import { drainBillingActions } from "@/lib/billing/lifetime"
 
 export const runtime = "nodejs"
 
@@ -20,6 +21,7 @@ export async function POST(request: Request) {
     if (error instanceof webhooks.PolarWebhookError) return Response.json({ error: "Invalid event" }, { status: 400 })
     throw error
   }
-  await processPolarEvent(id, event)
+  const accountId = await processPolarEvent(id, event)
+  if (accountId) await drainBillingActions(accountId)
   return Response.json({ received: true })
 }

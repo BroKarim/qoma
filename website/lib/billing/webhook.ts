@@ -75,6 +75,14 @@ async function applyPaidOrder(client: PoolClient, data: PolarData) {
         state?.revoked ? state.provider_modified_at : null, state?.provider_modified_at ?? modifiedAt])
   }
   if (checkoutId) await client.query("UPDATE checkout_attempts SET completed_at = now() WHERE provider_checkout_id = $1", [checkoutId])
+  if (plan === "lifetime" && number(data.refunded_amount) < number(data.total_amount)) {
+    const { rows: previous } = await client.query<{ provider_subscription_id: string }>(`
+      SELECT s.provider_subscription_id FROM billing_subscriptions s
+      WHERE s.account_id = $1 AND s.provider = 'polar' AND s.revoked_at IS NULL AND s.paid_until > now()
+      ORDER BY s.paid_until DESC LIMIT 1`, [accountId])
+    if (previous[0]) await client.query(`INSERT INTO billing_actions(provider, action, account_id, provider_subscription_id)
+      VALUES('polar','cancel_subscription',$1,$2) ON CONFLICT DO NOTHING`, [accountId, previous[0].provider_subscription_id])
+  }
   return accountId
 }
 
@@ -110,25 +118,31 @@ async function applySubscription(client: PoolClient, type: string, data: PolarDa
     WHERE polar_subscription_state.account_id = EXCLUDED.account_id
       AND polar_subscription_state.provider_modified_at <= EXCLUDED.provider_modified_at`,
     [id, accountId, product, revoked, data.cancel_at_period_end === true, modifiedAt])
-  const { rows } = await client.query("SELECT 1 FROM billing_orders WHERE provider = 'polar' AND subscription_id = $1 AND status = 'paid' LIMIT 1", [id])
+  const { rows } = await client.query<{ plan: string }>("SELECT plan FROM billing_orders WHERE provider = 'polar' AND subscription_id = $1 AND status = 'paid' ORDER BY paid_at DESC LIMIT 1", [id])
   if (!rows.length) return null // Subscription creation is not proof of payment.
   await client.query(`UPDATE billing_subscriptions SET plan = $2,
       cancel_at_period_end = $3, revoked_at = CASE WHEN $4 THEN now() ELSE NULL END,
       provider_modified_at = $5, updated_at = now()
     WHERE provider = 'polar' AND provider_subscription_id = $1 AND account_id = $6
       AND (provider_modified_at IS NULL OR provider_modified_at <= $5)`,
-    [id, plan, data.cancel_at_period_end === true, revoked, modifiedAt, accountId])
+    [id, rows[0].plan, data.cancel_at_period_end === true, revoked, modifiedAt, accountId])
   return accountId
 }
 
-export async function processPolarEvent(id: string, event: Event): Promise<void> {
+export async function processPolarEvent(id: string, event: Event): Promise<string | null> {
   if (!/^[A-Za-z0-9_-]{1,128}$/.test(id)) throw new Error("Invalid webhook id")
   const client = await database().connect()
   try {
     await client.query("BEGIN")
     const claim = await client.query(`INSERT INTO webhook_events(provider, event_id, payload)
       VALUES('polar',$1,$2) ON CONFLICT DO NOTHING`, [id, JSON.stringify(event)])
-    if (!claim.rowCount) { await client.query("COMMIT"); return }
+    if (!claim.rowCount) {
+      const orderId = string(object(event.data).id)
+      const { rows } = orderId ? await client.query<{ account_id: string }>(
+        "SELECT account_id FROM billing_orders WHERE provider = 'polar' AND provider_order_id = $1", [orderId]) : { rows: [] }
+      await client.query("COMMIT")
+      return rows[0]?.account_id ?? null
+    }
     const data = object(event.data)
     let accountId: string | null = null
     if (event.type === "order.paid") accountId = await applyPaidOrder(client, data)
@@ -137,6 +151,7 @@ export async function processPolarEvent(id: string, event: Event): Promise<void>
     if (accountId) await recomputeEntitlement(accountId, client)
     await client.query("UPDATE webhook_events SET processed_at = now() WHERE provider = 'polar' AND event_id = $1", [id])
     await client.query("COMMIT")
+    return accountId
   } catch (error) {
     await client.query("ROLLBACK")
     throw error
