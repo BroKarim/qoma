@@ -9,7 +9,9 @@ final class AnalyticsStore {
     private let shouldMigrateLegacyJSON: Bool
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
-    private let accountID = "local"
+    private var accountID = "local"
+
+    func useAccount(_ id: String) { accountID = id }
 
     init(storageDirectory: URL? = nil, database: QomaDatabase? = nil) {
         self.storageDirectory = storageDirectory

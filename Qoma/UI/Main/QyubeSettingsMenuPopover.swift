@@ -6,10 +6,6 @@ struct QyubeSettingsMenuPopover: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 1) {
-            .padding(.horizontal, 5)
-            .padding(.top, 0)
-            .padding(.bottom, 2)
-
             QyubeSettingsMenuItem(title: "Settings", image: "QyubeMenuSettings", action: self.onSettings)
             QyubeSettingsMenuItem(title: "Manage subscription", image: "QyubeMenuSubscription") {}
             QyubeSettingsMenuItem(title: "Sign out", image: "QyubeMenuSignOut") {}

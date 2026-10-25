@@ -54,6 +54,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return true
     }
 
+    func application(_ application: NSApplication, open urls: [URL]) {
+        guard let url = urls.first else { return }
+        if coordinator?.sessionCoordinator.snapshot != nil { return }
+        Task { @MainActor in
+            await AccessCoordinator.shared.handleCallback(url)
+            coordinator?.showHomeWindow()
+        }
+    }
+
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         return false
     }

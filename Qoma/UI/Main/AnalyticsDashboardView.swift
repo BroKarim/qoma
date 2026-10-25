@@ -96,7 +96,7 @@ struct AnalyticsDashboardView: View {
         var byID = Dictionary(
             AnalyticsStore.shared.loadFocusSessions().map { ($0.id, $0) },
             uniquingKeysWith: { _, newer in newer })
-        for session in SessionRepository.shared.loadHistory(accountID: "local") {
+        for session in SessionRepository.shared.loadHistory(accountID: AccessCoordinator.shared.accountID ?? "signed-out") {
             byID[session.id] = FocusSessionRecord(
                 id: session.id,
                 startedAt: session.startedAt,
@@ -111,7 +111,7 @@ struct AnalyticsDashboardView: View {
         self.sessions = Array(byID.values)
         self.apps = AnalyticsStore.shared.loadAppActivityEvents()
         self.websites = AnalyticsStore.shared.loadWebsiteVisits()
-        self.catches = CatchRepository.shared.listBanked(accountID: "local")
+        self.catches = CatchRepository.shared.listBanked(accountID: AccessCoordinator.shared.accountID ?? "signed-out")
     }
 }
 

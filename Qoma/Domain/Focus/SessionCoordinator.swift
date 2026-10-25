@@ -16,7 +16,7 @@ final class SessionCoordinator: ObservableObject {
 
     // MARK: - Dependencies
 
-    private let accountID: String
+    private var accountID: String
     private let sessionRepository: any SessionRepositoryProtocol
     private let catchRepository: any CatchRepositoryProtocol
     private let canStartSession: () -> Bool
@@ -58,6 +58,12 @@ final class SessionCoordinator: ObservableObject {
     var sessionAccountID: String { accountID }
 
     var onSessionEnded: ((FocusSession) -> Void)?
+
+    func useAccount(_ id: String) {
+        guard snapshot == nil, finalizationState == .idle else { return }
+        accountID = id
+        restore()
+    }
 
     init(
         accountID: String = "local",
