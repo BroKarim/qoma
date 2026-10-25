@@ -13,6 +13,7 @@ export default async function AccountPage() {
     <h1 className="text-3xl font-semibold">Your Qyube account</h1>
     <p>Signed in as {session.user.email}</p>
     <p>To start your seven-day trial, finish connecting the Qyube Mac app.</p>
+    <p>Returning from checkout? Your access updates after Polar confirms payment, which may take a moment. Reopen Qyube to refresh.</p>
     <Link href="/pricing" className="underline">View plans</Link>
   </main>
 }
