@@ -10,7 +10,8 @@
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit",
-    "db:migrate": "bun scripts/migrate.ts"
+    "db:migrate": "bun scripts/migrate.ts",
+    "auth:migrate": "bunx auth@1.7.12 migrate --config auth.ts -y"
   },
   "dependencies": {
     "@polar-sh/sdk": "^1.0.2",
