@@ -67,6 +67,8 @@ struct QyubeHomeView: View {
     @AppStorage(AppConstants.MenuBarSettings.selectedPresetMinutesKey)
     private var selectedPresetMinutes = AppConstants.MenuBarSettings.defaultPresetMinutes
     @State private var isAnalyticsConsentPresented = false
+    @State private var isLocalImportPresented = false
+    @State private var importError: String?
     @State private var isSessionFormPresented = false
     @State private var isEditingActiveSession = false
     @State private var shouldRestoreSessionFormAfterSettings = false
@@ -156,10 +158,29 @@ struct QyubeHomeView: View {
         }
         .onAppear {
             if self.access.accountID != nil && !self.analyticsConsentDecided { self.isAnalyticsConsentPresented = true }
+            if self.access.accountID != nil { self.isLocalImportPresented = LocalAccountMigrator.hasLocalData() }
         }
         .onChange(of: access.accountID) { _, id in
             if id != nil && !analyticsConsentDecided { isAnalyticsConsentPresented = true }
+            if id != nil { isLocalImportPresented = LocalAccountMigrator.hasLocalData() }
         }
+        .alert("Import your earlier Qyube data?", isPresented: $isLocalImportPresented) {
+            Button("Import") {
+                guard let id = access.accountID else { return }
+                do {
+                    if try LocalAccountMigrator.importToAccount(id) {
+                        sessionCoordinator.restore()
+                        navigation.refresh()
+                    }
+                } catch { importError = error.localizedDescription }
+            }
+            Button("Later", role: .cancel) {}
+        } message: {
+            Text("Sessions and catches from before sign-in will be linked to this account. A database backup is kept on this Mac.")
+        }
+        .alert("Import could not finish", isPresented: Binding(get: { importError != nil }, set: { if !$0 { importError = nil } })) {
+            Button("OK") { importError = nil }
+        } message: { Text(importError ?? "Your earlier data is still safe on this Mac.") }
     }
 
     @ViewBuilder private var detail: some View {
