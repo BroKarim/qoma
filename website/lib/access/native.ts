@@ -15,11 +15,23 @@ export async function startNativeLogin(input: { installationId: string; deviceNa
       !/^[A-Za-z0-9_-]{22,128}$/.test(input.state) ||
       !input.deviceName.trim() || input.deviceName.length > 80) throw new Error("INVALID_REQUEST")
   const id = randomUUID()
-  await database().query(`
-    INSERT INTO native_login_attempts(id, installation_hash, device_name, challenge, state, expires_at)
-    VALUES($1, $2, $3, $4, $5, now() + interval '10 minutes')`,
-    [id, digest(input.installationId), input.deviceName, input.challenge, input.state],
-  )
+  const hash = digest(input.installationId)
+  const client = await database().connect()
+  try {
+    await client.query("BEGIN")
+    await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", [hash])
+    const { rows } = await client.query<{ count: string }>(`
+      SELECT count(*)::text AS count FROM native_login_attempts
+      WHERE installation_hash = $1 AND created_at > now() - interval '10 minutes'`, [hash])
+    if (Number(rows[0].count) >= 5) throw new Error("RATE_LIMITED")
+    await client.query(`INSERT INTO native_login_attempts(id, installation_hash, device_name, challenge, state, expires_at)
+      VALUES($1, $2, $3, $4, $5, now() + interval '10 minutes')`,
+      [id, hash, input.deviceName, input.challenge, input.state])
+    await client.query("COMMIT")
+  } catch (error) {
+    await client.query("ROLLBACK")
+    throw error
+  } finally { client.release() }
   return { requestId: id, url: `${origin()}/auth?request=${id}` }
 }
 
@@ -91,7 +103,7 @@ export async function authenticatedDevice(request: Request): Promise<{ accountId
   const { rows } = await database().query<{ account_id: string; device_id: string }>(`
     SELECT c.account_id, c.device_id FROM device_credentials c
     JOIN devices d ON d.id = c.device_id AND d.account_id = c.account_id
-    WHERE c.token_hash = $1 AND c.expires_at > now() AND c.revoked_at IS NULL
+    WHERE c.token_hash = $1 AND c.expires_at > now() AND (c.revoked_at IS NULL OR c.grace_until > now())
       AND d.revoked_at IS NULL`, [digest(credential)])
   return rows[0] ? { accountId: rows[0].account_id, deviceId: rows[0].device_id } : null
 }
@@ -104,10 +116,10 @@ export async function rotateDeviceCredential(credential: string) {
     const { rows } = await client.query<{ account_id: string; device_id: string }>(`
       SELECT c.account_id, c.device_id FROM device_credentials c
       JOIN devices d ON d.id = c.device_id AND d.revoked_at IS NULL
-      WHERE c.token_hash = $1 AND c.expires_at > now() AND c.revoked_at IS NULL FOR UPDATE OF c`, [digest(credential)])
+      WHERE c.token_hash = $1 AND c.expires_at > now() AND (c.revoked_at IS NULL OR c.grace_until > now()) FOR UPDATE OF c`, [digest(credential)])
     if (!rows[0]) throw new Error("INVALID_CREDENTIAL")
     const next = token()
-    await client.query("UPDATE device_credentials SET revoked_at = now() WHERE token_hash = $1", [digest(credential)])
+    await client.query("UPDATE device_credentials SET revoked_at = now(), grace_until = now() + interval '10 minutes' WHERE token_hash = $1", [digest(credential)])
     await client.query("INSERT INTO device_credentials(token_hash, device_id, account_id, expires_at) VALUES($1,$2,$3,now() + interval '90 days')",
       [digest(next), rows[0].device_id, rows[0].account_id])
     await client.query("COMMIT")
@@ -121,7 +133,7 @@ export async function rotateDeviceCredential(credential: string) {
 export async function revokeDevice(client: PoolClient, accountId: string, deviceId: string) {
   const result = await client.query("UPDATE devices SET revoked_at = now() WHERE id = $1 AND account_id = $2 AND revoked_at IS NULL", [deviceId, accountId])
   if (result.rowCount) {
-    await client.query("UPDATE device_credentials SET revoked_at = now() WHERE device_id = $1 AND revoked_at IS NULL", [deviceId])
+    await client.query("UPDATE device_credentials SET revoked_at = now(), grace_until = NULL WHERE device_id = $1", [deviceId])
   }
   return Boolean(result.rowCount)
 }

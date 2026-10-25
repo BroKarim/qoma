@@ -50,7 +50,7 @@ export async function recomputeEntitlement(accountId: string, client?: PoolClien
     if (!client) await owned.query("BEGIN")
     await owned.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", [accountId])
     const { rows: trials } = await owned.query<{ ends_at: Date }>("SELECT ends_at FROM trial_claims WHERE account_id = $1", [accountId])
-    const { rows: lifetimes } = await owned.query("SELECT 1 FROM billing_orders WHERE account_id = $1 AND plan = 'lifetime' AND status = 'paid' AND refunded_cents < amount_cents LIMIT 1", [accountId])
+    const { rows: lifetimes } = await owned.query("SELECT 1 FROM billing_orders WHERE account_id = $1 AND plan = 'lifetime' AND status = 'paid' LIMIT 1", [accountId])
     const { rows: subscriptions } = await owned.query<{ plan: "monthly" | "annual"; paid_until: Date }>(
       "SELECT plan, paid_until FROM billing_subscriptions WHERE account_id = $1 AND paid_until > now() AND revoked_at IS NULL ORDER BY paid_until DESC LIMIT 1",
       [accountId],

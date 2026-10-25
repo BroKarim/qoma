@@ -11,12 +11,13 @@ final class AccessCoordinator: ObservableObject {
     @Published private(set) var state: AccessState = .signedOut
     @Published private(set) var accountID: String?
     @Published private(set) var message: String?
-    var onAccountActivated: ((String) -> Void)?
+    var onAccountChanged: ((String?) -> Void)?
 
     private struct Credential: Codable {
         let accountId: String
         let deviceId: String
         let token: String
+        let issuedAt: Date?
     }
     private struct PendingLogin: Codable {
         let installationId: String
@@ -98,12 +99,12 @@ final class AccessCoordinator: ObservableObject {
             let result: ExchangeResponse = try await post("/api/native-auth/exchange", body: [
                 "code": code, "verifier": pending.verifier, "installationId": pending.installationId,
             ])
-            let value = Credential(accountId: result.accountId, deviceId: result.deviceId, token: result.credential)
+            let value = Credential(accountId: result.accountId, deviceId: result.deviceId, token: result.credential, issuedAt: Date())
             try SecretStore.save(JSONEncoder().encode(value), as: "credential")
             SecretStore.delete("pending-login")
             credential = value
             accountID = value.accountId
-            onAccountActivated?(value.accountId)
+            onAccountChanged?(value.accountId)
             await refreshAccess()
         } catch {
             message = "Sign-in failed. If two Macs are active, remove one on the website and retry."
@@ -111,8 +112,26 @@ final class AccessCoordinator: ObservableObject {
     }
 
     func refreshAccess() async {
-        guard let credential else { state = .signedOut; return }
+        guard var credential else { state = .signedOut; return }
         do {
+            if credential.issuedAt.map({ $0.timeIntervalSinceNow < -60 * 86_400 }) ?? true {
+                var rotation = URLRequest(url: baseURL.appending(path: "/api/native-auth/refresh"))
+                rotation.httpMethod = "POST"
+                rotation.setValue("Bearer \(credential.token)", forHTTPHeaderField: "Authorization")
+                let (rotationData, rotationResponse) = try await URLSession.shared.data(for: rotation)
+                guard let rotationHTTP = rotationResponse as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+                if rotationHTTP.statusCode == 401 {
+                    signOut()
+                    message = "This Mac was signed out. Sign in again."
+                    return
+                }
+                guard rotationHTTP.statusCode == 200 else { throw URLError(.badServerResponse) }
+                let rotated = try JSONDecoder().decode(ExchangeResponse.self, from: rotationData)
+                guard rotated.accountId == credential.accountId, rotated.deviceId == credential.deviceId else { throw URLError(.userAuthenticationRequired) }
+                credential = Credential(accountId: rotated.accountId, deviceId: rotated.deviceId, token: rotated.credential, issuedAt: Date())
+                try SecretStore.save(JSONEncoder().encode(credential), as: "credential")
+                self.credential = credential
+            }
             var request = URLRequest(url: baseURL.appending(path: "/api/me/entitlement"))
             request.setValue("Bearer \(credential.token)", forHTTPHeaderField: "Authorization")
             let (data, response) = try await URLSession.shared.data(for: request)
@@ -143,6 +162,25 @@ final class AccessCoordinator: ObservableObject {
         accountID = nil
         state = .signedOut
         SecretStore.delete("credential")
+        onAccountChanged?(nil)
+    }
+
+    func signOutRemote() async {
+        guard let credential else { return }
+        var request = URLRequest(url: baseURL.appending(path: "/api/me/device"))
+        request.httpMethod = "DELETE"
+        request.setValue("Bearer \(credential.token)", forHTTPHeaderField: "Authorization")
+        do {
+            let (_, response) = try await URLSession.shared.data(for: request)
+            guard let http = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+            guard http.statusCode == 200 || http.statusCode == 401 else { throw URLError(.badServerResponse) }
+            signOut()
+            if http.statusCode == 401 {
+                message = "This Mac was signed out locally. Check connected Macs on the website if you need to remove it."
+            }
+        } catch {
+            message = "Sign-out needs an internet connection so this Mac can be removed from your account."
+        }
     }
 
     private func localState(at now: Date) -> AccessState {

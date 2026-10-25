@@ -31,14 +31,21 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
 
         navigation.accountID = access.accountID ?? "signed-out"
         AnalyticsStore.shared.useAccount(navigation.accountID)
-        access.onAccountActivated = { [weak self] accountID in
+        access.onAccountChanged = { [weak self] accountID in
             guard let self else { return }
-            self.sessionCoordinator.useAccount(accountID)
-            self.navigation.accountID = accountID
-            AnalyticsStore.shared.useAccount(accountID)
+            let scope = accountID ?? "signed-out"
+            self.sessionCoordinator.useAccount(scope)
+            self.navigation.accountID = scope
+            AnalyticsStore.shared.useAccount(scope)
             self.navigation.refresh()
         }
         Task { await access.refreshAccess() }
+        Timer.publish(every: 300, on: .main, in: .common).autoconnect()
+            .sink { [weak self] _ in
+                guard let self else { return }
+                Task { await self.access.refreshAccess() }
+            }
+            .store(in: &cancellables)
 
         menuBarController.configure(
             coordinator: self.sessionCoordinator,

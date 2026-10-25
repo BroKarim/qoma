@@ -52,14 +52,18 @@ async function applyPaidOrder(client: PoolClient, data: PolarData) {
   const paidAt = date(data.created_at) ?? new Date()
   const modifiedAt = date(data.modified_at) ?? paidAt
   await client.query(`INSERT INTO billing_orders(provider, provider_order_id, account_id, plan, subscription_id,
-      amount_cents, refunded_cents, currency, status, paid_at, period_start, period_end, provider_modified_at)
-    VALUES('polar',$1,$2,$3,$4,$5,$6,'usd',$7,$8,$9,$10,$11)
+      amount_cents, refunded_cents, total_cents, billing_reason, currency, status,
+      paid_at, period_start, period_end, provider_modified_at)
+    VALUES('polar',$1,$2,$3,$4,$5,$6,$7,$8,'usd',$9,$10,$11,$12,$13)
     ON CONFLICT (provider, provider_order_id) DO UPDATE SET
       refunded_cents = EXCLUDED.refunded_cents, status = EXCLUDED.status,
       provider_modified_at = EXCLUDED.provider_modified_at
     WHERE billing_orders.provider_modified_at IS NULL OR billing_orders.provider_modified_at <= EXCLUDED.provider_modified_at`,
-    [id, accountId, plan, subscriptionId, number(data.total_amount), number(data.refunded_amount),
-      number(data.refunded_amount) >= number(data.total_amount) ? "refunded" : "paid", paidAt, periodStart, periodEnd, modifiedAt])
+    [id, accountId, plan, subscriptionId, number(data.net_amount),
+      Math.max(0, number(data.refunded_amount) - number(data.refunded_tax_amount)),
+      number(data.total_amount), string(data.billing_reason),
+      number(data.refunded_amount) > 0 && number(data.refunded_amount) >= number(data.total_amount) ? "refunded" : "paid",
+      paidAt, periodStart, periodEnd, modifiedAt])
   if (subscriptionId && periodEnd && plan !== "lifetime") {
     const { rows: states } = await client.query<{ revoked: boolean; cancel_at_period_end: boolean; provider_modified_at: Date }>(
       "SELECT revoked, cancel_at_period_end, provider_modified_at FROM polar_subscription_state WHERE subscription_id = $1 AND account_id = $2", [subscriptionId, accountId])
@@ -75,7 +79,7 @@ async function applyPaidOrder(client: PoolClient, data: PolarData) {
         state?.revoked ? state.provider_modified_at : null, state?.provider_modified_at ?? modifiedAt])
   }
   if (checkoutId) await client.query("UPDATE checkout_attempts SET completed_at = now() WHERE provider_checkout_id = $1", [checkoutId])
-  if (plan === "lifetime" && number(data.refunded_amount) < number(data.total_amount)) {
+  if (plan === "lifetime" && (number(data.refunded_amount) === 0 || number(data.refunded_amount) < number(data.total_amount))) {
     const { rows: previous } = await client.query<{ provider_subscription_id: string }>(`
       SELECT s.provider_subscription_id FROM billing_subscriptions s
       WHERE s.account_id = $1 AND s.provider = 'polar' AND s.revoked_at IS NULL AND s.paid_until > now()
@@ -89,14 +93,16 @@ async function applyPaidOrder(client: PoolClient, data: PolarData) {
 async function applyRefund(client: PoolClient, data: PolarData) {
   const id = string(data.id)
   if (!id) throw new Error("Refund missing order ID")
-  const { rows } = await client.query<{ account_id: string; amount_cents: number; subscription_id: string | null }>(
-    "SELECT account_id, amount_cents, subscription_id FROM billing_orders WHERE provider = 'polar' AND provider_order_id = $1 FOR UPDATE", [id])
+  const { rows } = await client.query<{ account_id: string; total_cents: number; subscription_id: string | null }>(
+    "SELECT account_id, total_cents, subscription_id FROM billing_orders WHERE provider = 'polar' AND provider_order_id = $1 FOR UPDATE", [id])
   if (!rows[0]) throw new Error("Refund arrived before paid order")
   const amount = number(data.refunded_amount)
-  await client.query(`UPDATE billing_orders SET refunded_cents = $2, status = CASE WHEN $2 >= amount_cents THEN 'refunded' ELSE 'paid' END,
-      provider_modified_at = $3 WHERE provider = 'polar' AND provider_order_id = $1 AND
-      (provider_modified_at IS NULL OR provider_modified_at <= $3)`, [id, amount, date(data.modified_at) ?? new Date()])
-  if (amount >= rows[0].amount_cents && rows[0].subscription_id) {
+  await client.query(`UPDATE billing_orders SET refunded_cents = $2,
+      status = CASE WHEN $3 > 0 AND $3 >= total_cents THEN 'refunded' ELSE 'paid' END,
+      provider_modified_at = $4 WHERE provider = 'polar' AND provider_order_id = $1 AND
+      (provider_modified_at IS NULL OR provider_modified_at <= $4)`,
+    [id, Math.max(0, amount - number(data.refunded_tax_amount)), amount, date(data.modified_at) ?? new Date()])
+  if (amount > 0 && amount >= rows[0].total_cents && rows[0].subscription_id) {
     const { rows: paid } = await client.query("SELECT 1 FROM billing_orders WHERE provider = 'polar' AND subscription_id = $1 AND status = 'paid' LIMIT 1", [rows[0].subscription_id])
     if (!paid.length) await client.query("UPDATE billing_subscriptions SET revoked_at = now() WHERE provider = 'polar' AND provider_subscription_id = $1", [rows[0].subscription_id])
   }

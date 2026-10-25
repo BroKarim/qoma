@@ -2010,3 +2010,58 @@ Pembatasan perangkat minimum masuk tahap trial/auth karena trial per perangkat t
 - Polar [subscription management](https://polar.sh/docs/features/subscriptions/manage), [proration](https://polar.sh/docs/features/subscriptions/proration), [webhook delivery](https://polar.sh/docs/integrate/webhooks/delivery).
 - Polar [order.paid](https://polar.sh/docs/api-reference/webhooks/order.paid), [order.refunded](https://polar.sh/docs/api-reference/webhooks/order.refunded), [subscription.updated dan lifecycle events](https://polar.sh/docs/api-reference/webhooks/subscription.updated).
 - Polar [metode pembayaran](https://polar.sh/docs/features/checkout/payment-methods), [pricing/fees](https://polar.sh/resources/pricing). Periksa ulang capability/fee saat implementasi; jangan menyalin API lama dari ingatan.
+
+## Implementasi roadmap akun dan billing — 25 Oktober 2026 (status setelah coding)
+
+Bagian ini **menambahkan** status implementasi pada roadmap di atas; keputusan, rancangan, dan riwayat sebelumnya tetap berlaku. Branch dibuat berurutan dalam satu worktree, sehingga branch terakhir memuat semua commit sebelumnya:
+
+| Branch | Commit | Isi |
+|---|---|---|
+| `codex/auth-backend-foundation` | `1bdb5ce` | PostgreSQL schema, entitlement recompute, signed grant test, paket server. |
+| `codex/auth-website-login` | `815fa32` | Better Auth Google + OTP email, Resend, halaman login/akun, env template. |
+| `codex/native-trial-devices` | `3d04210` | Browser→Mac one-time PKCE handoff, trial akun+instalasi, batas 2 Mac, credential, signed API. |
+| `codex/native-access-onboarding` | `049d5f2` | Mac onboarding/login, Keychain credential, verifikasi grant, gate sesi, scope akun. |
+| `codex/account-data-migration` | `f3c4d39` | Backup SQLite dan import data local ke akun secara transaksional. |
+| `codex/polar-checkout-webhooks` | `563747e` | Checkout hosted, webhook signature/inbox, ledger order/subscription, harga/halaman. |
+| `codex/polar-plan-lifetime` | `854df3e` | Diskon lifetime, outbox cancellation, portal billing Polar. |
+| `codex/account-settings-release` | lihat HEAD branch | UI perangkat, sign-out device, credential rotation grace, setup dan status. |
+
+### Runtime dan batas kepercayaan yang terpasang
+
+```text
+Qoma (Swift): Keychain installation ID + device credential + signed access snapshot
+   ├─ POST /api/native-auth/start → website /auth (Google/OTP)
+   ├─ qyube://auth/callback?code&state → POST /api/native-auth/exchange (PKCE)
+   └─ GET /api/me/entitlement → verifikasi EdDSA + akses lokal
+
+website (Next/Better Auth/Resend) → PostgreSQL trial/device/entitlements
+   └─ POST /api/billing/checkout → Polar hosted checkout
+Polar signed webhook → order/subscription ledger → recompute entitlement
+   └─ lifetime order.paid → billing_actions → cancel subscription lama di Polar
+```
+
+- Mac **tidak** menyimpan token Polar, OTP, database URL atau secret penandatangan. Semua ada di server. Checkout return URL tidak membuka grant; hanya `order.paid` dengan verifikasi webhook yang memproses pembayaran. `order.refunded` memperbarui grant, koleksi lokal tetap ada.
+- Batas 2 Mac dan trial satu akun/satu instalasi ditegakkan dalam transaksi database. Identitas instalasi disimpan Keychain. Credential device dapat dicabut di web atau saat sign out online. Rotasi credential memakai overlap 10 menit agar response hilang tidak langsung memutus perangkat.
+- Subscription online berlaku sampai paid period end; cache offline sampai paid end + 3 hari. Lifetime cache 30 hari dari tanda tangan server terakhir; trial berhenti pada akhir 7 hari. Refresh dilakukan saat launch, app aktif lagi, dan berkala 5 menit. Pencabutan yang terjadi saat Mac offline baru berlaku saat ia kembali online atau masa cache habis.
+- Migrasi koleksi lama ditawarkan, tidak otomatis pindah akun; SQLite dibackup dahulu. Data historis akun lama tidak dihapus saat sign out.
+- Harga USD yang tampil: $3.99/month, $29/year, $49 lifetime macOS-only. Tiga Polar product ID dan seluruh secret sengaja kosong. Portal hosted mengurus perubahan monthly/annual dan harus dikonfigurasi menampilkan prorata final.
+- Untuk lifetime, diskon sekali redeem menggunakan pembayaran terakhir *sebelum pajak* pada subscription berbayar aktif. Akun dengan invoice terakhir `subscription_update` ditahan (`PRORATION_REVIEW_REQUIRED`) karena kredit dari invoice penyesuaian dapat salah. Ini sengaja belum dianggap selesai. Endpoint `POST /api/internal/billing/retry` dapat dipanggil cron Dokploy dengan token server untuk mencoba ulang cancellation outbox.
+
+### Bukti pengujian tanpa kredensial
+
+- `bun run typecheck`, `bun run build`, `bun test` pada `website/` lulus untuk logic akses dan diskon. `xcodebuild build` Debug macOS lulus; ada warning SwiftLint/concurrency lama yang tidak terkait.
+- Migrasi `001`–`006` dijalankan pada PostgreSQL 17 sementara lokal, lalu `scripts/test-billing-integration.ts` lulus untuk `order.paid`, deduplikasi event, nominal sebelum pajak, full refund, dan entitlement expiry. Server/database sementara dihentikan dan dibersihkan setelah tes. Ini bukan pengujian Polar live.
+- ESLint pada file auth/billing yang diubah lulus. `bun run lint` global masih gagal pada komponen website lama (`macos-dock.tsx`, `menu-bar.tsx`); perlu dibereskan terpisah sebelum menjadikan lint global release gate.
+- `LocalAccountMigratorTests` lulus untuk import atomik/idempotent dan kegagalan backup pada branch migrasi.
+- Belum ada tes end-to-end PostgreSQL/Google/Resend/Polar, karena env/sandbox/product belum diisi. Build bukan bukti callback OAuth, email delivery, webhook live, ataupun checkout benar-benar membayar.
+
+### Pekerjaan tersisa sebelum rilis (jangan tandai selesai hanya karena code sudah ada)
+
+1. Isi secret/produk dan jalankan migrasi sesuai [`website/SETUP.md`](website/SETUP.md); uji Better Auth schema migrasi terhadap database nyata, DNS OAuth/Resend, TLS, backup dan webhook endpoint. `QyubeEntitlementPublicKey` dalam `Info.plist` masih kosong: app akan menolak signed grant sampai key asli terpasang.
+2. Uji sandbox Polar penuh: harga produk cocok tampilan, pajak/negara, metode bayar, customer portal prorata, webhook duplikat/reorder, refund, subscription overdue/revoke, serta pembatalan lifetime outbox. Aktifkan cron Dokploy untuk endpoint retry yang sudah ada dan monitoring/alert; webhook yang kehabisan retry tetap perlu rekonsiliasi provider canonical.
+3. Validasi kredit lifetime setelah prorata plan change. Saat ini checkout kasus itu ditolak dengan status konflik, bukan diberi nominal spekulatif. Verifikasi expiry checkout vs expiry diskon dan dua tab checkout dalam sandbox. Perubahan paket via portal membutuhkan setting organisasi Polar yang sesuai.
+4. Uji dua Mac fisik/reinstall/Keychain, online→offline→reboot, jam mundur, revoke saat offline, dan restore pembelian. Pastikan native login di browser default kembali ke `qyube://` setelah OAuth/OTP pada signed Release build.
+5. Review security: rate limit lintas IP di reverse proxy (rate limit instalasi di API tidak cukup menghadapi UUID palsu), penanganan webhook tertunda/out-of-order dengan rekonsiliasi provider canonical, key rotation/signing `kid`, security headers/cookie, audit account linking verified-email dua arah. Tentukan retensi marker trial dan kebijakan account deletion/refund.
+6. UI dan copy final: hasil checkout pending berbasis server, error provider yang ramah pengguna, support/privacy/terms, akses histori dari Today saat expired, dan visual polish onboarding/akun. Jangan menjanjikan QRIS sebelum Xendit diintegrasikan.
+
+**Status:** implementasi dasar tersusun dan build, tetapi **belum release-ready**. Tahap yang memerlukan kredensial dan sandbox sengaja ditunda sesuai permintaan pengguna; tidak ada transaksi live atau deploy. Roadmap bagian I di atas tetap menjadi acceptance criteria, bukan otomatis berubah menjadi `[x]` seluruhnya.

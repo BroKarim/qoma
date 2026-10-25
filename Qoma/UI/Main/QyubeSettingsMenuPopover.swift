@@ -2,13 +2,18 @@ import SwiftUI
 
 struct QyubeSettingsMenuPopover: View {
     let onSettings: () -> Void
+    let onManageSubscription: () -> Void
+    let onSignOut: () -> Void
+    let canSignOut: Bool
     let onQuit: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 1) {
             QyubeSettingsMenuItem(title: "Settings", image: "QyubeMenuSettings", action: self.onSettings)
-            QyubeSettingsMenuItem(title: "Manage subscription", image: "QyubeMenuSubscription") {}
-            QyubeSettingsMenuItem(title: "Sign out", image: "QyubeMenuSignOut") {}
+            QyubeSettingsMenuItem(title: "Manage subscription", image: "QyubeMenuSubscription", action: self.onManageSubscription)
+            if canSignOut {
+                QyubeSettingsMenuItem(title: "Sign out", image: "QyubeMenuSignOut", action: self.onSignOut)
+            }
             QyubeSettingsMenuItem(title: "Help", image: "QyubeMenuHelp") {}
             QyubeSettingsMenuItem(title: "Give feedback", image: "QyubeMenuFeedback") {}
 

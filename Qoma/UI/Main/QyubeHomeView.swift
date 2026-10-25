@@ -69,6 +69,7 @@ struct QyubeHomeView: View {
     @State private var isAnalyticsConsentPresented = false
     @State private var isLocalImportPresented = false
     @State private var importError: String?
+    @State private var accountError: String?
     @State private var isSessionFormPresented = false
     @State private var isEditingActiveSession = false
     @State private var shouldRestoreSessionFormAfterSettings = false
@@ -105,6 +106,16 @@ struct QyubeHomeView: View {
                     self.isSessionFormPresented = false
                     self.navigation.page = .settings
                 },
+                onManageSubscription: {
+                    NSWorkspace.shared.open(URL(string: "https://qyube.brokarim.com/account")!)
+                },
+                onSignOut: {
+                    Task {
+                        await self.access.signOutRemote()
+                        if self.access.accountID != nil { self.accountError = self.access.message }
+                    }
+                },
+                canSignOut: self.access.accountID != nil && self.activeSession == nil,
                 onQuit: self.onQuit)
             if case .trialing(let expiresAt) = access.state {
                 Text("Free trial · \(max(1, Int(ceil(expiresAt.timeIntervalSinceNow / 86_400)))) days left")
@@ -181,12 +192,19 @@ struct QyubeHomeView: View {
         .alert("Import could not finish", isPresented: Binding(get: { importError != nil }, set: { if !$0 { importError = nil } })) {
             Button("OK") { importError = nil }
         } message: { Text(importError ?? "Your earlier data is still safe on this Mac.") }
+        .alert("Could not sign out", isPresented: Binding(get: { accountError != nil }, set: { if !$0 { accountError = nil } })) {
+            Button("OK") { accountError = nil }
+        } message: { Text(accountError ?? "Please try again.") }
     }
 
     @ViewBuilder private var detail: some View {
         if self.access.accountID == nil {
             accessGate(title: "Welcome to Qyube", detail: "Sign in to begin your free seven-day trial. No payment card is needed.", action: "Sign in") {
                 Task { await self.access.beginLogin() }
+            }
+        } else if case .unknown = self.access.state, self.navigation.page == nil {
+            accessGate(title: "Checking access", detail: "Connect to the internet to verify your account. Your collection is still available.", action: "Retry") {
+                Task { await self.access.refreshAccess() }
             }
         } else if !self.access.canStartSession(), self.navigation.page == nil {
             accessGate(title: "Keep focusing", detail: "Your access needs renewal. Your past sessions and catches are still here.", action: "View plans") {

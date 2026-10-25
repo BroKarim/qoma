@@ -11,7 +11,7 @@ export default function CompleteLoginPage() {
     if (started.current) return
     started.current = true
     const requestId = new URLSearchParams(window.location.search).get("request")
-    if (!requestId) { setMessage("This login request is missing. Start again in the Mac app."); return }
+    if (!requestId) { window.location.replace("/auth"); return }
     void fetch("/api/native-auth/complete", {
       method: "POST", headers: { "content-type": "application/json" },
       body: JSON.stringify({ requestId }),

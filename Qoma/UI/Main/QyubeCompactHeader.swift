@@ -5,6 +5,9 @@ struct QyubeCompactHeader: View {
     let onAnalytics: () -> Void
     let onCatalog: () -> Void
     let onSettings: () -> Void
+    let onManageSubscription: () -> Void
+    let onSignOut: () -> Void
+    let canSignOut: Bool
     let onQuit: () -> Void
     @State private var isSettingsPopoverPresented = false
 
@@ -31,6 +34,15 @@ struct QyubeCompactHeader: View {
                                 self.isSettingsPopoverPresented = false
                                 self.onSettings()
                             },
+                            onManageSubscription: {
+                                self.isSettingsPopoverPresented = false
+                                self.onManageSubscription()
+                            },
+                            onSignOut: {
+                                self.isSettingsPopoverPresented = false
+                                self.onSignOut()
+                            },
+                            canSignOut: self.canSignOut,
                             onQuit: {
                                 self.isSettingsPopoverPresented = false
                                 self.onQuit()
