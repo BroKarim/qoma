@@ -90,7 +90,7 @@ export default function MarketingPageClient() {
             width={2172}
             height={724}
             sizes="100vw"
-            className="absolute -bottom-[3%] left-1/2 w-[125%] max-w-none -translate-x-1/2 opacity-75 sm:w-[105%]"
+            className="absolute -bottom-[3%] left-1/2 w-[125%] max-w-none -translate-x-1/2 opacity-75 sm:w-[105%] xl:w-[105%]"
           />
           <Image
             src="/hero/ice-floe.webp"
@@ -98,7 +98,7 @@ export default function MarketingPageClient() {
             width={2172}
             height={724}
             sizes="(max-width: 768px) 125vw, 88vw"
-            className="absolute bottom-[5%] left-1/2 w-[125%] max-w-none -translate-x-1/2 sm:w-[90%] sm:max-w-[1180px]"
+            className="absolute bottom-[5%] left-1/2 w-[125%] max-w-none -translate-x-1/2 sm:w-[100%] xl:w-[90%] xl:max-w-[1180px]"
           />
           <Image
             src="/hero/bucket-empty.webp"
@@ -106,7 +106,7 @@ export default function MarketingPageClient() {
             width={1254}
             height={1254}
             sizes="(max-width: 768px) 22vw, 11vw"
-            className="absolute bottom-[19%] left-[15%] w-[22%] max-w-[150px] object-contain sm:bottom-[18%] sm:left-[29%] sm:w-[11%]"
+            className="absolute bottom-[19%] left-[15%] w-[22%] max-w-[150px] object-contain sm:bottom-[18%] sm:left-[6%] sm:w-[15%] xl:left-[29%] xl:w-[11%]"
           />
           <Image
             src={sessionState === "paused" ? "/hero/penguin-sleeping.webp" : "/hero/penguin-fishing.webp"}
@@ -115,7 +115,7 @@ export default function MarketingPageClient() {
             height={1254}
             priority
             sizes="(max-width: 640px) 46vw, (max-width: 1024px) 34vw, 300px"
-            className="absolute bottom-[19%] left-1/2 w-[46%] max-w-[300px] -translate-x-1/2 object-contain sm:bottom-[22%] sm:w-[34%]"
+            className="absolute bottom-[19%] left-1/2 w-[46%] max-w-[300px] -translate-x-1/2 object-contain sm:bottom-[19%] sm:left-[39%] sm:w-[30%] xl:bottom-[22%] xl:left-1/2 xl:w-[300px]"
           />
           <Image
             src="/hero/fishing-rod.webp"
@@ -123,7 +123,7 @@ export default function MarketingPageClient() {
             width={1774}
             height={887}
             sizes="(max-width: 640px) 46vw, 280px"
-            className="absolute bottom-[37%] left-[48%] w-[46%] max-w-[280px] object-contain sm:bottom-[38%] sm:left-[49%] sm:w-[280px]"
+            className="absolute bottom-[37%] left-[48%] w-[46%] max-w-[280px] object-contain sm:bottom-[38%] sm:left-[39%] sm:w-[280px] xl:left-[49%]"
           />
           <svg
             viewBox="0 0 100 100"
@@ -131,6 +131,23 @@ export default function MarketingPageClient() {
             className="absolute inset-0 h-full w-full"
           >
             <path
+              className="sm:hidden"
+              d="M 92 53 C 86 63, 68 66, 68 75"
+              fill="none"
+              stroke="#55565a"
+              strokeWidth=".12"
+              vectorEffect="non-scaling-stroke"
+            />
+            <path
+              className="hidden sm:block xl:hidden"
+              d="M 78 45 C 75 53, 70 58, 70 70"
+              fill="none"
+              stroke="#55565a"
+              strokeWidth=".12"
+              vectorEffect="non-scaling-stroke"
+            />
+            <path
+              className="hidden xl:block"
               d="M 68 45 C 67 53, 63 58, 63 70"
               fill="none"
               stroke="#55565a"
@@ -191,7 +208,7 @@ export default function MarketingPageClient() {
               event.preventDefault()
               startSession()
             }}
-            className="absolute top-[90px] right-4 z-20 w-[min(350px,calc(100%-2rem))] rounded-[18px] border border-black/10 bg-white/90 p-5 shadow-[0_16px_48px_rgba(32,32,32,0.12)] backdrop-blur-md sm:top-[25%] sm:right-[6%] sm:p-6 lg:right-[9%]"
+            className="absolute top-[84px] right-4 z-20 w-[min(350px,calc(100%-2rem))] rounded-[18px] border border-black/10 bg-white/90 p-5 shadow-[0_16px_48px_rgba(32,32,32,0.12)] backdrop-blur-md sm:w-[min(300px,calc(100%-2rem))] xl:top-[25%] xl:right-[6%] xl:w-[350px] xl:p-6"
           >
             <h1 className="mb-5 text-[20px] font-semibold tracking-[-0.035em]">
               New session
