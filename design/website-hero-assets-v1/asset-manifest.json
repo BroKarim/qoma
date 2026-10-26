@@ -1,0 +1,252 @@
+{
+  "status": "static-layer-assets; pose registration and animation pending",
+  "assets": [
+    {
+      "file": "bucket-empty.png",
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "alpha_bounds": [
+        0,
+        23,
+        1240,
+        1230
+      ]
+    },
+    {
+      "file": "fish/fish-source-01.png",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "alpha_bounds": [
+        36,
+        115,
+        476,
+        397
+      ]
+    },
+    {
+      "file": "fish/fish-source-10.png",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "alpha_bounds": [
+        77,
+        36,
+        435,
+        476
+      ]
+    },
+    {
+      "file": "fish/fish-source-22.png",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "alpha_bounds": [
+        36,
+        102,
+        476,
+        409
+      ]
+    },
+    {
+      "file": "fish/fish-source-25.png",
+      "width": 512,
+      "height": 512,
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "alpha_bounds": [
+        36,
+        55,
+        476,
+        457
+      ]
+    },
+    {
+      "file": "fishing-rod.png",
+      "width": 1774,
+      "height": 887,
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "alpha_bounds": [
+        65,
+        67,
+        1720,
+        841
+      ]
+    },
+    {
+      "file": "ice-floe.png",
+      "width": 2172,
+      "height": 724,
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "alpha_bounds": [
+        0,
+        9,
+        2171,
+        724
+      ]
+    },
+    {
+      "file": "penguin-casting.png",
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "alpha_bounds": [
+        0,
+        45,
+        1202,
+        1192
+      ]
+    },
+    {
+      "file": "penguin-completed.png",
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "alpha_bounds": [
+        0,
+        3,
+        1224,
+        1208
+      ]
+    },
+    {
+      "file": "penguin-deposit.png",
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "alpha_bounds": [
+        0,
+        37,
+        1232,
+        1192
+      ]
+    },
+    {
+      "file": "penguin-fishing.png",
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "alpha_bounds": [
+        0,
+        3,
+        1245,
+        1254
+      ]
+    },
+    {
+      "file": "penguin-pulling.png",
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "alpha_bounds": [
+        0,
+        9,
+        1204,
+        1254
+      ]
+    },
+    {
+      "file": "penguin-sleeping.png",
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "alpha_bounds": [
+        0,
+        21,
+        1234,
+        1238
+      ]
+    },
+    {
+      "file": "water-splash.png",
+      "width": 1585,
+      "height": 992,
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "alpha_bounds": [
+        273,
+        19,
+        1457,
+        976
+      ]
+    },
+    {
+      "file": "water-wash.png",
+      "width": 2172,
+      "height": 724,
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "alpha_bounds": [
+        23,
+        17,
+        2142,
+        724
+      ]
+    },
+    {
+      "file": "antarctic-background.png",
+      "width": 1586,
+      "height": 992,
+      "mode": "RGB",
+      "role": "opaque scenic background behind transparent foreground layers"
+    }
+  ]
+}

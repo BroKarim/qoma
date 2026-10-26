@@ -1,321 +1,238 @@
 "use client"
 
-import { useRef, useState, useEffect, type ReactNode } from "react"
 import Image from "next/image"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion"
-
 import Link from "next/link"
-import { useTimer } from "@/lib/use-timer"
-import { MenuBar } from "@/components/menu-bar"
-import { FloatingTimer } from "@/components/floating-timer"
-import MacOSDock from "@/components/macos-dock"
-import { DownloadSection } from "@/components/download-section"
+import { useEffect, useRef, useState } from "react"
+import { Download, Pause, Play, RotateCcw } from "lucide-react"
 
-const DOCK_APPS = [
-  {
-    id: "finder",
-    name: "Finder",
-    icon: "https://cdn.jim-nielsen.com/macos/1024/finder-2021-09-10.png?rf=1024",
-  },
-  {
-    id: "calculator",
-    name: "Calculator",
-    icon: "https://cdn.jim-nielsen.com/macos/1024/calculator-2021-04-29.png?rf=1024",
-  },
-  {
-    id: "qoma",
-    name: "Qoma",
-    icon: "/icon1.png",
-    iconScale: 0.8,
-  },
-  {
-    id: "terminal",
-    name: "Terminal",
-    icon: "https://cdn.jim-nielsen.com/macos/1024/terminal-2021-06-03.png?rf=1024",
-  },
-  {
-    id: "mail",
-    name: "Mail",
-    icon: "https://cdn.jim-nielsen.com/macos/1024/mail-2021-05-25.png?rf=1024",
-  },
-  {
-    id: "notes",
-    name: "Notes",
-    icon: "https://cdn.jim-nielsen.com/macos/1024/notes-2021-05-25.png?rf=1024",
-  },
-  {
-    id: "safari",
-    name: "Safari",
-    icon: "https://cdn.jim-nielsen.com/macos/1024/safari-2021-06-02.png?rf=1024",
-  },
-  {
-    id: "music",
-    name: "Music",
-    icon: "https://cdn.jim-nielsen.com/macos/1024/music-2021-05-25.png?rf=1024",
-  },
-  {
-    id: "calendar",
-    name: "Calendar",
-    icon: "https://cdn.jim-nielsen.com/macos/1024/calendar-2021-04-29.png?rf=1024",
-  },
-]
+const DURATIONS = [10, 25, 45, 60]
 
-const HIGHLIGHT_FEATURES = [
-  {
-    title: "Always on Top",
-    desc: "A compact floating timer that stays visible over any app. Never lose track of your focus again.",
-  },
-  {
-    title: "Focus Analytics",
-    desc: "Heatmap, daily breakdowns, top apps and websites used during sessions. Know exactly where your time goes.",
-  },
-  {
-    title: "Embarrassingly Free",
-    desc: "We felt weird charging for this. Instead, just give us feedback so we can make it better. That's the deal.",
-  },
-] as const
+type SessionState = "setup" | "running" | "paused" | "complete"
 
-const FAQ_ITEMS = [
-  {
-    question: "What is Qoma?",
-    answer:
-      "Qoma is a minimal floating pomodoro timer for macOS. It stays on top of your windows so you can see your countdown without switching apps.",
-  },
-  {
-    question: "Is Qoma really free?",
-    answer: "Yes. Every feature is free. No accounts, no subscriptions.",
-  },
-  {
-    question: "How do I install it?",
-    answer:
-      "Download the DMG from our releases page, drag it to Applications, and run one terminal command to bypass the macOS quarantine. Or use Homebrew.",
-  },
-  {
-    question: "What makes Qoma different from other Pomodoro timers?",
-    answer:
-      "Qoma floats above all windows so your timer never disappears behind other apps. Plus it tracks what apps and websites you use during focus sessions, giving you an analytics dashboard with heatmaps and breakdowns so you know exactly how productive you were.",
-  },
-  {
-    question: "Is my data collected?",
-    answer:
-      "No. Qoma runs entirely on your machine. No telemetry, no analytics servers, no accounts. Your focus data stays with you.",
-  },
-] as const
-
-function useInView(options?: IntersectionObserverInit) {
-  const ref = useRef<HTMLDivElement>(null)
-  const [isInView, setIsInView] = useState(false)
-  const optionsRef = useRef(options)
-
-  useEffect(() => {
-    optionsRef.current = options
-    const el = ref.current
-    if (!el) return
-
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        setIsInView(true)
-        observer.disconnect()
-      }
-    }, optionsRef.current)
-
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [options])
-
-  return { ref, isInView }
+function formatTime(seconds: number) {
+  const minutes = Math.floor(seconds / 60)
+  const remainder = seconds % 60
+  return `${String(minutes).padStart(2, "0")}:${String(remainder).padStart(2, "0")}`
 }
-
-function AnimatedSection({
-  children,
-  className = "",
-  threshold = 0.1,
-}: {
-  children: ReactNode
-  className?: string
-  threshold?: number
-}) {
-  const { ref, isInView } = useInView({ threshold })
-
-  return (
-    <div
-      ref={ref}
-      className={`transition-all duration-700 ease-out ${
-        isInView ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
-      } ${className}`}
-    >
-      {children}
-    </div>
-  )
-}
-
-const shadowClass = "shadow-qoma"
 
 export default function MarketingPageClient() {
-  const timer = useTimer()
-  const previewRef = useRef<HTMLDivElement>(null)
+  const [sessionState, setSessionState] = useState<SessionState>("setup")
+  const [duration, setDuration] = useState(25)
+  const [remaining, setRemaining] = useState(25 * 60)
+  const [task, setTask] = useState("")
+  const deadline = useRef(0)
+
+  useEffect(() => {
+    if (sessionState !== "running") return
+
+    const interval = window.setInterval(() => {
+      const seconds = Math.max(0, Math.ceil((deadline.current - Date.now()) / 1000))
+      setRemaining(seconds)
+      if (seconds === 0) setSessionState("complete")
+    }, 1000)
+
+    return () => window.clearInterval(interval)
+  }, [sessionState])
+
+  function startSession() {
+    const seconds = duration * 60
+    setRemaining(seconds)
+    deadline.current = Date.now() + seconds * 1000
+    setSessionState("running")
+  }
+
+  function pauseSession() {
+    setRemaining(Math.max(0, Math.ceil((deadline.current - Date.now()) / 1000)))
+    setSessionState("paused")
+  }
+
+  function resumeSession() {
+    deadline.current = Date.now() + remaining * 1000
+    setSessionState("running")
+  }
+
+  function resetSession() {
+    setRemaining(duration * 60)
+    setSessionState("setup")
+  }
+
+  const isSetup = sessionState === "setup"
 
   return (
-    <main className="flex flex-1 flex-col items-center font-sans">
-      {/* Hero */}
-      <AnimatedSection className="w-full">
-        <section className="flex flex-col items-center px-4 pt-10 pb-6 text-center sm:pt-16 sm:pb-8">
-          <a href="https://github.com/BroKarim/qoma" target="_blank" rel="noopener noreferrer" className="inline-block">
-            <Badge
-              className="mb-4 cursor-pointer rounded-full border border-white/15 bg-white/5 px-4 py-1 text-[10px] font-medium text-white/80 backdrop-blur-sm hover:bg-white/10 sm:mb-2"
-              style={{
-                boxShadow:
-                  "0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
-              }}
-            >
-              Open Source & Free
-            </Badge>
+    <main className="relative min-h-svh overflow-hidden bg-white font-sans text-[#202020]">
+      <section className="relative isolate min-h-svh" aria-label="qyube focus demo">
+        <Image
+          src="/hero/antarctic-background.webp"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="pointer-events-none -z-20 object-cover object-center"
+        />
+
+        <header className="absolute inset-x-0 top-0 z-30 mx-auto flex h-[76px] max-w-[1440px] items-center justify-between px-5 sm:px-9 lg:px-14">
+          <Link href="/" aria-label="qyube home" className="text-[25px] font-semibold tracking-[-0.07em]">
+            qyube
+          </Link>
+          <a
+            href="https://github.com/BroKarim/qoma/releases/latest"
+            className="inline-flex h-10 items-center gap-2 rounded-full bg-[#202020] px-5 text-[13px] font-medium text-white transition-colors hover:bg-[#3a3a3a] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#202020]"
+          >
+            <Download size={14} aria-hidden="true" />
+            Download for Mac
           </a>
+        </header>
 
-          <h1 className="mb-2 max-w-2xl font-sans text-3xl leading-tight font-normal text-white sm:text-5xl md:text-5xl">
-            Focus, floating.
-          </h1>
+        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
+          <Image
+            src="/hero/water-wash.webp"
+            alt=""
+            width={2172}
+            height={724}
+            sizes="100vw"
+            className="absolute -bottom-[3%] left-1/2 w-[125%] max-w-none -translate-x-1/2 opacity-75 sm:w-[105%]"
+          />
+          <Image
+            src="/hero/ice-floe.webp"
+            alt=""
+            width={2172}
+            height={724}
+            sizes="(max-width: 768px) 125vw, 88vw"
+            className="absolute bottom-[5%] left-1/2 w-[125%] max-w-none -translate-x-1/2 sm:w-[90%] sm:max-w-[1180px]"
+          />
+          <Image
+            src="/hero/bucket-empty.webp"
+            alt=""
+            width={1254}
+            height={1254}
+            sizes="(max-width: 768px) 22vw, 11vw"
+            className="absolute bottom-[19%] left-[15%] w-[22%] max-w-[150px] object-contain sm:bottom-[18%] sm:left-[29%] sm:w-[11%]"
+          />
+          <Image
+            src={sessionState === "paused" ? "/hero/penguin-sleeping.webp" : "/hero/penguin-fishing.webp"}
+            alt="Penguin wearing red and cyan 3D glasses, fishing on an iceberg"
+            width={1254}
+            height={1254}
+            priority
+            sizes="(max-width: 640px) 46vw, (max-width: 1024px) 34vw, 300px"
+            className="absolute bottom-[19%] left-1/2 w-[46%] max-w-[300px] -translate-x-1/2 object-contain sm:bottom-[22%] sm:w-[34%]"
+          />
+          <Image
+            src="/hero/fishing-rod.webp"
+            alt=""
+            width={1774}
+            height={887}
+            sizes="(max-width: 640px) 46vw, 280px"
+            className="absolute bottom-[37%] left-[48%] w-[46%] max-w-[280px] object-contain sm:bottom-[38%] sm:left-[49%] sm:w-[280px]"
+          />
+          <svg
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            className="absolute inset-0 h-full w-full"
+          >
+            <path
+              d="M 68 45 C 67 53, 63 58, 63 70"
+              fill="none"
+              stroke="#55565a"
+              strokeWidth=".12"
+              vectorEffect="non-scaling-stroke"
+            />
+          </svg>
+        </div>
 
-          <p className="mb-8 max-w-sm text-sm leading-relaxed text-gray-400 sm:mb-10 sm:max-w-md md:text-base">
-            A minimal pomodoro timer that stays on top of your windows.
-            <br className="hidden sm:block" />
-            Open source, free, built for macOS.
-          </p>
-
-          <div className="mb-4 flex items-center gap-3">
-            <Button
-              onClick={() => {
-                document
-                  .getElementById("download-section")
-                  ?.scrollIntoView({ behavior: "smooth" })
-              }}
-              className="shadow-qoma shrink-0 gap-2 border-none bg-[#222] px-6 py-2.5 text-sm text-white shadow-none transition-all hover:scale-105 hover:bg-[#222] active:scale-95"
-            >
-              Download for macOS
-            </Button>
-          </div>
-
-          <p className="text-[10px] text-gray-400 md:text-sm">
-            No account needed · Runs locally
-          </p>
-        </section>
-      </AnimatedSection>
-
-      {/* App Preview */}
-      <AnimatedSection className="w-full" threshold={0.05}>
-        <section className="mx-auto w-full max-w-4xl">
-          <div className="animate-fade-in overflow-hidden px-3 pb-6 sm:px-8 sm:pb-8">
-            <div
-              ref={previewRef}
-              className="relative aspect-[16/9] overflow-hidden rounded-xl shadow-popover sm:rounded-lg"
-            >
-              <MenuBar timer={timer} />
-              {timer.isActive && (
-                <FloatingTimer
-                  remainingSeconds={timer.remainingSeconds}
-                  containerRef={previewRef}
-                />
-              )}
-              <div className="absolute bottom-4 left-1/2 z-10 -translate-x-1/2">
-                <MacOSDock
-                  apps={DOCK_APPS}
-                  onAppClick={() => {}}
-                  openApps={["qoma"]}
-                />
-              </div>
-              <div className="absolute inset-0 rounded-[inherit]">
-                <Image
-                  fill
-                  decoding="auto"
-                  src="https://framerusercontent.com/images/MR7CyE9DaBgMhReh9Z6oUd4Iec.jpg?width=3840&height=2160"
-                  alt="macOS Desktop Preview"
-                  className="block h-full w-full rounded-[inherit] object-cover object-center"
-                />
+        <div className="pointer-events-none absolute inset-x-0 top-[104px] z-10 flex justify-center px-5 text-center sm:top-[104px]">
+          {!isSetup && (
+            <div className="pointer-events-auto">
+              <p className="mb-1 text-[11px] tracking-[0.12em] text-[#555] uppercase">
+                {sessionState === "complete" ? "Session complete" : task.trim() || "Time to focus"}
+              </p>
+              <time
+                className="block font-light text-[60px] leading-none tracking-[-0.065em] tabular-nums sm:text-[88px] lg:text-[104px]"
+                aria-label={`${Math.floor(remaining / 60)} minutes and ${remaining % 60} seconds remaining`}
+              >
+                {formatTime(remaining)}
+              </time>
+              <div className="mt-5 flex items-center justify-center gap-3">
+                {sessionState === "running" ? (
+                  <button
+                    type="button"
+                    onClick={pauseSession}
+                    className="inline-flex h-11 items-center gap-2 rounded-full border border-[#252525] bg-white/70 px-6 text-sm font-medium backdrop-blur-sm transition-colors hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#202020]"
+                  >
+                    <Pause size={15} aria-hidden="true" />
+                    Pause
+                  </button>
+                ) : sessionState === "paused" ? (
+                  <button
+                    type="button"
+                    onClick={resumeSession}
+                    className="inline-flex h-11 items-center gap-2 rounded-full border border-[#252525] bg-white/70 px-6 text-sm font-medium backdrop-blur-sm transition-colors hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#202020]"
+                  >
+                    <Play size={15} aria-hidden="true" />
+                    Resume
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={resetSession}
+                  className="inline-flex h-11 items-center gap-2 rounded-full px-5 text-sm text-[#444] transition-colors hover:bg-white/65 focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#202020]"
+                >
+                  <RotateCcw size={14} aria-hidden="true" />
+                  Reset
+                </button>
               </div>
             </div>
-          </div>
+          )}
+        </div>
 
-          <div className="grid grid-cols-1 border-y border-primary/20 md:grid-cols-3">
-            {HIGHLIGHT_FEATURES.map((feature, i) => (
-              <div
-                key={feature.title}
-                className={`p-6 sm:p-8 ${i < 2 ? "border-b border-primary/20 md:border-r md:border-b-0" : ""}`}
-              >
-                <h3 className="mb-2 text-sm font-semibold text-white">
-                  {feature.title}
-                </h3>
-                <p className="text-sm leading-relaxed text-gray-400">
-                  {feature.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-      </AnimatedSection>
-
-      {/* Download */}
-      <AnimatedSection className="w-full" threshold={0.05}>
-        <DownloadSection />
-      </AnimatedSection>
-
-      {/* FAQ */}
-      <AnimatedSection className="w-full" threshold={0.1}>
-        <section className="mx-auto w-full max-w-4xl">
-          <div className="px-4 py-12 sm:px-8">
-            <span className="text-[10px] font-bold tracking-[0.2em] text-gray-400 uppercase">
-              FAQ
-            </span>
-            <h2 className="mt-2 mb-8 text-2xl font-medium tracking-tight text-white md:text-3xl">
-              Questions? Answers.
-            </h2>
-
-            <Accordion type="single" collapsible className="w-full">
-              {FAQ_ITEMS.map((item, idx) => (
-                <AccordionItem
-                  key={idx}
-                  value={`item-${idx}`}
-                  className="border-primary/20"
-                >
-                  <AccordionTrigger className="text-left text-white hover:text-gray-200 hover:no-underline">
-                    {item.question}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-gray-400">
-                    {item.answer}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </div>
-        </section>
-      </AnimatedSection>
-
-      {/* CTA */}
-      <AnimatedSection className="w-full" threshold={0.1}>
-        <section className="w-full">
-          <div className="mx-auto flex max-w-7xl flex-col items-center px-4 py-12 sm:px-6 sm:py-16">
-            <h2 className="mb-2 max-w-2xl font-sans text-3xl leading-tight font-normal text-white sm:text-5xl md:text-5xl">
-              Start focusing.
-            </h2>
-            <Button
-              onClick={() => {
-                document
-                  .getElementById("download-section")
-                  ?.scrollIntoView({ behavior: "smooth" })
-              }}
-              className="shadow-qoma shrink-0 gap-2 border-none bg-[#222] px-6 py-2.5 text-sm text-white shadow-none transition-all hover:scale-105 hover:bg-[#222] active:scale-95"
+        {isSetup && (
+          <form
+            onSubmit={(event) => {
+              event.preventDefault()
+              startSession()
+            }}
+            className="absolute top-[90px] right-4 z-20 w-[min(350px,calc(100%-2rem))] rounded-[18px] border border-black/10 bg-white/90 p-5 shadow-[0_16px_48px_rgba(32,32,32,0.12)] backdrop-blur-md sm:top-[25%] sm:right-[6%] sm:p-6 lg:right-[9%]"
+          >
+            <h1 className="mb-5 text-[20px] font-semibold tracking-[-0.035em]">
+              New session
+            </h1>
+            <label htmlFor="focus-task" className="mb-2 block text-[13px] text-[#656565]">
+              What are you working on?
+            </label>
+            <input
+              id="focus-task"
+              value={task}
+              onChange={(event) => setTask(event.target.value)}
+              maxLength={80}
+              placeholder="A little time to focus"
+              className="mb-5 h-11 w-full rounded-[10px] border border-[#dedede] bg-white px-3 text-sm outline-none transition focus:border-[#777] focus:ring-2 focus:ring-black/5"
+            />
+            <label htmlFor="focus-duration" className="mb-2 block text-[13px] text-[#656565]">
+              Duration
+            </label>
+            <select
+              id="focus-duration"
+              value={duration}
+              onChange={(event) => setDuration(Number(event.target.value))}
+              className="mb-5 h-11 w-full rounded-[10px] border border-[#dedede] bg-white px-3 text-sm outline-none transition focus:border-[#777] focus:ring-2 focus:ring-black/5"
             >
-              Get Qoma
-            </Button>
-          </div>
-        </section>
-      </AnimatedSection>
+              {DURATIONS.map((minutes) => (
+                <option key={minutes} value={minutes}>
+                  {minutes} minutes
+                </option>
+              ))}
+            </select>
+            <button
+              type="submit"
+              className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-[10px] bg-[#202020] px-4 text-sm font-medium text-white transition-colors hover:bg-[#3a3a3a] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#202020]"
+            >
+              <Play size={15} fill="currentColor" aria-hidden="true" />
+              Start session
+            </button>
+          </form>
+        )}
+
+      </section>
     </main>
   )
 }
