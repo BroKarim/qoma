@@ -59,8 +59,7 @@ export default function MarketingPageClient() {
   const isSetup = sessionState === "setup"
 
   return (
-    <main className="relative min-h-svh overflow-hidden bg-white font-sans text-[#202020]">
-      <section className="relative isolate min-h-svh" aria-label="qyube focus demo">
+    <section id="top" className="relative isolate min-h-svh overflow-hidden bg-white font-sans text-[#202020]" aria-label="qyube focus demo">
         <Image
           src="/hero/antarctic-background.webp"
           alt=""
@@ -211,7 +210,6 @@ export default function MarketingPageClient() {
           </form>
         )}
 
-      </section>
-    </main>
+    </section>
   )
 }

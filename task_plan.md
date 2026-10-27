@@ -2065,3 +2065,85 @@ Polar signed webhook → order/subscription ledger → recompute entitlement
 6. UI dan copy final: hasil checkout pending berbasis server, error provider yang ramah pengguna, support/privacy/terms, akses histori dari Today saat expired, dan visual polish onboarding/akun. Jangan menjanjikan QRIS sebelum Xendit diintegrasikan.
 
 **Status:** implementasi dasar tersusun dan build, tetapi **belum release-ready**. Tahap yang memerlukan kredensial dan sandbox sengaja ditunda sesuai permintaan pengguna; tidak ada transaksi live atau deploy. Roadmap bagian I di atas tetap menjadi acceptance criteria, bukan otomatis berubah menjadi `[x]` seluruhnya.
+
+## Supabase + Drizzle dan panduan konfigurasi Polar — 26 Oktober 2026
+
+Bagian ini menambahkan keputusan dan implementasi baru. Seluruh roadmap, keputusan dan catatan implementasi sebelumnya tetap disimpan. Branch: `codex/supabase-drizzle`, berasal dari `codex/account-settings-release`.
+
+### Keputusan hosting database
+
+- Database akun/trial/perangkat/billing/entitlement memakai **Supabase managed PostgreSQL**. Keputusan PostgreSQL mandiri di VPS/Dokploy pada dokumentasi sebelumnya digantikan bagian ini.
+- Website/API tetap berjalan di VPS melalui Dokploy. Supabase dipakai sebagai database; **Better Auth** tetap menangani Google dan OTP email melalui Resend.
+- Drizzle memakai adapter `node-postgres` dan pool `pg` yang sama dengan Better Auth. Koneksi runtime dibuat lazy, maksimum lima koneksi per proses, connect timeout 10 detik, idle timeout 30 detik.
+- Kontrak API dan signed entitlement untuk Mac tetap berlaku. Mac dan browser tidak menerima database URL atau token Polar. App tidak membaca tabel Supabase secara langsung.
+
+```text
+Qoma Mac → website HTTPS API di Dokploy → Drizzle / transaksi pg → Supabase PostgreSQL
+Browser → Better Auth pada website → tabel auth di database yang sama
+Polar → signed webhook website → billing ledger → entitlements → signed snapshot API → Mac
+```
+
+### File dan fungsi yang diterapkan
+
+| Lokasi | Tanggung jawab |
+|---|---|
+| `website/db/schema.ts` | Definisi Drizzle 14 tabel domain, tipe kolom, constraint, index, relasi dan RLS. Tabel Better Auth tetap dimigrasikan oleh CLI auth sesuai versi terpasang. |
+| `website/lib/db.ts` | `database()` memberi shared `pg.Pool`; `orm(client?)` memberi Drizzle pada pool atau client transaksi yang sedang dipegang. |
+| `website/lib/access/entitlements.ts` | `recomputeEntitlement()` membaca trial, order lifetime dan subscription dengan Drizzle pada client transaksi yang sama; lock akun, jam server dan upsert version tetap berlaku. |
+| `website/lib/billing/lifetime.ts` | `drainBillingActions()` memilih dan memperbarui cancellation outbox dengan Drizzle. SDK Polar tetap hanya dipakai di server. |
+| `website/drizzle.config.ts` | Schema domain dan folder migrasi Drizzle; migration URL dapat dipisahkan dari runtime URL. |
+| `website/db/drizzle/0000_supabase_baseline.sql` | Baseline kompatibilitas menggunakan DDL idempotent dari `001`–`006`, lalu mengaktifkan RLS. Berlaku pada database kosong maupun database dengan schema lama. |
+| `website/db/drizzle/meta/` | Journal/snapshot Drizzle untuk menghasilkan perubahan berikutnya. |
+| `website/scripts/migrate.ts` | Migrator Drizzle; memakai advisory lock session agar deploy bersamaan tidak memigrasikan schema bersamaan. Menolak Supabase transaction pooler port 6543 untuk migrasi. |
+| `website/scripts/secure-auth-tables.ts` | Mengaktifkan RLS pada tabel `user`, `session`, `account`, `verification`, `rateLimit` setelah CLI auth. |
+| `website/scripts/test-database-migration.ts` | Tes PostgreSQL lokal untuk baseline baru/lama, rerun, kolom/constraint, data tersimpan, mapping Drizzle dan pembatasan RLS. |
+| `website/scripts/generate-entitlement-keys.ts` | `generateEntitlementKeys()` menghasilkan private Ed25519 PEM dan public raw 32-byte Base64 yang cocok dengan verifikator Mac. Tidak menulis key ke repo. |
+| `website/SUPABASE_SETUP.md` | Langkah project Supabase, URI, TLS, Data API, migrasi, deployment dan perpindahan data lama. |
+| `website/POLAR_SETUP.md` | Langkah sandbox, tiga produk, OAT/scopes, webhook, scheduled job, key entitlement dan perpindahan production. |
+
+SQL transaksi pada native-auth, trial dan webhook tidak ditulis ulang seluruhnya: transaksi dan advisory lock yang menjaga batas trial/perangkat/billing tetap memakai pool yang sama. Drizzle menangani schema/migrasi dan query domain yang disebut di atas. Perubahan ini bukan migrasi seluruh query menjadi query builder.
+
+### Migrasi dan perlindungan data
+
+- Tambahan env: `DATABASE_MIGRATION_URL` opsional, fallback ke `DATABASE_URL`. Gunakan direct/session connection untuk migrasi; Session pooler port 5432 sesuai untuk server Dokploy IPv4.
+- `bun run auth:migrate` memakai CLI Better Auth `1.7.12` melalui runtime Bun, kemudian menjalankan pengamanan tabel auth. Runtime Bun dipaksa karena dependency CLI memakai API JavaScript yang gagal pada Node 20 lokal saat tes.
+- `bun run db:migrate` membaca `db/drizzle/` dan mencatat migrasi di `drizzle.__drizzle_migrations`. File SQL `001`–`006` dipertahankan sebagai histori dan tidak dijalankan terpisah oleh migrator baru.
+- Baseline tidak drop/truncate tabel atau menghapus baris. Pada database dengan schema lama, baris dan kolom yang sudah ada dipertahankan; kolom dari migration lama yang belum diterapkan ditambahkan secara idempotent.
+- Mengganti URI VPS menjadi URI Supabase **tidak memindahkan baris** antar host. Jika VPS berisi data nyata, backup/restore ke Supabase dan hentikan write saat cutover, baru alihkan API. Belum ada transfer database nyata dalam tahap ini.
+- Tabel domain diberi RLS tanpa policy publik. Tabel Better Auth juga diamankan setelah migrasi auth. Pada project Supabase khusus Qyube, **Data API perlu dinonaktifkan** sesuai panduan; backend memakai role database pemilik/BYPASSRLS dan mengecek kepemilikan akun pada API.
+- Jangan memakai `drizzle-kit push`: schema domain sengaja tidak mendefinisikan tabel Better Auth. Perubahan berikutnya melalui `db/schema.ts` → `db:generate` → review migration → `db:migrate`.
+
+### Pemetaan secret dan setup produk
+
+Harga tetap **USD $3.99 monthly**, **$29 annual**, **$49 lifetime macOS-only**. Trial tujuh hari tetap pada server Qyube, tanpa kartu/auto-charge, dan trial produk Polar dimatikan.
+
+| Variable | Sumber/penggunaan |
+|---|---|
+| `POLAR_ACCESS_TOKEN` | Organization Access Token dari settings organisasi sandbox/production; scope sesuai checkout, discount, subscription dan customer-session API. |
+| `POLAR_ENVIRONMENT` | `sandbox` selama pengujian, `production` setelah resource production siap. |
+| `POLAR_WEBHOOK_SECRET` | Secret endpoint webhook format Raw pada organisasi yang sesuai environment. |
+| `POLAR_MONTHLY_PRODUCT_ID` | ID produk recurring setiap satu bulan, fixed USD $3.99. |
+| `POLAR_ANNUAL_PRODUCT_ID` | ID produk recurring setiap satu tahun, fixed USD $29. |
+| `POLAR_LIFETIME_PRODUCT_ID` | ID produk one-time, fixed USD $49. |
+| `BILLING_JOB_TOKEN` | Dibuat sendiri dengan random bytes; dipakai job Dokploy untuk `POST /api/internal/billing/retry`. |
+| `ENTITLEMENT_SIGNING_PRIVATE_KEY` | Dibuat sendiri dengan `bun run entitlement:keys`, disimpan hanya di server. |
+| `ENTITLEMENT_SIGNING_PUBLIC_KEY` | Public key pasangan yang sama, sebagai referensi deployment. Nilai public juga harus dimasukkan ke `QyubeEntitlementPublicKey` di `Qoma/Info.plist` lalu app dibuild ulang. |
+
+Token, product IDs dan webhook secret sandbox berbeda dari production. Kredit upgrade lifetime tetap dibuat melalui diskon API; pengguna tidak perlu membuat diskon manual di dashboard. Secret dan produk nyata belum dibuat/diisi oleh perubahan ini.
+
+### Bukti verifikasi dan sisa pekerjaan
+
+- [x] Typecheck website lulus.
+- [x] Tujuh unit test lulus, termasuk kecocokan pasangan key generator dengan format raw public Ed25519 Mac.
+- [x] Drizzle metadata check lulus; generate ulang tanpa perubahan schema tidak membuat migration tambahan.
+- [x] Baseline pada PostgreSQL 17 lokal kosong lulus, termasuk rerun dan pembatasan RLS.
+- [x] Baseline pada schema lama `001`–`006` berisi data lulus; sentinel entitlement beserta version tetap utuh.
+- [x] Tes integrasi billing lokal lulus untuk paid order, duplicate event, refund, renewal dan perhitungan entitlement melalui query Drizzle.
+- [x] Production build website lulus; ESLint pada file kode yang diubah lulus.
+- [x] CLI migrasi Better Auth lokal lulus melalui Bun, diikuti script pengamanan tabel auth.
+- [ ] Buat project Supabase nyata, isi URI/TLS, matikan Data API dan verifikasi koneksi dari container Dokploy.
+- [ ] Jika database VPS memiliki data nyata, backup/restore dan uji cutover; tidak dilakukan tanpa target/kredensial.
+- [ ] Buat resource Polar sandbox, isi Google/Resend dan pasang pasangan key entitlement. Jalankan acceptance end-to-end dalam `website/SETUP.md`.
+- [ ] Selesaikan gate rilis production pada roadmap sebelumnya: webhook/checkout nyata, portal/prorata, refund/cancellation retry, key di build Mac, signing/notarization dan auto-update.
+
+Rujukan resmi untuk panduan: [koneksi Supabase](https://supabase.com/docs/guides/database/connecting-to-postgres), [pengamanan Data API](https://supabase.com/docs/guides/api/securing-your-api), [Drizzle + Supabase](https://orm.drizzle.team/docs/connect-supabase), [Polar sandbox](https://polar.sh/docs/integrate/sandbox), [OAT](https://polar.sh/docs/integrate/oat), [produk](https://polar.sh/docs/features/products), dan [webhook](https://polar.sh/docs/integrate/webhooks/endpoints).
