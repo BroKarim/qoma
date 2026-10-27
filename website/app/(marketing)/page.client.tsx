@@ -106,55 +106,17 @@ export default function MarketingPageClient() {
             width={1254}
             height={1254}
             sizes="(max-width: 768px) 22vw, 11vw"
-            className="absolute bottom-[19%] left-[15%] w-[22%] max-w-[150px] object-contain sm:bottom-[18%] sm:left-[6%] sm:w-[15%] xl:left-[29%] xl:w-[11%]"
+            className="absolute bottom-[19%] left-[43%] w-[15%] max-w-[100px] object-contain sm:bottom-[18%] sm:left-[30%] sm:w-[14%] xl:left-[29%] xl:w-[11%]"
           />
           <Image
-            src={sessionState === "paused" ? "/hero/penguin-sleeping.webp" : "/hero/penguin-fishing.webp"}
-            alt="Penguin wearing red and cyan 3D glasses, fishing on an iceberg"
-            width={1254}
-            height={1254}
+            src={sessionState === "paused" ? "/hero/penguin-sleeping.webp" : "/hero/penguin-fishing-integrated.webp"}
+            alt={sessionState === "paused" ? "Penguin wearing red and cyan 3D glasses, resting" : "Penguin wearing red and cyan 3D glasses, holding a fishing rod"}
+            width={sessionState === "paused" ? 1254 : 1335}
+            height={sessionState === "paused" ? 1254 : 1178}
             priority
             sizes="(max-width: 640px) 46vw, (max-width: 1024px) 34vw, 300px"
-            className="absolute bottom-[19%] left-1/2 w-[46%] max-w-[300px] -translate-x-1/2 object-contain sm:bottom-[19%] sm:left-[39%] sm:w-[30%] xl:bottom-[22%] xl:left-1/2 xl:w-[300px]"
+            className="absolute bottom-[19%] left-[2%] w-[46%] max-w-[260px] object-contain sm:bottom-[19%] sm:left-[4%] sm:w-[38%] xl:bottom-[22%] xl:left-1/2 xl:w-[300px] xl:max-w-[300px] xl:-translate-x-1/2"
           />
-          <Image
-            src="/hero/fishing-rod.webp"
-            alt=""
-            width={1774}
-            height={887}
-            sizes="(max-width: 640px) 46vw, 280px"
-            className="absolute bottom-[37%] left-[48%] w-[46%] max-w-[280px] object-contain sm:bottom-[38%] sm:left-[39%] sm:w-[280px] xl:left-[49%]"
-          />
-          <svg
-            viewBox="0 0 100 100"
-            preserveAspectRatio="none"
-            className="absolute inset-0 h-full w-full"
-          >
-            <path
-              className="sm:hidden"
-              d="M 92 53 C 86 63, 68 66, 68 75"
-              fill="none"
-              stroke="#55565a"
-              strokeWidth=".12"
-              vectorEffect="non-scaling-stroke"
-            />
-            <path
-              className="hidden sm:block xl:hidden"
-              d="M 78 45 C 75 53, 70 58, 70 70"
-              fill="none"
-              stroke="#55565a"
-              strokeWidth=".12"
-              vectorEffect="non-scaling-stroke"
-            />
-            <path
-              className="hidden xl:block"
-              d="M 68 45 C 67 53, 63 58, 63 70"
-              fill="none"
-              stroke="#55565a"
-              strokeWidth=".12"
-              vectorEffect="non-scaling-stroke"
-            />
-          </svg>
         </div>
 
         <div className="pointer-events-none absolute inset-x-0 top-[104px] z-10 flex justify-center px-5 text-center sm:top-[104px]">

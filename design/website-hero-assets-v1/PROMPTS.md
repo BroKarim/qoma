@@ -5,6 +5,12 @@ All generated assets requested with transparent_background=true. Fish reused fro
 
 References: `../website-hero-watercolor-v1/02-active-session.png` for material/mood, `../qyube-minimum-assets-v1/01-poses-no-glasses.png` and `PROMPTS.md` for character/pose concepts. Subsequent poses reference generated `penguin-fishing.png`.
 
+## penguin-fishing-integrated
+
+Use case: stylized-concept. Asset type: single transparent character illustration for the website hero.
+Input images: Image 1 (`design/qyube-minimum-assets-v1/01-poses-no-glasses.png`) supplies the seated fishing pose and visible flipper-to-rod grip. Image 2 (`penguin-fishing.png`) supplies the approved character identity, 3D glasses, and watercolor material.
+Create exactly ONE complete seated penguin fishing character with the fishing rod integrated naturally into the pose. One flipper visibly wraps around the rod handle with clear contact; no gap or ambiguous overlap. Angle the slender charcoal rod up-right, with a fine line hanging from its tip. Keep the rounded charcoal-and-white penguin three-quarter facing right, feet forward, wearing chunky charcoal 3D glasses with opaque muted dusty-red and cyan lenses. Both eyes fully hidden. Cozy hand-drawn watercolor picture-book illustration with charcoal contours and visible pigment texture. Genuine transparent alpha; no backdrop, ice, water, bucket, fish, scenery, shadow, UI, text, extra limbs, or duplicate character.
+
 ## penguin-fishing
 
 Use case: stylized-concept. Asset type: isolated transparent PNG watercolor character for qyube website hero animation.
