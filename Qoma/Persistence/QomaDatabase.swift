@@ -153,6 +153,26 @@ final class QomaDatabase: @unchecked Sendable {
         }
     }
 
+    func backup(to url: URL) throws {
+        lock.lock()
+        defer { lock.unlock() }
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        guard !FileManager.default.fileExists(atPath: url.path) else { throw Self.error("Backup already exists") }
+        var destination: OpaquePointer?
+        guard sqlite3_open_v2(url.path, &destination, SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE, nil) == SQLITE_OK,
+              let destination else {
+            if let destination { sqlite3_close(destination) }
+            throw Self.error("Could not create migration backup")
+        }
+        defer { sqlite3_close(destination) }
+        guard let operation = sqlite3_backup_init(destination, "main", connection, "main") else {
+            throw Self.error("Could not start migration backup")
+        }
+        let result = sqlite3_backup_step(operation, -1)
+        let finished = sqlite3_backup_finish(operation)
+        guard result == SQLITE_DONE, finished == SQLITE_OK else { throw Self.error("Migration backup failed") }
+    }
+
     func hasMigration(_ key: String) throws -> Bool {
         try !query("SELECT key FROM migrations WHERE key = ?", [.text(key)]).isEmpty
     }

@@ -206,12 +206,9 @@ struct CatchEvent: Identifiable, Codable, Equatable, Sendable {
 
 enum AccessState: Equatable, Sendable {
     case signedOut
-    case cardRequired
-    case readyForFirstSession
     case trialing(expiresAt: Date)
     case paid
     case expired
-    case paymentIssue
     case unknown
 }
 

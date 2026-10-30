@@ -7,6 +7,7 @@ import OSLog
 @MainActor
 final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
     let sessionCoordinator: SessionCoordinator
+    private let access = AccessCoordinator.shared
     private let focusPreferences = FocusPreferences.shared
     private let timerController = FloatingTimerController()
     private let companionController = CompanionWindowController()
@@ -20,11 +21,31 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
     private var trackedSessionID: UUID?
 
     init(sessionCoordinator: SessionCoordinator? = nil) {
-        self.sessionCoordinator = sessionCoordinator ?? SessionCoordinator()
+        self.sessionCoordinator = sessionCoordinator ?? SessionCoordinator(
+            accountID: AccessCoordinator.shared.accountID ?? "signed-out",
+            canStartSession: { AccessCoordinator.shared.canStartSession() })
         LegacySessionMigrator.migrateIfNeeded()
         self.distractionCoordinator = DistractionCoordinator(monitor: ForegroundActivityMonitor())
         self.menuBarController = MenuBarController()
         super.init()
+
+        navigation.accountID = access.accountID ?? "signed-out"
+        AnalyticsStore.shared.useAccount(navigation.accountID)
+        access.onAccountChanged = { [weak self] accountID in
+            guard let self else { return }
+            let scope = accountID ?? "signed-out"
+            self.sessionCoordinator.useAccount(scope)
+            self.navigation.accountID = scope
+            AnalyticsStore.shared.useAccount(scope)
+            self.navigation.refresh()
+        }
+        Task { await access.refreshAccess() }
+        Timer.publish(every: 300, on: .main, in: .common).autoconnect()
+            .sink { [weak self] _ in
+                guard let self else { return }
+                Task { await self.access.refreshAccess() }
+            }
+            .store(in: &cancellables)
 
         menuBarController.configure(
             coordinator: self.sessionCoordinator,
@@ -67,6 +88,7 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
         let contentView = QyubeHomeView(
             navigation: navigation,
             sessionCoordinator: sessionCoordinator,
+            access: access,
             onSessionStarted: { [weak self] in self?.homeWindowController?.close() },
             onBackToSession: { [weak self] in self?.returnToSession() },
             onQuit: { [weak self] in self?.quitImmediately() })

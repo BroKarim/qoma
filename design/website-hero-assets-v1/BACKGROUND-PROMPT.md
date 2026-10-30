@@ -1,0 +1,9 @@
+# Antarctic background
+
+Generated with built-in imagegen. Reference: ../website-hero-watercolor-v1/02-active-session.png. Opaque white background intentional; foreground PNGs remain transparent.
+
++Use case: stylized-concept.
+Asset type: full-width website hero BACKGROUND PLATE only, wide landscape 16:10, high resolution.
+Input image: reference website mockup supplies exact composition, grayscale watercolor illustration style, Antarctic atmosphere and lightness. Generate the empty environment behind its foreground.
+Primary request: quiet cozy Antarctic bay with distant snow-covered ice mountains framing LEFT and RIGHT edges at mid-height, tiny distant icebergs, very pale still sea in lower half, soft horizontal watercolor reflections. Large nearly pure white empty sky across upper 40 percent for header and timer, open pale central space for a separate penguin and ice floe overlay. Mountains softly fade into mist toward center. Fine hand drawn watercolor brush texture and delicate graphite details, subtle paper grain within painted areas. White, pale gray, restrained graphite, only faint cool neutral hints. Low contrast, minimal, airy, eye catching through craftsmanship.
+Constraints: environment ONLY. Remove ALL reference text, logo, timer, controls, penguin, fishing rod, line, bucket, fish, central foreground ice floe, splash and concentric ripples. Reconstruct calm open water in their place, no phantom shadows or penguin reflections. Do not include UI, characters, animals, boats, buildings, new props or frame. Preserve white breathing space, distant modest mountain scale and clean open middle. Background fades to clean white at upper and lower edges to blend into a white website. Opaque white background intentional, not transparent. Finished background asset, not website screenshot.

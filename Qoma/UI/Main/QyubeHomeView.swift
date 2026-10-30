@@ -1,3 +1,4 @@
+import AppKit
 import Combine
 import SwiftUI
 
@@ -30,10 +31,12 @@ final class QyubeNavigation: ObservableObject {
     @Published private(set) var history: [FocusSession] = []
     @Published private(set) var catches: [CatchEvent] = []
 
+    var accountID = "signed-out"
+
     func refresh() {
-        self.history = SessionRepository.shared.loadHistory(accountID: "local")
+        self.history = SessionRepository.shared.loadHistory(accountID: accountID)
             .sorted { $0.startedAt > $1.startedAt }
-        self.catches = CatchRepository.shared.listBanked(accountID: "local")
+        self.catches = CatchRepository.shared.listBanked(accountID: accountID)
             .sorted { $0.depositedAt > $1.depositedAt }
     }
 
@@ -54,6 +57,7 @@ final class QyubeNavigation: ObservableObject {
 struct QyubeHomeView: View {
     @ObservedObject var navigation: QyubeNavigation
     @ObservedObject var sessionCoordinator: SessionCoordinator
+    @ObservedObject var access: AccessCoordinator
     let onSessionStarted: () -> Void
     let onBackToSession: () -> Void
     let onQuit: () -> Void
@@ -63,6 +67,9 @@ struct QyubeHomeView: View {
     @AppStorage(AppConstants.MenuBarSettings.selectedPresetMinutesKey)
     private var selectedPresetMinutes = AppConstants.MenuBarSettings.defaultPresetMinutes
     @State private var isAnalyticsConsentPresented = false
+    @State private var isLocalImportPresented = false
+    @State private var importError: String?
+    @State private var accountError: String?
     @State private var isSessionFormPresented = false
     @State private var isEditingActiveSession = false
     @State private var shouldRestoreSessionFormAfterSettings = false
@@ -99,7 +106,24 @@ struct QyubeHomeView: View {
                     self.isSessionFormPresented = false
                     self.navigation.page = .settings
                 },
+                onManageSubscription: {
+                    NSWorkspace.shared.open(URL(string: "https://qyube.brokarim.com/account")!)
+                },
+                onSignOut: {
+                    Task {
+                        await self.access.signOutRemote()
+                        if self.access.accountID != nil { self.accountError = self.access.message }
+                    }
+                },
+                canSignOut: self.access.accountID != nil && self.activeSession == nil,
                 onQuit: self.onQuit)
+            if case .trialing(let expiresAt) = access.state {
+                Text("Free trial · \(max(1, Int(ceil(expiresAt.timeIntervalSinceNow / 86_400)))) days left")
+                    .font(.system(size: 10, weight: .medium))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 14).padding(.vertical, 5)
+                    .background(Color.qyubeSelection)
+            }
             self.detail
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .background(Color.qyubeBackground)
@@ -144,12 +168,49 @@ struct QyubeHomeView: View {
             AnalyticsConsentSheet { _ in self.analyticsConsentDecided = true }
         }
         .onAppear {
-            if !self.analyticsConsentDecided { self.isAnalyticsConsentPresented = true }
+            if self.access.accountID != nil && !self.analyticsConsentDecided { self.isAnalyticsConsentPresented = true }
+            if self.access.accountID != nil { self.isLocalImportPresented = LocalAccountMigrator.hasLocalData() }
         }
+        .onChange(of: access.accountID) { _, id in
+            if id != nil && !analyticsConsentDecided { isAnalyticsConsentPresented = true }
+            if id != nil { isLocalImportPresented = LocalAccountMigrator.hasLocalData() }
+        }
+        .alert("Import your earlier Qyube data?", isPresented: $isLocalImportPresented) {
+            Button("Import") {
+                guard let id = access.accountID else { return }
+                do {
+                    if try LocalAccountMigrator.importToAccount(id) {
+                        sessionCoordinator.restore()
+                        navigation.refresh()
+                    }
+                } catch { importError = error.localizedDescription }
+            }
+            Button("Later", role: .cancel) {}
+        } message: {
+            Text("Sessions and catches from before sign-in will be linked to this account. A database backup is kept on this Mac.")
+        }
+        .alert("Import could not finish", isPresented: Binding(get: { importError != nil }, set: { if !$0 { importError = nil } })) {
+            Button("OK") { importError = nil }
+        } message: { Text(importError ?? "Your earlier data is still safe on this Mac.") }
+        .alert("Could not sign out", isPresented: Binding(get: { accountError != nil }, set: { if !$0 { accountError = nil } })) {
+            Button("OK") { accountError = nil }
+        } message: { Text(accountError ?? "Please try again.") }
     }
 
     @ViewBuilder private var detail: some View {
-        if self.isSessionFormPresented {
+        if self.access.accountID == nil {
+            accessGate(title: "Welcome to Qyube", detail: "Sign in to begin your free seven-day trial. No payment card is needed.", action: "Sign in") {
+                Task { await self.access.beginLogin() }
+            }
+        } else if case .unknown = self.access.state, self.navigation.page == nil {
+            accessGate(title: "Checking access", detail: "Connect to the internet to verify your account. Your collection is still available.", action: "Retry") {
+                Task { await self.access.refreshAccess() }
+            }
+        } else if !self.access.canStartSession(), self.navigation.page == nil {
+            accessGate(title: "Keep focusing", detail: "Your access needs renewal. Your past sessions and catches are still here.", action: "View plans") {
+                NSWorkspace.shared.open(URL(string: "https://qyube.brokarim.com/pricing")!)
+            }
+        } else if self.isSessionFormPresented {
             NewSessionView(
                 coordinator: self.sessionCoordinator,
                 draft: self.$sessionDraft,
@@ -199,6 +260,30 @@ struct QyubeHomeView: View {
                 onSelectSession: self.openSession)
         }
         }
+    }
+
+    private func accessGate(title: String, detail: String, action: String, onAction: @escaping () -> Void) -> some View {
+        VStack(alignment: .leading, spacing: 18) {
+            Spacer()
+            Image("CompanionPoseCompleted")
+                .resizable().scaledToFit().frame(height: 145)
+                .frame(maxWidth: .infinity)
+                .accessibilityHidden(true)
+            Text(title).font(.system(size: 25, design: .serif))
+            Text(detail).font(.system(size: 12)).foregroundStyle(.secondary)
+            if let message = access.message { Text(message).font(.system(size: 11)).foregroundStyle(.red) }
+            Button(action, action: onAction)
+                .buttonStyle(.plain)
+                .frame(maxWidth: .infinity).padding(13)
+                .background(Color.qyubeMenuInk).foregroundStyle(.white)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+            if access.accountID != nil {
+                Button("Refresh access") { Task { await access.refreshAccess() } }
+                    .buttonStyle(.plain).underline()
+            }
+            Spacer()
+        }
+        .padding(22)
     }
 
     private func createSession() {

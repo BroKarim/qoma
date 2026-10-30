@@ -1,0 +1,58 @@
+# qyube website hero — asset prompts v1
+
+Tool: built-in imagegen. Generated 26 October 2026 (Asia/Jakarta).
+All generated assets requested with transparent_background=true. Fish reused from existing artwork.
+
+References: `../website-hero-watercolor-v1/02-active-session.png` for material/mood, `../qyube-minimum-assets-v1/01-poses-no-glasses.png` and `PROMPTS.md` for character/pose concepts. Subsequent poses reference generated `penguin-fishing.png`.
+
+## penguin-fishing
+
+Use case: stylized-concept. Asset type: isolated transparent PNG watercolor character for qyube website hero animation.
+Input images: image 1 (website mockup) is a WATERCOLOR MATERIAL and cozy Antarctic mood reference only, no UI/scenery copied. Image 2 (pose sheet) supplies chubby rounded penguin identity and simplified proportions. Create ONE single seated fishing-wait penguin, not a sheet. Charcoal cap/back, warm opaque white heart-shaped face and belly, small dark gray beak, little dark feet forward. Three-quarter facing RIGHT. Hand drawn charcoal contours and richly textured watercolor plumage, cozy picture book illustration, not realistic photo or 3D render.
+CRITICAL: wear chunky retro cinema 3D glasses, charcoal frame with one opaque muted dusty-red lens and one opaque muted cyan lens. Eyes completely hidden: no pupils, eyelashes or eye lines visible through or outside lenses. Glasses firmly on face.
+Seated upright relaxed, both flippers loosely held near belly ready to grip a separate rod, no fishing rod or line in this asset. Full body and feet visible. Center character inside square canvas, consistent room for future poses, feet baseline around 82% height, character occupies ~65% canvas height. Genuine transparent alpha background, no paper backdrop, no water, ice, bucket, fish, shadows or text. White belly stays opaque. Individual cutout, unclipped edges.
+
+## penguin-casting
+
+Use case: stylized-concept. Asset type: single transparent PNG watercolor animation character pose. Reference image is exact character identity, glasses and material reference. Generate exactly ONE complete cutout of the SAME penguin in this pose: Seated CASTING anticipation: lift both flippers up toward upper-right in an arc ready to cast, tilt upper body gently forward, retain seated little feet. Flippers empty; rod will be overlaid separately.
+Preserve chubby charcoal-and-white penguin, watercolor and graphite hand drawn brush texture, opaque warm white belly, little dark beak, three-quarter right viewing angle, same proportions and costume. CRITICAL same chunky charcoal cinema 3D glasses, left-on-image opaque dusty red lens and right-on-image opaque muted cyan lens. NO EYES visible anywhere, lenses completely hide eyes. Character centered with ample transparent margins, unclipped feet and flippers. Genuine transparent alpha outside character. NO ice, ground, shadow, water, bucket, fish, rod, line, lettering, backdrop or paper rectangle. Single subject, no sheet.
+
+## penguin-pulling
+
+Use case: stylized-concept. Asset type: single transparent PNG watercolor animation character pose. Reference image is exact character identity, glasses and material reference. Generate exactly ONE complete cutout of the SAME penguin in this pose: Seated PULLING / REELING: lean upper body gently backward toward left, brace feet forward, both flippers raised together toward upper-right at chest/shoulder height gripping imaginary rod. Rod and line will be overlaid separately, so DO NOT draw them.
+Preserve chubby charcoal-and-white penguin, watercolor and graphite hand drawn brush texture, opaque warm white belly, little dark beak, three-quarter right viewing angle, same proportions and costume. CRITICAL same chunky charcoal cinema 3D glasses, left-on-image opaque dusty red lens and right-on-image opaque muted cyan lens. NO EYES visible anywhere, lenses completely hide eyes. Character centered with ample transparent margins, unclipped feet and flippers. Genuine transparent alpha outside character. NO ice, ground, shadow, water, bucket, fish, rod, line, lettering, backdrop or paper rectangle. Single subject, no sheet.
+
+## penguin-deposit
+
+Use case: stylized-concept. Asset type: single transparent PNG watercolor animation character pose. Reference image is exact character identity, glasses and material reference. Generate exactly ONE complete cutout of the SAME penguin in this pose: Seated DEPOSIT follow-through: lean gently toward LEFT where separate bucket will sit, extend one flipper toward lower-left directing separate catch toward bucket. Empty flippers, no fish, no celebration or held catch.
+Preserve chubby charcoal-and-white penguin, watercolor and graphite hand drawn brush texture, opaque warm white belly, little dark beak, three-quarter right viewing angle, same proportions and costume. CRITICAL same chunky charcoal cinema 3D glasses, left-on-image opaque dusty red lens and right-on-image opaque muted cyan lens. NO EYES visible anywhere, lenses completely hide eyes. Character centered with ample transparent margins, unclipped feet and flippers. Genuine transparent alpha outside character. NO ice, ground, shadow, water, bucket, fish, rod, line, lettering, backdrop or paper rectangle. Single subject, no sheet.
+
+## penguin-sleeping
+
+Use case: stylized-concept. Asset type: single transparent PNG watercolor animation character pose. Reference image is exact character identity, glasses and material reference. Generate exactly ONE complete cutout of the SAME penguin in this pose: PAUSED SLEEPING: curled on its side on the same baseline, body facing right with flippers tucked and feet tucked, keep the identical opaque cinema 3D glasses firmly on face, eyes hidden. No Z letters.
+Preserve chubby charcoal-and-white penguin, watercolor and graphite hand drawn brush texture, opaque warm white belly, little dark beak, three-quarter right viewing angle, same proportions and costume. CRITICAL same chunky charcoal cinema 3D glasses, left-on-image opaque dusty red lens and right-on-image opaque muted cyan lens. NO EYES visible anywhere, lenses completely hide eyes. Character centered with ample transparent margins, unclipped feet and flippers. Genuine transparent alpha outside character. NO ice, ground, shadow, water, bucket, fish, rod, line, lettering, backdrop or paper rectangle. Single subject, no sheet.
+
+## penguin-completed
+
+Use case: stylized-concept. Asset type: single transparent PNG watercolor animation character pose. Reference image is exact character identity, glasses and material reference. Generate exactly ONE complete cutout of the SAME penguin in this pose: COMPLETED / entry pose: standing calmly with tiny feet beneath body, flippers relaxed downward, head gently angled down-left toward separate bucket position. Satisfied quiet body language, same glasses, empty hands.
+Preserve chubby charcoal-and-white penguin, watercolor and graphite hand drawn brush texture, opaque warm white belly, little dark beak, three-quarter right viewing angle, same proportions and costume. CRITICAL same chunky charcoal cinema 3D glasses, left-on-image opaque dusty red lens and right-on-image opaque muted cyan lens. NO EYES visible anywhere, lenses completely hide eyes. Character centered with ample transparent margins, unclipped feet and flippers. Genuine transparent alpha outside character. NO ice, ground, shadow, water, bucket, fish, rod, line, lettering, backdrop or paper rectangle. Single subject, no sheet.
+
+## ice-floe
+
+Use case: stylized-concept. Asset type: standalone transparent watercolor scene prop for qyube hero. Input 1 penguin supplies watercolor paper-grain material matching, input 2 supplies scene perspective. Subject: One EMPTY broad low Antarctic ice floe in three-quarter front view, wide landscape silhouette about 3:1 width to thickness, flat snowy top wide enough for penguin and bucket, chipped faceted graphite-gray sides, fine snow and ice watercolor texture. Absolutely no penguin, bucket, water, horizon or shadow. Hand painted detailed watercolor and charcoal contours, cozy minimalist Antarctic mood, only white gray charcoal. White interiors remain opaque, outside object genuine transparent alpha. Centered with generous margin, no UI, labels, sheets, frame or background rectangle.
+
+## bucket-empty
+
+Use case: stylized-concept. Asset type: standalone transparent watercolor scene prop for qyube hero. Input 1 penguin supplies watercolor paper-grain material matching, input 2 supplies scene perspective. Subject: One small EMPTY galvanized metal fishing bucket, three-quarter front view, dark oval rim and open dark interior, curved wire handle hanging across front, softly brushed white gray sides and charcoal watercolor line work. No fish, no text, no ground or shadow. Complete standalone object. Hand painted detailed watercolor and charcoal contours, cozy minimalist Antarctic mood, only white gray charcoal. White interiors remain opaque, outside object genuine transparent alpha. Centered with generous margin, no UI, labels, sheets, frame or background rectangle.
+
+## water-wash
+
+Use case: stylized-concept. Asset type: standalone transparent watercolor water effect layer for qyube website animation. Reference supplies hand painted material and scene perspective only. A single wide shallow patch of calm Antarctic WATER SURFACE, a sparse horizontal graphite-gray watercolor wash with tiny broken horizontal reflective strokes and soft translucent irregular feathered perimeter. About 3:1 aspect ratio. Three-quarter perspective viewing down gently. Keep center pale and unobtrusive. No baked penguin reflection, no objects, no mountains, horizon or landscape. No concentric rings: those will be animated separately. Isolated water decal with genuine transparent alpha around perimeter and semi transparent gray pigment. No hard rectangular paper boundary, no white matte background. White gaps transparent. Palette grayscale only. Detailed hand drawn watercolor texture, cozy restrained Antarctic atmosphere. No text, UI, checkerboard painting, border or labels.
+
+## water-splash
+
+Use case: stylized-concept. Asset type: standalone transparent watercolor water effect layer for qyube website animation. Reference supplies hand painted material and scene perspective only. ONE delicate small water splash keyframe rising from a very shallow oval water contact point, two thin curved watercolor jets and six separated tiny droplets of varying sizes, gray and white watercolor translucent pigment, fine charcoal accents and subtle wash granulation. Three-quarter view matching a fish jumping from calm water. No fish, no bucket, rod, scene or large surrounding water patch. No concentric rings: animated rings will be added separately. Complete unclipped small isolated effect on genuine transparent alpha, no paper matte, no shadow. Palette grayscale only. Detailed hand drawn watercolor texture, cozy restrained Antarctic atmosphere. No text, UI, checkerboard painting, border or labels.
+
+## fishing-rod
+
+Use case: stylized-concept. Asset type: single isolated transparent watercolor fishing rod prop for qyube web animation. A single slender simple graphite-dark fishing rod, oriented from lower left grip to upper right tip, shallow gentle curve, small subtle line guides, short charcoal handle. Hand drawn watercolor charcoal material matches the reference penguin, cozy detailed brush texture. COMPLETE single rod with generous transparent margins, no fishing line, hook, fish, penguin, water, scenery, lettering, shadow or background. Genuine transparent alpha outside the rod. Thin but readable at small website scale, matte graphite black and very muted warm gray only. Not photorealistic or 3D. Wide landscape canvas.
