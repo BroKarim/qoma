@@ -1635,3 +1635,10 @@ Perbaikan dan temuan lanjutan:
 
 - Setelah review visual, ukuran popover diperkecil dari 246pt menjadi 206pt. Ini sekitar dua pertiga lebar panel utama 310pt; lebar sepertiga (sekitar 103pt) tidak memberi ruang cukup untuk enam label dan ikon yang tetap terbaca.
 - Tinggi isi ikut dipadatkan dengan row 34pt, ikon 25pt, padding lebih kecil, dan header sedikit lebih ringkas. Label tetap utuh dan terbaca.
+
+### Perbaikan build branch popover — 28 Oktober 2026
+
+- Memperbaiki compile error di `Qoma/UI/Main/QyubeSettingsMenuPopover.swift`: tiga modifier `.padding(...)` berdiri sendiri di dalam `VStack` tanpa menerima view sebagai basis. Baris tersebut dihapus; padding container yang valid setelah `VStack` tetap dipertahankan.
+- Perbaikan ini hanya menyentuh popover menu dan tidak menambah bypass/dev mode, login, atau perubahan perilaku sesi. `main` sudah memiliki penghapusan baris yang sama pada rangkaian perubahan berikutnya.
+- Peringatan build tentang `Qoma/Info.plist` yang tercantum di Copy Bundle Resources bersifat terpisah dari compile error; perlu dibersihkan tersendiri bila masih muncul, tetapi bukan bagian dari perbaikan ini.
+- **Verifikasi:** setelah dependency SwiftLintPlugins dan Sparkle berhasil di-resolve, build Debug macOS lulus dengan `xcodebuild build -project qoma.xcodeproj -scheme Qoma -configuration Debug -destination 'platform=macOS' -derivedDataPath /tmp/qyube-settings-popover-derived CODE_SIGNING_ALLOWED=NO`. Warning `Info.plist` di Copy Bundle Resources masih muncul dan terpisah dari compile error ini. `git diff --check` juga lulus.

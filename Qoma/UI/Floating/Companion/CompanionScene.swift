@@ -1,426 +1,431 @@
 import AppKit
 import SpriteKit
 
-/// A 140 pt transparent stage; the shared floe occupies 118 pt of its width.
-/// Positions are stage points, independent of Retina scale and window magnification.
+/// Whole watercolor poses keep the face and belly continuous at desktop scale.
 final class CompanionScene: SKScene {
     static let stageSize = CGSize(width: 140, height: 140)
     private(set) var playback = CompanionPlayback()
     var onHidden: (() -> Void)?
-    var reduceMotion = false {
-        didSet { self.render() }
-    }
+    var reduceMotion = false { didSet { render() } }
+    var visualNow: () -> Date = Date.init
 
-    private let puppet = SKNode()
-    private let head = SKSpriteNode(imageNamed: "CompanionHead")
-    private let torso = SKSpriteNode(imageNamed: "CompanionTorso")
-    private let feet = SKSpriteNode(imageNamed: "CompanionFeet")
-    private let leftFlipper = SKSpriteNode(imageNamed: "CompanionFlipperLeft")
-    private let rightFlipper = SKSpriteNode(imageNamed: "CompanionFlipperRight")
-    private let rod = SKSpriteNode(imageNamed: "CompanionRod")
-    private let restingPose = SKSpriteNode(imageNamed: "CompanionPoseSleeping")
-    private let floe = SKSpriteNode(imageNamed: "CompanionFloe")
+    // Contact and ripple locations are measured on the combined ice/water artwork.
+    private let seatedOrigin = CGPoint(x: 72, y: 27)
+    private let waterPoint = CGPoint(x: 26, y: 20)
+    private let bucketOrigin = CGPoint(x: 119, y: 38)
+    private let characterHeight: CGFloat = 100
+    private let character = SKSpriteNode()
+    private let floe = SKSpriteNode(imageNamed: "CompanionIceWaterV2")
     private let bucket = SKSpriteNode(imageNamed: "CompanionBucket")
-    private let catchSprite = SKSpriteNode(imageNamed: "CompanionFish")
-    private let sleepMarks = SKSpriteNode(imageNamed: "CompanionSleepMarks")
-    private let biteMark = SKSpriteNode(imageNamed: "CompanionBite")
+    private let catchSprite = SKSpriteNode()
     private let splash = SKSpriteNode(imageNamed: "CompanionSplash")
+    private let sleepMarks = SKSpriteNode(imageNamed: "CompanionSleepMarks")
     private let line = SKShapeNode()
-    private let fishTexture = SKTexture(imageNamed: "CompanionFish")
-    private let sleepTexture = SKTexture(imageNamed: "CompanionPoseSleeping")
-    private let hopTexture = SKTexture(imageNamed: "CompanionPoseHop")
-    private let completeTexture = SKTexture(imageNamed: "CompanionPoseCompleted")
-    private var steamPuffs: [SKShapeNode] = []
     private var distractionVisual: DistractionVisualState?
     private var lastTime: TimeInterval?
     private var motionTime: TimeInterval = 0
-    private var built = false
-    var visualNow: () -> Date = Date.init
 
-    override init() {
+    // Pixel rectangles include the complete rod, including the deposit pose's tip.
+    // Coordinates are top-left image pixels; SpriteKit texture rectangles use bottom-left UVs.
+    private let poses: [SKTexture] = {
+        let atlas = SKTexture(imageNamed: "CompanionPosesV2")
+        let rectangles = [
+            CGRect(x: 0, y: 0, width: 512, height: 512),
+            CGRect(x: 512, y: 0, width: 512, height: 512),
+            CGRect(x: 1024, y: 0, width: 512, height: 512),
+            CGRect(x: 0, y: 512, width: 512, height: 512),
+            CGRect(x: 512, y: 512, width: 532, height: 512),
+            CGRect(x: 1044, y: 512, width: 492, height: 512),
+        ]
+        return rectangles.map { rect in
+            let texture = SKTexture(rect: CGRect(
+                x: rect.minX / 1536, y: 1 - rect.maxY / 1024,
+                width: rect.width / 1536, height: rect.height / 1024), in: atlas)
+            texture.filteringMode = .linear
+            return texture
+        }
+    }()
+    private let catches: [SKTexture] = {
+        let atlas = SKTexture(imageNamed: "CompanionCatchesV2")
+        return (0..<4).map { index in
+            let texture = SKTexture(rect: CGRect(x: CGFloat(index) / 4, y: 0, width: 0.25, height: 1), in: atlas)
+            texture.filteringMode = .linear
+            return texture
+        }
+    }()
+
+    private let catchFrames: [SKTexture] = {
+        let atlas = SKTexture(imageNamed: "CompanionCatchFramesV3")
+        return (0..<12).map { index in
+            let texture = SKTexture(rect: CGRect(
+                x: CGFloat(index % 4) / 4, y: CGFloat(2 - index / 4) / 3,
+                width: 0.25, height: 1.0 / 3), in: atlas)
+            texture.filteringMode = .linear
+            return texture
+        }
+    }()
+    private let catchFrameOrder = [0, 1, 2, 4, 5, 3, 6, 7, 8, 9, 10, 11]
+    // Each painted cell has a different margin; align the feet, not the cell edges.
+    private let catchAnchors: [CGPoint] = [
+        CGPoint(x: 0.604, y: 0.073), CGPoint(x: 0.605, y: 0.073),
+        CGPoint(x: 0.578, y: 0.073), CGPoint(x: 0.600, y: 0.073),
+        CGPoint(x: 0.617, y: 0.147), CGPoint(x: 0.613, y: 0.147),
+        CGPoint(x: 0.591, y: 0.144), CGPoint(x: 0.604, y: 0.147),
+        CGPoint(x: 0.604, y: 0.211), CGPoint(x: 0.604, y: 0.211),
+        CGPoint(x: 0.598, y: 0.211), CGPoint(x: 0.600, y: 0.211),
+    ]
+    private let catchRodTips: [CGPoint] = [
+        CGPoint(x: 0.26, y: 0.736), CGPoint(x: 0.266, y: 0.707),
+        CGPoint(x: 0.188, y: 0.590), CGPoint(x: 0.242, y: 0.724),
+        CGPoint(x: 0.221, y: 0.768), CGPoint(x: 0.211, y: 0.745),
+        CGPoint(x: 0.227, y: 0.800), CGPoint(x: 0.229, y: 0.798),
+        CGPoint(x: 0.242, y: 0.877), CGPoint(x: 0.247, y: 0.877),
+        CGPoint(x: 0.242, y: 0.874), CGPoint(x: 0.242, y: 0.874),
+    ]
+
+    private let castFrames = CompanionScene.fishingTextures(named: "CompanionCastFramesV4")
+    private let depositFrames: [SKTexture] = {
+        let atlas = SKTexture(imageNamed: "CompanionDepositFramesV4")
+        return (0..<12).map { index in
+            // Keep the long right-facing rod in cell 6 out of the neighboring cell 7.
+            let offset: CGFloat = index == 7 ? 28 : 0
+            let width: CGFloat = index == 6 ? 416 : (index == 7 ? 356 : 384)
+            let texture = SKTexture(rect: CGRect(
+                x: (CGFloat(index % 4) * 384 + offset) / 1536,
+                y: CGFloat(2 - index / 4) / 3, width: width / 1536, height: 1.0 / 3), in: atlas)
+            texture.filteringMode = .linear
+            return texture
+        }
+    }()
+    private let castAlignment: [(anchor: CGPoint, height: CGFloat)] = [
+        (CGPoint(x: 0.603, y: 0.023), 103.783), (CGPoint(x: 0.618, y: 0.026), 104.236),
+        (CGPoint(x: 0.574, y: 0.023), 102.888), (CGPoint(x: 0.595, y: 0.023), 103.783),
+        (CGPoint(x: 0.607, y: 0.067), 103.783), (CGPoint(x: 0.630, y: 0.062), 105.619),
+        (CGPoint(x: 0.620, y: 0.067), 102.888), (CGPoint(x: 0.589, y: 0.065), 100.717),
+        (CGPoint(x: 0.637, y: 0.132), 102.009), (CGPoint(x: 0.632, y: 0.132), 101.574),
+        (CGPoint(x: 0.577, y: 0.132), 101.144), (CGPoint(x: 0.607, y: 0.132), 102.009),
+    ]
+    private let depositAlignment: [(anchor: CGPoint, height: CGFloat)] = [
+        (CGPoint(x: 0.591, y: 0.038), 120.556), (CGPoint(x: 0.574, y: 0.038), 112.594),
+        (CGPoint(x: 0.569, y: 0.038), 116.439), (CGPoint(x: 0.557, y: 0.038), 116.439),
+        (CGPoint(x: 0.514, y: 0.097), 111.023), (CGPoint(x: 0.521, y: 0.097), 111.542),
+        (CGPoint(x: 0.445, y: 0.094), 115.874), (CGPoint(x: 0.335, y: 0.094), 117.010),
+        (CGPoint(x: 0.589, y: 0.185), 114.211), (CGPoint(x: 0.573, y: 0.185), 113.667),
+        (CGPoint(x: 0.553, y: 0.185), 114.211), (CGPoint(x: 0.548, y: 0.185), 114.760),
+    ]
+    private let castTips: [CGPoint] = [
+        CGPoint(x: 0.169, y: 0.719), CGPoint(x: 0.221, y: 0.719),
+        CGPoint(x: 0.323, y: 0.862), CGPoint(x: 0.464, y: 0.812),
+        CGPoint(x: 0.503, y: 0.900), CGPoint(x: 0.438, y: 0.900),
+        CGPoint(x: 0.122, y: 0.821), CGPoint(x: 0.151, y: 0.821),
+        CGPoint(x: 0.091, y: 0.736), CGPoint(x: 0.232, y: 0.877),
+        CGPoint(x: 0.216, y: 0.883), CGPoint(x: 0.219, y: 0.874),
+    ]
+    private let depositTips: [CGPoint] = [
+        CGPoint(x: 0.247, y: 0.663), CGPoint(x: 0.263, y: 0.751),
+        CGPoint(x: 0.357, y: 0.853), CGPoint(x: 0.391, y: 0.877),
+        CGPoint(x: 0.924, y: 0.809), CGPoint(x: 0.935, y: 0.780),
+        CGPoint(x: 0.978, y: 0.592), CGPoint(x: 0.871, y: 0.416),
+        CGPoint(x: 0.286, y: 0.871), CGPoint(x: 0.276, y: 0.871),
+        CGPoint(x: 0.232, y: 0.868), CGPoint(x: 0.216, y: 0.853),
+    ]
+    // Compress only the rod's outer margin; keep the seated body at its calibrated size.
+    private static let shortenedRod = SKWarpGeometryGrid(columns: 2, rows: 1,
+        sourcePositions: [SIMD2<Float>(0, 0), SIMD2<Float>(0.7, 0), SIMD2<Float>(1, 0),
+                          SIMD2<Float>(0, 1), SIMD2<Float>(0.7, 1), SIMD2<Float>(1, 1)],
+        destinationPositions: [SIMD2<Float>(0, 0), SIMD2<Float>(0.7, 0), SIMD2<Float>(0.9, 0),
+                               SIMD2<Float>(0, 1), SIMD2<Float>(0.7, 1), SIMD2<Float>(0.9, 1)])
+
+    private static func fishingTextures(named name: String) -> [SKTexture] {
+        let atlas = SKTexture(imageNamed: name)
+        return (0..<12).map { index in
+            let texture = SKTexture(rect: CGRect(
+                x: CGFloat(index % 4) / 4, y: CGFloat(2 - index / 4) / 3,
+                width: 0.25, height: 1.0 / 3), in: atlas)
+            texture.filteringMode = .linear
+            return texture
+        }
+    }
+
+    private static let distractionFrames: [[SKTexture]] = [
+        "CompanionDistractionLightsV3", "CompanionDistractionIceV3", "CompanionDistractionSnowV3",
+    ].map { fishingTextures(named: $0) }
+
+    init(playback: CompanionPlayback = CompanionPlayback()) {
+        self.playback = playback
         super.init(size: Self.stageSize)
         backgroundColor = .clear
         scaleMode = .aspectFit
-        self.buildScene()
-    }
-
-    required init?(coder aDecoder: NSCoder) {
-        nil
-    }
-
-    func startSession() {
-        self.playback.start()
-        self.distractionVisual = nil
-        self.lastTime = nil
-        self.motionTime = 0
-        isPaused = false
-        self.render()
-    }
-
-    func setSessionPaused(_ value: Bool) {
-        self.playback.setPaused(value); self.render()
-    }
-
-    func setDistracted(_ value: Bool) {
-        if !value { self.distractionVisual = nil }
-        self.playback.setDistracted(value); self.render()
-    }
-
-    func setDistractionVisual(_ visual: DistractionVisualState?) {
-        self.distractionVisual = visual
-        self.playback.setDistracted(visual != nil)
-        self.render()
-    }
-
-    func completeSession() {
-        self.playback.complete(); self.render()
-    }
-
-    func recordCatch(kindID: String) {
-        playback.recordCatch(kindID: kindID)
+        configure(floe, name: "floe", size: CGSize(width: 140, height: 46), position: CGPoint(x: 70, y: 25), z: 0)
+        configure(bucket, name: "bucket", size: CGSize(width: 22, height: 23), position: bucketOrigin, z: 12)
+        configure(character, name: "character", size: CGSize(width: characterHeight, height: characterHeight), position: seatedOrigin, z: 3)
+        character.anchorPoint = CGPoint(x: 0.6, y: 0.07)
+        configure(catchSprite, name: "catch", size: CGSize(width: 23, height: 31), position: .zero, z: 10)
+        configure(splash, name: "splash", size: CGSize(width: 16, height: 10), position: waterPoint, z: 2)
+        configure(sleepMarks, name: "sleep", size: CGSize(width: 16, height: 12), position: CGPoint(x: 94, y: 94), z: 10)
+        line.strokeColor = NSColor(white: 0.22, alpha: 0.8)
+        line.lineWidth = 0.6
+        line.zPosition = 2
+        addChild(line)
         render()
     }
 
-    func stopSession(activeSeconds: TimeInterval) {
-        self.playback.stop(activeSeconds: activeSeconds); self.render()
-    }
+    required init?(coder: NSCoder) { nil }
 
-    func biteNow() {
-        self.playback.biteNow(); self.render()
+    func startSession() {
+        playback.start()
+        distractionVisual = nil
+        lastTime = nil
+        motionTime = 0
+        isPaused = false
+        render()
     }
-
+    func setSessionPaused(_ value: Bool) { playback.setPaused(value); render() }
+    func setDistracted(_ value: Bool) {
+        if !value { distractionVisual = nil }
+        playback.setDistracted(value)
+        render()
+    }
+    func setDistractionVisual(_ visual: DistractionVisualState?) {
+        distractionVisual = visual
+        playback.setDistracted(visual != nil)
+        render()
+    }
+    func completeSession() { playback.complete(); render() }
+    func recordCatch(kindID: String) {
+        // Persisted rewards keep their own accounting; decorative objects never award items.
+        playback.recordCatch(kindID: kindID)
+        render()
+    }
+    func stopSession(activeSeconds: TimeInterval) { playback.stop(activeSeconds: activeSeconds); render() }
+    func biteNow() { playback.biteNow(); render() }
     func shutDown() {
-        self.onHidden = nil
-        self.distractionVisual = nil
-        self.playback.dismiss()
+        onHidden = nil
+        distractionVisual = nil
+        playback.dismiss()
         isPaused = true
-        self.lastTime = nil
+        lastTime = nil
+        render()
     }
-
     override func update(_ currentTime: TimeInterval) {
         defer { lastTime = currentTime }
-        guard let lastTime else { self.render(); return }
-        // Don't fast-forward visual catches after a suspended/hidden app or display sleep.
-        self.advanceAnimation(by: min(0.1, max(0, currentTime - lastTime)))
+        guard let lastTime else { render(); return }
+        advanceAnimation(by: min(0.1, max(0, currentTime - lastTime)))
     }
-
-    /// Also used by the deterministic visual verification harness.
     func advanceAnimation(by delta: TimeInterval) {
-        let previous = self.playback.phase
-        self.playback.advance(by: delta)
-        self.motionTime += delta
-        self.render()
-        if previous != .hidden, self.playback.phase == .hidden { self.onHidden?() }
+        guard delta.isFinite, delta > 0 else { return }
+        let previous = playback.phase
+        playback.advance(by: delta)
+        motionTime += delta
+        render()
+        if previous != .hidden, playback.phase == .hidden { onHidden?() }
     }
 
-    private func configure(
-        _ sprite: SKSpriteNode, size: CGSize, position: CGPoint, z: CGFloat, parent: SKNode? = nil)
-    {
-        sprite.size = size
-        sprite.position = position
-        sprite.zPosition = z
-        sprite.texture?.filteringMode = .linear
-        (parent ?? self).addChild(sprite)
-    }
-
-    private func buildScene() {
-        guard !self.built else { return }
-        self.built = true
-        self.floe.name = "floe"
-        self.bucket.name = "bucket"
-        self.catchSprite.name = "catch"
-        self.configure(self.floe, size: CGSize(width: 118, height: 52), position: CGPoint(x: 70, y: 30), z: 0)
-        self.configure(self.bucket, size: CGSize(width: 25, height: 26), position: CGPoint(x: 113, y: 47), z: 12)
-        self.puppet.position = CGPoint(x: 65, y: 47)
-        self.puppet.zPosition = 3
-        addChild(self.puppet)
-        self.configure(self.feet, size: CGSize(width: 43, height: 8), position: .zero, z: 5, parent: self.puppet)
-        self.configure(
-            self.torso,
-            size: CGSize(width: 45, height: 34),
-            position: CGPoint(x: 0, y: 17.5),
-            z: 1,
-            parent: self.puppet)
-        self.configure(
-            self.head,
-            size: CGSize(width: 46, height: 41),
-            position: CGPoint(x: 0, y: 31),
-            z: 3,
-            parent: self.puppet)
-        self.head.anchorPoint = CGPoint(x: 0.5, y: 0.15)
-        self.configure(
-            self.leftFlipper,
-            size: CGSize(width: 14, height: 27),
-            position: CGPoint(x: -19, y: 33),
-            z: 4,
-            parent: self.puppet)
-        self.configure(
-            self.rightFlipper,
-            size: CGSize(width: 14, height: 29),
-            position: CGPoint(x: 19, y: 33),
-            z: 7,
-            parent: self.puppet)
-        self.leftFlipper.anchorPoint = CGPoint(x: 0.65, y: 0.88)
-        self.rightFlipper.anchorPoint = CGPoint(x: 0.25, y: 0.9)
-        self.configure(
-            self.rod,
-            size: CGSize(width: 46, height: 43),
-            position: CGPoint(x: 6, y: 14),
-            z: 6,
-            parent: self.puppet)
-        self.rod.anchorPoint = CGPoint(x: 0.95, y: 0.05)
-        self.configure(self.restingPose, size: CGSize(width: 130, height: 130), position: CGPoint(x: 65, y: 47), z: 4)
-        self.restingPose.anchorPoint = CGPoint(x: 0.5, y: 62.0 / 512)
-        for _ in 0..<3 {
-            let path = CGMutablePath()
-            path.move(to: CGPoint(x: -2, y: -2))
-            path.addCurve(to: CGPoint(x: -5, y: 3), control1: CGPoint(x: -9, y: -1), control2: CGPoint(x: -9, y: 5))
-            path.addCurve(to: CGPoint(x: 1, y: 7), control1: CGPoint(x: -7, y: 10), control2: CGPoint(x: 0, y: 12))
-            path.addCurve(to: CGPoint(x: 6, y: 2), control1: CGPoint(x: 7, y: 10), control2: CGPoint(x: 10, y: 4))
-            path.addCurve(to: CGPoint(x: 2, y: -2), control1: CGPoint(x: 10, y: -3), control2: CGPoint(x: 5, y: -5))
-            path.addLine(to: CGPoint(x: -1, y: -8))
-            path.closeSubpath()
-            let puff = SKShapeNode(path: path)
-            puff.fillColor = NSColor(white: 0.72, alpha: 0.8)
-            puff.strokeColor = NSColor(white: 0.28, alpha: 0.85)
-            puff.lineWidth = 0.8
-            puff.zPosition = 11
-            puff.isHidden = true
-            addChild(puff)
-            self.steamPuffs.append(puff)
-        }
-        self.configure(self.catchSprite, size: CGSize(width: 10, height: 6), position: .zero, z: 10)
-        self.configure(self.sleepMarks, size: CGSize(width: 16, height: 12), position: CGPoint(x: 103, y: 66), z: 10)
-        self.configure(self.biteMark, size: CGSize(width: 4, height: 10), position: CGPoint(x: 82, y: 122), z: 10)
-        self.configure(self.splash, size: CGSize(width: 10, height: 8), position: CGPoint(x: 20, y: 32), z: 1)
-        self.line.strokeColor = NSColor(white: 0.22, alpha: 0.8)
-        self.line.lineWidth = 0.55
-        self.line.zPosition = 2
-        addChild(self.line)
-        self.render()
+    private func configure(_ node: SKSpriteNode, name: String, size: CGSize, position: CGPoint, z: CGFloat) {
+        node.name = name
+        node.size = size
+        node.position = position
+        node.zPosition = z
+        node.texture?.filteringMode = .linear
+        addChild(node)
     }
 
     private func render() {
-        guard self.built else { return }
-        let phase = self.playback.phase
-        let progress = CGFloat(playback.progress)
-        let time = CGFloat(playback.phaseTime)
-        let breath = self.reduceMotion ? 0 : sin(CGFloat(self.motionTime) * 1.6)
+        let phase = playback.phase
+        let p = CGFloat(playback.progress)
+        let t = CGFloat(playback.phaseTime)
+        let breath: CGFloat = reduceMotion ? 0 : sin(CGFloat(motionTime) * 1.6)
         let active = phase != .hidden
-        self.floe.isHidden = !active
-        self.bucket.isHidden = !active
-        self.puppet.isHidden = !active
-        self.puppet.position = CGPoint(x: 65, y: 47)
-        self.puppet.zRotation = 0
-        self.puppet.setScale(1)
-        self.torso.yScale = 1 + breath * 0.012
-        self.torso.xScale = 1
-        self.torso.zRotation = 0
-        self.torso.position = CGPoint(x: 0, y: 17.5)
-        self.head.position = CGPoint(x: 0, y: 31 + breath * 0.35)
-        self.head.zRotation = breath * 0.012
-        self.head.xScale = 1
-        self.head.yScale = 1
-        self.leftFlipper.position = CGPoint(x: -19, y: 33)
-        self.rightFlipper.position = CGPoint(x: 19, y: 33)
-        self.leftFlipper.setScale(1)
-        self.rightFlipper.setScale(1)
-        self.feet.position = .zero
-        self.leftFlipper.zRotation = -0.7 + breath * 0.018
-        self.rightFlipper.zRotation = -0.95 + breath * 0.022
-        self.rod.zRotation = 0.35 + breath * 0.013
-        self.rod.isHidden = false
-        self.restingPose.isHidden = true
-        self.restingPose.position = CGPoint(x: 65, y: 47)
-        self.restingPose.zRotation = 0
-        self.restingPose.alpha = 1
-        self.restingPose.setScale(1)
-        self.steamPuffs.forEach { $0.isHidden = true }
-        self.sleepMarks.isHidden = true
-        self.biteMark.isHidden = phase != .bite
-        self.splash.isHidden = true
-        self.catchSprite.isHidden = true
-        self.catchSprite.alpha = 1
-        self.catchSprite.zRotation = 0
-        self.catchSprite.setScale(1)
-        self.catchSprite.texture = self.fishTexture
-        self.catchSprite.size = CGSize(width: 11, height: 6)
-        var waterPoint = CGPoint(x: 20, y: 31)
-        self.line.isHidden = !active
+        floe.isHidden = !active
+        bucket.isHidden = !active
+        character.isHidden = !active
+        character.warpGeometry = nil
+        floe.alpha = 1
+        bucket.alpha = 1
+        bucket.setScale(1)
+        character.alpha = 1
+        character.position = seatedOrigin
+        character.zRotation = 0
+        character.xScale = 1 - breath * 0.004
+        character.yScale = 1 + breath * 0.012
+        catchSprite.isHidden = true
+        catchSprite.alpha = 1
+        catchSprite.zRotation = 0
+        catchSprite.texture = catches[playback.completedVisualCatches % catches.count]
+        splash.isHidden = true
+        splash.position = waterPoint
+        splash.alpha = 1
+        sleepMarks.isHidden = true
+        line.isHidden = !active
+        var pose = 0
+        var endpoint = waterPoint
 
         switch phase {
-        case .hidden:
-            self.puppet.isHidden = true
+        case .hidden: break
         case .starting:
-            self.rod.isHidden = true
-            self.line.isHidden = true
-            if !self.reduceMotion {
-                self.puppet.position.x -= (1 - self.smooth(progress)) * 23
-                self.puppet.position.y += sin(progress * .pi) * 12
+            line.isHidden = true
+            if !reduceMotion {
+                let settled = smooth(p)
+                floe.alpha = smooth(min(1, p * 3))
+                bucket.alpha = floe.alpha
+                character.alpha = smooth(min(1, p * 2))
+                character.position.x -= 12 * (1 - settled)
+                character.position.y += sin(p * .pi) * 4
+                character.yScale = 0.96 + 0.04 * settled
             }
         case .casting:
-            if !self.reduceMotion {
-                self.rod.zRotation = -0.13 + 0.48 * self.smooth(progress) - sin(progress * .pi) * 0.9
-                self.rightFlipper.zRotation = -1.2 + 0.25 * self.smooth(progress) - sin(progress * .pi) * 0.3
-                self.head.zRotation = -0.06 * (1 - self.smooth(progress)) - sin(progress * .pi) * 0.04
-                waterPoint = self.mix(CGPoint(x: 46, y: 72), waterPoint, self.smooth(progress))
+            if !reduceMotion {
+                character.zRotation = sin(p * .pi) * 0.025
+                if p < 0.45 { line.isHidden = true }
+                endpoint = quadratic(CGPoint(x: 82, y: 103), CGPoint(x: 7, y: 100), waterPoint,
+                                     smooth(min(1, max(0, (p - 0.45) / 0.55))))
+                splash.isHidden = p < 0.85
+                splash.alpha = sin(max(0, (p - 0.85) / 0.15) * .pi)
             }
-        case .fishing: break
+        case .fishing:
+            if !reduceMotion { character.zRotation = sin(t * 0.65) * 0.015 }
         case .bite:
-            if !self.reduceMotion {
-                self.rod.zRotation = 0.35 + sin(progress * .pi) * 0.1
-                self.head.zRotation = -0.06
+            pose = 1
+            if !reduceMotion {
+                character.position.x -= sin(p * .pi) * 3
+                character.yScale = 1 - sin(p * .pi) * 0.045
+                splash.isHidden = false
             }
-            self.splash.isHidden = self.reduceMotion
         case .pulling:
-            waterPoint = self.renderPull(progress: progress, time: time, waterPoint: waterPoint)
-        case .deposit:
-            waterPoint = self.renderDeposit(progress: progress)
-        case .sleeping:
-            self.showPose(self.sleepTexture)
-            if !self.reduceMotion { self.restingPose.yScale = 1 + breath * 0.01 }
-            self.sleepMarks.isHidden = false
-            self.sleepMarks.position = CGPoint(x: 101, y: 65 + (self.reduceMotion ? 0 : sin(time * 1.4) * 1.4))
-            self.sleepMarks.alpha = self.reduceMotion ? 0.7 : 0.65 + 0.2 * sin(time * 1.4)
-        case .distracted:
-            self.renderDistraction(time: time)
-        case .completed:
-            self.showPose(self.completeTexture)
-            if !self.reduceMotion { self.restingPose.yScale = 1 + breath * 0.006 }
-        case .releasing:
-            self.renderRelease(progress: progress)
-        }
-
-        if !self.line.isHidden {
-            let tip = self.rod.convert(CGPoint(x: -self.rod.size.width * 0.9, y: self.rod.size.height * 0.9), to: self)
-            let path = CGMutablePath()
-            path.move(to: tip)
-            path.addQuadCurve(to: waterPoint, control: CGPoint(x: tip.x - 2, y: (tip.y + waterPoint.y) / 2))
-            self.line.path = path
-        }
-    }
-
-    private func renderPull(progress: CGFloat, time: CGFloat, waterPoint: CGPoint) -> CGPoint {
-        if !self.reduceMotion {
-            let tug = sin(time * 7) * 0.025
-            self.puppet.zRotation = -0.045 * self.smooth(progress) + tug
-            self.rod.zRotation = 0.35 - 0.48 * self.smooth(progress) + tug
-            self.rightFlipper.zRotation -= 0.25 * self.smooth(progress)
-            self.head.zRotation = 0.045
-        }
-        guard progress > 0.65 else { return waterPoint }
-        let rise = self.smooth((progress - 0.65) / 0.35)
-        let point = self.reduceMotion ? CGPoint(x: 29, y: 86) : self.mix(waterPoint, CGPoint(x: 29, y: 86), rise)
-        self.catchSprite.isHidden = false
-        self.catchSprite.position = point
-        if self.reduceMotion { self.catchSprite.alpha = rise }
-        return point
-    }
-
-    private func renderDistraction(time: CGFloat) {
-        // A single articulated penguin keeps its silhouette and texture through the
-        // entire motion. Crossfading two complete poses creates a double image.
-        self.rod.isHidden = true
-        self.line.isHidden = true
-        switch self.distractionVisual?.effect ?? .iceFlower {
-        case .iceFlower:
-            self.showPose(self.hopTexture)
-            if !self.reduceMotion {
-                let phase = time.truncatingRemainder(dividingBy: 1.45) / 1.45
-                if phase < 0.18 {
-                    let squash = sin(phase / 0.18 * .pi)
-                    self.restingPose.yScale = 1 - 0.08 * squash
-                    self.restingPose.xScale = 1 + 0.04 * squash
-                } else if phase < 0.8 {
-                    let flight = (phase - 0.18) / 0.62
-                    self.restingPose.position.y += 13 * sin(flight * .pi)
-                    self.restingPose.zRotation = sin(flight * 2 * .pi) * 0.035
-                } else {
-                    let settle = sin((phase - 0.8) / 0.2 * .pi)
-                    self.restingPose.yScale = 1 - 0.06 * settle
-                    self.restingPose.xScale = 1 + 0.03 * settle
+            // Anticipation → effort → reveal → a held, happy reward beat.
+            if !reduceMotion {
+                let effort = sin(min(1, p / 0.62) * .pi)
+                character.zRotation = -0.025 * effort
+                character.position.x += 1.2 * effort
+                character.yScale = 1 - 0.035 * effort
+                if p >= 0.62 {
+                    let bounce = (p - 0.62) / 0.38
+                    character.position.y += max(0, sin(bounce * 2 * .pi)) * 4
                 }
             }
-            for (index, puff) in self.steamPuffs.enumerated() {
-                let travel = self.reduceMotion ? 0.45
-                    : (time / 1.7 + CGFloat(index) / 3).truncatingRemainder(dividingBy: 1)
-                puff.position = CGPoint(
-                    x: 46 + CGFloat(index) * 19 + sin(CGFloat(index) + travel * 2) * 3,
-                    y: 108 + travel * 17)
-                puff.setScale(0.65 + travel * 0.3)
-                puff.alpha = self.reduceMotion ? 0.75 : sin(travel * .pi) * 0.85
-                puff.isHidden = false
+            if p >= 0.35 {
+                let rise = smooth(min(1, (p - 0.35) / 0.25))
+                endpoint = reduceMotion ? CGPoint(x: 24, y: 84) : mix(endpoint, CGPoint(x: 24, y: 84), rise)
+                catchSprite.isHidden = false
+                catchSprite.position = endpoint
+                catchSprite.zRotation = reduceMotion ? 0 : sin(t * 5) * 0.12 * rise
+                splash.isHidden = reduceMotion || p > 0.65
+                splash.alpha = 1 - rise
             }
-        case .dimBright:
-            let elapsed = visualNow().timeIntervalSince(self.distractionVisual?.startedAt ?? visualNow())
-            let strength: CGFloat = self.reduceMotion
-                ? 0.8 : CGFloat(DistractionMotion.dimStrength(elapsed: elapsed))
-            self.torso.position.x = -3 * strength
-            self.torso.yScale = 1 - 0.2 * strength
-            self.torso.xScale = 1 - 0.15 * strength
-            self.head.position = CGPoint(x: -5 * strength, y: 31 - 10 * strength)
-            self.head.zRotation = 0.15 * strength
-            self.head.yScale = 1 - 0.04 * strength
-            // Shoulder anchors stay attached; both flippers swing forward as the head bows.
-            self.leftFlipper.position = CGPoint(x: -19 - strength, y: 39 - 11 * strength)
-            self.rightFlipper.position = CGPoint(x: 19 - 5 * strength, y: 39 - 12 * strength)
-            self.leftFlipper.zRotation = -2.65 + 1.15 * strength
-            self.rightFlipper.zRotation = 2.65 + 2.23 * strength
-            self.leftFlipper.yScale = 1.35 - 0.25 * strength
-            self.rightFlipper.yScale = 1.25 - 0.05 * strength
+        case .deposit:
+            catchSprite.isHidden = p >= 0.78
+            let overhead = CGPoint(x: 24, y: 122)
+            let landing = CGPoint(x: bucketOrigin.x, y: bucketOrigin.y - 1)
+            if p < 0.25 {
+                endpoint = mix(CGPoint(x: 24, y: 84), overhead, smooth(p / 0.25))
+            } else if p < 0.5 {
+                line.isHidden = true
+                endpoint = mix(overhead, CGPoint(x: bucketOrigin.x, y: overhead.y), smooth((p - 0.25) / 0.25))
+            } else {
+                // Release above the head before the catch drops into the bucket.
+                line.isHidden = true
+                endpoint = mix(CGPoint(x: bucketOrigin.x, y: overhead.y), landing,
+                               smooth(min(1, (p - 0.5) / 0.25)))
+            }
+            catchSprite.position = endpoint
+            if reduceMotion {
+                catchSprite.position = CGPoint(x: bucketOrigin.x, y: bucketOrigin.y + 11)
+                catchSprite.alpha = 1 - p
+            } else {
+                character.zRotation = -sin(p * .pi) * 0.02
+                catchSprite.zRotation = -p * 0.25
+                let landingBounce = p > 0.7 ? sin(min(1, (p - 0.7) / 0.3) * .pi) : 0
+                bucket.xScale = 1 + landingBounce * 0.035
+                bucket.yScale = 1 - landingBounce * 0.035
+            }
+        case .sleeping:
+            pose = 5
+            line.isHidden = true
+            sleepMarks.isHidden = false
+            sleepMarks.alpha = reduceMotion ? 0.7 : 0.65 + 0.2 * sin(t * 1.4)
+        case .distracted:
+            line.isHidden = true
+        case .completed:
+            pose = 3
+            line.isHidden = true
+        case .releasing:
+            pose = 4
+            line.isHidden = true
+            if playback.releasedCatches > 0 {
+                catchSprite.isHidden = false
+                catchSprite.position = reduceMotion ? waterPoint
+                    : quadratic(CGPoint(x: bucketOrigin.x, y: bucketOrigin.y + 9), CGPoint(x: 68, y: 89), waterPoint, p)
+                catchSprite.alpha = 1 - p
+            }
         }
-    }
-
-    private func renderDeposit(progress: CGFloat) -> CGPoint {
-        self.catchSprite.isHidden = false
-        self.catchSprite.position = self.quadratic(
-            CGPoint(x: 29, y: 86), CGPoint(x: 81, y: 175), CGPoint(x: 113, y: 52), progress)
-        self.catchSprite.zRotation = self.reduceMotion ? 0 : -progress * 0.5
-        // Bucket z-order occludes the catch only as it lands.
-        if !self.reduceMotion {
-            self.rod.zRotation = -0.13 - sin(progress * .pi) * 0.6
-            self.rightFlipper.zRotation = -1.2 - sin(progress * .pi) * 0.3
-            self.head.zRotation = -0.06 * progress
+        character.texture = poses[pose]
+        let width = characterHeight * (pose == 4 ? 532.0 / 512 : (pose == 5 ? 492.0 / 512 : 1))
+        character.size = CGSize(width: width, height: characterHeight)
+        if phase == .distracted {
+            let effect = distractionVisual?.effect ?? .iceFlower
+            let elapsed = distractionVisual.map { visualNow().timeIntervalSince($0.startedAt) } ?? playback.phaseTime
+            character.size = CGSize(width: 128, height: 128)
+            character.anchorPoint = CGPoint(x: 0.5, y: 20.0 / 256)
+            let sheet: Int = switch effect {
+            case .dimBright: 0
+            case .iceFlower: 1
+            case .snowstorm: 2
+            }
+            let frame = DistractionMotion.penguinFrame(effect: effect, elapsed: elapsed, reduceMotion: reduceMotion)
+            character.texture = Self.distractionFrames[sheet][frame]
+            character.position.y += CGFloat(DistractionMotion.penguinLift(
+                effect: effect, elapsed: elapsed, reduceMotion: reduceMotion))
         } else {
-            self.catchSprite.position = CGPoint(x: 113, y: 60)
-            self.catchSprite.alpha = 1 - progress
+            character.anchorPoint = CGPoint(x: 0.6, y: 0.07)
         }
-        return self.catchSprite.position
-    }
-
-    private func renderRelease(progress: CGFloat) {
-        self.showPose(self.completeTexture)
-        guard self.playback.releasedCatches > 0 else { return }
-        self.catchSprite.isHidden = false
-        self.catchSprite.texture = self.fishTexture
-        self.catchSprite.position = self.quadratic(
-            CGPoint(x: 113, y: 57), CGPoint(x: 68, y: 89), CGPoint(x: 20, y: 30), progress)
-        self.catchSprite.alpha = progress > 0.8 ? (1 - progress) / 0.2 : 1
-        if self.reduceMotion {
-            self.catchSprite.position = CGPoint(x: 20, y: 30)
-            self.catchSprite.alpha = 1 - progress
+        var paintedRodTip: CGPoint?
+        switch phase {
+        case .starting, .fishing, .bite, .pulling, .completed:
+            let frame = catchFrameOrder[reduceMotion ? 0 : playback.catchFrame]
+            character.texture = catchFrames[frame]
+            character.size = CGSize(width: 128, height: 1024.0 / 9)
+            character.anchorPoint = catchAnchors[frame]
+            paintedRodTip = catchRodTips[frame]
+        case .casting:
+            let order = [11, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+            let frame = order[reduceMotion ? 0 : playback.movementFrame]
+            let alignment = castAlignment[frame]
+            character.texture = castFrames[frame]
+            character.size = CGSize(width: alignment.height * 1.125, height: alignment.height)
+            character.anchorPoint = alignment.anchor
+            paintedRodTip = castTips[frame]
+        case .deposit, .releasing:
+            let frame = reduceMotion ? 0 : (phase == .releasing ? 11 - playback.movementFrame : playback.movementFrame)
+            let alignment = depositAlignment[frame]
+            let cellWidth: CGFloat = frame == 6 ? 416 : (frame == 7 ? 356 : 384)
+            character.texture = depositFrames[frame]
+            character.size = CGSize(width: alignment.height * cellWidth / (1024.0 / 3), height: alignment.height)
+            character.anchorPoint = alignment.anchor
+            paintedRodTip = depositTips[frame]
+            if frame == 6 || frame == 7 { character.warpGeometry = Self.shortenedRod }
+        default: break
         }
-        self.splash.isHidden = self.reduceMotion || progress < 0.8
+        if !line.isHidden {
+            // Rod-tip locations measured inside each atlas cell, in normalized bottom-left coordinates.
+            let tips: [CGPoint] = [CGPoint(x: 0.17, y: 0.73), CGPoint(x: 0.10, y: 0.45),
+                                   CGPoint(x: 0.10, y: 0.85), CGPoint(x: 0.13, y: 0.93),
+                                   CGPoint(x: 0.95, y: 0.86), .zero]
+            let normalizedTip = paintedRodTip ?? tips[pose]
+            let tip = character.convert(CGPoint(
+                x: (normalizedTip.x - character.anchorPoint.x) * character.size.width,
+                y: (normalizedTip.y - character.anchorPoint.y) * character.size.height), to: self)
+            let path = CGMutablePath()
+            path.move(to: tip)
+            path.addQuadCurve(to: endpoint, control: CGPoint(x: tip.x, y: (tip.y + endpoint.y) / 2))
+            line.path = path
+        }
     }
 
-    private func showPose(_ texture: SKTexture) {
-        self.puppet.isHidden = true
-        self.line.isHidden = true
-        self.restingPose.isHidden = false
-        self.restingPose.texture = texture
+    private func smooth(_ t: CGFloat) -> CGFloat { t * t * (3 - 2 * t) }
+    private func mix(_ a: CGPoint, _ b: CGPoint, _ t: CGFloat) -> CGPoint {
+        CGPoint(x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t)
     }
-
-    private func smooth(_ value: CGFloat) -> CGFloat {
-        value * value * (3 - 2 * value)
-    }
-
-    private func mix(_ first: CGPoint, _ second: CGPoint, _ t: CGFloat) -> CGPoint {
-        CGPoint(x: first.x + (second.x - first.x) * t, y: first.y + (second.y - first.y) * t)
-    }
-
-    private func quadratic(_ start: CGPoint, _ control: CGPoint, _ end: CGPoint, _ t: CGFloat) -> CGPoint {
-        let first = self.mix(start, control, t)
-        let second = self.mix(control, end, t)
-        return self.mix(first, second, t)
+    private func quadratic(_ a: CGPoint, _ b: CGPoint, _ c: CGPoint, _ t: CGFloat) -> CGPoint {
+        mix(mix(a, b, t), mix(b, c, t), t)
     }
 }

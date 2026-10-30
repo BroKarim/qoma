@@ -1,0 +1,18 @@
+Use case: stylized-concept.
+Asset type: production twelve-frame 2D character animation sprite sheet, exactly FOUR columns and THREE rows, 12 equal cells, frames ordered left-to-right then top-to-bottom. Transparent background.
+Reference is character identity and watercolor brushwork only. Use the same plump charcoal-and-cream seated baby penguin with organic dark outlines and watercolor paper grain. No mouth, beak, nose, pupils, round eyes or eye whites. Eyes are ONLY two short curved black strokes, changing to squeezed > < strokes for effort.
+Draw ONE continuous short action as twelve CLOSE consecutive in-between drawings, NOT twelve unrelated poses. Camera, character volume, head size and feet MUST stay locked. Each penguin sits with both feet centered at x=62% and baseline y=88% of its cell; top of head approximately y=26%. Keep EVERY pixel of the penguin and its rod inside its own cell with at least 8% margin. Rod and flippers move naturally while torso stays coherent. No fish, line, bucket, ice, water, labels, numbers, grid lines, motion marks or background. Only full penguin and wooden fishing rod.
+All rod tips stay on upper LEFT of penguin, never pointing right.
+Frame 1 calm fishing, diagonal pole toward upper left.
+Frame 2 tiny tug, head inclines and pole dips slightly.
+Frame 3 leans a little forward, flippers tighten, pole dips farther.
+Frame 4 crouches forward slightly, eyes squeezed strokes, wooden pole clearly bends under tension.
+Frame 5 begins drawing the pole back, body compressed, very small movement from 4.
+Frame 6 pulls pole up slightly, flippers rise and torso straightens a little.
+Frame 7 pole reaches mid-angle, body leans back slightly, head follows.
+Frame 8 pole lifts farther, curve relaxes, subtle upward stretch.
+Frame 9 pole nearly upright leaning upper left, body starting to settle.
+Frame 10 rod high upper left, happy closed stroke eyes, flippers gently raised.
+Frame 11 small soft overshoot of raised pole and body, same proportions.
+Frame 12 settles to happy held catch pose with rod high upper left.
+The gradual pose progression must be smooth, with small evenly spaced changes between adjacent frames. Especially no sudden rod-angle jumps, body resizing or foot repositioning. Consistent low-contrast mottled watercolor texture, no shiny 3D, no flat vector, no painted backdrop, no paper rectangle. A usable transparent sprite atlas with clean cell separation.

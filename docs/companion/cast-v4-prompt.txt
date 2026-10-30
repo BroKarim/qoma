@@ -1,0 +1,18 @@
+Use case: stylized-concept.
+Asset type: production TWELVE in-between drawings for one gentle fishing CAST animation. Exactly 4 columns by 3 rows of identical cells, true transparent background. Reference is the exact watercolor penguin identity to preserve.
+Layout CRITICAL: keep each WHOLE penguin plus entire wooden pole within CENTER 65% of its cell; 15% empty transparent padding on all sides, no overlap between cells. Fixed camera, fixed plump body size, seated feet planted at same baseline and same horizontal position in every cell. Fine mottled watercolor paper texture inside the character, organic dark pencil edge. Black head/back, ivory face/belly, black flippers and tiny feet. NO mouth/beak/nose. Eyes only short curved black strokes or closed chevrons, never dots/pupils/white eyeballs.
+Only penguin and wooden fishing rod, NO line, NO fish, no water, no ice, no bucket, no shadows, no labels, no grid lines.
+Twelve SMALL consecutive changes, read left-to-right then top-to-bottom:
+1 calm seated fishing, pole diagonally upper left.
+2 flippers lift pole a little, slight preparatory body compression.
+3 pole rotates upward toward vertical, head follows.
+4 pole moves just to upper right in a gentle backswing, torso leans a little right.
+5 pole at farthest upper right, holds anticipation, slight squash.
+6 torso starts forward, pole begins accelerating toward vertical.
+7 pole sweeps toward upper left, flippers follow, gentle torso stretch.
+8 pole reaches upper-left diagonal, body leans slightly forward.
+9 forward cast follow-through, pole tip dips to left, feet stay planted.
+10 little recoil, pole returns slightly upward.
+11 nearly settled, soft happy eyes.
+12 calm seated fishing, same character, pole angle and hand placement as frame 1 and as the reference's relaxed fishing pose.
+No large changes between neighboring drawings, no resizing character, no detached parts. Cozy work companion movement, never frantic. Fully transparent empty regions.

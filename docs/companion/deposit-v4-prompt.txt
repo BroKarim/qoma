@@ -1,0 +1,17 @@
+Use case: stylized-concept.
+Production sprite animation atlas: EXACTLY 4 columns by 3 rows, 12 equal cells, fully transparent background. Use reference penguin watercolor identity and plump proportions exactly. NO mouth, beak or nose; eyes ONLY two curved black strokes, never pupils or round eyes. Mottled watercolor washes, organic pencil edge.
+Twelve CONSECUTIVE IN-BETWEEN drawings of transferring a dangling catch from LEFT to a bucket on RIGHT, then returning to relaxed fishing. ONLY penguin plus wooden rod in each cell; no fish, bucket, line, ice, water, text, grid, shadows or backdrop. These will be separate runtime layers.
+Keep the complete penguin and pole within middle 65% of each cell with wide transparent margins. SAME camera, body scale, head volume, and seated foot contact throughout. No double arms or disconnected parts. Feet stay planted at a consistent baseline near 84% cell height and center x=60%. Every drawing must have a small gradual change from previous.
+1 happy seated penguin holding rod high toward upper LEFT, matches reference last row catch pose.
+2 flippers begin lifting pole slightly higher to clear head.
+3 pole moves toward vertical, head starts turning right.
+4 pole over the head nearly vertical, body gently turns right.
+5 pole crosses toward upper RIGHT, both flippers guide it.
+6 penguin faces slightly right, rod points high upper right.
+7 leans a little toward right bucket, rod lowers slightly right.
+8 gently lowers the catch toward right bucket (but do not draw catch or bucket), rod points right.
+9 relaxed release, flippers start bringing rod back upright.
+10 pole rotates back toward upper LEFT, body returns center.
+11 pole settles to diagonal upper left.
+12 calm relaxed fishing, diagonal pole upper left, matches reference first pose.
+Keep all tips and feet in frame. High quality matte hand-drawn watercolor. Preserve identity and draw smooth connected motion rather than unrelated poses. Absolutely no scenery or glowing background.

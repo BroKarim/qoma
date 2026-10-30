@@ -27,7 +27,7 @@ final class CompanionWindowController: NSObject, NSWindowDelegate {
             return
         }
 
-        let contentSize = CGSize(width: 140, height: 140)
+        let contentSize = CompanionScene.stageSize
         let panel = NSPanel(
             contentRect: NSRect(origin: initialOrigin(size: contentSize), size: contentSize),
             styleMask: [.borderless, .nonactivatingPanel, .fullSizeContentView],

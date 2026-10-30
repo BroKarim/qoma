@@ -16,6 +16,7 @@ final class DistractionOverlayController {
     private var timer: Timer?
     private var lastTrackedAt = Date.distantPast
     private var soundCursor = DistractionSoundCursor()
+    private var raisedPanels: [NSWindow: NSWindow.Level] = [:]
 
     init(
         frontmostPID: @escaping @MainActor () -> pid_t? = {
@@ -59,6 +60,8 @@ final class DistractionOverlayController {
         timer?.invalidate()
         timer = nil
         window?.orderOut(nil)
+        for (panel, level) in raisedPanels { panel.level = level }
+        raisedPanels.removeAll()
         target = nil
         soundCursor = DistractionSoundCursor()
         audio.stop()
@@ -76,19 +79,19 @@ final class DistractionOverlayController {
             lastTrackedAt = date
             guard let next = locate(state.ownerPID) else { hide(); return }
             ensureWindow()
-            let protectedPanels = NSApp.windows.compactMap { panel -> CGRect? in
-                guard panel !== window, panel.isVisible, panel.level.rawValue >= NSWindow.Level.floating.rawValue
-                else { return nil }
-                let intersection = panel.frame.intersection(next.frame)
-                guard !intersection.isNull, !intersection.isEmpty else { return nil }
-                return intersection.offsetBy(dx: -next.frame.minX, dy: -next.frame.minY)
-            }
-            surface?.occludedRegions = next.occludedRegions + protectedPanels
+            surface?.occludedRegions = next.occludedRegions
             if target != next || window?.isVisible != true {
                 window?.setFrame(next.frame, display: true, animate: false)
                 // Keep normal app content below the effect, and the floating timer above it.
                 window?.level = NSWindow.Level(rawValue: next.level + 1)
                 window?.orderFrontRegardless()
+            }
+            // WindowServer composites the sprites' alpha over the veil; never cut a rectangular hole for them.
+            for panel in NSApp.windows where panel !== window && panel.isVisible
+                && panel.level.rawValue >= NSWindow.Level.floating.rawValue {
+                guard panel.level.rawValue <= next.level + 1 else { continue }
+                if raisedPanels[panel] == nil { raisedPanels[panel] = panel.level }
+                panel.level = NSWindow.Level(rawValue: next.level + 2)
             }
             let firstFrame = target == nil
             target = next

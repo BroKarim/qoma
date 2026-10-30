@@ -22,10 +22,11 @@ enum DistractionVisualCheck {
         defer { controller.hide() }
         let decision = PolicyDecision(isDistraction: true, reason: .safeByDefault)
         let samples: [(String, DistractionEffect, Double)] = [
-            ("ice-06", .iceFlower, 1), ("ice-10", .iceFlower, 11),
-            ("ice-18", .iceFlower, 31), ("ice-24", .iceFlower, 51),
+            ("ice-start", .iceFlower, 1), ("ice-growing", .iceFlower, 11),
+            ("ice-dense", .iceFlower, 31), ("ice-full", .iceFlower, 51),
             ("lights-bright", .dimBright, 0), ("lights-mid", .dimBright, 2),
             ("lights-dark", .dimBright, 4), ("lights-bright-again", .dimBright, 8),
+            ("snow-start", .snowstorm, 1), ("snow-full", .snowstorm, 41),
         ]
         controller.show(decision: decision)
         for sample in samples {
@@ -59,7 +60,7 @@ enum DistractionVisualCheck {
                 let png = NSBitmapImageRep(data: data)?.representation(using: .png, properties: [:]) {
                 try png.write(to: directory.appendingPathComponent(sample.0 + ".png"))
             }
-            print("RENDER \(sample.0) flowers=\(surface.flowerCount) veil=\(surface.dimOpacity)")
+            print("RENDER \(sample.0) flowers=\(surface.flowerCount) snow=\(surface.snowCount) veil=\(surface.dimOpacity)")
         }
         RunLoop.main.run(until: Date().addingTimeInterval(0.15))
         let windows = CGWindowListCopyWindowInfo(.optionOnScreenOnly, kCGNullWindowID) as? [[String: Any]] ?? []
@@ -75,6 +76,21 @@ enum DistractionVisualCheck {
         }
         print("LAYER overlayAboveTarget=\(a < b) clickThrough=\(overlay.ignoresMouseEvents)")
         precondition(a < b && overlay.ignoresMouseEvents, "Overlay must be above target without intercepting input")
+
+        // Measures CPU drawing in this debug fixture, not overall GPU usage or battery drain.
+        if let surface = controller.surface,
+           let bitmap = surface.bitmapImageRepForCachingDisplay(in: surface.bounds),
+           let state = controller.state {
+            let start = ProcessInfo.processInfo.systemUptime
+            for tick in 0..<120 {
+                surface.render(state: state, elapsed: 41 + Double(tick) / 30, reduceMotion: false)
+                surface.cacheDisplay(in: surface.bounds, to: bitmap)
+            }
+            let milliseconds = (ProcessInfo.processInfo.systemUptime - start) * 1_000 / 120
+            print("STORM averageDrawMs=\(milliseconds) size=900x650 frames=120")
+        }
+        controller.hide()
+        try DistractionPolishVisualCheck.write(to: directory.appendingPathComponent("polish"))
     }
 }
 #endif
