@@ -13,21 +13,19 @@ const fontMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "Qoma - A minimalist floating timer with analytics",
-  metadataBase: new URL("https://qoma.app"),
-  description:
-    "Qoma is a floating Pomodoro timer designed specifically for macOS that focuses entirely on simplicity and clean analytics.",
+  title: "Qyube — Focus with intention",
+  metadataBase: new URL("https://qyube.brokarim.com"),
+  description: "A calm focus timer for macOS, with thoughtful sessions and a little Antarctic companion.",
   openGraph: {
-    title: "Qoma - A minimalist floating timer with analytics",
-    description:
-      "Qoma is a floating Pomodoro timer designed specifically for macOS that focuses entirely on simplicity and clean analytics.",
-    siteName: "Qoma",
+    title: "Qyube — Focus with intention",
+    description: "A calm focus timer for macOS, with thoughtful sessions and a little Antarctic companion.",
+    siteName: "Qyube",
     images: [
       {
         url: "/og.png",
         width: 1200,
         height: 630,
-        alt: "Qoma - A minimalist floating timer with analytics",
+        alt: "Qyube — Focus with intention",
       },
     ],
     locale: "en_US",
@@ -35,9 +33,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Qoma - A minimalist floating timer with analytics",
-    description:
-      "Qoma is a floating Pomodoro timer designed specifically for macOS that focuses entirely on simplicity and clean analytics.",
+    title: "Qyube — Focus with intention",
+    description: "A calm focus timer for macOS, with thoughtful sessions and a little Antarctic companion.",
     images: ["/og.png"],
   },
   robots: {

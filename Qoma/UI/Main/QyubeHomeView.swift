@@ -69,7 +69,6 @@ struct QyubeHomeView: View {
     @State private var isAnalyticsConsentPresented = false
     @State private var isLocalImportPresented = false
     @State private var importError: String?
-    @State private var accountError: String?
     @State private var isSessionFormPresented = false
     @State private var isEditingActiveSession = false
     @State private var shouldRestoreSessionFormAfterSettings = false
@@ -106,16 +105,20 @@ struct QyubeHomeView: View {
                     self.isSessionFormPresented = false
                     self.navigation.page = .settings
                 },
-                onManageSubscription: {
+                onAccountPurchases: {
                     NSWorkspace.shared.open(URL(string: "https://qyube.brokarim.com/account")!)
                 },
                 onSignOut: {
-                    Task {
-                        await self.access.signOutRemote()
-                        if self.access.accountID != nil { self.accountError = self.access.message }
+                    await self.access.signOutRemote()
+                    guard self.access.accountID == nil else {
+                        return self.access.message ?? "Could not sign out. Please try again."
                     }
+                    return nil
                 },
                 canSignOut: self.access.accountID != nil && self.activeSession == nil,
+                showTrialReassurance: {
+                    if case .trialing = self.access.state { true } else { false }
+                }(),
                 onQuit: self.onQuit)
             if case .trialing(let expiresAt) = access.state {
                 Text("Free trial · \(max(1, Int(ceil(expiresAt.timeIntervalSinceNow / 86_400)))) days left")
@@ -192,9 +195,6 @@ struct QyubeHomeView: View {
         .alert("Import could not finish", isPresented: Binding(get: { importError != nil }, set: { if !$0 { importError = nil } })) {
             Button("OK") { importError = nil }
         } message: { Text(importError ?? "Your earlier data is still safe on this Mac.") }
-        .alert("Could not sign out", isPresented: Binding(get: { accountError != nil }, set: { if !$0 { accountError = nil } })) {
-            Button("OK") { accountError = nil }
-        } message: { Text(accountError ?? "Please try again.") }
     }
 
     @ViewBuilder private var detail: some View {

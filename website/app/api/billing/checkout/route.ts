@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto"
 import { database } from "@/lib/db"
 import { getAuth } from "@/lib/auth"
-import { type PaidPlan, planForProduct, polar, productId } from "@/lib/billing/polar"
+import { newCheckoutPlan, planForProduct, polar, productId } from "@/lib/billing/polar"
 import { lifetimeCredit } from "@/lib/billing/lifetime"
 
 export const runtime = "nodejs"
@@ -10,11 +10,12 @@ export async function POST(request: Request) {
   if (request.headers.get("origin") !== process.env.BETTER_AUTH_URL) return Response.json({ error: "Invalid origin" }, { status: 403 })
   const session = await getAuth().api.getSession({ headers: request.headers })
   if (!session?.user.emailVerified) return Response.json({ error: "Sign in first" }, { status: 401 })
-  let plan: PaidPlan
+  let plan: "lifetime"
   try {
     const body = await request.json()
-    if (!["monthly", "annual", "lifetime"].includes(body.plan)) throw new Error("INVALID_PLAN")
-    plan = body.plan
+    const parsed = newCheckoutPlan(body.plan)
+    if (!parsed) throw new Error("INVALID_PLAN")
+    plan = parsed
   } catch { return Response.json({ error: "Invalid plan" }, { status: 400 }) }
   const accountId = session.user.id
   const product = productId(plan)

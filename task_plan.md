@@ -2071,3 +2071,70 @@ Polar signed webhook → order/subscription ledger → recompute entitlement
 6. UI dan copy final: hasil checkout pending berbasis server, error provider yang ramah pengguna, support/privacy/terms, akses histori dari Today saat expired, dan visual polish onboarding/akun. Jangan menjanjikan QRIS sebelum Xendit diintegrasikan.
 
 **Status:** implementasi dasar tersusun dan build, tetapi **belum release-ready**. Tahap yang memerlukan kredensial dan sandbox sengaja ditunda sesuai permintaan pengguna; tidak ada transaksi live atau deploy. Roadmap bagian I di atas tetap menjadi acceptance criteria, bukan otomatis berubah menjadi `[x]` seluruhnya.
+## Account, auth & one-time purchase — 31 Oktober 2026
+
+**Status: implementasi awal selesai; verifikasi sandbox dan visual masih terbuka.** Bagian ini menjadi arah terbaru untuk UI akun/auth dan penjualan baru, menggantikan rencana monthly/annual serta upgrade subscription sebelumnya. Riwayat di bawah tetap disimpan. Baseline autentikasi tersimpan pada commit `01b706b`; pekerjaan baru berada di branch `codex/account-auth-design`.
+
+### Keputusan produk
+
+- Penjualan baru diarahkan ke satu produk **Qyube Pro**, pembayaran sekali untuk akses lifetime macOS, maksimum dua Mac. Gunakan ID/entitlement `lifetime` yang sudah ada agar tidak membuat kontrak kedua. Harga existing $49 menjadi baseline; harga final dan cakupan update besar/support perlu dipastikan sebelum rilis.
+- Trial tujuh hari dimulai pada login native pertama yang selesai. Sign out tidak mengulang atau menghentikan hitungan trial. Klaim akun dan marker instalasi tetap disimpan; histori/koleksi tetap scoped ke akun.
+- Menu **Manage subscription** berubah menjadi **Account & purchases**, membuka `/account`. Tidak ada halaman web khusus untuk sign out app.
+- Mockup adalah arahan visual, bukan kontrak state backend. Jangan tampilkan pembelian sukses atau “Your Mac is connected” sebelum ada konfirmasi yang sesuai dari server/app.
+
+### Frontend website
+
+| Area | Rencana dan state yang wajib tersedia |
+|---|---|
+| `/auth` | Shell putih mengikuti landing page, wordmark existing, latar watercolor es, kartu responsif. Google tetap tersedia; pertahankan email OTP existing dengan state kirim kode, verifikasi, ganti email, busy, retry/error, dan session sudah login. Request native serta tujuan callback tidak boleh hilang saat OAuth/OTP. Tampilkan shell/loading yang terbaca sejak render pertama; jangan ada flash gelap atau tombol dobel saat busy. |
+| `/auth/complete` | Connecting, handoff ready, expired/invalid request, dan gagal jaringan punya copy/action berbeda. Tombol **Open Qyube** hanya memakai callback valid dari server. Retry membuka callback yang sama; hindari membuat ulang one-time code tanpa alur pemulihan. “You’re ready to focus” hanya setelah konfirmasi exchange jika status itu memang tersedia; tanpa acknowledgment gunakan “Return to Qyube to finish signing in.” Sediakan instruksi restart dari app bila request sudah kedaluwarsa. |
+| `/account` | Email akun, kartu akses trial/expired/Pro lifetime/revoked/pending verification; tanggal trial dari server, CTA beli untuk akun belum Pro, **Purchases & invoices** untuk pembeli. Daftar Mac dengan nama/last seen dan konfirmasi remove. Browser tidak boleh mengklaim “This Mac” tanpa identitas perangkat yang tepercaya. |
+| Checkout | Satu CTA beli Pro; status return pending sampai webhook paid terverifikasi. Jangan mengaktifkan akses hanya karena query string sukses. Refund penuh menampilkan status akses aktual. Portal failure punya pesan dan retry, bukan halaman kosong. |
+| Visual/accessibility | Pakai font dan komponen website existing, kartu putih/border abu-abu, tombol hitam, ilustrasi es di bawah. Mobile tidak tertutup ilustrasi; teks tetap HTML, ikon dekoratif alt kosong, fokus keyboard jelas, status diumumkan, reduced motion dihormati. |
+
+### Frontend macOS
+
+- `Qoma/UI/Main/QyubeSettingsMenuPopover.swift` dan caller `Qoma/UI/Main/QyubeHomeView.swift`: ubah label/callback account secara konsisten; tetap buka `/account`.
+- Popover custom konfirmasi **Sign out of Qyube?**, mengikuti frame off-white/navy existing. Tombol **Stay signed in** dan **Sign out**, disabled/busy saat request; Escape membatalkan dan fokus kembali ke pemicu. Gunakan ikon `QyubeMenuSignOut` existing.
+- Konfirmasi menjalankan `AccessCoordinator.signOutRemote()`; kredensial lokal baru dibersihkan mengikuti hasil revoke yang berlaku sekarang. Gagal offline tetap signed in dengan error/retry terlihat. Jangan hapus installation ID, klaim trial, atau data lokal akun. Sign out tetap diblokir saat sesi aktif.
+- Trial reassurance hanya ditampilkan pada akun trial; akun Pro tidak mendapat pesan trial. Quit tetap memakai jalur lifecycle existing; konfirmasi sesi aktif serta Help/Feedback bukan perluasan fitur pada tahap desain ini.
+
+### Backend dan kontrak akses
+
+- Audit dan gunakan ulang `/api/native-auth/{start,complete,exchange,refresh}`, `/api/me/entitlement`, `/api/me/device`, serta `/api/me/devices/[id]`. Pertahankan PKCE, state, TTL, one-time exchange, signed entitlement, ownership perangkat dan batas dua Mac. Redesign tidak memerlukan sistem auth baru.
+- `/account` membaca akun dari session server. Portal dibuat server melalui `/api/billing/portal`; token Polar tidak masuk browser/app. Audit dukungan order/invoice one-time pada hosted portal di sandbox; bila cukup gunakan portal existing, jangan membuat sistem invoice sendiri. Pengguna tanpa pembelian mendapat CTA pembelian yang jelas.
+- Perubahan one-time mencakup `website/app/pricing/page.tsx`, API checkout, `website/lib/billing/polar.ts`, lifetime quote/cancellation, webhook, entitlement, env contoh, `website/POLAR_SETUP.md`, `website/SETUP.md`, serta tests/fixtures terkait. Server wajib menolak checkout monthly/annual baru; menyembunyikan kartu harga saja tidak cukup.
+- Sebelum menghapus lifecycle subscription/outbox, periksa adanya subscription sungguhan dan job pending. Jika ada, hormati akses yang dibayar dan selesaikan kewajibannya; jika hanya sandbox, sederhanakan cabang recurring dan diskon upgrade yang tidak lagi digunakan. Jangan drop ledger/data historis hanya untuk merapikan kode.
+- Pertahankan signature webhook, deduplikasi event, validasi produk/nominal/currency, paid/refund grant, retry/reconciliation yang diperlukan. Cron cancellation subscription hanya dapat dilepas setelah dependensinya benar-benar kosong; webhook tetap diperlukan untuk one-time.
+- Tidak merencanakan schema/API baru sebelum terbukti dibutuhkan oleh invoice atau acknowledgment native. Jika diperlukan, dokumentasikan migrasi dan authorization-nya dahulu. Tidak ada perubahan dashboard Polar atau database dalam tahap ini.
+
+### Aset dan referensi
+
+- Board prototype disimpan di `design/account-auth-2026-10-31/prototype-board.png`.
+- Revisi aset: gunakan background utuh dengan penguin/ember menyatu, `signin-fishing-background-v2.png` (penguin kiri berkacamata 3D merah/cyan) dan `account-complete-background-v2.png` (penguin kanan, mata terpejam). Background kosong dan penguin welcome terpisah sebelumnya menjadi eksplorasi historis, bukan pilihan implementasi. Pertahankan karakter saat crop responsif.
+- Aset baru dan prompt lengkap: `design/account-auth-2026-10-31/`; inventaris serta status reuse ada pada `README.md` dalam folder tersebut. Varian WebP teroptimasi dipasang di `website/public/account/`.
+- Gunakan kembali `website/public/hero/` untuk penguin fishing/completed, bucket dan ice floe; gunakan ikon menu app existing. Ikon UI kecil/check/perangkat memakai Lucide atau native symbols; Google memakai aset brand resmi. Jangan menghasilkan logo Google atau teks UI sebagai bitmap.
+
+### Urutan implementasi dan acceptance
+
+1. Finalisasi aset dan copy; konfirmasi lifetime/update policy serta audit data subscription.
+2. Redesign shell auth dan complete sambil mempertahankan Google/OTP/PKCE. Verifikasi login baru, existing session, error provider, request expired, retry dan app belum terpasang.
+3. Redesign akun + portal one-time + perangkat, termasuk akses lintas akun ditolak, Mac ketiga, revoke perangkat saat ini dan kegagalan portal.
+4. Terapkan penjualan one-time di FE/BE/config/docs; buktikan checkout batal/pending tidak memberi akses, verified paid mengaktifkan Pro, event duplikat aman, refund penuh mencabut grant yang terkait.
+5. Pasang popover sign out; cek cancel, double click, offline, sesi aktif, login ulang tidak reset trial, data akun A/B tetap terpisah.
+6. Jalankan typecheck/build, tes auth/billing yang relevan, build macOS dan uji sandbox/browser pada desktop/mobile serta keyboard. Deploy/merge mengikuti instruksi berikutnya.
+
+- [x] Simpan perubahan baseline dan buat branch desain baru.
+- [x] Dokumentasikan scope FE/BE, kontrak akses dan acceptance.
+- [x] Implementasikan shell sign-in/email OTP/Google, handoff complete states, halaman Account & purchases/perangkat, UI lifetime saja, validasi backend checkout dan popover sign-out SwiftUI.
+- [x] Tambahkan panduan Polar one-time dan perbarui setup/env; pertahankan compatibility subscription lama sambil menunggu audit ledger production.
+- [ ] Uji OAuth/OTP, callback native sekali pakai, Polar order/invoice dan paid/refund pada sandbox; audit subscription/customer portal production sebelum menghapus lifecycle lama.
+- [ ] Uji responsive visual di browser, keyboard/error states dan production build website.
+- [ ] Migrasi database atau deploy — tidak diperlukan oleh perubahan ini dan belum dilakukan.
+
+### Hasil implementasi awal — 31 Oktober 2026
+
+- Website `/auth`, `/auth/complete`, `/account`, `/pricing` memakai scene watercolor terpadu; form mempertahankan Google, OTP, request handoff, pesan loading/error dan pending checkout. Akun membaca entitlement/order/perangkat hanya milik session, menampilkan order/portal dan konfirmasi remove.
+- Endpoint checkout baru hanya menerima `lifetime`; webhook tetap menerima product bulanan/tahunan historis. API lifecycle, schema dan outbox tidak dihapus karena belum ada bukti ledger production bahwa tak ada paid period atau cancellation job.
+- Menu app memakai label **Account & purchases**. Sign out menampilkan konfirmasi popover, disable saat request, tetap terbuka dengan error saat revoke gagal, dan memanggil revoke server yang sudah ada. Trial reminder hanya ditampilkan untuk status trial; sign out tidak menghapus klaim trial atau data lokal.
+- Verifikasi lokal: `bun run typecheck`, ESLint pada file TS yang berubah, `bun test lib/billing`, `git diff --check`, dan `xcodebuild build -project Qoma.xcodeproj -scheme Qoma -configuration Debug -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO` lulus. Production website build gagal karena runner tidak dapat mengunduh font Google (Geist, Geist Mono, Syne), termasuk saat dicoba di luar sandbox. Belum ada tes browser/OAuth/Polar sandbox, audit ledger production atau transaksi nyata.

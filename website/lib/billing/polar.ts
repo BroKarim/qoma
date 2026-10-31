@@ -2,6 +2,10 @@ import { createPolar } from "@polar-sh/sdk/2026-10"
 
 export type PaidPlan = "monthly" | "annual" | "lifetime"
 
+export function newCheckoutPlan(value: unknown): "lifetime" | null {
+  return value === "lifetime" ? value : null
+}
+
 export const prices: Record<PaidPlan, number> = { monthly: 399, annual: 2900, lifetime: 4900 }
 
 export function productId(plan: PaidPlan): string {
