@@ -5,7 +5,7 @@
 	<key>CFBundleURLTypes</key>
 	<array><dict><key>CFBundleURLName</key><string>com.dzulkiram.qoma.auth</string><key>CFBundleURLSchemes</key><array><string>qyube</string></array></dict></array>
 	<key>QyubeEntitlementPublicKey</key>
-	<string></string>
+	<string>AGMBVtNdhieWIW1NHEjBtQDXSQFFYOE4JVzugVF9AUE=</string>
 	<key>LSUIElement</key>
 	<true/>
 	<key>UIAppFonts</key>
