@@ -6,7 +6,7 @@ The website is the only component that holds payment, OAuth, email, database, an
 
 1. Create a PostgreSQL 17 database on Dokploy with TLS/private-network access and backups. Set `DATABASE_URL` on the website service; do not expose PostgreSQL publicly.
 2. Set `BETTER_AUTH_URL=https://qyube.brokarim.com` and a random `BETTER_AUTH_SECRET` of at least 32 characters. Run `bun run auth:migrate`, then `bun run db:migrate`. Better Auth migration must be checked against its installed version before applying to production.
-3. Add Google OAuth credentials with callback `https://qyube.brokarim.com/api/auth/callback/google`. Configure Resend with a verified sending subdomain, SPF, DKIM, and preferably DMARC; set `RESEND_API_KEY` and `RESEND_FROM`.
+3. Add Google OAuth credentials with callback `https://qyube.brokarim.com/api/auth/callback/google`. For Apple, create an App ID with **Sign in with Apple**, a matching Service ID, and a Sign in with Apple key in the Apple Developer portal. Set `APPLE_CLIENT_ID` to the Service ID, plus `APPLE_TEAM_ID`, `APPLE_KEY_ID`, and the downloaded `.p8` contents in `APPLE_PRIVATE_KEY`. Register `qyube.brokarim.com` and callback `https://qyube.brokarim.com/api/auth/callback/apple` on the Service ID. Keep the private key server-only; never commit it. The app generates Apple's six-month-limited client secret JWT from the key. Apple sign-in requires HTTPS and cannot complete on `localhost`.
 4. Create the **USD Qyube Pro lifetime** Polar product at $49 one-time and disable Polar trials. Set `POLAR_LIFETIME_PRODUCT_ID` and the organization access token. New recurring checkout is disabled. Keep old monthly/annual product IDs configured only while historical subscription webhooks or paid subscriptions still need recognition; do not delete their Polar products until the subscription ledger and pending jobs have been checked. Keep `POLAR_ENVIRONMENT=sandbox` until end-to-end tests pass; production requires a different Polar token, product ID, and webhook secret. Verify price and tax behavior in Polar before offering checkout.
 5. Create a Polar webhook at `https://qyube.brokarim.com/api/billing/webhook/polar`. Subscribe to `order.paid` and `order.refunded`; keep `subscription.*` events while old subscriptions or their paid periods remain. Set `POLAR_WEBHOOK_SECRET`. Enable one-time orders and invoices in the customer portal and verify them in sandbox. QRIS is **not** advertised.
    Set a random `BILLING_JOB_TOKEN` (at least 32 characters) and keep the Dokploy cron calling `POST /api/internal/billing/retry` with `Authorization: Bearer <token>` while legacy lifetime upgrades may have queued subscription cancellation actions. Remove that cron only after the ledger confirms no active legacy subscriptions and no pending cancellation actions.
@@ -17,7 +17,7 @@ The website is the only component that holds payment, OAuth, email, database, an
 
 ## Flow
 
-Mac installation ID (Keychain) → one-time PKCE browser handoff → Better Auth Google/email OTP → trial/device transaction → device credential (Keychain) → signed entitlement snapshot. Trial starts on the first completed native login, not when visiting the website. There is no card or auto-charge during trial.
+Mac installation ID (Keychain) → one-time PKCE browser handoff → Better Auth Google or Apple OAuth → trial/device transaction → device credential (Keychain) → signed entitlement snapshot. Trial starts on the first completed native login, not when visiting the website. There is no card or auto-charge during trial.
 
 Checkout requires a verified website session. The server fixes the product ID and account ID; new checkout accepts `lifetime` only. The webhook still recognizes configured historical recurring products for their paid access. A return from Polar is never proof of payment. The signed webhook updates the billing ledger and recomputes `entitlements`; the Mac refreshes from that API. Full refund removes lifetime access but never deletes local sessions or catches.
 
@@ -25,7 +25,7 @@ For an account with an existing paid subscription, the lifetime upgrade discount
 
 ## Mandatory sandbox acceptance checks
 
-- Google-first, OTP-first, verified same-email linking, unverified email rejection; OTP replay/rate limits and wrong PKCE state/verifier.
+- Google and Apple sign-in, verified same-email linking, unverified email rejection, and wrong PKCE state/verifier.
 - Account and installation trial once each, 2 active Macs, third Mac rejected, old Mac removal, revoked credential refused.
 - Trial expiration, offline subscription through paid end + 3 days, lifetime 30 days since last server check, device removal while offline.
 - Monthly/annual checkout requests are rejected; failed/canceled lifetime checkout grants nothing; verified paid lifetime grants only its owner; duplicate/out-of-order events and full/partial refunds.

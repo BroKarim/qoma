@@ -2086,7 +2086,7 @@ Polar signed webhook → order/subscription ledger → recompute entitlement
 
 | Area | Rencana dan state yang wajib tersedia |
 |---|---|
-| `/auth` | Shell putih mengikuti landing page, wordmark existing, latar watercolor es, kartu responsif. Google tetap tersedia; pertahankan email OTP existing dengan state kirim kode, verifikasi, ganti email, busy, retry/error, dan session sudah login. Request native serta tujuan callback tidak boleh hilang saat OAuth/OTP. Tampilkan shell/loading yang terbaca sejak render pertama; jangan ada flash gelap atau tombol dobel saat busy. |
+| `/auth` | Shell putih mengikuti landing page, wordmark existing, latar watercolor es, kartu responsif. Tawarkan Google dan Apple OAuth saja, tanpa email OTP. Request native serta tujuan callback tidak boleh hilang saat OAuth. Tampilkan shell/loading yang terbaca sejak render pertama; jangan ada flash gelap atau tombol dobel saat busy. Apple perlu Service ID, Team ID, Key ID, `.p8`, HTTPS callback, dan client-secret JWT valid. |
 | `/auth/complete` | Connecting, handoff ready, expired/invalid request, dan gagal jaringan punya copy/action berbeda. Tombol **Open Qyube** hanya memakai callback valid dari server. Retry membuka callback yang sama; hindari membuat ulang one-time code tanpa alur pemulihan. “You’re ready to focus” hanya setelah konfirmasi exchange jika status itu memang tersedia; tanpa acknowledgment gunakan “Return to Qyube to finish signing in.” Sediakan instruksi restart dari app bila request sudah kedaluwarsa. |
 | `/account` | Email akun, kartu akses trial/expired/Pro lifetime/revoked/pending verification; tanggal trial dari server, CTA beli untuk akun belum Pro, **Purchases & invoices** untuk pembeli. Daftar Mac dengan nama/last seen dan konfirmasi remove. Browser tidak boleh mengklaim “This Mac” tanpa identitas perangkat yang tepercaya. |
 | Checkout | Satu CTA beli Pro; status return pending sampai webhook paid terverifikasi. Jangan mengaktifkan akses hanya karena query string sukses. Refund penuh menampilkan status akses aktual. Portal failure punya pesan dan retry, bukan halaman kosong. |
@@ -2118,7 +2118,7 @@ Polar signed webhook → order/subscription ledger → recompute entitlement
 ### Urutan implementasi dan acceptance
 
 1. Finalisasi aset dan copy; konfirmasi lifetime/update policy serta audit data subscription.
-2. Redesign shell auth dan complete sambil mempertahankan Google/OTP/PKCE. Verifikasi login baru, existing session, error provider, request expired, retry dan app belum terpasang.
+2. Redesign shell auth dan complete sambil mempertahankan Google/Apple OAuth dan PKCE. Verifikasi login baru, existing session, error provider, request expired, retry dan app belum terpasang.
 3. Redesign akun + portal one-time + perangkat, termasuk akses lintas akun ditolak, Mac ketiga, revoke perangkat saat ini dan kegagalan portal.
 4. Terapkan penjualan one-time di FE/BE/config/docs; buktikan checkout batal/pending tidak memberi akses, verified paid mengaktifkan Pro, event duplikat aman, refund penuh mencabut grant yang terkait.
 5. Pasang popover sign out; cek cancel, double click, offline, sesi aktif, login ulang tidak reset trial, data akun A/B tetap terpisah.
@@ -2138,3 +2138,11 @@ Polar signed webhook → order/subscription ledger → recompute entitlement
 - Endpoint checkout baru hanya menerima `lifetime`; webhook tetap menerima product bulanan/tahunan historis. API lifecycle, schema dan outbox tidak dihapus karena belum ada bukti ledger production bahwa tak ada paid period atau cancellation job.
 - Menu app memakai label **Account & purchases**. Sign out menampilkan konfirmasi popover, disable saat request, tetap terbuka dengan error saat revoke gagal, dan memanggil revoke server yang sudah ada. Trial reminder hanya ditampilkan untuk status trial; sign out tidak menghapus klaim trial atau data lokal.
 - Verifikasi lokal: `bun run typecheck`, ESLint pada file TS yang berubah, `bun test lib/billing`, `git diff --check`, dan `xcodebuild build -project Qoma.xcodeproj -scheme Qoma -configuration Debug -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO` lulus. Production website build gagal karena runner tidak dapat mengunduh font Google (Geist, Geist Mono, Syne), termasuk saat dicoba di luar sandbox. Belum ada tes browser/OAuth/Polar sandbox, audit ledger production atau transaksi nyata.
+
+### Auth providers — Google + Apple only
+
+- [x] Hapus email OTP dari halaman login dan konfigurasi Better Auth, termasuk helper/env Resend yang hanya dipakai untuk OTP.
+- [x] Tambahkan Apple OAuth dengan client-secret JWT ES256 masa berlaku 180 hari, konfigurasi env dan petunjuk callback HTTPS.
+- [x] Jaga theme hotkey tetap aman ketika event keyboard tidak membawa `key`.
+- [ ] Isi Apple Developer credentials di Dokploy, daftarkan Service ID dan callback `https://qyube.brokarim.com/api/auth/callback/apple`, lalu uji OAuth Apple di domain HTTPS.
+- Verifikasi kode lokal: `bun run typecheck`, ESLint file auth/theme-provider, dan `git diff --check` lulus. Belum ada OAuth Apple test karena credential belum dikonfigurasi.

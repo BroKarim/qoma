@@ -1,9 +1,10 @@
 "use client"
 
-import { FormEvent, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { authClient } from "@/lib/auth-client"
+import { Apple } from "lucide-react"
 import styles from "./account-auth.module.css"
 
 function GoogleMark() {
@@ -12,10 +13,7 @@ function GoogleMark() {
 
 export default function AuthPanel({ requestId, invalidRequest }: { requestId: string | null; invalidRequest: boolean }) {
   const router = useRouter()
-  const [email, setEmail] = useState("")
-  const [otp, setOtp] = useState("")
-  const [sent, setSent] = useState(false)
-  const [busy, setBusy] = useState(false)
+  const [busyProvider, setBusyProvider] = useState<"google" | "apple" | null>(null)
   const [message, setMessage] = useState("")
   const { data: session, isPending } = authClient.useSession()
   const destination = requestId ? `/auth/complete?request=${encodeURIComponent(requestId)}` : "/account"
@@ -24,35 +22,15 @@ export default function AuthPanel({ requestId, invalidRequest }: { requestId: st
     if (!invalidRequest && !isPending && session) router.replace(destination)
   }, [destination, invalidRequest, isPending, router, session])
 
-  async function submitEmail(event: FormEvent) {
-    event.preventDefault()
-    setBusy(true)
-    setMessage("")
+  async function socialSignIn(provider: "google" | "apple") {
+    setBusyProvider(provider)
+    setMessage(`Opening ${provider === "google" ? "Google" : "Apple"} sign-in…`)
     try {
-      if (!sent) {
-        const { error } = await authClient.emailOtp.sendVerificationOtp({ email, type: "sign-in" })
-        if (error) throw error
-        setSent(true)
-        setMessage("Check your email for a six-digit sign-in code.")
-      } else {
-        const { error } = await authClient.signIn.emailOtp({ email, otp })
-        if (error) throw error
-        window.location.assign(destination)
-      }
-    } catch {
-      setMessage(sent ? "That code is invalid or expired. Try again." : "Could not send a code. Please try again shortly.")
-    } finally { setBusy(false) }
-  }
-
-  async function googleSignIn() {
-    setBusy(true)
-    setMessage("Opening Google sign-in…")
-    try {
-      const { error } = await authClient.signIn.social({ provider: "google", callbackURL: destination })
+      const { error } = await authClient.signIn.social({ provider, callbackURL: destination })
       if (error) throw error
     } catch {
-      setBusy(false)
-      setMessage("Google sign-in is unavailable. Try again or use email.")
+      setBusyProvider(null)
+      setMessage(`${provider === "google" ? "Google" : "Apple"} sign-in is unavailable. Please try again.`)
     }
   }
 
@@ -63,18 +41,13 @@ export default function AuthPanel({ requestId, invalidRequest }: { requestId: st
       <p className={styles.intro}>Sign in to connect Qyube on your Mac.</p>
       {invalidRequest && <p className={`${styles.status} ${styles.error}`} role="alert">This sign-in request is invalid. Return to Qyube on your Mac and start again.</p>}
       {!invalidRequest && !isPending && !session && <>
-        <button type="button" className={styles.google} disabled={busy} onClick={googleSignIn}>
-          <GoogleMark />{busy ? "Opening Google…" : "Continue with Google"}
+        <button type="button" className={styles.google} disabled={busyProvider !== null} onClick={() => socialSignIn("google")}>
+          <GoogleMark />{busyProvider === "google" ? "Opening Google…" : "Continue with Google"}
         </button>
-        <div className={styles.divider}>or continue with email</div>
-        <form className={styles.form} onSubmit={submitEmail}>
-          <label htmlFor="email">Email address</label>
-          <input className={styles.input} id="email" type="email" autoComplete="email" required disabled={busy || sent} value={email} onChange={event => setEmail(event.target.value)} />
-          {sent && <><label htmlFor="otp">Six-digit code</label><input className={styles.input} id="otp" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" required value={otp} onChange={event => setOtp(event.target.value)} /></>}
-          <button className={styles.primary} disabled={busy}>{busy ? (sent ? "Verifying…" : "Sending code…") : sent ? "Verify and continue" : "Send sign-in code"}</button>
-        </form>
-        {sent && <button className={styles.textButton} disabled={busy} onClick={() => { setSent(false); setOtp(""); setMessage("") }}>Use a different email</button>}
-        <p className={`${styles.status} ${message.includes("unavailable") || message.includes("invalid") || message.includes("Could not") ? styles.error : ""}`} role="status" aria-live="polite">{message}</p>
+        <button type="button" className={styles.apple} disabled={busyProvider !== null} onClick={() => socialSignIn("apple")}>
+          <Apple size={19} fill="currentColor" aria-hidden="true" />{busyProvider === "apple" ? "Opening Apple…" : "Continue with Apple"}
+        </button>
+        <p className={`${styles.status} ${message.includes("unavailable") ? styles.error : ""}`} role="status" aria-live="polite">{message}</p>
         <p className={styles.helper}>Your 7-day trial starts when you connect the app. No card required.</p>
       </>}
       {!invalidRequest && (isPending || session) && <p className={styles.status} role="status" aria-live="polite">{session ? "You’re signed in. Continuing…" : "Checking your sign-in…"}</p>}
