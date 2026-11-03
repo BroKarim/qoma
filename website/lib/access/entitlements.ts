@@ -1,5 +1,7 @@
 import type { PoolClient } from "pg"
-import { database } from "@/lib/db"
+import { and, desc, eq, gt, isNull, sql } from "drizzle-orm"
+import { database, orm } from "@/lib/db"
+import { billingOrders, billingSubscriptions, trialClaims } from "@/db/schema"
 
 export type Plan = "trial" | "monthly" | "annual" | "lifetime"
 export type Access = {
@@ -49,17 +51,20 @@ export async function recomputeEntitlement(accountId: string, client?: PoolClien
   try {
     if (!client) await owned.query("BEGIN")
     await owned.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", [accountId])
-    const { rows: trials } = await owned.query<{ ends_at: Date }>("SELECT ends_at FROM trial_claims WHERE account_id = $1", [accountId])
-    const { rows: lifetimes } = await owned.query("SELECT 1 FROM billing_orders WHERE account_id = $1 AND plan = 'lifetime' AND status = 'paid' LIMIT 1", [accountId])
-    const { rows: subscriptions } = await owned.query<{ plan: "monthly" | "annual"; paid_until: Date }>(
-      "SELECT plan, paid_until FROM billing_subscriptions WHERE account_id = $1 AND paid_until > now() AND revoked_at IS NULL ORDER BY paid_until DESC LIMIT 1",
-      [accountId],
-    )
+    const db = orm(owned)
+    const trials = await db.select({ endsAt: trialClaims.endsAt }).from(trialClaims).where(eq(trialClaims.accountId, accountId))
+    const lifetimes = await db.select({ id: billingOrders.providerOrderId }).from(billingOrders).where(and(
+      eq(billingOrders.accountId, accountId), eq(billingOrders.plan, "lifetime"), eq(billingOrders.status, "paid"),
+    )).limit(1)
+    const subscriptions = await db.select({ plan: billingSubscriptions.plan, paidUntil: billingSubscriptions.paidUntil })
+      .from(billingSubscriptions).where(and(eq(billingSubscriptions.accountId, accountId),
+        gt(billingSubscriptions.paidUntil, sql`now()`), isNull(billingSubscriptions.revokedAt)))
+      .orderBy(desc(billingSubscriptions.paidUntil)).limit(1)
     const { rows: clock } = await owned.query<{ now: Date }>("SELECT now() AS now")
     const access = resolveAccess({
-      trialEndsAt: trials[0]?.ends_at ?? null,
+      trialEndsAt: trials[0]?.endsAt ?? null,
       lifetimePaid: lifetimes.length > 0,
-      subscription: subscriptions[0] ? { plan: subscriptions[0].plan, paidUntil: subscriptions[0].paid_until } : null,
+      subscription: subscriptions[0] ?? null,
     }, clock[0].now)
     await owned.query(`
       INSERT INTO entitlements (account_id, plan, status, access_until, trial_ends_at, version)

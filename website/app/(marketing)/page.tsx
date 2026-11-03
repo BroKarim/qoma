@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import MarketingPageClient from "./page.client"
+import MarketingInformation from "./marketing-information"
 
 export const metadata: Metadata = {
   title: "qyube — Focus with a little catch",
@@ -8,5 +9,10 @@ export const metadata: Metadata = {
 }
 
 export default function MarketingPage() {
-  return <MarketingPageClient />
+  return (
+    <main className="font-sans text-[#202020]">
+      <MarketingPageClient />
+      <MarketingInformation />
+    </main>
+  )
 }

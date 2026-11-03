@@ -8,7 +8,8 @@ Same charcoal/white watercolor penguin with opaque red–cyan cinema 3D glasses 
 
 | File | Use |
 | --- | --- |
-| [penguin-fishing.png](penguin-fishing.png) | Before start and quiet fishing wait; flippers ready to grip rod |
+| [penguin-fishing-integrated.png](penguin-fishing-integrated.png) | Website hero setup and quiet fishing wait; one flipper visibly grips the integrated rod |
+| [penguin-fishing.png](penguin-fishing.png) | Original character-only quiet fishing pose, retained for animation composition |
 | [penguin-casting.png](penguin-casting.png) | Casting anticipation, flippers lifted |
 | [penguin-pulling.png](penguin-pulling.png) | Pull/reel, body leaning back |
 | [penguin-deposit.png](penguin-deposit.png) | Direct deposit toward bucket at scene left |
@@ -25,7 +26,7 @@ Pose concepts adapted from ../qyube-minimum-assets-v1/PROMPTS.md. Hop omitted be
 | --- | --- |
 | [ice-floe.png](ice-floe.png) | Single fixed platform reused in every state |
 | [bucket-empty.png](bucket-empty.png) | Single fixed bucket at penguin's left |
-| [fishing-rod.png](fishing-rod.png) | Separate rod, pointed up-right |
+| [fishing-rod.png](fishing-rod.png) | Separate rod for animation states that need independent rod movement |
 | [water-wash.png](water-wash.png) | Wide isolated watercolor water texture |
 | [water-splash.png](water-splash.png) | Catch splash keyframe |
 
@@ -37,7 +38,7 @@ Copies of fish-source-01, 10, 22 and 25 are in fish/. Original source: ../../out
 
 ## Assembly notes for the next implementation
 
-Layer order: water wash → moving reflection → ice floe → penguin → rod/line/catch → bucket foreground occlusion → splash/droplets as needed. Keep bucket and ice fixed while the penguin changes pose. Choose a shared scene coordinate system and record feet and rod-grip anchors per pose before animating. The rod grip must meet the flippers; do not bake a second rod into character art.
+Layer order: water wash → moving reflection → ice floe → penguin → line/catch → bucket foreground occlusion → splash/droplets as needed. The setup/quiet-wait pose uses the integrated rod artwork so the grip stays connected. For animated casting/pulling, use the separate rod and register its handle to the active pose's flipper before animating.
 
 Draw a fine SVG line from rod tip to water/catch at runtime. Ripple ellipses, individual droplets, the little bite cue, and reflection distortion are code-drawn effects rather than additional generated bitmaps. Adjust the rod curve dynamically for reel tension; this raster rod is a material/reference asset and a simple rigid fallback.
 

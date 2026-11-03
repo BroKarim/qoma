@@ -4,7 +4,7 @@ The website is the only component that holds payment, OAuth, email, database, an
 
 ## Required before a live test
 
-1. Create a PostgreSQL 17 database on Dokploy with TLS/private-network access and backups. Set `DATABASE_URL` on the website service; do not expose PostgreSQL publicly.
+1. Create a dedicated Supabase PostgreSQL project and follow [SUPABASE_SETUP.md](SUPABASE_SETUP.md). The website stays on Dokploy. Set the session-pooler connection URI in `DATABASE_URL`; `DATABASE_MIGRATION_URL` can override it for migrations. Disable the project's Data API because clients use the website API.
 2. Set `BETTER_AUTH_URL=https://qyube.brokarim.com` and a random `BETTER_AUTH_SECRET` of at least 32 characters. Run `bun run auth:migrate`, then `bun run db:migrate`. Better Auth migration must be checked against its installed version before applying to production.
 3. Add Google OAuth credentials with callback `https://qyube.brokarim.com/api/auth/callback/google`. For Apple, create an App ID with **Sign in with Apple**, a matching Service ID, and a Sign in with Apple key in the Apple Developer portal. Set `APPLE_CLIENT_ID` to the Service ID, plus `APPLE_TEAM_ID`, `APPLE_KEY_ID`, and the downloaded `.p8` contents in `APPLE_PRIVATE_KEY`. Register `qyube.brokarim.com` and callback `https://qyube.brokarim.com/api/auth/callback/apple` on the Service ID. Keep the private key server-only; never commit it. The app generates Apple's six-month-limited client secret JWT from the key. Apple sign-in requires HTTPS and cannot complete on `localhost`.
 4. Create the **USD Qyube Pro lifetime** Polar product at $49 one-time and disable Polar trials. Set `POLAR_LIFETIME_PRODUCT_ID` and the organization access token. New recurring checkout is disabled. Keep old monthly/annual product IDs configured only while historical subscription webhooks or paid subscriptions still need recognition; do not delete their Polar products until the subscription ledger and pending jobs have been checked. Keep `POLAR_ENVIRONMENT=sandbox` until end-to-end tests pass; production requires a different Polar token, product ID, and webhook secret. Verify price and tax behavior in Polar before offering checkout.
@@ -32,4 +32,4 @@ For an account with an existing paid subscription, the lifetime upgrade discount
 - Existing subscription access still honors paid-through dates and revocation; legacy lifetime upgrade discount, cancellation retry and proration conflict paths remain covered until production ledger audit clears them.
 - Stripe/Xendit are not wired in MVP. Polar payment methods and tax behavior must be verified in its dashboard per market.
 
-No live PostgreSQL, OAuth, Resend, or Polar request has been exercised while credentials remain blank. Typecheck/build/unit tests do not replace these gates.
+No live PostgreSQL, OAuth, or Polar request has been exercised while credentials remain blank. Typecheck/build/unit tests do not replace these gates.

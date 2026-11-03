@@ -1,5 +1,5 @@
 {
-  "status": "static-layer-assets; pose registration and animation pending",
+  "status": "hero fishing pose integrated; animation pending",
   "assets": [
     {
       "file": "bucket-empty.png",
@@ -159,6 +159,22 @@
         37,
         1232,
         1192
+      ]
+    },
+    {
+      "file": "penguin-fishing-integrated.png",
+      "width": 1335,
+      "height": 1178,
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "alpha_bounds": [
+        0,
+        17,
+        1311,
+        1178
       ]
     },
     {

@@ -1,4 +1,6 @@
-import { database } from "@/lib/db"
+import { and, eq, isNull, sql } from "drizzle-orm"
+import { orm } from "@/lib/db"
+import { billingActions } from "@/db/schema"
 import { polar } from "./polar"
 
 export function lifetimeCredit(lastPaidCents: number | null, activeUntil: Date | null, now: Date): number {
@@ -7,16 +9,17 @@ export function lifetimeCredit(lastPaidCents: number | null, activeUntil: Date |
 }
 
 export async function drainBillingActions(accountId: string) {
-  const { rows } = await database().query<{ id: number; provider_subscription_id: string }>(`
-    SELECT id, provider_subscription_id FROM billing_actions
-    WHERE account_id = $1 AND provider = 'polar' AND action = 'cancel_subscription' AND completed_at IS NULL
-    ORDER BY id LIMIT 10`, [accountId])
+  const db = orm()
+  const rows = await db.select().from(billingActions).where(and(
+    eq(billingActions.accountId, accountId), eq(billingActions.provider, "polar"),
+    eq(billingActions.action, "cancel_subscription"), isNull(billingActions.completedAt),
+  )).orderBy(billingActions.id).limit(10)
   for (const row of rows) {
     try {
-      await polar().subscriptions.update(row.provider_subscription_id, { cancel_at_period_end: true })
-      await database().query("UPDATE billing_actions SET completed_at = now(), last_error = NULL WHERE id = $1", [row.id])
+      await polar().subscriptions.update(row.providerSubscriptionId, { cancel_at_period_end: true })
+      await db.update(billingActions).set({ completedAt: sql`now()`, lastError: null }).where(eq(billingActions.id, row.id))
     } catch (error) {
-      await database().query("UPDATE billing_actions SET last_error = $2 WHERE id = $1", [row.id, error instanceof Error ? error.message.slice(0, 500) : "Unknown Polar error"])
+      await db.update(billingActions).set({ lastError: error instanceof Error ? error.message.slice(0, 500) : "Unknown Polar error" }).where(eq(billingActions.id, row.id))
       throw error
     }
   }
