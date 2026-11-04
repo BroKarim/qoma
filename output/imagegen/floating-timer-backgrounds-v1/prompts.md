@@ -1,5 +1,9 @@
 # Floating timer backgrounds
 
+## Hover watercolor revision v3
+
+Built-in image_gen, precise-object-edit. Output `b-watercolor-normal-hover-v3.png`. Edit target: v2 normal/hover sheet. Style reference: `settings-menu-icons-v1/concept-b.png`. Prompt: replace ONLY three pixel hover icons with smooth hand-drawn watercolor matching Polar Field Notes, delicate graphite contours and pigment granulation. Edit is an ice-blue diagonal wooden pencil with ochre tip; Pause is two rounded fjord-blue watercolor bars; Stop is a muted coral watercolor octagon. Preserve normal black 24:40, selected blue-white wash, border, panel geometry, layout and labels. No pixel stair steps, glossy 3D, additional captions, shadows or decorations. Prototype only.
+
 ## Selected B revision: normal and hover
 
 Built-in image_gen edit. Output: `b-watercolor-normal-hover-v2.png`. References: selected B background and user's current hover screenshot. Prompt: comparison sheet with two identical compact rounded horizontal panels, selected blue-white watercolor wash and thin border; normal state exact 24:40 in pure black rounded SF Pro-like numerals; hover state replaces countdown with three evenly spaced icons matching screenshot, teal pencil Edit, black Pause, red Stop. Same panel size/background in both states. No task title, shadow, glow, bevel, glass, bottom decorations or cursor. Labels outside panels Normal and Hover. Prototype only, not integrated.
