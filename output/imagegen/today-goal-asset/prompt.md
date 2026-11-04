@@ -1,0 +1,2 @@
+Built-in image_gen; reference docs/companion/runtime-preview.png.
+Generate single transparent cutout of default seated watercolor penguin, smiling closed eyes, same orange wooden rod pointing upper left. No glasses, clothing, fishing line, hook, fish, ice, water, bucket, shadow or text. Preserve reference character. Output resized to 384px in Qoma/Assets.xcassets/TodayGoalPenguin.imageset/penguin.png (119KB).
