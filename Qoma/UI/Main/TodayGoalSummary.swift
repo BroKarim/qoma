@@ -23,17 +23,17 @@ struct TodayGoalSummary: View {
                     Text("\(QyubeFormat.duration(self.focusedSeconds)) / \(QyubeFormat.duration(self.goalSeconds))")
                         .font(.title2).monospacedDigit()
                         .lineLimit(1).minimumScaleFactor(0.7)
-                        .frame(width: max(0, geometry.size.width - 96), alignment: .leading)
+                        .frame(width: max(0, geometry.size.width - 78), alignment: .leading)
                         .padding(.top, 12)
                     GoalFishingProgress(progress: self.revealed ? self.progress : 0)
                     Image("TodayGoalPenguin")
                         .resizable().scaledToFit()
-                        .frame(width: 100, height: 100)
-                        .offset(x: geometry.size.width - 100, y: -2)
+                        .frame(width: 80, height: 80)
+                        .offset(x: geometry.size.width - 80, y: 2)
                         .accessibilityHidden(true)
                 }
             }
-            .frame(height: 105)
+            .frame(height: 81)
             Text(self.goalSeconds > 0 ? "Focus Goal" : "No daily focus target")
                 .font(.callout).foregroundStyle(Color.qyubeAccent)
         }
@@ -66,23 +66,33 @@ private struct GoalFishingProgress: View, Animatable {
     var body: some View {
         GeometryReader { geometry in
             let width = geometry.size.width
-            let end = CGPoint(x: 4 + max(0, width - 8) * self.progress, y: 101)
-            // Rod tip calibrated to the transparent TodayGoalPenguin asset's 100pt frame.
-            let tip = CGPoint(x: width - 89, y: 14)
+            let end = CGPoint(x: width * self.progress, y: 77)
+            // Rod tip calibrated to the transparent TodayGoalPenguin standing asset’s 80pt frame.
+            let tip = CGPoint(x: width - 72, y: 10)
             ZStack(alignment: .topLeading) {
                 Capsule().fill(Color.qyubeAccent.opacity(0.09))
                     .overlay(Capsule().stroke(Color.qyubeAccent.opacity(0.25), lineWidth: 0.5))
-                    .frame(height: 8).offset(y: 97)
+                    .frame(height: 8).offset(y: 73)
                 Capsule().fill(Color.qyubeAccent)
-                    .frame(width: width * self.progress, height: 8).offset(y: 97)
+                    .frame(width: width * self.progress, height: 8).offset(y: 73)
                 Path { path in
                     path.move(to: tip)
                     path.addCurve(
                         to: end,
-                        control1: CGPoint(x: tip.x, y: 78),
-                        control2: CGPoint(x: end.x, y: 64))
+                        control1: CGPoint(x: tip.x, y: 58),
+                        control2: CGPoint(x: end.x, y: 52))
                 }
                 .stroke(Color(red: 0.53, green: 0.36, blue: 0.18), style: StrokeStyle(lineWidth: 0.65, lineCap: .round))
+                Path { hook in
+                    hook.move(to: CGPoint(x: end.x, y: end.y - 7))
+                    hook.addLine(to: end)
+                    hook.addCurve(
+                        to: CGPoint(x: end.x - 4, y: end.y - 3),
+                        control1: CGPoint(x: end.x, y: end.y + 3),
+                        control2: CGPoint(x: end.x - 5, y: end.y + 3))
+                    hook.addLine(to: CGPoint(x: end.x - 3, y: end.y - 1))
+                }
+                .stroke(Color.qyubeMenuInk, style: StrokeStyle(lineWidth: 0.8, lineCap: .round, lineJoin: .round))
             }
         }
         .accessibilityHidden(true)
