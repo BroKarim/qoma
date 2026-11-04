@@ -1,11 +1,12 @@
 import { and, eq, isNull, sql } from "drizzle-orm"
 import { orm } from "@/lib/db"
 import { billingActions } from "@/db/schema"
-import { polar } from "./polar"
+import { polar, prices } from "./polar"
+import { minimumLifetimeAmountCents } from "./order-amount"
 
 export function lifetimeCredit(lastPaidCents: number | null, activeUntil: Date | null, now: Date): number {
   if (!lastPaidCents || !activeUntil || activeUntil <= now) return 0
-  return Math.max(0, Math.min(4900, lastPaidCents))
+  return Math.max(0, Math.min(prices.lifetime - minimumLifetimeAmountCents(), lastPaidCents))
 }
 
 export async function drainBillingActions(accountId: string) {

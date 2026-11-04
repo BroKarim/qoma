@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="id"><meta charset="utf-8"><title>Penguin Natal — preview atlas</title>
+<style>body{font:16px system-ui;background:#eee8dd;color:#302c29;margin:24px}main{max-width:800px;margin:auto}canvas{width:min(100%,600px);background:#faf8f2;border-radius:20px;display:block;margin:20px 0}button,select,input{font:inherit;padding:8px}label{margin:8px;display:inline-block}</style>
+<main><h1>Penguin Natal</h1><p>Preview gambar atlas berurutan. Pilih gerakan untuk meninjau sambungan pose.</p>
+<select id="action" aria-label="Gerakan"></select><button id="play">Jeda</button><label>FPS <input id="fps" type="number" value="12" min="1" max="30"></label><label>Latar <input id="bg" type="color" value="#faf8f2"></label>
+<canvas id="canvas" width="600" height="600"></canvas><p id="status"></p><p>Tarikan menahan pose terakhir. Gerakan lain mengulang untuk memeriksa sambungannya. Preview ini belum menjalankan tali, tangkapan, ember, atau efek aplikasi.</p></main>
+<script src="registration.js"></script><script>
+const names=['arrival-idle','cast','catch','deposit','distraction-lights','distraction-ice','distraction-snow'];
+const labels=['Muncul / idle','Lempar pancing','Tarik tangkapan','Masukkan ke ember','Distraction: lampu','Distraction: es','Distraction: salju'];
+const select=document.querySelector('#action'),canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),status=document.querySelector('#status');
+names.forEach((name,i)=>select.add(new Option(labels[i],name)));
+let sprite=new Image(),ready=false,playing=true,start=performance.now(),frame=0;
+function load(){ready=false;sprite=new Image();sprite.onload=()=>{ready=true;start=performance.now();frame=0};sprite.onerror=()=>status.textContent='Atlas tidak dapat dimuat: '+select.value;sprite.src='atlases/'+select.value+'.png'}
+select.onchange=load;document.querySelector('#fps').onchange=()=>start=performance.now();
+document.querySelector('#play').onclick=()=>{playing=!playing;document.querySelector('#play').textContent=playing?'Jeda':'Putar';start=performance.now()-frame*1000/(Number(document.querySelector('#fps').value)||12)};
+document.querySelector('#bg').oninput=e=>canvas.style.background=e.target.value;
+function draw(now){if(ready){const fps=Math.max(1,Math.min(30,Number(document.querySelector('#fps').value)||12));if(playing){const elapsed=Math.floor((now-start)/1000*fps);frame=select.value==='catch'?Math.min(11,elapsed):elapsed%12}const w=sprite.naturalWidth/4,h=sprite.naturalHeight/3;const a=window.registration?.[select.value]?.frames[frame]||{footX:w*.55,footY:h*.84};const scale=500/Math.max(w,h);ctx.clearRect(0,0,600,600);ctx.drawImage(sprite,(frame%4)*w,Math.floor(frame/4)*h,w,h,330-a.footX*scale,520-a.footY*scale,w*scale,h*scale);status.textContent=labels[names.indexOf(select.value)]+' · frame '+(frame+1)+'/12 · '+sprite.naturalWidth+' × '+sprite.naturalHeight+' px'}requestAnimationFrame(draw)}load();requestAnimationFrame(draw);
+</script></html>

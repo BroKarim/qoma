@@ -2228,3 +2228,10 @@ Token, product IDs dan webhook secret sandbox berbeda dari production. Kredit up
 - [ ] Selesaikan gate rilis production pada roadmap sebelumnya: webhook/checkout nyata, portal/prorata, refund/cancellation retry, key di build Mac, signing/notarization dan auto-update.
 
 Rujukan resmi untuk panduan: [koneksi Supabase](https://supabase.com/docs/guides/database/connecting-to-postgres), [pengamanan Data API](https://supabase.com/docs/guides/api/securing-your-api), [Drizzle + Supabase](https://orm.drizzle.team/docs/connect-supabase), [Polar sandbox](https://polar.sh/docs/integrate/sandbox), [OAT](https://polar.sh/docs/integrate/oat), [produk](https://polar.sh/docs/features/products), dan [webhook](https://polar.sh/docs/integrate/webhooks/endpoints).
+
+
+## Harga Qyube Pro lifetime diperbarui — 3 November 2026
+
+Keputusan terbaru pengguna menggantikan harga lifetime USD $49 pada catatan sebelumnya: **Qyube Pro lifetime macOS = USD $11 one-time**. Harga website, checkout, Polar product, dan validasi webhook harus cocok pada 1100 cents sebelum pajak. `EXPECTED_LIFETIME_AMOUNT_CENTS` default 1100; checkout upgrade lama hanya diterima bila diskon dan kredit tercatat pada checkout yang sama serta nominal akhir memenuhi batas minimum. Nominal $4.90 ditolak. Harga monthly/annual lama hanya relevan bagi catatan akses langganan historis; produk baru tetap lifetime saja.
+
+Harga $49 dan kalkulasi upgrade yang masih muncul di bagian strategi lama adalah riwayat keputusan terdahulu, bukan harga yang berlaku. Sebelum jual, setel product Polar lifetime ke USD $11 dan samakan environment live `EXPECTED_LIFETIME_AMOUNT_CENTS=1100` serta `MIN_LIFETIME_AMOUNT_CENTS=500`.

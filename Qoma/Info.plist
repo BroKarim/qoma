@@ -21,9 +21,7 @@
 	<string>Qoma monitors application activity during your focus sessions.</string>
 	<key>SUEnableInstallerLauncherService</key>
 	<true/>
-	<key>SUFeedURL</key>
-	<string>https://raw.githubusercontent.com/qoma-app/pomodoro/main/appcast.xml</string>
-	<key>SUPublicEDKey</key>
-	<string>gVDoWQzdh4+9rmj9AsGWxmm1gk58fHaKyXg+N5Uu+kg=</string>
+	<key>QyubeEnableSparkleUpdates</key>
+	<false/>
 </dict>
 </plist>

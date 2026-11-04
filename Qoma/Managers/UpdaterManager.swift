@@ -38,6 +38,7 @@ final class UpdaterManager: NSObject, ObservableObject {
         #if DEBUG
         return
         #else
+        guard Bundle.main.object(forInfoDictionaryKey: "QyubeEnableSparkleUpdates") as? Bool == true else { return }
         controller.startUpdater()
         #endif
     }
@@ -46,6 +47,7 @@ final class UpdaterManager: NSObject, ObservableObject {
         #if DEBUG
         return
         #else
+        guard Bundle.main.object(forInfoDictionaryKey: "QyubeEnableSparkleUpdates") as? Bool == true else { return }
         NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
         controller.checkForUpdates(nil)

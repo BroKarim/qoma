@@ -6,9 +6,10 @@ New purchases use one **one-time Qyube Pro** product. Existing monthly/annual pr
 
 - Name: `Qyube Pro`
 - Billing type: one-time
-- Price: USD $49 (verify against the dashboard before launch)
+- Price: USD $11 (verify against the dashboard before launch)
 - Benefit: lifetime access to Qyube for macOS, up to two active Macs per account
 - Disable Polar's built-in trial; Qyube grants its seven-day trial after the first completed native sign-in.
+- Set `EXPECTED_LIFETIME_AMOUNT_CENTS=1100` and `MIN_LIFETIME_AMOUNT_CENTS=500`. A normal order must net exactly 1100 cents before tax; an upgrade discount is accepted only when that checkout's server record has a matching credit and the resulting amount is at least 500 cents. A $4.90 order is rejected and saved in the webhook review log.
 - Set the product ID in `POLAR_LIFETIME_PRODUCT_ID`. The browser cannot choose a Polar product ID.
 
 ## Webhook

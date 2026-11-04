@@ -2,8 +2,10 @@ import type { PoolClient } from "pg"
 import { database } from "@/lib/db"
 import { recomputeEntitlement } from "@/lib/access/entitlements"
 import { planForProduct, polar } from "./polar"
+import { expectedLifetimeAmountCents, minimumLifetimeAmountCents, validateLifetimeOrderAmount } from "./order-amount"
 
 type Event = { type: string; timestamp: string; data: unknown }
+export function shouldProcessWebhookEvent(status: string) { return status !== "processed" }
 type PolarData = Record<string, unknown>
 const object = (value: unknown): PolarData => value && typeof value === "object" && !Array.isArray(value) ? value as PolarData : {}
 const string = (value: unknown): string | null => typeof value === "string" && value.length > 0 ? value : null
@@ -37,10 +39,24 @@ async function applyPaidOrder(client: PoolClient, data: PolarData) {
   if (!id || !product || !customer || !plan || data.paid !== true || data.currency !== "usd") throw new Error("Invalid or unconfigured paid order")
   const accountId = await accountFor(client, data)
   const checkoutId = string(data.checkout_id)
+  let checkoutCreditCents = 0
+  let hasConfiguredDiscount = false
   if (checkoutId) {
-    const { rows } = await client.query<{ product_id: string; account_id: string }>(
-      "SELECT product_id, account_id FROM checkout_attempts WHERE provider_checkout_id = $1", [checkoutId])
+    const { rows } = await client.query<{ product_id: string; account_id: string; credit_cents: number; discount_id: string | null }>(
+      "SELECT product_id, account_id, credit_cents, discount_id FROM checkout_attempts WHERE provider_checkout_id = $1", [checkoutId])
     if (rows[0] && (rows[0].product_id !== product || rows[0].account_id !== accountId)) throw new Error("Checkout product/account mismatch")
+    if (rows[0]) {
+      checkoutCreditCents = rows[0].credit_cents
+      hasConfiguredDiscount = checkoutCreditCents > 0 && !!rows[0].discount_id
+    }
+  }
+  if (plan === "lifetime") {
+    const amountCents = number(data.net_amount)
+    const expectedCents = expectedLifetimeAmountCents()
+    const minimumDiscountedCents = minimumLifetimeAmountCents()
+    if (!validateLifetimeOrderAmount({ amountCents, currency: String(data.currency), expectedCents, checkoutCreditCents, hasConfiguredDiscount, minimumDiscountedCents })) {
+      throw new Error(`Lifetime order amount mismatch: expected ${expectedCents - checkoutCreditCents} cents, received ${amountCents} cents`)
+    }
   }
   await client.query(`INSERT INTO billing_customers(account_id, provider, provider_customer_id) VALUES($1,'polar',$2)
     ON CONFLICT (account_id, provider) DO UPDATE SET provider_customer_id = EXCLUDED.provider_customer_id`, [accountId, customer])
@@ -146,29 +162,53 @@ async function applySubscription(client: PoolClient, type: string, data: PolarDa
 
 export async function processPolarEvent(id: string, event: Event): Promise<string | null> {
   if (!/^[A-Za-z0-9_-]{1,128}$/.test(id)) throw new Error("Invalid webhook id")
+  await database().query(`INSERT INTO webhook_events(provider, event_id, payload, event_type, status)
+    VALUES('polar',$1,$2,$3,'received') ON CONFLICT (provider,event_id) DO NOTHING`,
+  [id, JSON.stringify(event), event.type])
   const client = await database().connect()
   try {
     await client.query("BEGIN")
-    const claim = await client.query(`INSERT INTO webhook_events(provider, event_id, payload)
-      VALUES('polar',$1,$2) ON CONFLICT DO NOTHING`, [id, JSON.stringify(event)])
-    if (!claim.rowCount) {
-      const orderId = string(object(event.data).id)
-      const { rows } = orderId ? await client.query<{ account_id: string }>(
-        "SELECT account_id FROM billing_orders WHERE provider = 'polar' AND provider_order_id = $1", [orderId]) : { rows: [] }
+    const { rows: logged } = await client.query<{ status: string; account_id: string | null }>(
+      "SELECT status, account_id FROM webhook_events WHERE provider = 'polar' AND event_id = $1 FOR UPDATE", [id])
+    if (!shouldProcessWebhookEvent(logged[0]?.status ?? "received")) {
       await client.query("COMMIT")
-      return rows[0]?.account_id ?? null
+      return logged[0].account_id
     }
+    await client.query("UPDATE webhook_events SET status = 'processing', error = NULL WHERE provider = 'polar' AND event_id = $1", [id])
     const data = object(event.data)
     let accountId: string | null = null
     if (event.type === "order.paid") accountId = await applyPaidOrder(client, data)
-    else if (event.type === "order.refunded") accountId = await applyRefund(client, data)
+    else if (event.type === "order.refunded") {
+      try { accountId = await applyRefund(client, data) }
+      catch (error) {
+        if (!(error instanceof Error) || error.message !== "Refund arrived before paid order") throw error
+        await client.query("UPDATE webhook_events SET status = 'deferred' WHERE provider = 'polar' AND event_id = $1", [id])
+        await client.query("COMMIT")
+        return null
+      }
+    }
     else if (event.type.startsWith("subscription.")) accountId = await applySubscription(client, event.type, data)
+    if (event.type === "order.paid") {
+      const orderId = string(data.id)
+      if (orderId) {
+        const { rows: pendingRefunds } = await client.query<{ event_id: string; payload: Event }>(`
+          SELECT event_id, payload FROM webhook_events
+          WHERE provider = 'polar' AND status = 'deferred' AND event_type = 'order.refunded'
+            AND payload->'data'->>'id' = $1 FOR UPDATE`, [orderId])
+        for (const pending of pendingRefunds) {
+          const refundAccount = await applyRefund(client, object(pending.payload.data))
+          await recomputeEntitlement(refundAccount, client)
+          await client.query("UPDATE webhook_events SET status = 'processed', account_id = $2, processed_at = now() WHERE provider = 'polar' AND event_id = $1", [pending.event_id, refundAccount])
+        }
+      }
+    }
     if (accountId) await recomputeEntitlement(accountId, client)
-    await client.query("UPDATE webhook_events SET processed_at = now() WHERE provider = 'polar' AND event_id = $1", [id])
+    await client.query("UPDATE webhook_events SET status = 'processed', account_id = $2, processed_at = now() WHERE provider = 'polar' AND event_id = $1", [id, accountId])
     await client.query("COMMIT")
     return accountId
   } catch (error) {
     await client.query("ROLLBACK")
+    await database().query("UPDATE webhook_events SET status = 'failed', error = $2 WHERE provider = 'polar' AND event_id = $1", [id, error instanceof Error ? error.message.slice(0, 2000) : String(error).slice(0, 2000)])
     throw error
   } finally { client.release() }
 }

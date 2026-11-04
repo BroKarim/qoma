@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct QyubeSettingsMenuPopover: View {
@@ -62,8 +63,12 @@ struct QyubeSettingsMenuPopover: View {
                             self.isConfirmingSignOut = true
                         }
                     }
-                    QyubeSettingsMenuItem(title: "Help", image: "QyubeMenuHelp") {}
-                    QyubeSettingsMenuItem(title: "Give feedback", image: "QyubeMenuFeedback") {}
+                    QyubeSettingsMenuItem(title: "Help", image: "QyubeMenuHelp") {
+                        NSWorkspace.shared.open(SupportLinks.help)
+                    }
+                    QyubeSettingsMenuItem(title: "Give feedback", image: "QyubeMenuFeedback") {
+                        NSWorkspace.shared.open(SupportLinks.feedback)
+                    }
 
                     QyubeSettingsMenuItem(title: "Quit", image: "QyubeMenuQuit", action: self.onQuit)
                 }

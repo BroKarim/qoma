@@ -7,7 +7,7 @@ import { recomputeEntitlement } from "./entitlements"
 
 const origin = () => process.env.BETTER_AUTH_URL ?? "https://qyube.brokarim.com"
 
-export async function startNativeLogin(input: { installationId: string; deviceName: string; challenge: string; state: string }) {
+export async function startNativeLogin(input: { installationId: string; deviceName: string; challenge: string; state: string; sourceIp?: string }) {
   if (!input || typeof input.installationId !== "string" || typeof input.deviceName !== "string" ||
       typeof input.challenge !== "string" || typeof input.state !== "string" ||
       !/^[a-f0-9-]{36}$/i.test(input.installationId) ||
@@ -16,17 +16,25 @@ export async function startNativeLogin(input: { installationId: string; deviceNa
       !input.deviceName.trim() || input.deviceName.length > 80) throw new Error("INVALID_REQUEST")
   const id = randomUUID()
   const hash = digest(input.installationId)
+  const ipHash = input.sourceIp ? digest(input.sourceIp) : null
   const client = await database().connect()
   try {
     await client.query("BEGIN")
+    if (ipHash) {
+      await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 1))", [ipHash])
+      const { rows: ipAttempts } = await client.query<{ count: string }>(`
+        SELECT count(*)::text AS count FROM native_login_attempts
+        WHERE source_ip_hash = $1 AND created_at > now() - interval '10 minutes'`, [ipHash])
+      if (Number(ipAttempts[0].count) >= 30) throw new Error("RATE_LIMITED")
+    }
     await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", [hash])
     const { rows } = await client.query<{ count: string }>(`
       SELECT count(*)::text AS count FROM native_login_attempts
       WHERE installation_hash = $1 AND created_at > now() - interval '10 minutes'`, [hash])
     if (Number(rows[0].count) >= 5) throw new Error("RATE_LIMITED")
-    await client.query(`INSERT INTO native_login_attempts(id, installation_hash, device_name, challenge, state, expires_at)
-      VALUES($1, $2, $3, $4, $5, now() + interval '10 minutes')`,
-      [id, hash, input.deviceName, input.challenge, input.state])
+    await client.query(`INSERT INTO native_login_attempts(id, installation_hash, source_ip_hash, device_name, challenge, state, expires_at)
+      VALUES($1, $2, $3, $4, $5, $6, now() + interval '10 minutes')`,
+      [id, hash, ipHash, input.deviceName, input.challenge, input.state])
     await client.query("COMMIT")
   } catch (error) {
     await client.query("ROLLBACK")

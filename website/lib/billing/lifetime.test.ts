@@ -11,7 +11,7 @@ describe("lifetime upgrade credit", () => {
   it("last paid period only, bounded by lifetime price", () => {
     const future = new Date("2026-11-01T00:00:00Z")
     assert.equal(lifetimeCredit(399, future, now), 399)
-    assert.equal(lifetimeCredit(2900, future, now), 2900)
-    assert.equal(lifetimeCredit(6000, future, now), 4900)
+    assert.equal(lifetimeCredit(2900, future, now), 600)
+    assert.equal(lifetimeCredit(6000, future, now), 600)
   })
 })
