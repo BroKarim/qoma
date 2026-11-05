@@ -19,6 +19,14 @@
 **Fokus:** macOS lebih dulu. Rancangan iOS tetap pekerjaan lanjutan.
 **Nama target kode saat ini:** `Qoma`; nama produk yang dituju: `qyube`.
 
+### Pembaruan 5 November 2026 — completion langsung ke Today
+
+- Saat countdown selesai, `SessionCoordinator` tetap memfinalisasi dan menyimpan status `completed` seperti biasa. Sesudah finalisasi sukses, bunyi completion diputar, floating timer ditutup, lalu jendela utama dibuka pada `TodayView`.
+- Hapus alur break sepenuhnya dari UI produksi: tidak ada prompt/panel outcome, break timer, status break di menu bar, label break di Today, atau penguncian start sesi baru karena break.
+- Perubahan dibatasi pada presentasi dan navigation; aturan persistence sesi, catches, dan status completed/interrupted tidak berubah.
+- Sumber implementasi: `Qoma/Managers/QyubeAppCoordinator.swift` menangani completion; `Qoma/Managers/FloatingTimerController.swift` menutup timer dan membuka Today; `Qoma/UI/Main/TodayView.swift`, `NewSessionView.swift`, dan `QyubeHomeView.swift` tidak lagi membawa state break.
+- Keputusan ini menggantikan deskripsi alur completed lama di bagian 1 dan 19.3.
+
 ## jangan dihapus, catatan pribadi 
 
 - cara run di terminal : 
@@ -615,7 +623,7 @@ User menguji implementasi §14 dan melaporkan gerak penguin kurang halus, snowfl
 | Identitas sesi | Pengguna tidak diminta memberi nama sesi/tugas dan tidak melihat form New Session. Sesi baru memakai label netral `Focus session` pada riwayat dan aksesibilitas. Data historis yang sudah punya judul tetap dibaca; jangan hapus atau ubah judul lama saat migrasi. Distribusi berdasarkan judul tugas baru tidak relevan, sedangkan metrik fokus, waktu, aplikasi, domain, dan tangkapan tetap ada. |
 | Aturan fokus | Mode `timerOnly`/`allowing`/`blocking`, daftar aplikasi/domain, dan browser pilihan menjadi preferensi global persisten di Settings; `timerOnly` adalah default pertama kali. Daftar Allowing dan Blocking disimpan terpisah ketika mode berganti. Saat Start, salin aturan saat itu ke snapshot sesi agar riwayat dan evaluasi sesi stabil; perubahan Settings berlaku untuk sesi berikutnya, bukan mengubah sesi aktif diam-diam. Jika izin yang diperlukan tidak tersedia, tampilkan keadaan izin dan opsi Timer Only sebelum Start, jangan mengklaim aturan domain sedang bekerja. |
 | Panel floating | Saat active/paused, penguin dan timer tampil otomatis. Pause membuat penguin tidur. Menutup timer hanya menyembunyikan timer; penguin tetap tampil dan dapat memulihkan timer. Preferensi `Hide floating timer` di Settings berlaku langsung dan tetap tersimpan untuk sesi berikutnya; menu bar tetap menyediakan kontrol sesi. Saat idle kedua panel tidak tampil. |
-| Selesai | Countdown nol menghasilkan satu sesi `completed`. Penguin/timer menutup setelah transisi aman; panel menu bar ringkas muncul dengan `Start again` dan `Lihat hasil tangkapan`. Jendela utama tidak terbuka otomatis. Tombol hasil membuka **Insight** pada hari/sesi yang baru selesai, karena Insight menampilkan event tangkapan individual; Catalog tetap halaman koleksi spesies keseluruhan. Panel selesai memuat ringkasan singkat saja, bukan Fishing Report besar. |
+| Selesai | Countdown nol menyimpan satu sesi `completed`, memutar suara completion, menutup floating timer, lalu otomatis membuka Today. Tidak ada panel outcome, pilihan break, atau break timer. |
 | Stop/Restart/Quit | Stop meminta konfirmasi dan menyimpan `interrupted` dengan waktu aktif nyata. Restart mengulang countdown durasi sesi saat ini **dalam sesi logis yang sama**: ID sesi tetap, tidak menambah record interrupted/completed, dan tidak membuat reward tambahan. Quit ketika active/paused meminta konfirmasi `Stop and Quit`, menyimpan interrupted lebih dulu, lalu keluar; menutup jendela utama bukan Quit. |
 | Akses akun | Implementasi auth, trial, langganan, pembayaran, serta gate akses ditunda pada fase ini. Jangan menambahkan gate lokal palsu atau mengubah penyimpanan riwayat/tangkapan karena penundaan ini. |
 
@@ -711,7 +719,7 @@ Semua rekomendasi interview menu bar disetujui pengguna pada 13 Oktober. Bagian 
 | Idle | Ruler durasi 1–60 menit; tiga preset tersimpan di bawahnya | start kiri, … kanan | Ruler dapat diklik/diseret dan disesuaikan via accessibility. Pilihan terakhir tersimpan. Default instalasi baru 5/10/25; durasi awal 25. Preferensi yang sudah tersimpan tidak ditimpa. |
 | Active | Ruler progres menuju kiri, cancel/restart kiri, … kanan | pause kiri, countdown besar kanan | Ruler hanya menampilkan progres terhadap durasi awal sesi; tidak dapat mengubah durasi. Start yang berhasil menutup panel dan menampilkan penguin/timer sesuai preferensi. |
 | Paused | Sama seperti active; indikator berhenti | resume kiri, countdown yang berhenti kanan | Pause/Resume memakai clock yang sama; penguin mengikuti state paused yang sudah ada. |
-| Completed | Focus complete dan ringkasan durasi/jumlah tangkapan | start again dan Lihat hasil tangkapan | Panel otomatis terbuka. Start again memakai durasi sesi yang selesai dan snapshot preferensi global terbaru. Hasil membuka Insight untuk sesi tersebut. |
+| Completed | Tidak ada panel completed terpisah | Jendela utama membuka Today otomatis | Penyelesaian sesi tetap difinalisasi oleh coordinator sebelum Today ditampilkan. |
 | Recovery error | Pesan gagal simpan dan Retry saving | … | Hanya muncul ketika finalisasi benar-benar gagal; perlindungan data dan perbaikan kompatibilitas riwayat lama tetap dipakai. |
 
 ### Kontrol dan lifecycle

@@ -2,182 +2,72 @@ import Cocoa
 import Combine
 import SwiftUI
 
-/// Owns the movable focus timer and its completion and break presentations.
+/// Owns the movable focus timer presentation.
 @MainActor
 final class FloatingTimerController: NSObject, NSWindowDelegate {
-    private enum Presentation { case focus, completion, breakRunning, breakFinished }
-
     private var window: NSPanel?
     private let positionKey = "qyube.timer.origin"
     private let readout = TimerReadoutModel()
-    private var presentation = Presentation.focus
-    private var completedSession: FocusSession?
-    private var breakDeadline: Date?
-    private var breakTimer: Timer?
     private var onTogglePause: (() -> Bool)?
     private var onStop: (() -> Void)?
     private var onEdit: (() -> Void)?
-    private var onRepeat: ((FocusSession) -> Bool)?
     private var onToday: (() -> Void)?
-    private var onReview: ((FocusSession) -> Void)?
-    var onBreakChanged: (() -> Void)?
 
-    var isVisible: Bool { window?.isVisible ?? false }
-    var isShowingFocus: Bool { presentation == .focus }
-    var isOnBreak: Bool { presentation == .breakRunning || presentation == .breakFinished }
-    var isBreakFinished: Bool { presentation == .breakFinished }
-    var breakRemaining: TimeInterval { readout.breakRemaining }
+    var isVisible: Bool {
+        self.window?.isVisible ?? false
+    }
 
     func configure(
         onTogglePause: @escaping () -> Bool,
         onEdit: @escaping () -> Void,
         onStop: @escaping () -> Void,
-        onRepeat: @escaping (FocusSession) -> Bool,
-        onReview: @escaping (FocusSession) -> Void,
-        onToday: @escaping () -> Void
-    ) {
+        onToday: @escaping () -> Void)
+    {
         self.onTogglePause = onTogglePause
         self.onEdit = onEdit
         self.onStop = onStop
-        self.onRepeat = onRepeat
-        self.onReview = onReview
         self.onToday = onToday
     }
 
     func show(remainingTime: TimeInterval, title: String, isPaused: Bool) {
-        if isOnBreak {
-            breakTimer?.invalidate()
-            breakTimer = nil
-            breakDeadline = nil
-            completedSession = nil
-            onBreakChanged?()
-        }
-        readout.remainingTime = remainingTime
-        readout.taskTitle = title
-        readout.isPaused = isPaused
-        if presentation != .focus || window?.contentView == nil {
-            presentation = .focus
-            let panel = preparePanel(size: CGSize(
+        self.readout.remainingTime = remainingTime
+        self.readout.taskTitle = title
+        self.readout.isPaused = isPaused
+        if self.window?.contentView == nil {
+            let panel = self.preparePanel(size: CGSize(
                 width: AppConstants.FloatingLayoutSettings.timerOnlyWidth,
                 height: AppConstants.FloatingLayoutSettings.timerOnlyHeight))
             panel.contentView = NSHostingView(rootView: FloatingTimerView(
-                timer: readout,
+                timer: self.readout,
                 onTogglePause: { [weak self] in self?.onTogglePause?() ?? false },
                 onEdit: { [weak self] in self?.onEdit?() },
                 onStop: { [weak self] in self?.onStop?() }))
         }
-        window?.orderFrontRegardless()
+        self.window?.orderFrontRegardless()
     }
 
     func update(remainingTime: TimeInterval, title: String, isPaused: Bool) {
-        guard presentation == .focus else { return }
-        readout.remainingTime = remainingTime
-        readout.taskTitle = title
-        readout.isPaused = isPaused
+        self.readout.remainingTime = remainingTime
+        self.readout.taskTitle = title
+        self.readout.isPaused = isPaused
     }
 
-    func showCompletion(session: FocusSession, catches: [CatchEvent]) {
-        completedSession = session
-        presentation = .completion
-        let panel = preparePanel(size: CGSize(width: 208, height: 230), animate: true)
-        let content = NSHostingView(rootView: SessionOutcomeView(
-            onBreak: { [weak self] in self?.startBreak() },
-            onToday: { [weak self] in
-                self?.done()
-                self?.onToday?()
-            }))
-        content.sizingOptions = []
-        panel.contentView = content
-        panel.orderFrontRegardless()
+    func showCompletion() {
+        self.hide()
+        self.onToday?()
     }
 
     func hide() {
-        window?.orderOut(nil)
+        self.window?.orderOut(nil)
     }
 
     func hideFocus() {
-        if presentation == .focus { hide() }
+        self.hide()
     }
 
     func windowDidMove(_ notification: Notification) {
         guard let window else { return }
-        UserDefaults.standard.set(NSStringFromPoint(window.frame.origin), forKey: positionKey)
-    }
-
-    private func startBreak() {
-        guard presentation == .completion, completedSession != nil else { return }
-        // shortcut: Break lives in memory; add restoration when break persistence is designed.
-        breakDeadline = Date().addingTimeInterval(5 * 60)
-        readout.breakRemaining = 5 * 60
-        presentation = .breakRunning
-        showBreakPanel(finished: false)
-        breakTimer?.invalidate()
-        breakTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-            MainActor.assumeIsolated { self?.tickBreak() }
-        }
-        onBreakChanged?()
-    }
-
-    private func tickBreak() {
-        guard let breakDeadline else { return }
-        readout.breakRemaining = max(0, breakDeadline.timeIntervalSinceNow)
-        onBreakChanged?()
-        if readout.breakRemaining <= 0 { finishBreak() }
-    }
-
-    private func finishBreak() {
-        guard presentation == .breakRunning else { return }
-        breakTimer?.invalidate()
-        breakTimer = nil
-        breakDeadline = nil
-        readout.breakRemaining = 0
-        presentation = .breakFinished
-        showBreakPanel(finished: true)
-        onBreakChanged?()
-    }
-
-    private func showBreakPanel(finished: Bool) {
-        let panel = preparePanel(size: CGSize(width: 260, height: 190))
-        panel.contentView = NSHostingView(rootView: BreakPanelView(
-            readout: readout,
-            finished: finished,
-            onSkip: { [weak self] in self?.finishBreak() },
-            onRepeat: { [weak self] in self?.repeatSession() ?? false },
-            onDone: { [weak self] in self?.done() },
-            onReview: { [weak self] in self?.reviewSession() }))
-        panel.orderFrontRegardless()
-    }
-
-    private func repeatSession() -> Bool {
-        guard let completedSession, onRepeat?(completedSession) == true else { return false }
-        breakTimer?.invalidate()
-        breakTimer = nil
-        breakDeadline = nil
-        self.completedSession = nil
-        if presentation != .focus {
-            presentation = .focus
-            hide()
-            window?.contentView = nil
-        }
-        onBreakChanged?()
-        return true
-    }
-
-    private func reviewSession() {
-        guard let completedSession else { return }
-        done()
-        onReview?(completedSession)
-    }
-
-    private func done() {
-        breakTimer?.invalidate()
-        breakTimer = nil
-        breakDeadline = nil
-        completedSession = nil
-        presentation = .focus
-        hide()
-        window?.contentView = nil
-        onBreakChanged?()
+        UserDefaults.standard.set(NSStringFromPoint(window.frame.origin), forKey: self.positionKey)
     }
 
     private func preparePanel(size: CGSize, animate: Bool = false) -> NSPanel {
@@ -193,7 +83,7 @@ final class FloatingTimerController: NSObject, NSWindowDelegate {
                 y: min(max(y, visible.minY), max(visible.minY, visible.maxY - size.height)),
                 width: size.width, height: size.height)
             assert(target.width > 0 && target.height > 0 && target.origin.x.isFinite && target.origin.y.isFinite)
-            if animate && window.isVisible && !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
+            if animate, window.isVisible, !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
                 NSAnimationContext.runAnimationGroup { context in
                     context.duration = 0.25
                     window.animator().setFrame(target, display: true)
@@ -219,7 +109,7 @@ final class FloatingTimerController: NSObject, NSWindowDelegate {
         panel.delegate = self
         panel.onDismiss = { [weak self] in
             guard let self else { return }
-            if self.presentation == .focus { self.hide() } else { self.done() }
+            self.hide()
         }
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         window = panel
@@ -229,7 +119,7 @@ final class FloatingTimerController: NSObject, NSWindowDelegate {
     private func initialOrigin(size: CGSize) -> CGPoint {
         let screen = NSScreen.screens.first { $0.frame.contains(NSEvent.mouseLocation) } ?? NSScreen.main
         let visible = screen?.visibleFrame ?? CGRect(x: 0, y: 0, width: 1280, height: 800)
-        let saved = UserDefaults.standard.string(forKey: positionKey).map(NSPointFromString)
+        let saved = UserDefaults.standard.string(forKey: self.positionKey).map(NSPointFromString)
         let proposed = saved ?? CGPoint(x: visible.minX + 36, y: visible.maxY - size.height - 36)
         return CGPoint(
             x: min(max(proposed.x, visible.minX), visible.maxX - size.width),
@@ -239,9 +129,17 @@ final class FloatingTimerController: NSObject, NSWindowDelegate {
 
 private final class QyubeTimerPanel: NSPanel {
     var onDismiss: (() -> Void)?
-    override var canBecomeKey: Bool { true }
-    override var canBecomeMain: Bool { false }
-    override func cancelOperation(_ sender: Any?) { onDismiss?() }
+    override var canBecomeKey: Bool {
+        true
+    }
+
+    override var canBecomeMain: Bool {
+        false
+    }
+
+    override func cancelOperation(_ sender: Any?) {
+        self.onDismiss?()
+    }
 }
 
 @MainActor
@@ -249,5 +147,4 @@ final class TimerReadoutModel: ObservableObject {
     @Published var remainingTime: TimeInterval = 0
     @Published var taskTitle = ""
     @Published var isPaused = false
-    @Published var breakRemaining: TimeInterval = 0
 }

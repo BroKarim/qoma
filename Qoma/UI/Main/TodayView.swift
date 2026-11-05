@@ -4,7 +4,6 @@ struct TodayView: View {
     let sessions: [FocusSession]
     let activeSession: ActiveSessionSnapshot?
     let remainingTime: TimeInterval
-    let breakRemaining: TimeInterval?
     let onCreateSession: () -> Void
     let onBackToSession: () -> Void
     let onEditActiveSession: () -> Void
@@ -45,17 +44,6 @@ struct TodayView: View {
                     }
 
                     TodayGoalSummary(focusedSeconds: self.focusedSeconds)
-
-                    if let breakRemaining {
-                        Text(breakRemaining > 0
-                             ? "Break · \(QyubeFormat.countdown(breakRemaining)) remaining"
-                             : "Break finished · choose Repeat or Done in the break panel")
-                            .font(.callout.weight(.medium))
-                            .foregroundStyle(Color.qyubeAccent)
-                            .padding(10)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .qyubeInkSurface(fill: .qyubeSelection.opacity(0.5))
-                    }
 
                     VStack(alignment: .leading, spacing: 10) {
                         HStack {
@@ -163,7 +151,6 @@ struct TodayView: View {
         ],
         activeSession: nil,
         remainingTime: 0,
-        breakRemaining: nil,
         onCreateSession: {},
         onBackToSession: {},
         onEditActiveSession: {},

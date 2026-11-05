@@ -169,20 +169,13 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
             onStop: { [weak self] in
                 _ = self?.sessionCoordinator.stopSession(reason: "Stopped from floating timer")
             },
-            onRepeat: { [weak self] session in self?.repeatSession(session) ?? false },
-            onReview: { [weak self] session in self?.reviewSession(session) },
             onToday: { [weak self] in
                 self?.navigation.page = nil
                 self?.navigation.sessionToReview = nil
                 self?.navigation.todayRequest = UUID()
                 self?.showHomeWindow()
             })
-        timerController.onBreakChanged = { [weak self] in
-            guard let self else { return }
-            self.navigation.breakRemaining = self.timerController.isOnBreak
-                ? self.timerController.breakRemaining : nil
-            self.updateStatusItem()
-        }
+
 
         overlayController.onVisualStateChanged = { [weak self] visual in
             self?.companionController.setDistractionVisual(visual)
@@ -346,10 +339,7 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
 
     private func updateStatusItem() {
         let title: String
-        if timerController.isOnBreak {
-            title = timerController.isBreakFinished
-                ? "Break done" : "Break \(formatTime(timerController.breakRemaining))"
-        } else if let snapshot = sessionCoordinator.snapshot,
+        if let snapshot = sessionCoordinator.snapshot,
                   snapshot.status == .active || snapshot.status == .paused {
             title = snapshot.status == .paused
                 ? "Ⅱ \(formatTime(sessionCoordinator.remainingTime))"
@@ -372,29 +362,7 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
                 ?? AppConstants.SoundSettings.defaultSoundID,
             volume: defaults.object(forKey: AppConstants.SoundSettings.volumeKey) as? Double
                 ?? AppConstants.SoundSettings.defaultVolume)
-        let catches = CatchRepository.shared.listBanked(accountID: sessionCoordinator.sessionAccountID)
-            .filter { $0.sessionID == session.id }
-        timerController.showCompletion(session: session, catches: catches)
-    }
-
-    private func repeatSession(_ session: FocusSession) -> Bool {
-        guard sessionCoordinator.snapshot == nil, sessionCoordinator.finalizationState == .idle else { return false }
-        guard let draft = Self.repeatDraft(for: session) else { return false }
-        return sessionCoordinator.startSession(draft: draft) != nil
-    }
-
-    static func repeatDraft(for session: FocusSession) -> SessionDraft? {
-        var draft = session.draftSnapshot
-        draft.taskTitle = draft.taskTitle.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !draft.taskTitle.isEmpty else { return nil }
-        guard draft.policy.mode != .allowing || !draft.policy.allowedApps.isEmpty else { return nil }
-        return draft
-    }
-
-    private func reviewSession(_ session: FocusSession) {
-        navigation.page = nil
-        navigation.sessionToReview = session
-        showHomeWindow()
+        timerController.showCompletion()
     }
 
     private func updateAnalyticsTracking(for snapshot: ActiveSessionSnapshot) {

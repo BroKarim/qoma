@@ -25,7 +25,6 @@ final class QyubeNavigation: ObservableObject {
     @Published var selectedDay = Calendar.current.startOfDay(for: Date())
     @Published var catchRequest: UUID?
     @Published var sessionToReview: FocusSession?
-    @Published var breakRemaining: TimeInterval?
     @Published var todayRequest: UUID?
     @Published var editActiveSessionRequest: UUID?
     @Published private(set) var history: [FocusSession] = []
@@ -217,7 +216,6 @@ struct QyubeHomeView: View {
                 sourceSession: self.selectedSession,
                 isEditingActiveSession: self.isEditingActiveSession,
                 catches: self.navigation.catches.filter { $0.sessionID == self.selectedSession?.id },
-                breakRemaining: self.navigation.breakRemaining,
                 onBack: {
                     self.isSessionFormPresented = false
                     self.isEditingActiveSession = false
@@ -253,7 +251,6 @@ struct QyubeHomeView: View {
                 sessions: self.navigation.history,
                 activeSession: self.activeSession,
                 remainingTime: self.sessionCoordinator.remainingTime,
-                breakRemaining: self.navigation.breakRemaining,
                 onCreateSession: self.createSession,
                 onBackToSession: self.onBackToSession,
                 onEditActiveSession: { self.navigation.editActiveSessionRequest = UUID() },

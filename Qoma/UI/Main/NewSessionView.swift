@@ -8,7 +8,6 @@ struct NewSessionView: View {
     let sourceSession: FocusSession?
     let isEditingActiveSession: Bool
     let catches: [CatchEvent]
-    let breakRemaining: TimeInterval?
     let onBack: () -> Void
     let onSaved: () -> Void
     let onStarted: () -> Void
@@ -25,7 +24,6 @@ struct NewSessionView: View {
     private var canStart: Bool {
         !self.draft.taskTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             && self.coordinator.snapshot == nil
-            && self.breakRemaining == nil
             && (self.draft.policy.mode != .allowing || !self.apps.isEmpty)
     }
 
@@ -202,11 +200,6 @@ struct NewSessionView: View {
                     }
                     if self.coordinator.snapshot != nil && !self.isEditingActiveSession {
                         Text("Finish the current session before starting another.")
-                            .font(.caption)
-                            .foregroundStyle(Color.qyubeInterrupted)
-                    }
-                    if self.breakRemaining != nil {
-                        Text("Finish or skip the break before starting another session.")
                             .font(.caption)
                             .foregroundStyle(Color.qyubeInterrupted)
                     }
