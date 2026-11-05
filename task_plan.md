@@ -2243,3 +2243,8 @@ Rujukan resmi untuk panduan: [koneksi Supabase](https://supabase.com/docs/guides
 Keputusan terbaru pengguna menggantikan harga lifetime USD $49 pada catatan sebelumnya: **Qyube Pro lifetime macOS = USD $11 one-time**. Harga website, checkout, Polar product, dan validasi webhook harus cocok pada 1100 cents sebelum pajak. `EXPECTED_LIFETIME_AMOUNT_CENTS` default 1100; checkout upgrade lama hanya diterima bila diskon dan kredit tercatat pada checkout yang sama serta nominal akhir memenuhi batas minimum. Nominal $4.90 ditolak. Harga monthly/annual lama hanya relevan bagi catatan akses langganan historis; produk baru tetap lifetime saja.
 
 Harga $49 dan kalkulasi upgrade yang masih muncul di bagian strategi lama adalah riwayat keputusan terdahulu, bukan harga yang berlaku. Sebelum jual, setel product Polar lifetime ke USD $11 dan samakan environment live `EXPECTED_LIFETIME_AMOUNT_CENTS=1100` serta `MIN_LIFETIME_AMOUNT_CENTS=500`.
+### Floating timer watercolor — 4 November 2026
+
+- Branch `codex/floating-watercolor-timer`: timer memakai latar watercolor biru-putih, angka hitam dan border; shadow SwiftUI dihapus. Kontrol hover memakai ilustrasi Edit, Pause, Resume, dan Stop baru. Jarak HStack dan ukuran target tombol tetap sama.
+- Aset dibuat dengan imagegen bawaan sebagai `FloatingWatercolor-*` di asset catalog. Prompt: watercolor kertas biru-putih dengan tengah terang; simbol terpisah bergaya tinta dan watercolor polar untuk pensil, pause, play, dan stop. Screenshot referensi prototype ada di `output/imagegen/floating-timer-backgrounds-v1/`.
+- Pengaturan warna tema dan liquid glass tidak lagi memengaruhi timer fokus karena desain baru memakai latar watercolor dan teks hitam. Perubahan controller yang sudah ada sebelum pekerjaan ini dipertahankan.

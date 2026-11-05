@@ -6,11 +6,6 @@ struct FloatingTimerView: View {
     let onEdit: () -> Void
     let onStop: () -> Void
 
-    @AppStorage(AppConstants.FloatingThemeSettings.selectedThemeKey)
-    private var selectedThemeID = AppConstants.FloatingThemeSettings.defaultThemeID
-    @AppStorage(AppConstants.FloatingThemeSettings.liquidGlassKey)
-    private var liquidGlass = false
-
     @State private var isHovered = false
     @State private var pointerInside = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -22,7 +17,7 @@ struct FloatingTimerView: View {
     var body: some View {
         Group {
             if showingControls {
-                PixelSessionControlView(
+                SessionControlView(
                     title: timer.taskTitle,
                     isPaused: timer.isPaused,
                     onTogglePause: {
@@ -39,7 +34,7 @@ struct FloatingTimerView: View {
                             size: AppConstants.FloatingLayoutSettings.timerOnlyFontSize,
                             weight: .medium,
                             design: .rounded).monospacedDigit())
-                        .foregroundStyle(FloatingTheme.from(id: selectedThemeID).textColor)
+                        .foregroundStyle(.black)
                         .lineLimit(1)
 
                 }
@@ -62,15 +57,11 @@ struct FloatingTimerView: View {
             }
         }
         .background {
-            if #available(macOS 26.0, *), liquidGlass {
-                RoundedRectangle(cornerRadius: 16).fill(.clear)
-                    .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 16))
-            } else {
-                RoundedRectangle(cornerRadius: 16).fill(.white)
-            }
+            Image("FloatingWatercolor-background")
+                .resizable()
+                .clipShape(RoundedRectangle(cornerRadius: 16))
         }
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.qyubeLine, lineWidth: 1))
-        .shadow(color: .black.opacity(0.13), radius: 12, y: 5)
         .help(timer.taskTitle)
         .onHover { pointerInside = $0; if $0 { isHovered = true } }
         .task(id: pointerInside) {

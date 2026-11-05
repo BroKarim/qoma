@@ -18,36 +18,10 @@ struct SessionControlView: View {
                 .frame(maxWidth: .infinity)
                 .accessibilityLabel(title)
 
-            HStack(spacing: 18) {
-                Button(action: onEdit) {
-                    Image(systemName: "pencil")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(Color(red: 82 / 255, green: 115 / 255, blue: 134 / 255))
-                        .frame(width: 34, height: 34)
-                        .background(Color(red: 220 / 255, green: 232 / 255, blue: 237 / 255), in: Circle())
-                }
-                .help("Edit active session")
-                .accessibilityLabel("Edit active session")
-
-                Button(action: onTogglePause) {
-                    Image(systemName: isPaused ? "play.fill" : "pause.fill")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(Color(red: 82 / 255, green: 115 / 255, blue: 134 / 255))
-                        .frame(width: 34, height: 34)
-                        .background(Color(red: 220 / 255, green: 232 / 255, blue: 237 / 255), in: Circle())
-                }
-                .help(isPaused ? "Resume session" : "Pause session")
-                .accessibilityLabel(isPaused ? "Resume session" : "Pause session")
-
-                Button(action: onStop) {
-                    Image(systemName: "stop.fill")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(Color.qyubeInterrupted)
-                        .frame(width: 34, height: 34)
-                        .background(Color.qyubeLine.opacity(0.45), in: Circle())
-                }
-                .help("End session")
-                .accessibilityLabel("End session")
+            HStack(spacing: 4) {
+                control("edit", label: "Edit active session", action: onEdit)
+                control(isPaused ? "play" : "pause", label: isPaused ? "Resume session" : "Pause session", action: onTogglePause)
+                control("stop", label: "End session", action: onStop)
             }
             .buttonStyle(.plain)
         }
@@ -55,6 +29,19 @@ struct SessionControlView: View {
         .frame(
             width: 200,
             height: 110)
+    }
+
+    private func control(_ asset: String, label: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image("FloatingWatercolor-\(asset)")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 24, height: 24)
+                .frame(width: 36, height: 36)
+                .contentShape(Rectangle())
+        }
+        .help(label)
+        .accessibilityLabel(label)
     }
 }
 
@@ -79,7 +66,7 @@ struct PixelSessionControlView: View {
 
     private func control(_ asset: String, label: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Image("FloatingPixel-\(asset)").resizable().interpolation(.none)
+            Image("FloatingWatercolor-\(asset)").resizable()
                 .scaledToFit().frame(width: 24, height: 24)
                 .frame(width: 36, height: 36).contentShape(Rectangle())
         }
