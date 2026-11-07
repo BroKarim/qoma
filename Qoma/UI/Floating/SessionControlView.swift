@@ -9,13 +9,16 @@ struct SessionControlView: View {
     let onStop: () -> Void
 
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 6) {
             Text(title)
                 .font(.system(size: 24, weight: .bold))
                 .foregroundStyle(Color.qyubeInk)
-                .lineLimit(1)
-                .truncationMode(.tail)
+                .lineLimit(3)
+                .minimumScaleFactor(0.1)
+                .multilineTextAlignment(.center)
+                .lineSpacing(2)
                 .frame(maxWidth: .infinity)
+                .frame(height: 58)
                 .accessibilityLabel(title)
 
             HStack(spacing: 4) {
@@ -36,8 +39,9 @@ struct SessionControlView: View {
             Image("FloatingWatercolor-\(asset)")
                 .resizable()
                 .scaledToFit()
-                .frame(width: 24, height: 24)
-                .frame(width: 36, height: 36)
+                .frame(width: 64, height: 44)
+                .frame(width: 42, height: 40)
+                .clipped()
                 .contentShape(Rectangle())
         }
         .help(label)
