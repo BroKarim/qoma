@@ -14,7 +14,7 @@ export function CheckoutButton({ plan }: { plan: PaidPlan }) {
         method: "POST", headers: { "content-type": "application/json" },
         body: JSON.stringify({ plan }),
       })
-      const result = await response.json()
+      const result = await response.json().catch(() => ({}))
       if (!response.ok || typeof result.url !== "string" || !result.url.startsWith("https://")) {
         const messages: Record<string, string> = {
           ALREADY_LIFETIME: "This account already has Qyube Pro lifetime access.",
