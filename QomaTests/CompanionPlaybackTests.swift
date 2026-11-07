@@ -4,6 +4,31 @@ import Testing
 
 @MainActor
 struct CompanionPlaybackTests {
+    @Test func coveFishMoveWithoutMovingTheIslandAndRespectPauseAndReducedMotion() throws {
+        let scene = CompanionScene()
+        let fish = try #require(scene.childNode(withName: "swimmingFish-0") as? SKSpriteNode)
+        let island = try #require(scene.childNode(withName: "floe"))
+        #expect(fish.isHidden)
+        scene.startSession()
+        scene.advanceAnimation(by: 1.21)
+        let start = fish.position
+        let islandPosition = island.position
+        scene.advanceAnimation(by: 0.5)
+        #expect(fish.position != start)
+        #expect(island.position == islandPosition)
+        scene.setSessionPaused(true)
+        let paused = fish.position
+        scene.advanceAnimation(by: 1)
+        #expect(fish.position == paused)
+        scene.reduceMotion = true
+        let reduced = fish.position
+        scene.setSessionPaused(false)
+        scene.advanceAnimation(by: 1)
+        #expect(fish.position == reduced)
+        scene.shutDown()
+        #expect(fish.isHidden)
+    }
+
     private func fishing() -> CompanionPlayback {
         var model = CompanionPlayback(biteWait: { 6 }, reelTime: { 2 })
         model.start()
@@ -69,7 +94,7 @@ struct CompanionPlaybackTests {
         scene.reduceMotion = true
         scene.startSession()
         scene.advanceAnimation(by: 1.21)
-        let character = try #require(scene.childNode(withName: "character") as? SKSpriteNode)
+        let character = try #require(scene.childNode(withName: "//character") as? SKSpriteNode)
         let texture = character.texture
         let position = character.position
         scene.biteNow()
@@ -97,8 +122,8 @@ struct CompanionPlaybackTests {
     @Test func depositRoutesCatchAboveHeadThenIntoBucket() throws {
         let scene = CompanionScene(playback: CompanionPlayback(biteWait: { 0.8 }, reelTime: { 1.5 }))
         scene.startSession()
-        let catchNode = try #require(scene.childNode(withName: "catch") as? SKSpriteNode)
-        let bucket = try #require(scene.childNode(withName: "bucket") as? SKSpriteNode)
+        let catchNode = try #require(scene.childNode(withName: "//catch") as? SKSpriteNode)
+        let bucket = try #require(scene.childNode(withName: "//bucket") as? SKSpriteNode)
         var checked = 0
         for _ in 0..<360 {
             if scene.playback.phase == .deposit, !catchNode.isHidden {
@@ -189,7 +214,7 @@ struct CompanionPlaybackTests {
     @Test func fixedSceneKeepsItsAnchorsAcrossCharacterStates() throws {
         let scene = CompanionScene()
         let floe = try #require(scene.childNode(withName: "floe") as? SKSpriteNode)
-        let bucket = try #require(scene.childNode(withName: "bucket") as? SKSpriteNode)
+        let bucket = try #require(scene.childNode(withName: "//bucket") as? SKSpriteNode)
         let floePosition = floe.position
         let bucketPosition = bucket.position
         let floeTexture = floe.texture
@@ -220,9 +245,9 @@ struct CompanionPlaybackTests {
             scene.advanceAnimation(by: 0.01)
         }
         #expect(scene.playback.phase == .deposit)
-        let catchNode = try #require(scene.childNode(withName: "catch") as? SKSpriteNode)
+        let catchNode = try #require(scene.childNode(withName: "//catch") as? SKSpriteNode)
         #expect(!catchNode.isHidden)
-        let bucket = try #require(scene.childNode(withName: "bucket") as? SKSpriteNode)
+        let bucket = try #require(scene.childNode(withName: "//bucket") as? SKSpriteNode)
         #expect(catchNode.position.x == bucket.position.x)
         #expect(scene.playback.depositedCatches == 0)
         scene.advanceAnimation(by: 1.21)

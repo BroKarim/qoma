@@ -144,7 +144,7 @@ struct DistractionIntegrationTests {
         let scene = CompanionScene()
         scene.startSession()
         scene.advanceAnimation(by: 1.21)
-        let character = try #require(scene.childNode(withName: "character") as? SKSpriteNode)
+        let character = try #require(scene.childNode(withName: "//character") as? SKSpriteNode)
         let fishingTexture = try #require(character.texture)
         scene.visualNow = { Date(timeIntervalSince1970: 100) }
         scene.setDistractionVisual(.init(
@@ -216,7 +216,7 @@ struct DistractionIntegrationTests {
         scene.visualNow = { Date(timeIntervalSince1970: 101.35) }
         scene.setDistractionVisual(.init(
             effect: .dimBright, startedAt: Date(timeIntervalSince1970: 100), seed: 1, ownerPID: 42))
-        let character = try #require(scene.childNode(withName: "character") as? SKSpriteNode)
+        let character = try #require(scene.childNode(withName: "//character") as? SKSpriteNode)
         let position = character.position
         let rotation = character.zRotation
         let scale = character.yScale

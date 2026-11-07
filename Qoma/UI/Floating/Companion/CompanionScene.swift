@@ -3,7 +3,7 @@ import SpriteKit
 
 /// Whole watercolor poses keep the face and belly continuous at desktop scale.
 final class CompanionScene: SKScene {
-    static let stageSize = CGSize(width: 140, height: 140)
+    static let stageSize = CGSize(width: 164, height: 180)
     private(set) var playback = CompanionPlayback()
     var onHidden: (() -> Void)?
     var reduceMotion = false { didSet { render() } }
@@ -15,8 +15,10 @@ final class CompanionScene: SKScene {
     private let bucketOrigin = CGPoint(x: 119, y: 38)
     private let characterHeight: CGFloat = 100
     private let character = SKSpriteNode()
-    private let floe = SKSpriteNode(imageNamed: "CompanionIceWaterV2")
-    private let bucket = SKSpriteNode(imageNamed: "CompanionBucket")
+    private let floe = SKSpriteNode(imageNamed: "CompanionCoveV5")
+    private let actors = SKNode()
+    private let swimmingFish = (0..<3).map { _ in SKSpriteNode(imageNamed: "CompanionFishCoveV5") }
+    private let bucket = SKSpriteNode(imageNamed: "CompanionBucketCoveV5")
     private let catchSprite = SKSpriteNode()
     private let splash = SKSpriteNode(imageNamed: "CompanionSplash")
     private let sleepMarks = SKSpriteNode(imageNamed: "CompanionSleepMarks")
@@ -28,7 +30,7 @@ final class CompanionScene: SKScene {
     // Pixel rectangles include the complete rod, including the deposit pose's tip.
     // Coordinates are top-left image pixels; SpriteKit texture rectangles use bottom-left UVs.
     private let poses: [SKTexture] = {
-        let atlas = SKTexture(imageNamed: "CompanionPosesV2")
+        let atlas = SKTexture(imageNamed: "CompanionPosesV2CoveV5")
         let rectangles = [
             CGRect(x: 0, y: 0, width: 512, height: 512),
             CGRect(x: 512, y: 0, width: 512, height: 512),
@@ -55,7 +57,7 @@ final class CompanionScene: SKScene {
     }()
 
     private let catchFrames: [SKTexture] = {
-        let atlas = SKTexture(imageNamed: "CompanionCatchFramesV3")
+        let atlas = SKTexture(imageNamed: "CompanionCatchFramesV3CoveV5")
         return (0..<12).map { index in
             let texture = SKTexture(rect: CGRect(
                 x: CGFloat(index % 4) / 4, y: CGFloat(2 - index / 4) / 3,
@@ -83,9 +85,9 @@ final class CompanionScene: SKScene {
         CGPoint(x: 0.242, y: 0.874), CGPoint(x: 0.242, y: 0.874),
     ]
 
-    private let castFrames = CompanionScene.fishingTextures(named: "CompanionCastFramesV4")
+    private let castFrames = CompanionScene.fishingTextures(named: "CompanionCastFramesV4CoveV5")
     private let depositFrames: [SKTexture] = {
-        let atlas = SKTexture(imageNamed: "CompanionDepositFramesV4")
+        let atlas = SKTexture(imageNamed: "CompanionDepositFramesV4CoveV5")
         return (0..<12).map { index in
             // Keep the long right-facing rod in cell 6 out of the neighboring cell 7.
             let offset: CGFloat = index == 7 ? 28 : 0
@@ -148,7 +150,7 @@ final class CompanionScene: SKScene {
     }
 
     private static let distractionFrames: [[SKTexture]] = [
-        "CompanionDistractionLightsV3", "CompanionDistractionIceV3", "CompanionDistractionSnowV3",
+        "CompanionDistractionLightsV3", "CompanionDistractionIceV3CoveV5", "CompanionDistractionSnowV3",
     ].map { fishingTextures(named: $0) }
 
     init(playback: CompanionPlayback = CompanionPlayback()) {
@@ -156,7 +158,17 @@ final class CompanionScene: SKScene {
         super.init(size: Self.stageSize)
         backgroundColor = .clear
         scaleMode = .aspectFit
-        configure(floe, name: "floe", size: CGSize(width: 140, height: 46), position: CGPoint(x: 70, y: 25), z: 0)
+        actors.position = CGPoint(x: 28, y: 35)
+        addChild(actors)
+        configure(floe, name: "floe", size: CGSize(width: 164, height: 164), position: CGPoint(x: 82, y: 82), z: 0)
+        floe.removeFromParent()
+        addChild(floe)
+        for (index, fish) in swimmingFish.enumerated() {
+            configure(fish, name: "swimmingFish-\(index)", size: CGSize(width: 13, height: 8), position: .zero, z: 1)
+            fish.removeFromParent()
+            addChild(fish)
+            fish.alpha = 0.45
+        }
         configure(bucket, name: "bucket", size: CGSize(width: 22, height: 23), position: bucketOrigin, z: 12)
         configure(character, name: "character", size: CGSize(width: characterHeight, height: characterHeight), position: seatedOrigin, z: 3)
         character.anchorPoint = CGPoint(x: 0.6, y: 0.07)
@@ -166,7 +178,7 @@ final class CompanionScene: SKScene {
         line.strokeColor = NSColor(white: 0.22, alpha: 0.8)
         line.lineWidth = 0.6
         line.zPosition = 2
-        addChild(line)
+        actors.addChild(line)
         render()
     }
 
@@ -216,7 +228,7 @@ final class CompanionScene: SKScene {
         guard delta.isFinite, delta > 0 else { return }
         let previous = playback.phase
         playback.advance(by: delta)
-        motionTime += delta
+        if playback.phase != .sleeping { motionTime += delta }
         render()
         if previous != .hidden, playback.phase == .hidden { onHidden?() }
     }
@@ -227,7 +239,7 @@ final class CompanionScene: SKScene {
         node.position = position
         node.zPosition = z
         node.texture?.filteringMode = .linear
-        addChild(node)
+        actors.addChild(node)
     }
 
     private func render() {
@@ -236,6 +248,13 @@ final class CompanionScene: SKScene {
         let t = CGFloat(playback.phaseTime)
         let breath: CGFloat = reduceMotion ? 0 : sin(CGFloat(motionTime) * 1.6)
         let active = phase != .hidden
+        for (index, fish) in swimmingFish.enumerated() {
+            let time = reduceMotion ? 0 : CGFloat(motionTime)
+            let angle = time * (0.3 + CGFloat(index) * 0.04) + CGFloat(index) * 2.1
+            fish.position = CGPoint(x: 69 + cos(angle) * 20, y: 43 + CGFloat(index) * 6 + sin(angle) * 2)
+            fish.xScale = sin(angle) >= 0 ? 1 : -1
+            fish.isHidden = !active
+        }
         floe.isHidden = !active
         bucket.isHidden = !active
         character.isHidden = !active
@@ -413,7 +432,7 @@ final class CompanionScene: SKScene {
             let normalizedTip = paintedRodTip ?? tips[pose]
             let tip = character.convert(CGPoint(
                 x: (normalizedTip.x - character.anchorPoint.x) * character.size.width,
-                y: (normalizedTip.y - character.anchorPoint.y) * character.size.height), to: self)
+                y: (normalizedTip.y - character.anchorPoint.y) * character.size.height), to: actors)
             let path = CGMutablePath()
             path.move(to: tip)
             path.addQuadCurve(to: endpoint, control: CGPoint(x: tip.x, y: (tip.y + endpoint.y) / 2))

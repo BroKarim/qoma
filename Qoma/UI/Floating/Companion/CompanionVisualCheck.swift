@@ -83,7 +83,7 @@ enum CompanionVisualCheck {
             let x = CGFloat(index % 4) * 200
             let y = CGFloat(rows - 1 - index / 4) * 270
             let rendered = NSImage(cgImage: image, size: CompanionScene.stageSize)
-            rendered.draw(in: CGRect(x: x + 30, y: y + 110, width: 140, height: 140))
+            rendered.draw(in: CGRect(x: x + 30, y: y + 110, width: 140, height: 154))
             // A second miniature on a dark background catches alpha fringes.
             NSColor(white: 0.14, alpha: 1).setFill()
             NSRect(x: x + 50, y: y + 10, width: 100, height: 90).fill()
@@ -136,8 +136,8 @@ enum CompanionVisualCheck {
             NSRect(x: 0, y: 0, width: 280, height: 280).fill()
             NSColor(white: 0.12, alpha: 1).setFill()
             NSRect(x: 280, y: 0, width: 280, height: 280).fill()
-            rendered.draw(in: CGRect(x: 0, y: 0, width: 280, height: 280))
-            rendered.draw(in: CGRect(x: 280, y: 0, width: 280, height: 280))
+            rendered.draw(in: CGRect(x: 0, y: 0, width: 255, height: 280))
+            rendered.draw(in: CGRect(x: 280, y: 0, width: 255, height: 280))
             board.unlockFocus()
             let bitmap = NSBitmapImageRep(data: board.tiffRepresentation!)!
             try bitmap.representation(using: .png, properties: [:])!
