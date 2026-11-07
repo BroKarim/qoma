@@ -34,6 +34,7 @@ export const devices = pgTable("devices", {
 export const nativeLoginAttempts = pgTable("native_login_attempts", {
   id: uuid("id").primaryKey(),
   installationHash: text("installation_hash").notNull(),
+  sourceIpHash: text("source_ip_hash"),
   deviceName: text("device_name").notNull(),
   challenge: text("challenge").notNull(),
   state: text("state").notNull(),
@@ -125,6 +126,9 @@ export const webhookEvents = pgTable("webhook_events", {
   provider: text("provider").notNull(),
   eventId: text("event_id").notNull(),
   payload: jsonb("payload").notNull(),
+  eventType: text("event_type"),
+  status: text("status", { enum: ["received", "processing", "processed", "failed", "deferred"] }).notNull().default("received"),
+  accountId: text("account_id"),
   receivedAt: time("received_at").notNull().defaultNow(),
   processedAt: time("processed_at"),
   error: text("error"),

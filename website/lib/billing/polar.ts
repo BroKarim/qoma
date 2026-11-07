@@ -1,8 +1,17 @@
 import { createPolar } from "@polar-sh/sdk/2026-10"
+import { expectedLifetimeAmountCents } from "./order-amount"
 
 export type PaidPlan = "monthly" | "annual" | "lifetime"
 
-export const prices: Record<PaidPlan, number> = { monthly: 399, annual: 2900, lifetime: 4900 }
+export function newCheckoutPlan(value: unknown): "lifetime" | null {
+  return value === "lifetime" ? value : null
+}
+
+export const prices: Record<PaidPlan, number> = { monthly: 399, annual: 2900, lifetime: expectedLifetimeAmountCents() }
+
+export function formatUSD(cents: number) {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(cents / 100)
+}
 
 export function productId(plan: PaidPlan): string {
   const key = { monthly: "POLAR_MONTHLY_PRODUCT_ID", annual: "POLAR_ANNUAL_PRODUCT_ID", lifetime: "POLAR_LIFETIME_PRODUCT_ID" }[plan]
