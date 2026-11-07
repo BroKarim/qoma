@@ -29,6 +29,24 @@ struct CompanionPlaybackTests {
         #expect(fish.isHidden)
     }
 
+    @Test func fishStayInOpenWaterThroughoutTheirCompleteRoutes() throws {
+        let scene = CompanionScene(playback: CompanionPlayback(biteWait: { 600 }, reelTime: { 2 }))
+        scene.startSession()
+        for _ in 0..<3600 {
+            scene.advanceAnimation(by: 1.0 / 30)
+            for index in 0..<3 {
+                let fish = try #require(scene.childNode(withName: "swimmingFish-\(index)") as? SKSpriteNode)
+                // Includes half the sprite size, not just its center.
+                #expect(fish.position.x - 7 >= 39)
+                #expect(fish.position.x + 7 <= 91)
+                #expect(fish.position.y - 5 >= 29)
+                #expect(fish.position.y + 5 <= 50)
+            }
+        }
+        let character = try #require(scene.childNode(withName: "//character"))
+        #expect(abs((character.parent?.xScale ?? 0) - 0.78) < 0.0001)
+    }
+
     private func fishing() -> CompanionPlayback {
         var model = CompanionPlayback(biteWait: { 6 }, reelTime: { 2 })
         model.start()

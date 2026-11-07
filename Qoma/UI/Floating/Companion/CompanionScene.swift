@@ -30,7 +30,7 @@ final class CompanionScene: SKScene {
     // Pixel rectangles include the complete rod, including the deposit pose's tip.
     // Coordinates are top-left image pixels; SpriteKit texture rectangles use bottom-left UVs.
     private let poses: [SKTexture] = {
-        let atlas = SKTexture(imageNamed: "CompanionPosesV2CoveV5")
+        let atlas = SKTexture(imageNamed: "CovePosesV6")
         let rectangles = [
             CGRect(x: 0, y: 0, width: 512, height: 512),
             CGRect(x: 512, y: 0, width: 512, height: 512),
@@ -57,7 +57,7 @@ final class CompanionScene: SKScene {
     }()
 
     private let catchFrames: [SKTexture] = {
-        let atlas = SKTexture(imageNamed: "CompanionCatchFramesV3CoveV5")
+        let atlas = SKTexture(imageNamed: "CoveCatchV6")
         return (0..<12).map { index in
             let texture = SKTexture(rect: CGRect(
                 x: CGFloat(index % 4) / 4, y: CGFloat(2 - index / 4) / 3,
@@ -85,9 +85,9 @@ final class CompanionScene: SKScene {
         CGPoint(x: 0.242, y: 0.874), CGPoint(x: 0.242, y: 0.874),
     ]
 
-    private let castFrames = CompanionScene.fishingTextures(named: "CompanionCastFramesV4CoveV5")
+    private let castFrames = CompanionScene.fishingTextures(named: "CoveCastV6")
     private let depositFrames: [SKTexture] = {
-        let atlas = SKTexture(imageNamed: "CompanionDepositFramesV4CoveV5")
+        let atlas = SKTexture(imageNamed: "CoveDepositV6")
         return (0..<12).map { index in
             // Keep the long right-facing rod in cell 6 out of the neighboring cell 7.
             let offset: CGFloat = index == 7 ? 28 : 0
@@ -149,16 +149,16 @@ final class CompanionScene: SKScene {
         }
     }
 
-    private static let distractionFrames: [[SKTexture]] = [
-        "CompanionDistractionLightsV3", "CompanionDistractionIceV3CoveV5", "CompanionDistractionSnowV3",
-    ].map { fishingTextures(named: $0) }
+    private static let distractionFrames = fishingTextures(named: "CoveHopV6")
 
     init(playback: CompanionPlayback = CompanionPlayback()) {
         self.playback = playback
         super.init(size: Self.stageSize)
         backgroundColor = .clear
         scaleMode = .aspectFit
-        actors.position = CGPoint(x: 28, y: 35)
+        // Keep the reference's 58 pt painted body; all fishing paths share this transform.
+        actors.setScale(0.78)
+        actors.position = CGPoint(x: 44, y: 41)
         addChild(actors)
         configure(floe, name: "floe", size: CGSize(width: 164, height: 164), position: CGPoint(x: 82, y: 82), z: 0)
         floe.removeFromParent()
@@ -250,9 +250,13 @@ final class CompanionScene: SKScene {
         let active = phase != .hidden
         for (index, fish) in swimmingFish.enumerated() {
             let time = reduceMotion ? 0 : CGFloat(motionTime)
-            let angle = time * (0.3 + CGFloat(index) * 0.04) + CGFloat(index) * 2.1
-            fish.position = CGPoint(x: 69 + cos(angle) * 20, y: 43 + CGFloat(index) * 6 + sin(angle) * 2)
-            fish.xScale = sin(angle) >= 0 ? 1 : -1
+            let angle = time * (0.32 + CGFloat(index) * 0.05) + CGFloat(index) * 2.1
+            // The whole sprite stays within the open lower lagoon, below the snowy shelf.
+            fish.position = CGPoint(x: 65 + cos(angle) * (14 + CGFloat(index) * 2),
+                                    y: 37 + CGFloat(index) * 3 + sin(angle * 2) * 1.5)
+            fish.xScale = reduceMotion ? 1 : tanh(sin(angle) * 5)
+            fish.yScale = 1 + (reduceMotion ? 0 : sin(time * 2.5 + CGFloat(index)) * 0.04)
+            fish.zRotation = reduceMotion ? 0 : cos(angle) * 0.07
             fish.isHidden = !active
         }
         floe.isHidden = !active
@@ -385,13 +389,8 @@ final class CompanionScene: SKScene {
             let elapsed = distractionVisual.map { visualNow().timeIntervalSince($0.startedAt) } ?? playback.phaseTime
             character.size = CGSize(width: 128, height: 128)
             character.anchorPoint = CGPoint(x: 0.5, y: 20.0 / 256)
-            let sheet: Int = switch effect {
-            case .dimBright: 0
-            case .iceFlower: 1
-            case .snowstorm: 2
-            }
             let frame = DistractionMotion.penguinFrame(effect: effect, elapsed: elapsed, reduceMotion: reduceMotion)
-            character.texture = Self.distractionFrames[sheet][frame]
+            character.texture = Self.distractionFrames[frame]
             character.position.y += CGFloat(DistractionMotion.penguinLift(
                 effect: effect, elapsed: elapsed, reduceMotion: reduceMotion))
         } else {

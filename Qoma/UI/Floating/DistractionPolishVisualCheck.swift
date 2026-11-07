@@ -58,8 +58,8 @@ enum DistractionPolishVisualCheck {
                     NSColor(white: 0.12, alpha: 1).setFill()
                     CGRect(x: 280, y: 0, width: 280, height: 280).fill()
                     let image = texture.cgImage()
-                    NSGraphicsContext.current?.cgContext.draw(image, in: CGRect(x: 0, y: 0, width: 280, height: 280))
-                    NSGraphicsContext.current?.cgContext.draw(image, in: CGRect(x: 280, y: 0, width: 280, height: 280))
+                    NSGraphicsContext.current?.cgContext.draw(image, in: CGRect(x: 12, y: 0, width: 255, height: 280))
+                    NSGraphicsContext.current?.cgContext.draw(image, in: CGRect(x: 292, y: 0, width: 255, height: 280))
                     NSGraphicsContext.restoreGraphicsState()
                     guard let image = bitmap.cgImage else { throw error("Cannot encode drawn-frame preview") }
                     CGImageDestinationAddImage(destination, image, [
