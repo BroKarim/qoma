@@ -100,7 +100,7 @@ struct DistractionIntegrationTests {
     @Test func illustratedEffectsAreBundledAndDrawWithoutLeakingIntoOcclusions() throws {
         for name in (1...6).map({ "DistractionIceFlower\($0)" })
             + (1...6).map({ "DistractionSnow\($0)" })
-            + ["DistractionWind", "DistractionSnowbank", "CoveHopV6"] {
+            + ["DistractionWind", "DistractionSnowbank", "PixelHopV1"] {
             let image = try #require(NSImage(named: name))
             #expect(image.size.width > 0)
         }

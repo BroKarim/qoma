@@ -1,7 +1,7 @@
 import AppKit
 import SpriteKit
 
-/// Whole watercolor poses keep the face and belly continuous at desktop scale.
+/// Whole pixel-art poses keep the face and belly continuous at desktop scale.
 final class CompanionScene: SKScene {
     static let stageSize = CGSize(width: 164, height: 180)
     private(set) var playback = CompanionPlayback()
@@ -15,13 +15,13 @@ final class CompanionScene: SKScene {
     private let bucketOrigin = CGPoint(x: 119, y: 38)
     private let characterHeight: CGFloat = 100
     private let character = SKSpriteNode()
-    private let floe = SKSpriteNode(imageNamed: "CompanionCoveV5")
+    private let floe = SKSpriteNode(imageNamed: "PixelIslandV1")
     private let actors = SKNode()
-    private let swimmingFish = (0..<3).map { _ in SKSpriteNode(imageNamed: "CompanionFishCoveV5") }
-    private let bucket = SKSpriteNode(imageNamed: "CompanionBucketCoveV5")
+    private let swimmingFish = (0..<3).map { _ in SKSpriteNode(imageNamed: "PixelWaterFishV1") }
+    private let bucket = SKSpriteNode(imageNamed: "PixelBucketV1")
     private let catchSprite = SKSpriteNode()
-    private let splash = SKSpriteNode(imageNamed: "CompanionSplash")
-    private let sleepMarks = SKSpriteNode(imageNamed: "CompanionSleepMarks")
+    private let splash = SKSpriteNode(imageNamed: "PixelSplashV1")
+    private let sleepMarks = SKSpriteNode(imageNamed: "PixelSleepV1")
     private let line = SKShapeNode()
     private var distractionVisual: DistractionVisualState?
     private var lastTime: TimeInterval?
@@ -30,7 +30,7 @@ final class CompanionScene: SKScene {
     // Pixel rectangles include the complete rod, including the deposit pose's tip.
     // Coordinates are top-left image pixels; SpriteKit texture rectangles use bottom-left UVs.
     private let poses: [SKTexture] = {
-        let atlas = SKTexture(imageNamed: "CovePosesV6")
+        let atlas = SKTexture(imageNamed: "PixelPosesV1")
         let rectangles = [
             CGRect(x: 0, y: 0, width: 512, height: 512),
             CGRect(x: 512, y: 0, width: 512, height: 512),
@@ -43,26 +43,26 @@ final class CompanionScene: SKScene {
             let texture = SKTexture(rect: CGRect(
                 x: rect.minX / 1536, y: 1 - rect.maxY / 1024,
                 width: rect.width / 1536, height: rect.height / 1024), in: atlas)
-            texture.filteringMode = .linear
+            texture.filteringMode = .nearest
             return texture
         }
     }()
     private let catches: [SKTexture] = {
-        let atlas = SKTexture(imageNamed: "CompanionCatchesV2")
+        let atlas = SKTexture(imageNamed: "PixelCatchesV1")
         return (0..<4).map { index in
             let texture = SKTexture(rect: CGRect(x: CGFloat(index) / 4, y: 0, width: 0.25, height: 1), in: atlas)
-            texture.filteringMode = .linear
+            texture.filteringMode = .nearest
             return texture
         }
     }()
 
     private let catchFrames: [SKTexture] = {
-        let atlas = SKTexture(imageNamed: "CoveCatchV6")
+        let atlas = SKTexture(imageNamed: "PixelCatchV1")
         return (0..<12).map { index in
             let texture = SKTexture(rect: CGRect(
                 x: CGFloat(index % 4) / 4, y: CGFloat(2 - index / 4) / 3,
                 width: 0.25, height: 1.0 / 3), in: atlas)
-            texture.filteringMode = .linear
+            texture.filteringMode = .nearest
             return texture
         }
     }()
@@ -85,9 +85,9 @@ final class CompanionScene: SKScene {
         CGPoint(x: 0.242, y: 0.874), CGPoint(x: 0.242, y: 0.874),
     ]
 
-    private let castFrames = CompanionScene.fishingTextures(named: "CoveCastV6")
+    private let castFrames = CompanionScene.fishingTextures(named: "PixelCastV1")
     private let depositFrames: [SKTexture] = {
-        let atlas = SKTexture(imageNamed: "CoveDepositV6")
+        let atlas = SKTexture(imageNamed: "PixelDepositV1")
         return (0..<12).map { index in
             // Keep the long right-facing rod in cell 6 out of the neighboring cell 7.
             let offset: CGFloat = index == 7 ? 28 : 0
@@ -95,7 +95,7 @@ final class CompanionScene: SKScene {
             let texture = SKTexture(rect: CGRect(
                 x: (CGFloat(index % 4) * 384 + offset) / 1536,
                 y: CGFloat(2 - index / 4) / 3, width: width / 1536, height: 1.0 / 3), in: atlas)
-            texture.filteringMode = .linear
+            texture.filteringMode = .nearest
             return texture
         }
     }()
@@ -144,12 +144,12 @@ final class CompanionScene: SKScene {
             let texture = SKTexture(rect: CGRect(
                 x: CGFloat(index % 4) / 4, y: CGFloat(2 - index / 4) / 3,
                 width: 0.25, height: 1.0 / 3), in: atlas)
-            texture.filteringMode = .linear
+            texture.filteringMode = .nearest
             return texture
         }
     }
 
-    private static let distractionFrames = fishingTextures(named: "CoveHopV6")
+    private static let distractionFrames = fishingTextures(named: "PixelHopV1")
 
     init(playback: CompanionPlayback = CompanionPlayback()) {
         self.playback = playback
@@ -238,7 +238,7 @@ final class CompanionScene: SKScene {
         node.size = size
         node.position = position
         node.zPosition = z
-        node.texture?.filteringMode = .linear
+        node.texture?.filteringMode = .nearest
         actors.addChild(node)
     }
 
