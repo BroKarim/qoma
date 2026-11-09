@@ -51,7 +51,7 @@ async function applyPaidOrder(client: PoolClient, data: PolarData) {
     }
   }
   if (plan === "lifetime") {
-    const amountCents = number(data.net_amount)
+    const amountCents = number(data.subtotal_amount) - number(data.discount_amount)
     const expectedCents = expectedLifetimeAmountCents()
     const minimumDiscountedCents = minimumLifetimeAmountCents()
     if (!validateLifetimeOrderAmount({ amountCents, currency: String(data.currency), expectedCents, checkoutCreditCents, hasConfiguredDiscount, minimumDiscountedCents })) {
