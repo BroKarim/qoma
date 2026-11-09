@@ -18,6 +18,7 @@ const customer = randomUUID()
 const order = randomUUID()
 const paidAt = new Date()
 const periodEnd = new Date(paidAt.getTime() + 30 * 86_400_000)
+process.env.EXPECTED_LIFETIME_AMOUNT_CENTS = "1100"
 
 try {
   await database().query(`INSERT INTO checkout_attempts(id, account_id, plan, product_id, provider_checkout_id)
@@ -79,6 +80,32 @@ try {
   const subscriptionAfterRefund = await database().query<{ paid_until: Date }>(
     "SELECT paid_until FROM billing_subscriptions WHERE provider_subscription_id = $1", [subscription])
   assert.equal(subscriptionAfterRefund.rows[0].paid_until.toISOString(), nextPeriodEnd.toISOString())
+
+  const lifetimeAccount = randomUUID(), lifetimeCheckout = randomUUID(), lifetimeOrder = randomUUID()
+  await database().query(`INSERT INTO checkout_attempts(id, account_id, plan, product_id, provider_checkout_id)
+    VALUES($1,$2,'lifetime',$3,$4)`, [randomUUID(), lifetimeAccount, "lifetime-test-product", lifetimeCheckout])
+  const lifetimeData = {
+    id: lifetimeOrder, created_at: paidAt.toISOString(), modified_at: paidAt.toISOString(),
+    paid: true, currency: "usd", total_amount: 1100, net_amount: 1100,
+    refunded_amount: 0, refunded_tax_amount: 0, product_id: "lifetime-test-product",
+    checkout_id: lifetimeCheckout, customer_id: randomUUID(),
+  }
+  const earlyRefund = { type: "order.refunded", timestamp: paidAt.toISOString(), data: { ...lifetimeData, refunded_amount: 1100 } }
+  const earlyRefundId = randomUUID()
+  await processPolarEvent(earlyRefundId, earlyRefund)
+  const lifetimePaid = { type: "order.paid", timestamp: paidAt.toISOString(), data: lifetimeData }
+  const lifetimePaidId = randomUUID()
+  await processPolarEvent(lifetimePaidId, lifetimePaid)
+  await processPolarEvent(lifetimePaidId, lifetimePaid)
+  const refundedLifetime = await database().query<{ status: string }>(
+    "SELECT status FROM billing_orders WHERE provider_order_id = $1", [lifetimeOrder])
+  assert.equal(refundedLifetime.rows[0].status, "refunded")
+  const deferredEvent = await database().query<{ status: string }>(
+    "SELECT status FROM webhook_events WHERE event_id = $1", [earlyRefundId])
+  assert.equal(deferredEvent.rows[0].status, "processed")
+  const lifetimeAccess = await database().query<{ status: string }>(
+    "SELECT status FROM entitlements WHERE account_id = $1", [lifetimeAccount])
+  assert.equal(lifetimeAccess.rows[0].status, "expired")
   process.stdout.write("Local billing integration checks passed\n")
 } finally {
   await database().end()
