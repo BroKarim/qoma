@@ -8,6 +8,9 @@
 !.yarn/releases
 !.yarn/versions
 
+
+prod-ca-2021.crt
+
 # testing
 /coverage
 
