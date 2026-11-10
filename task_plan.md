@@ -44,6 +44,23 @@ open ~/Library/Developer/Xcode/DerivedData/qoma-drxrbpjdzxdevegbhqstemmkbakm/Bui
 
 cara kill : pkill -f Qoma
 
+-------
+KLO PENGEN LIHAT LOG
+
+- pake 2 terminal
+- jalankan ini dlu : 
+pkill -x Qoma 2>/dev/null || true
+open /Users/kiram/Library/Developer/Xcode/DerivedData/qoma-drxrbpjdzxdevegbhqstemmkbakm/Build/Products/Debug/Qoma.app
+log stream --style compact --level debug --predicate 'process == "Qoma"'
+
+- lalu di termianl satunya : 
+xcodebuild -project qoma.xcodeproj \
+  -scheme Qoma \
+  -configuration Debug \
+  -destination 'platform=macOS' \
+  build && \
+open /Users/kiram/Library/Developer/Xcode/DerivedData/qoma-drxrbpjdzxdevegbhqstemmkbakm/Build/Products/Debug/Qoma.app
+
 ## 0. Cara memakai rencana ini
 
 Dokumen ini menjadi sumber keputusan untuk implementasi macOS berikutnya. `PRODUCT_SPEC.md`, `ROADMAP.md`, `findings.md`, dan beberapa catatan desain masih memuat keputusan lama tentang tag, break, free tier, pembayaran App Store, serta fitur kolam animasi. Bila bertentangan, gunakan keputusan pengguna di dokumen ini dan buat PR dokumentasi penyelarasan sebelum rilis. Jangan menganggap contoh nama tipe/fungsi di sini sudah ada; bagian **Usulan** adalah kontrak yang harus diwujudkan atau diganti dengan alasan yang tercatat.
