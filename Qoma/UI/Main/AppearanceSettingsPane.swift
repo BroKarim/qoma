@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct AppearanceSettingsPane: View {
+    @AppStorage("qyube.coveAtmosphere") private var coveAtmosphere = "Auto"
     @AppStorage("qyube.reduceMotionOverride") private var reduceMotionOverride = false
     @AppStorage(AppConstants.FloatingThemeSettings.opacityKey)
     private var floatingOpacity: Double = AppConstants.FloatingThemeSettings.defaultOpacity
@@ -22,6 +23,13 @@ struct AppearanceSettingsPane: View {
 
                 windowFeelSection
                 timerThemeSection
+                SettingsSurfaceCard {
+                    SettingsRow(title: "Cove atmosphere", subtitle: "Auto follows the time on this Mac.") {
+                        Picker("Atmosphere", selection: $coveAtmosphere) {
+                            ForEach(["Auto", "Morning", "Sunset", "Night"], id: \.self) { Text($0) }
+                        }.labelsHidden()
+                    }
+                }
                 SettingsSurfaceCard {
                     SettingsRow(
                         title: "Reduce companion motion",

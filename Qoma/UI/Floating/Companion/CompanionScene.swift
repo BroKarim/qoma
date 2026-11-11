@@ -11,7 +11,7 @@ final class CompanionScene: SKScene {
 
     // Contact and ripple locations are measured on the combined ice/water artwork.
     private let seatedOrigin = CGPoint(x: 72, y: 27)
-    private let waterPoint = CGPoint(x: 26, y: 20)
+    private let waterPoint = CGPoint(x: -9, y: 13)
     private let bucketOrigin = CGPoint(x: 119, y: 38)
     private let characterHeight: CGFloat = 100
     private let character = SKSpriteNode()
@@ -26,6 +26,11 @@ final class CompanionScene: SKScene {
     private var distractionVisual: DistractionVisualState?
     private var lastTime: TimeInterval?
     private var motionTime: TimeInterval = 0
+    private var ambientTime: TimeInterval = 0
+    private let ripple = SKShapeNode(ellipseOf: CGSize(width: 16, height: 5))
+    private let snow = (0..<12).map { _ in SKSpriteNode(color: .white, size: CGSize(width: 1, height: 1)) }
+    private var snowySession = false
+    private var atmosphereID = ""
 
     // Pixel rectangles include the complete rod, including the deposit pose's tip.
     // Coordinates are top-left image pixels; SpriteKit texture rectangles use bottom-left UVs.
@@ -157,12 +162,17 @@ final class CompanionScene: SKScene {
         backgroundColor = .clear
         scaleMode = .aspectFit
         // Keep the reference's 58 pt painted body; all fishing paths share this transform.
-        actors.setScale(0.78)
-        actors.position = CGPoint(x: 44, y: 41)
+        actors.setScale(0.45)
+        actors.position = CGPoint(x: 68, y: 50)
         addChild(actors)
         configure(floe, name: "floe", size: CGSize(width: 164, height: 164), position: CGPoint(x: 82, y: 82), z: 0)
         floe.removeFromParent()
         addChild(floe)
+        ripple.strokeColor = NSColor.white.withAlphaComponent(0.5)
+        ripple.lineWidth = 0.5
+        ripple.zPosition = 2
+        addChild(ripple)
+        for flake in snow { flake.zPosition = 20; addChild(flake) }
         for (index, fish) in swimmingFish.enumerated() {
             configure(fish, name: "swimmingFish-\(index)", size: CGSize(width: 13, height: 8), position: .zero, z: 1)
             fish.removeFromParent()
@@ -189,6 +199,7 @@ final class CompanionScene: SKScene {
         distractionVisual = nil
         lastTime = nil
         motionTime = 0
+        snowySession = Bool.random()
         isPaused = false
         render()
     }
@@ -229,6 +240,7 @@ final class CompanionScene: SKScene {
         let previous = playback.phase
         playback.advance(by: delta)
         if playback.phase != .sleeping { motionTime += delta }
+        if playback.phase != .hidden { ambientTime += delta }
         render()
         if previous != .hidden, playback.phase == .hidden { onHidden?() }
     }
@@ -246,7 +258,7 @@ final class CompanionScene: SKScene {
         let phase = playback.phase
         let p = CGFloat(playback.progress)
         let t = CGFloat(playback.phaseTime)
-        let breath: CGFloat = reduceMotion ? 0 : sin(CGFloat(motionTime) * 1.6)
+        let breath: CGFloat = 0
         let active = phase != .hidden
         for (index, fish) in swimmingFish.enumerated() {
             let time = reduceMotion ? 0 : CGFloat(motionTime)
@@ -306,7 +318,7 @@ final class CompanionScene: SKScene {
                 splash.alpha = sin(max(0, (p - 0.85) / 0.15) * .pi)
             }
         case .fishing:
-            if !reduceMotion { character.zRotation = sin(t * 0.65) * 0.015 }
+            break
         case .bite:
             pose = 1
             if !reduceMotion {
@@ -436,6 +448,43 @@ final class CompanionScene: SKScene {
             path.move(to: tip)
             path.addQuadCurve(to: endpoint, control: CGPoint(x: tip.x, y: (tip.y + endpoint.y) / 2))
             line.path = path
+        }
+        // Painted animation already contains body motion; keep the feet and pixel proportions stable.
+        character.zRotation = 0
+        character.xScale = 1
+        character.yScale = 1
+        if phase != .distracted { character.position = seatedOrigin }
+        updateEnvironment(active: active)
+    }
+
+    private func updateEnvironment(active: Bool) {
+        let time = reduceMotion ? 0 : ambientTime
+        let wave = CGFloat(time.truncatingRemainder(dividingBy: 2) / 2)
+        ripple.isHidden = !active || playback.phase != .fishing
+        ripple.position = actors.convert(waterPoint, to: self)
+        ripple.setScale(0.7 + wave * 0.8)
+        ripple.alpha = reduceMotion ? 0.35 : 0.5 * (1 - wave)
+        let mode = UserDefaults.standard.string(forKey: "qyube.coveAtmosphere") ?? "Auto"
+        let hour = Calendar.current.component(.hour, from: visualNow())
+        let night = mode == "Night" || (mode == "Auto" && (hour < 6 || hour >= 20))
+        let sunset = mode == "Sunset" || (mode == "Auto" && (17..<20).contains(hour))
+        let tint = night ? NSColor(calibratedRed: 0.35, green: 0.44, blue: 0.7, alpha: 1)
+            : sunset ? NSColor(calibratedRed: 1, green: 0.77, blue: 0.65, alpha: 1) : .white
+        let nextAtmosphere = night ? "Night" : sunset ? "Sunset" : "Morning"
+        if atmosphereID != nextAtmosphere {
+            atmosphereID = nextAtmosphere
+            for node in [floe, character, bucket] {
+                node.removeAction(forKey: "atmosphere")
+                node.run(.colorize(with: tint, colorBlendFactor: night ? 0.55 : sunset ? 0.3 : 0,
+                                   duration: reduceMotion ? 0 : 4), withKey: "atmosphere")
+            }
+        }
+        for (index, flake) in snow.enumerated() {
+            flake.isHidden = !active || !snowySession || reduceMotion
+            let seed = Double(index)
+            flake.position = CGPoint(x: 15 + (seed * 37 + sin(time * 0.3 + seed) * 4).truncatingRemainder(dividingBy: 135),
+                                     y: 35 + (seed * 17 + 130 - time * 4).truncatingRemainder(dividingBy: 130))
+            flake.alpha = 0.55
         }
     }
 

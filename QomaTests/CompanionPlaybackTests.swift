@@ -4,6 +4,17 @@ import Testing
 
 @MainActor
 struct CompanionPlaybackTests {
+    @Test func paintedPosesKeepTheirFeetAndProportionsStable() throws {
+        let scene = CompanionScene(playback: CompanionPlayback(biteWait: { 1 }, reelTime: { 2 }))
+        scene.startSession()
+        let character = try #require(scene.childNode(withName: "//character") as? SKSpriteNode)
+        for _ in 0..<400 {
+            scene.advanceAnimation(by: 0.02)
+            #expect(character.position == CGPoint(x: 72, y: 27))
+            #expect(character.zRotation == 0)
+            #expect(character.xScale == 1 && character.yScale == 1)
+        }
+    }
     @Test func coveFishMoveWithoutMovingTheIslandAndRespectPauseAndReducedMotion() throws {
         let scene = CompanionScene()
         let fish = try #require(scene.childNode(withName: "swimmingFish-0") as? SKSpriteNode)
@@ -44,7 +55,7 @@ struct CompanionPlaybackTests {
             }
         }
         let character = try #require(scene.childNode(withName: "//character"))
-        #expect(abs((character.parent?.xScale ?? 0) - 0.78) < 0.0001)
+        #expect(abs((character.parent?.xScale ?? 0) - 0.45) < 0.0001)
     }
 
     private func fishing() -> CompanionPlayback {
