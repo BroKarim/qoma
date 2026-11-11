@@ -140,6 +140,12 @@ final class CatchRepository: CatchRepositoryProtocol, @unchecked Sendable {
         )
     }
 
+    func listSession(sessionID: UUID, accountID: String) -> [CatchEvent] {
+        guard migrateLegacyJSON(accountID: accountID) else { return [] }
+        return list("SELECT payload FROM catches WHERE account_id = ? AND session_id = ? ORDER BY deposited_at, id",
+                    [.text(accountID), .text(sessionID.uuidString)])
+    }
+
     func listProvisional(sessionID: UUID, accountID: String) -> [CatchEvent] {
         guard migrateLegacyJSON(accountID: accountID) else { return [] }
         return list(

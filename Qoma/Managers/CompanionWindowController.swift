@@ -9,6 +9,21 @@ final class CompanionWindowController: NSObject, NSWindowDelegate {
     private var sessionID: UUID?
     private let positionKey = "qyube.companion.origin"
     private var onTap: (() -> Void)?
+    private let bucketPopover = NSPopover()
+    var bucketEvents: ((UUID) -> [CatchEvent])?
+    var previouslyCaughtKinds: ((UUID) -> Set<String>)?
+    var onOpenCatalog: (() -> Void)?
+
+    private func showBucket() {
+        guard let window, let anchor = window.contentView, let sessionID else { return }
+        if bucketPopover.isShown { bucketPopover.close(); return }
+        bucketPopover.behavior = .transient
+        bucketPopover.contentViewController = NSHostingController(rootView: CoveBucketView(
+            events: { [weak self] in self?.bucketEvents?(sessionID) ?? [] },
+            previouslyCaughtKinds: previouslyCaughtKinds?(sessionID) ?? [],
+            onCatalog: { [weak self] in self?.bucketPopover.close(); self?.onOpenCatalog?() }))
+        bucketPopover.show(relativeTo: CGRect(x: 108, y: 60, width: 28, height: 28), of: anchor, preferredEdge: .maxY)
+    }
 
     var isVisible: Bool { window?.isVisible ?? false }
 
@@ -51,6 +66,8 @@ final class CompanionWindowController: NSObject, NSWindowDelegate {
         scene.setSessionPaused(paused)
         let contentView = FloatingCompanionView(scene: scene, onTap: { [weak self] in
             self?.onTap?()
+        }, onBucket: { [weak self] in
+            self?.showBucket()
         })
         panel.contentView = NSHostingView(rootView: contentView)
         panel.contentView?.wantsLayer = true
@@ -63,6 +80,7 @@ final class CompanionWindowController: NSObject, NSWindowDelegate {
     }
 
     func hide() {
+        bucketPopover.close()
         window?.orderOut(nil)
         scene?.shutDown()
         scene = nil

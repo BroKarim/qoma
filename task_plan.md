@@ -2265,3 +2265,12 @@ Harga $49 dan kalkulasi upgrade yang masih muncul di bagian strategi lama adalah
 - Branch `codex/floating-watercolor-timer`: timer memakai latar watercolor biru-putih, angka hitam dan border; shadow SwiftUI dihapus. Kontrol hover memakai ilustrasi Edit, Pause, Resume, dan Stop baru. Jarak HStack dan ukuran target tombol tetap sama.
 - Aset dibuat dengan imagegen bawaan sebagai `FloatingWatercolor-*` di asset catalog. Prompt: watercolor kertas biru-putih dengan tengah terang; simbol terpisah bergaya tinta dan watercolor polar untuk pensil, pause, play, dan stop. Screenshot referensi prototype ada di `output/imagegen/floating-timer-backgrounds-v1/`.
 - Pengaturan warna tema dan liquid glass tidak lagi memengaruhi timer fokus karena desain baru memakai latar watercolor dan teks hitam. Perubahan controller yang sudah ada sebelum pekerjaan ini dipertahankan.
+
+## Living cove bertahap — 11 November 2026
+
+- Satu worktree; branch bertingkat: codex/living-cove-atmosphere → codex/cove-visitors → codex/cove-interactive-bucket.
+- Tahap pertama: scale actors 0.78 → 0.45 dengan posisi kaki dunia tetap, menghapus rotasi/stretch prosedural tambahan di atas animasi gambar, riak pelampung, salju ringan acak per sesi, pilihan suasana Auto/Morning/Sunset/Night dan transisi warna empat detik. Rute ikan dekoratif existing dipertahankan.
+- Tahap kedua: satu camar atau anjing laut pixel, jeda 8–15 menit fokus aktif, kunjungan 10–20 detik. Kedatangan menunggu idle fishing dan scheduling berhenti saat pause. Kapal selam ditunda sesuai rekomendasi yang disetujui.
+- Tahap ketiga: popover ember dengan query account/session terindeks, banked + provisional, count per spesies, penemuan baru dan Open Catalog. Area klik ember diperluas; accessibility press serta Space/Return membuka ringkasan.
+- Build Debug dan 38 tes terarah animasi/pengunjung lulus; tes akhir ditambah isolasi query ember. Renderer aktual sudah mengekspor preview. Detail hasil dan batas ada di docs/companion/pixel-cove-v1/LIVING_COVE.md.
+- Belum final: alpha mask atlas pixel lama masih mengikuti siluet watercolor dan perlu cleanup agar potongan tepi antar-frame terjamin hilang; idle blink/head-turn baru belum ditambahkan. Manual QA popover, kunjungan lama dan transisi suasana belum dilakukan. Completion existing masih menyembunyikan diorama sehingga ringkasan sesi terakhir tidak tersedia melalui ember sesudah panel hilang.

@@ -184,6 +184,19 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
         companionController.configure(onTap: { [weak self] in
             self?.restoreTimerPanel()
         })
+        companionController.bucketEvents = { [weak self] sessionID in
+            guard let self else { return [] }
+            return CatchRepository.shared.listSession(sessionID: sessionID, accountID: self.sessionCoordinator.sessionAccountID)
+        }
+        companionController.onOpenCatalog = { [weak self] in
+            self?.navigation.page = .catalog
+            self?.showHomeWindow()
+        }
+        companionController.previouslyCaughtKinds = { [weak self] sessionID in
+            guard let self else { return [] }
+            return Set(CatchRepository.shared.listBanked(accountID: self.sessionCoordinator.sessionAccountID)
+                .filter { $0.sessionID != sessionID }.map(\.kindID))
+        }
 
         sessionCoordinator.onSessionEnded = { [weak self] session in
             self?.onSessionEnded(session)
