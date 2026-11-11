@@ -39,16 +39,6 @@ xcodebuild \
 
 open ~/Library/Developer/Xcode/DerivedData/qoma-drxrbpjdzxdevegbhqstemmkbakm/Build/Products/Debug/Qoma.app
 
-atua klo g bisa : 
-DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
-xcodebuild build \
-  -project qoma.xcodeproj \
-  -scheme Qoma \
-  -configuration Debug \
-  -destination 'platform=macOS'
-
-lalu : 
-open ~/Library/Developer/Xcode/DerivedData/qoma-drxrbpjdzxdevegbhqstemmkbakm/Build/Products/Debug/Qoma.app
 
 cara kill : pkill -f Qoma
 
