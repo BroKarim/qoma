@@ -31,6 +31,9 @@ final class CompanionScene: SKScene {
     private let snow = (0..<12).map { _ in SKSpriteNode(color: .white, size: CGSize(width: 1, height: 1)) }
     private var snowySession = false
     private var atmosphereID = ""
+    private var visitors = CoveVisitorSchedule()
+    private let visitor = SKNode()
+    private var displayedVisitor: CoveVisitorSchedule.Kind?
 
     // Pixel rectangles include the complete rod, including the deposit pose's tip.
     // Coordinates are top-left image pixels; SpriteKit texture rectangles use bottom-left UVs.
@@ -172,6 +175,8 @@ final class CompanionScene: SKScene {
         ripple.lineWidth = 0.5
         ripple.zPosition = 2
         addChild(ripple)
+        visitor.zPosition = 4
+        addChild(visitor)
         for flake in snow { flake.zPosition = 20; addChild(flake) }
         for (index, fish) in swimmingFish.enumerated() {
             configure(fish, name: "swimmingFish-\(index)", size: CGSize(width: 13, height: 8), position: .zero, z: 1)
@@ -200,6 +205,7 @@ final class CompanionScene: SKScene {
         lastTime = nil
         motionTime = 0
         snowySession = Bool.random()
+        visitors = CoveVisitorSchedule()
         isPaused = false
         render()
     }
@@ -241,6 +247,8 @@ final class CompanionScene: SKScene {
         playback.advance(by: delta)
         if playback.phase != .sleeping { motionTime += delta }
         if playback.phase != .hidden { ambientTime += delta }
+        visitors.advance(by: delta, active: playback.isSessionActive && !playback.isPaused,
+                         canArrive: playback.phase == .fishing)
         render()
         if previous != .hidden, playback.phase == .hidden { onHidden?() }
     }
@@ -455,6 +463,38 @@ final class CompanionScene: SKScene {
         character.yScale = 1
         if phase != .distracted { character.position = seatedOrigin }
         updateEnvironment(active: active)
+        updateVisitor(active: active)
+    }
+
+    private func updateVisitor(active: Bool) {
+        visitor.isHidden = !active || visitors.kind == nil
+        guard let kind = visitors.kind else { return }
+        if displayedVisitor != kind {
+            displayedVisitor = kind
+            visitor.removeAllChildren()
+            let rows = kind == .gull
+                ? ["  WWW    ", " WWWWKOO ", "WWWWWW   ", " DDDDD   ", "  O O    "]
+                : ["   DDD   ", "  DWWWD  ", " DKWKWWD ", " DWWOWWD ", "DDWWWWWDD"]
+            let colors: [Character: NSColor] = [
+                "W": NSColor(calibratedWhite: 0.9, alpha: 1),
+                "D": NSColor(calibratedRed: 0.48, green: 0.61, blue: 0.68, alpha: 1),
+                "K": NSColor(calibratedWhite: 0.2, alpha: 1),
+                "O": NSColor(calibratedRed: 0.85, green: 0.56, blue: 0.3, alpha: 1),
+            ]
+            for (y, row) in rows.enumerated() {
+                for (x, pixel) in row.enumerated() {
+                    guard let color = colors[pixel] else { continue }
+                    let node = SKSpriteNode(color: color, size: CGSize(width: 1.2, height: 1.2))
+                    node.position = CGPoint(x: Double(x) * 1.2, y: Double(-y) * 1.2)
+                    visitor.addChild(node)
+                }
+            }
+        }
+        visitor.alpha = visitors.visibility
+        visitor.position = kind == .gull ? CGPoint(x: 104, y: 131) : CGPoint(x: 43, y: 46)
+        if !reduceMotion, kind == .seal {
+            visitor.position.y += sin(visitors.elapsed * 1.5) * 0.5
+        }
     }
 
     private func updateEnvironment(active: Bool) {
