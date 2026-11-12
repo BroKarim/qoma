@@ -1,0 +1,9 @@
+# Complete pixel silhouettes and forward seating — 11 November 2026
+
+Implemented on `codex/all-pixel-art`. Built-in imagegen repaired all five character atlases (54 drawings), preserving their grid/pose layout while restoring complete body contours and providing native transparent alpha. Sources and the exact shared repair prompt are preserved here. `prepare-assets.py` resizes only with nearest-neighbor and exports alpha unchanged; no watercolor masks, thresholding or silhouette intersections are used. It checks every cell and each torso interior.
+
+Runtime character assets are `PixelCatchV2`, `PixelCastV2`, `PixelDepositV2`, `PixelHopV2`, and `PixelPosesV2`, under `Qoma/Assets.xcassets/Companion/PixelCoveV2/`. Superseded character V1 image sets and source sheets have been deleted. The V1 preparation script now exports only the island/props, so it cannot recreate defective character atlases.
+
+Actor scale remains 0.45. Actor translation changes from (68,50) to (64,45), moving the penguin and bucket 4 pt left and 5 pt down toward the ice edge. The float remains at scene (63.95,55.85), converted back into actor coordinates for fishing/casting/release paths. Bucket deposit paths stay in actor coordinates; the click target also moves by (-4,-5). Swimming routes, living-cove atmosphere and visitors are preserved.
+
+Validation: 37 focused tests in four suites passed, including forward seating/fixed float coordinates, full fishing flow, distractions and visitors. All 54 exported cells passed nonempty/torso checks. Native-alpha fishing, deposit and hop renders were visually inspected; new contact sheet, full-cycle video (180 frames) and hop GIF are saved in `previews/`. A stale distraction test was updated to expect stable transforms, matching the deliberate living-cove removal of procedural stretch. `git diff --check` passed. No manual bucket interaction, long-session or multimonitor QA.

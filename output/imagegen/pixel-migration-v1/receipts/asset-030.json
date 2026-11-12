@@ -1,0 +1,13 @@
+{
+  "id": "asset-030",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-030.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-common-shell-shard.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/ocean-finds/common-shell-shard.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

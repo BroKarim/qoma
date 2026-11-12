@@ -1,0 +1,13 @@
+{
+  "id": "asset-059",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-059.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-rattail-taper.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-rattail-taper.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

@@ -18,6 +18,7 @@ final class CompanionWindowController: NSObject, NSWindowDelegate {
         guard let window, let anchor = window.contentView, let sessionID else { return }
         if bucketPopover.isShown { bucketPopover.close(); return }
         bucketPopover.behavior = .transient
+        bucketPopover.appearance = NSAppearance(named: .aqua)
         bucketPopover.contentViewController = NSHostingController(rootView: CoveBucketView(
             events: { [weak self] in self?.bucketEvents?(sessionID) ?? [] },
             previouslyCaughtKinds: previouslyCaughtKinds?(sessionID) ?? [],

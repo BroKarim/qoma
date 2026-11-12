@@ -1,0 +1,12 @@
+{
+  "id": "asset-005",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-005.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-pebble.imageset/image.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

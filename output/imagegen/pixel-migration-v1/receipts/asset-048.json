@@ -1,0 +1,12 @@
+{
+  "id": "asset-048",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-048.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/AppIcon.appiconset/qoma.png"
+  ],
+  "status": "installed",
+  "size": [
+    1024,
+    1024
+  ]
+}

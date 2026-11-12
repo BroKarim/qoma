@@ -1,0 +1,6 @@
+{
+  "id": "asset-122",
+  "source": "/Users/kiram/.codex/generated_images/01a14d18-1275-7fe3-bbaa-4807ee68a130/exec-a8a334a9-6094-4f66-aa51-b343b687de7c.png",
+  "prompt": "Use case: style-transfer. Edit target is the provided partial penguin torso sprite. Keep exactly this partial torso, silhouette, crop, attached right flipper, cream and gray colors and transparent exterior. Do not add a head, feet, face, eyes or scenery. Correct ONLY its remaining soft watercolor shading: replace ALL gradients and the blurry gray central belly patch with crisp flat square pixel color clusters. Use a uniform coarse 48-pixel logical grid, no blur, no smooth tonal transitions, no texture, at most 6 opaque colors. The belly's small gray patch becomes two sharply bounded stepped gray pixel clusters, with the rest flat cream. Preserve existing shape and layout. Actual transparent background.",
+  "status": "generated"
+}

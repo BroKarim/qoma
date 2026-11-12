@@ -1,0 +1,13 @@
+{
+  "id": "asset-047",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-047.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-opal-amphipod.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-opal-amphipod.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

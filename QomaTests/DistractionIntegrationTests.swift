@@ -100,7 +100,7 @@ struct DistractionIntegrationTests {
     @Test func illustratedEffectsAreBundledAndDrawWithoutLeakingIntoOcclusions() throws {
         for name in (1...6).map({ "DistractionIceFlower\($0)" })
             + (1...6).map({ "DistractionSnow\($0)" })
-            + ["DistractionWind", "DistractionSnowbank", "PixelHopV1"] {
+            + ["DistractionWind", "DistractionSnowbank", "PixelHopV2"] {
             let image = try #require(NSImage(named: name))
             #expect(image.size.width > 0)
         }
@@ -209,7 +209,7 @@ struct DistractionIntegrationTests {
         #expect(panel.level == .floating)
     }
 
-    @Test func wholeDrawingBreathesBetweenIllustratedFrames() throws {
+    @Test func wholeDrawingKeepsItsTransformBetweenIllustratedFrames() throws {
         let scene = CompanionScene()
         scene.startSession()
         scene.visualNow = { Date(timeIntervalSince1970: 101.35) }
@@ -221,7 +221,7 @@ struct DistractionIntegrationTests {
         let scale = character.yScale
         scene.visualNow = { Date(timeIntervalSince1970: 101.35 + 1.0 / 60) }
         scene.advanceAnimation(by: 1.0 / 60)
-        #expect(character.position != position || character.zRotation != rotation || character.yScale != scale)
+        #expect(character.position == position && character.zRotation == rotation && character.yScale == scale)
     }
 }
 

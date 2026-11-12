@@ -11,3 +11,5 @@ Motion purpose: state indication for fishing/distraction and the requested ambie
 Both branches remain available for selection. This branch does not change the saved watercolor branch. Previews are captured from the actual SpriteKit renderer.
 
 Validation: Debug build succeeded; 34 focused companion/distraction tests passed. Preparation checks all 54 character cells are present. Final fishing, deposit and hop were inspected using actual SpriteKit renders. Full-cycle preview contains 180 frames at 30 FPS; hop preview verifies all twelve drawings. The final island-only cleanup was followed by another successful build and fresh preview export. `git diff --check` passed. Long-session/multimonitor manual QA was not performed.
+
+Superseded 11 November 2026: the character V1 sheets and their watercolor matte export have been removed. Character runtime now uses the repaired native-alpha V2 atlases; see `../pixel-cove-v2/README.md`. This folder retains only the environment/props and historical previews.

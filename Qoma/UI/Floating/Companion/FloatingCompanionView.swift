@@ -76,7 +76,7 @@ private final class CompanionSpriteView: SKView {
             let point = convert(event.locationInWindow, from: nil)
             if let scene {
                 let location = scene.convertPoint(fromView: point)
-                if CGRect(x: 108, y: 57, width: 28, height: 28).contains(location) { onBucket?() }
+                if CGRect(x: 104, y: 52, width: 28, height: 28).contains(location) { onBucket?() }
                 else { onTap?() }
             }
         }

@@ -1,0 +1,13 @@
+{
+  "id": "asset-077",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-077.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-tide-astrolabe.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-tide-astrolabe.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

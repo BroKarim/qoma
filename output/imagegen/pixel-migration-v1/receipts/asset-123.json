@@ -1,0 +1,12 @@
+{
+  "id": "asset-123",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-123.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionSplash.imageset/CompanionSplash.png"
+  ],
+  "status": "installed",
+  "size": [
+    234,
+    179
+  ]
+}

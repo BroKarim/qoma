@@ -1,0 +1,13 @@
+{
+  "id": "asset-107",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-107.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-blizzard-egg.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-blizzard-egg.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

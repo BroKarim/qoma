@@ -11,7 +11,9 @@ final class CompanionScene: SKScene {
 
     // Contact and ripple locations are measured on the combined ice/water artwork.
     private let seatedOrigin = CGPoint(x: 72, y: 27)
-    private let waterPoint = CGPoint(x: -9, y: 13)
+    private var waterPoint: CGPoint {
+        actors.convert(CGPoint(x: 63.95, y: 55.85), from: self)
+    }
     private let bucketOrigin = CGPoint(x: 119, y: 38)
     private let characterHeight: CGFloat = 100
     private let character = SKSpriteNode()
@@ -38,7 +40,7 @@ final class CompanionScene: SKScene {
     // Pixel rectangles include the complete rod, including the deposit pose's tip.
     // Coordinates are top-left image pixels; SpriteKit texture rectangles use bottom-left UVs.
     private let poses: [SKTexture] = {
-        let atlas = SKTexture(imageNamed: "PixelPosesV1")
+        let atlas = SKTexture(imageNamed: "PixelPosesV2")
         let rectangles = [
             CGRect(x: 0, y: 0, width: 512, height: 512),
             CGRect(x: 512, y: 0, width: 512, height: 512),
@@ -65,7 +67,7 @@ final class CompanionScene: SKScene {
     }()
 
     private let catchFrames: [SKTexture] = {
-        let atlas = SKTexture(imageNamed: "PixelCatchV1")
+        let atlas = SKTexture(imageNamed: "PixelCatchV2")
         return (0..<12).map { index in
             let texture = SKTexture(rect: CGRect(
                 x: CGFloat(index % 4) / 4, y: CGFloat(2 - index / 4) / 3,
@@ -93,9 +95,9 @@ final class CompanionScene: SKScene {
         CGPoint(x: 0.242, y: 0.874), CGPoint(x: 0.242, y: 0.874),
     ]
 
-    private let castFrames = CompanionScene.fishingTextures(named: "PixelCastV1")
+    private let castFrames = CompanionScene.fishingTextures(named: "PixelCastV2")
     private let depositFrames: [SKTexture] = {
-        let atlas = SKTexture(imageNamed: "PixelDepositV1")
+        let atlas = SKTexture(imageNamed: "PixelDepositV2")
         return (0..<12).map { index in
             // Keep the long right-facing rod in cell 6 out of the neighboring cell 7.
             let offset: CGFloat = index == 7 ? 28 : 0
@@ -157,7 +159,7 @@ final class CompanionScene: SKScene {
         }
     }
 
-    private static let distractionFrames = fishingTextures(named: "PixelHopV1")
+    private static let distractionFrames = fishingTextures(named: "PixelHopV2")
 
     init(playback: CompanionPlayback = CompanionPlayback()) {
         self.playback = playback
@@ -166,7 +168,7 @@ final class CompanionScene: SKScene {
         scaleMode = .aspectFit
         // Keep the reference's 58 pt painted body; all fishing paths share this transform.
         actors.setScale(0.45)
-        actors.position = CGPoint(x: 68, y: 50)
+        actors.position = CGPoint(x: 64, y: 45)
         addChild(actors)
         configure(floe, name: "floe", size: CGSize(width: 164, height: 164), position: CGPoint(x: 82, y: 82), z: 0)
         floe.removeFromParent()

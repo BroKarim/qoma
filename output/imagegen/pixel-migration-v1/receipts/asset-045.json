@@ -1,0 +1,13 @@
+{
+  "id": "asset-045",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-045.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-dreamweaver-squid.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-dreamweaver-squid.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

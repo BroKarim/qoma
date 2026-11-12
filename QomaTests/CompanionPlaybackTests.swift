@@ -4,6 +4,19 @@ import Testing
 
 @MainActor
 struct CompanionPlaybackTests {
+    @Test func forwardSeatingKeepsTheFloatInTheLagoon() throws {
+        let scene = CompanionScene()
+        scene.startSession()
+        scene.advanceAnimation(by: 1.21)
+        let character = try #require(scene.childNode(withName: "//character"))
+        let splash = try #require(scene.childNode(withName: "//splash"))
+        let parent = try #require(character.parent)
+        let feet = parent.convert(character.position, to: scene)
+        let floatPoint = parent.convert(splash.position, to: scene)
+        #expect(abs(feet.x - 96.4) < 0.001 && abs(feet.y - 57.15) < 0.001)
+        #expect(abs(floatPoint.x - 63.95) < 0.001 && abs(floatPoint.y - 55.85) < 0.001)
+    }
+
     @Test func paintedPosesKeepTheirFeetAndProportionsStable() throws {
         let scene = CompanionScene(playback: CompanionPlayback(biteWait: { 1 }, reelTime: { 2 }))
         scene.startSession()

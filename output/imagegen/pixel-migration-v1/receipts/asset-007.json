@@ -1,0 +1,13 @@
+{
+  "id": "asset-007",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-007.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-snowflake-crab.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-snowflake-crab.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

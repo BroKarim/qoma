@@ -1,0 +1,13 @@
+{
+  "id": "asset-011",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-011.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-blueflame-lanternfish.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-blueflame-lanternfish.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

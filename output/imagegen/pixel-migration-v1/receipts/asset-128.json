@@ -1,0 +1,13 @@
+{
+  "id": "asset-128",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-128.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionFish.imageset/CompanionFish.png",
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/WatercolorCoveV6/CompanionFishCoveV5.imageset/CompanionFish.png"
+  ],
+  "status": "installed",
+  "size": [
+    288,
+    144
+  ]
+}

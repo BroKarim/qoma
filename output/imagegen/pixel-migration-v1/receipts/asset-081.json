@@ -1,0 +1,13 @@
+{
+  "id": "asset-081",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-081.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-crystal-moth.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-crystal-moth.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

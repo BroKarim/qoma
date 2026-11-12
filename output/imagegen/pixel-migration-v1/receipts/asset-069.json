@@ -1,0 +1,13 @@
+{
+  "id": "asset-069",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-069.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-aurora-harp.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-aurora-harp.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

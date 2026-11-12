@@ -1,0 +1,13 @@
+{
+  "id": "asset-060",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-060.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-glacier-sailing-ship.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-glacier-sailing-ship.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

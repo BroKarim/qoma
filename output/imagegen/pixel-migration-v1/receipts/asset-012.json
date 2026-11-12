@@ -1,0 +1,12 @@
+{
+  "id": "asset-012",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-012.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/QyubeMenuQuit.imageset/qyube-menu-quit.png"
+  ],
+  "status": "installed",
+  "size": [
+    128,
+    128
+  ]
+}

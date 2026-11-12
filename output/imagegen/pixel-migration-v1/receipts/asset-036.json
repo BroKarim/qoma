@@ -1,0 +1,13 @@
+{
+  "id": "asset-036",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-036.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-midnight-puffer.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-midnight-puffer.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

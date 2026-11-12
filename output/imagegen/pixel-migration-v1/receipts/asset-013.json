@@ -1,0 +1,13 @@
+{
+  "id": "asset-013",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-013.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-common-clam-shell.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/ocean-finds/common-clam-shell.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

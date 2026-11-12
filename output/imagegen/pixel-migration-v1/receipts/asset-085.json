@@ -1,0 +1,13 @@
+{
+  "id": "asset-085",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-085.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-icefish-wingfin.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-icefish-wingfin.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

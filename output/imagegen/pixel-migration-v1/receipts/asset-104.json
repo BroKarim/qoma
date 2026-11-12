@@ -1,0 +1,13 @@
+{
+  "id": "asset-104",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-104.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-icefish-petal.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-icefish-petal.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

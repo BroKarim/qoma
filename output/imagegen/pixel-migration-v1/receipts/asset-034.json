@@ -1,0 +1,13 @@
+{
+  "id": "asset-034",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-034.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-snow-hydra.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-snow-hydra.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

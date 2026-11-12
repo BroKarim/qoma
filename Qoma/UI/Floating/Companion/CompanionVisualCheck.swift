@@ -1,6 +1,7 @@
 #if DEBUG
 import AppKit
 import SpriteKit
+import SwiftUI
 
 /// Opt-in render check, run in a separate Debug app process with --companion-snapshots <directory>.
 /// It uses bundled textures and the actual renderer; no monitoring or session persistence is started.
@@ -8,6 +9,31 @@ import SpriteKit
 enum CompanionVisualCheck {
     static func write(to directory: URL) throws {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let sampleKinds = Array(CatalogDefinitions.allKinds.prefix(5).map(\.id))
+        let bucketSamples = sampleKinds.enumerated().map { index, kind in
+            CatchEvent(sessionID: UUID(), accountID: "preview", kindID: kind,
+                       depositedAt: .now, bankedAt: index == 0 ? nil : .now)
+        }
+        for (name, items, known) in [
+            ("empty", [CatchEvent](), Set<String>()),
+            ("discoveries", bucketSamples, Set(sampleKinds.prefix(3))),
+            ("known", bucketSamples, Set(sampleKinds)),
+        ] {
+            let hosting = NSHostingView(rootView: CoveBucketView(
+                events: { items }, previouslyCaughtKinds: known, onCatalog: {}))
+            hosting.appearance = NSAppearance(named: .aqua)
+            hosting.setFrameSize(hosting.fittingSize)
+            let previewWindow = NSWindow(contentRect: hosting.frame, styleMask: .borderless,
+                                         backing: .buffered, defer: false)
+            previewWindow.contentView = hosting
+            hosting.layoutSubtreeIfNeeded()
+            if let bitmap = hosting.bitmapImageRepForCachingDisplay(in: hosting.bounds) {
+                hosting.cacheDisplay(in: hosting.bounds, to: bitmap)
+                try bitmap.representation(using: .png, properties: [:])?
+                    .write(to: directory.appendingPathComponent("bucket-\(name).png"))
+            }
+            previewWindow.contentView = nil
+        }
         let view = SKView(frame: CGRect(x: 0, y: 0, width: 280, height: 280))
         view.allowsTransparency = true
         let window = NSWindow(contentRect: view.frame, styleMask: .borderless, backing: .buffered, defer: false)
