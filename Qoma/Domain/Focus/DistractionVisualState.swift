@@ -41,7 +41,7 @@ enum DistractionMotion {
         case .dimBright:
             let cycle = dimCycle(elapsed: time)
             let duration = max(3, 8 - Double(cycle.index) * 0.5)
-            let click = duration * (cycle.phase < 0.5 ? 0.25 : 0.75)
+            let click = duration * (cycle.phase < 0.425 ? 0.15 : 0.70)
             // Drawing 6 is the press, exactly on each light-switch sound beat.
             let drawingTime = cycle.phase * duration - click + 0.5
             return drawingTime >= 0 && drawingTime < 1 ? min(11, Int(drawingTime * 12 + 0.000001)) : 0
@@ -85,8 +85,9 @@ enum DistractionMotion {
 
     static func dimStrength(elapsed: TimeInterval) -> Double {
         let phase = dimPhase(elapsed: elapsed)
-        let sine = sin(.pi * phase)
-        return sine * sine
+        let duration = max(3, 8 - Double(dimCycle(elapsed: elapsed).index) * 0.5)
+        let transition = 0.15 / duration
+        return min(1, max(0, min((phase - 0.15) / transition, (0.70 - phase) / transition)))
     }
 }
 
@@ -108,7 +109,7 @@ struct DistractionSoundCursor {
             return marker != lastMarker ? .freeze : nil
         case .dimBright:
             let cycle = DistractionMotion.dimCycle(elapsed: elapsed)
-            let marker = cycle.index * 2 + Int((cycle.phase + 0.25) * 2)
+            let marker = cycle.index * 2 + (cycle.phase >= 0.15 ? 1 : 0) + (cycle.phase >= 0.70 ? 1 : 0)
             defer { lastMarker = marker }
             guard !reduceMotion, let lastMarker, marker != lastMarker else { return nil }
             return .lightSwitch

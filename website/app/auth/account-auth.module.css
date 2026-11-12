@@ -8,6 +8,15 @@
   font-family: Arial, sans-serif;
 }
 
+.signinScene {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #08152e;
+}
+
+.signinScene .brand { color: #e9edf4; }
+
 .brand {
   position: absolute;
   top: clamp(1.5rem, 4vw, 3rem);

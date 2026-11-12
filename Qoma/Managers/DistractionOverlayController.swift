@@ -28,7 +28,7 @@ final class DistractionOverlayController {
         },
         now: @escaping () -> Date = Date.init,
         chooseEffect: @escaping () -> DistractionEffect = {
-            DistractionEffect.allCases.randomElement() ?? .iceFlower
+            [.iceFlower, .dimBright].randomElement() ?? .iceFlower
         },
         audio: DistractionAudioPlayer? = nil
     ) {

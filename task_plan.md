@@ -2411,3 +2411,9 @@ Harga $49 dan kalkulasi upgrade yang masih muncul di bagian strategi lama adalah
 - APP menampilkan Check for Updates, versi, Erase local data beserta penjelasan singkat. Dialog/error penghapusan existing tetap digunakan. Native scrollbar disembunyikan memakai helper bersama.
 - Perubahan aset ilustrasi yang sudah ada di working tree dipertahankan. Swift parse dan diff whitespace diperiksa; QA interaksi manual dan pengiriman notifikasi pada macOS belum dilakukan.
 - Build Debug macOS berhasil dengan `xcodebuild`, dependency Sparkle/SwiftLint berhasil di-resolve. Artefak verifikasi berada di `/private/tmp/qyube-settings-review/Build/Products/Debug/Qoma.app`; aplikasi yang berjalan tidak direstart otomatis.
+
+## Penyesuaian distraction dan ember — 12 November 2026
+
+- Pilihan distraction runtime dibatasi ke bunga es dan lampu; badai salju disimpan untuk penggunaan nanti. Pemilihan tetap acak setiap episode.
+- Lampu memakai transisi cepat dengan durasi gelap dan terang yang berkurang setiap siklus; timing pose dan penanda suara mengikuti pergantian lampu.
+- Popover ember diperkecil menjadi 210 pt. Kontrol sesi di menu bar tetap tersedia saat floating timer dimatikan.

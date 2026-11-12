@@ -150,6 +150,20 @@ struct NewSessionView: View {
                                     Button("Edit apps", systemImage: "pencil") { self.editingApps = true }
                                         .labelStyle(.iconOnly)
                                         .foregroundStyle(Color.qyubeAccent)
+                                        .popover(isPresented: self.$editingApps) {
+                                            QyubeAppRuleEditor(mode: self.draft.policy.mode, selectedApps: self.apps, onToggle: { id, selected in
+                                                let previous = self.draft.policy
+                                                self.setApp(id, selected: selected)
+                                                if self.isEditingActiveSession {
+                                                    guard self.draft.policy.mode != .allowing || !self.apps.isEmpty,
+                                                          self.coordinator.updateActiveSession(taskTitle: self.coordinator.currentTaskTitle, allowedApps: self.draft.policy.allowedApps, blockedApps: self.draft.policy.blockedApps) else {
+                                                        self.draft.policy = previous
+                                                        return false
+                                                    }
+                                                }
+                                                return true
+                                            })
+                                        }
                                 }
                                 .padding(.horizontal, 14)
                                 .frame(height: 44)
@@ -233,15 +247,6 @@ struct NewSessionView: View {
         }
         .foregroundStyle(Color.qyubeMenuInk)
         .background(Color.qyubeBackground)
-        .sheet(isPresented: self.$editingApps) {
-            QyubeAppRuleEditor(
-                mode: self.draft.policy.mode,
-                selectedApps: self.apps,
-                onToggle: { id, selected in
-                    self.setApp(id, selected: selected)
-                    return true
-                })
-        }
     }
 
     private var modeTitle: String {
@@ -404,12 +409,6 @@ struct QyubeAppRuleEditor: View {
       Button("Choose application…", systemImage: "plus", action: chooseApplication)
         .foregroundStyle(Color.qyubeAccent)
         .frame(maxWidth: .infinity).padding(12)
-      Button { dismiss() } label: {
-        Text("DONE").font(.headline).tracking(1.3)
-          .frame(maxWidth: .infinity).frame(height: 48)
-          .foregroundStyle(.white).background(Color.qyubeMenuInk)
-      }
-      .keyboardShortcut(.defaultAction)
     }
     .buttonStyle(.plain)
     .foregroundStyle(Color.qyubeMenuInk)

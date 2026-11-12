@@ -43,7 +43,11 @@ struct MenuBarSessionPopover: View {
             }
         }
         .foregroundStyle(Color.qyubeInk)
-        .background(.white, in: RoundedRectangle(cornerRadius: 16))
+        .background {
+            Image("FloatingWatercolor-background")
+                .resizable()
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+        }
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.qyubeLine, lineWidth: 1))
         .environment(\.colorScheme, .light)
         .alert("End this session?", isPresented: $confirmingStop) {

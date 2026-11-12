@@ -11,10 +11,10 @@ struct CoveBucketView: View {
             let groups = Dictionary(grouping: catches, by: \.kindID)
             let discoveries = Set(groups.keys).subtracting(previouslyCaughtKinds).count
 
-            VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 9) {
                 VStack(alignment: .leading, spacing: 5) {
                     Text("This session")
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(.system(size: 16, weight: .semibold))
                     Text("\(catches.count) catches · \(groups.count) species")
                         .font(.system(size: 13))
                         .foregroundStyle(Color.qyubeInk.opacity(0.65))
@@ -34,12 +34,12 @@ struct CoveBucketView: View {
                             ForEach(groups.keys.sorted(), id: \.self) { kindID in
                                 HStack(spacing: 6) {
                                     QyubeCatchArt(kindID: kindID)
-                                        .frame(width: 48, height: 44)
+                                        .frame(width: 38, height: 36)
                                     Text("×\(groups[kindID]?.count ?? 0)")
                                         .font(.system(size: 15, weight: .medium))
                                         .monospacedDigit()
                                 }
-                                .frame(width: 94, height: 64)
+                                .frame(width: 78, height: 52)
                                 .help(CatalogDefinitions.kind(id: kindID)?.name ?? kindID)
                                 .accessibilityElement(children: .ignore)
                                 .accessibilityLabel("\(CatalogDefinitions.kind(id: kindID)?.name ?? kindID), \(groups[kindID]?.count ?? 0) catches")
@@ -49,7 +49,7 @@ struct CoveBucketView: View {
                     }
                     .scrollIndicators(.hidden)
                     .scrollTargetBehavior(.viewAligned)
-                    .frame(height: 64)
+                    .frame(height: 52)
                 }
 
                 Divider()
@@ -78,8 +78,8 @@ struct CoveBucketView: View {
                 }
                 .buttonStyle(.plain)
             }
-            .padding(20)
-            .frame(width: 310)
+            .padding(12)
+            .frame(width: 210)
             .foregroundStyle(Color.qyubeInk)
             .background(Color.qyubeBackground)
             .environment(\.colorScheme, .light)

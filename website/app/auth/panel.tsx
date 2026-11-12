@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { authClient } from "@/lib/auth-client"
 import { Apple } from "lucide-react"
 import styles from "./account-auth.module.css"
+import heroStyles from "../(marketing)/hero.module.css"
 import { LegalFooter } from "@/components/legal-footer"
 
 function GoogleMark() {
@@ -40,7 +41,9 @@ export default function AuthPanel({ requestId, invalidRequest, checkout }: { req
     }
   }
 
-  return <main className={styles.scene} style={{ backgroundImage: "url('/account/signin-fishing.webp')" }}>
+  return <main className={`${styles.scene} ${styles.signinScene}`}>
+    <div className={heroStyles.aurora} aria-hidden="true" />
+    <div className={heroStyles.grain} aria-hidden="true" />
     <Link href="/" className={styles.brand} aria-label="Qyube home">qyube</Link>
     <div className={styles.center}><section className={styles.card} aria-labelledby="signin-title">
       <h1 id="signin-title">A little closer to focus.</h1>
@@ -60,11 +63,10 @@ export default function AuthPanel({ requestId, invalidRequest, checkout }: { req
       {!invalidRequest && !isPending && !session && providers && !providers.google && !providers.apple && <p className={`${styles.status} ${styles.error}`} role="alert">Sign-in is temporarily unavailable. Please try again later.</p>}
       {!invalidRequest && !isPending && !session && providers && (providers.google || providers.apple) && <>
         <p className={`${styles.status} ${message.includes("unavailable") ? styles.error : ""}`} role="status" aria-live="polite">{message}</p>
-        <p className={styles.helper}>Your 7-day trial starts when you connect the app. No card required.</p>
+        {/*<p className={styles.helper}>Your 7-day trial starts when you connect the app. No card required.</p>*/}
       </>}
       {!invalidRequest && (isPending || session) && <p className={styles.status} role="status" aria-live="polite">{session ? "You’re signed in. Continuing…" : "Checking your sign-in…"}</p>}
-      <div className={styles.terms}><Link href="/">Qyube for Mac</Link></div>
-      <LegalFooter />
+      {/*<LegalFooter />*/}
     </section></div>
   </main>
 }

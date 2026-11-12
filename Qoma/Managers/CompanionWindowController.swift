@@ -23,7 +23,17 @@ final class CompanionWindowController: NSObject, NSWindowDelegate {
             events: { [weak self] in self?.bucketEvents?(sessionID) ?? [] },
             previouslyCaughtKinds: previouslyCaughtKinds?(sessionID) ?? [],
             onCatalog: { [weak self] in self?.bucketPopover.close(); self?.onOpenCatalog?() }))
-        bucketPopover.show(relativeTo: CGRect(x: 108, y: 60, width: 28, height: 28), of: anchor, preferredEdge: .maxY)
+        let size = bucketPopover.contentViewController?.view.fittingSize ?? NSSize(width: 210, height: 240)
+        let visible = window.screen?.visibleFrame ?? NSScreen.main?.visibleFrame ?? .zero
+        let island = window.convertToScreen(NSRect(x: 0, y: 0, width: 164, height: 164))
+        let options: [(NSRectEdge, CGFloat, CGFloat, NSRect)] = [
+            (.maxY, visible.maxY - island.maxY, size.height, NSRect(x: 82, y: 168, width: 1, height: 1)),
+            (.maxX, visible.maxX - island.maxX, size.width, NSRect(x: 168, y: 82, width: 1, height: 1)),
+            (.minX, island.minX - visible.minX, size.width, NSRect(x: -4, y: 82, width: 1, height: 1)),
+            (.minY, island.minY - visible.minY, size.height, NSRect(x: 82, y: -4, width: 1, height: 1))
+        ]
+        let choice = options.first(where: { $0.1 >= $0.2 + 12 }) ?? options.max(by: { $0.1 - $0.2 < $1.1 - $1.2 })!
+        bucketPopover.show(relativeTo: choice.3, of: anchor, preferredEdge: choice.0)
     }
 
     var isVisible: Bool { window?.isVisible ?? false }
