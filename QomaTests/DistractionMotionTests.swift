@@ -2,6 +2,16 @@ import Testing
 @testable import Qoma
 
 struct DistractionMotionTests {
+    @Test func crystalBloomTurnsSlowlyInBothDirectionsAndRespectsReducedMotion() {
+        let clockwise = DistractionMotion.crystalBloom(index: 0, age: 12, reduceMotion: false)
+        let counterclockwise = DistractionMotion.crystalBloom(index: 1, age: 12, reduceMotion: false)
+        #expect(abs(clockwise.rotation - .pi / 2) < 0.0001)
+        #expect(counterclockwise.rotation < 0)
+        #expect((0.94...1).contains(clockwise.opacity))
+        let still = DistractionMotion.crystalBloom(index: 1, age: 12, reduceMotion: true)
+        #expect(still.rotation == 0 && still.opacity == 1)
+    }
+
     @Test func flowersGrowDenselyWithWindowAreaAndStayBounded() {
         #expect(DistractionMotion.iceFlowerCount(elapsed: 0) == 30)
         #expect(DistractionMotion.iceFlowerCount(elapsed: 9.9) == 30)
@@ -44,7 +54,7 @@ struct DistractionMotionTests {
     }
 
     @Test func drawnPressMatchesSoundBeatsAndConnectingDrawingsAdvanceInOrder() {
-        for click in [2.0, 6.0, 9.875] {
+        for click in [1.2, 5.6, 9.125] {
             #expect(DistractionMotion.penguinFrame(effect: .dimBright, elapsed: click, reduceMotion: false) == 6)
             for drawing in 0..<12 {
                 let time = click - 0.5 + (Double(drawing) + 0.1) / 12

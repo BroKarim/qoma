@@ -1,9 +1,52 @@
 #if DEBUG
 import AppKit
+import ImageIO
+import UniformTypeIdentifiers
 
 /// Actual AppKit surfaces and controller, with a private fixture and clock; no focus records.
 @MainActor
 enum DistractionVisualCheck {
+    static func writeCrystalClip(to directory: URL) throws {
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let view = DistractionEffectView(frame: CGRect(x: 0, y: 0, width: 720, height: 480))
+        let window = NSWindow(contentRect: view.frame, styleMask: .borderless, backing: .buffered, defer: false)
+        window.contentView = view
+        defer { window.contentView = nil }
+        let state = DistractionVisualState(effect: .iceFlower, startedAt: Date(), seed: 7, ownerPID: 42)
+        let url = directory.appendingPathComponent("crystal-bloom.gif")
+        guard let destination = CGImageDestinationCreateWithURL(url as CFURL, UTType.gif.identifier as CFString, 200, nil)
+        else { throw CocoaError(.fileWriteUnknown) }
+        CGImageDestinationSetProperties(destination, [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFLoopCount: 0]] as CFDictionary)
+        for tick in 0..<200 {
+            try autoreleasepool {
+                view.render(state: state, elapsed: 51 + Double(tick) / 20, reduceMotion: false)
+                guard let overlay = view.bitmapImageRepForCachingDisplay(in: view.bounds),
+                      let bitmap = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: 720, pixelsHigh: 480,
+                        bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
+                        colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)
+                else { throw CocoaError(.fileWriteUnknown) }
+                view.cacheDisplay(in: view.bounds, to: overlay)
+                NSGraphicsContext.saveGraphicsState()
+                NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: bitmap)
+                NSColor(calibratedRed: 0.10, green: 0.12, blue: 0.18, alpha: 1).setFill()
+                view.bounds.fill()
+                for row in 0..<9 {
+                    NSColor(white: 0.35, alpha: 1).setFill()
+                    CGRect(x: 30, y: 35 + row * 50, width: row.isMultiple(of: 2) ? 570 : 660, height: 7).fill()
+                }
+                if let image = overlay.cgImage {
+                    NSImage(cgImage: image, size: view.bounds.size).draw(
+                        in: view.bounds, from: .zero, operation: .sourceOver, fraction: 1)
+                }
+                NSGraphicsContext.restoreGraphicsState()
+                guard let cgImage = bitmap.cgImage else { throw CocoaError(.fileWriteUnknown) }
+                CGImageDestinationAddImage(destination, cgImage, [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFDelayTime: 0.05]] as CFDictionary)
+                if tick == 0 { try bitmap.representation(using: .png, properties: [:])?.write(to: directory.appendingPathComponent("crystal-bloom.png")) }
+            }
+        }
+        guard CGImageDestinationFinalize(destination) else { throw CocoaError(.fileWriteUnknown) }
+    }
+
     static func write(to directory: URL) throws {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         let frame = CGRect(x: 120, y: 120, width: 900, height: 650)

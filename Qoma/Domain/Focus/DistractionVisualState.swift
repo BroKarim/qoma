@@ -15,6 +15,16 @@ struct DistractionVisualState: Equatable {
 }
 
 enum DistractionMotion {
+    /// Slow, linear turns indicate an ongoing distraction; alternate directions avoid a spinning field.
+    static func crystalBloom(index: Int, age: TimeInterval, reduceMotion: Bool) -> (rotation: Double, opacity: Double) {
+        guard !reduceMotion else { return (0, 1) }
+        let period = Double(48 + (index % 3) * 12)
+        let direction = index.isMultiple(of: 2) ? 1.0 : -1.0
+        let rotation = direction * max(0, age).truncatingRemainder(dividingBy: period) / period * 2 * .pi
+        let shimmer = (sin(max(0, age) * 2 * .pi / 8 + Double(index)) + 1) / 2
+        return (rotation, 0.94 + shimmer * 0.06)
+    }
+
     static func iceFlowerCapacity(area: Double) -> Int {
         min(180, max(24, Int(max(0, area) / 5_000)))
     }

@@ -13,6 +13,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         #if DEBUG
         if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil { return }
         let arguments = ProcessInfo.processInfo.arguments
+        if let index = arguments.firstIndex(of: "--crystal-bloom-snapshots"), arguments.count > index + 1 {
+            do { try DistractionVisualCheck.writeCrystalClip(to: URL(fileURLWithPath: arguments[index + 1])) }
+            catch { NSLog("Crystal Bloom preview failed: %@", error.localizedDescription) }
+            NSApp.terminate(nil)
+            return
+        }
         if let index = arguments.firstIndex(of: "--distraction-snapshots"), arguments.count > index + 1 {
             do {
                 try DistractionVisualCheck.write(to: URL(fileURLWithPath: arguments[index + 1]))

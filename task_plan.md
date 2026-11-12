@@ -2430,3 +2430,10 @@ Harga $49 dan kalkulasi upgrade yang masih muncul di bagian strategi lama adalah
 - Progress memakai kontur tinta, track warna kertas dan fill teal lebih lembut mengikuti prototype dark footer.
 - Ikon edit, pause, resume dan stop memakai garis vektor dengan ketidaksimetrisan tetap agar tajam pada ukuran kecil; tidak memakai SF Symbols untuk kontrol player.
 - Build Debug berhasil dan git diff --check bersih. Perbandingan visual di aplikasi belum dilakukan.
+
+## Crystal Bloom distraction — 13 November 2026
+
+- Branch codex/crystal-bloom-distraction dari snapshot player 4a11be9.
+- Enam bunga es lama diganti Crystal Bloom pixel dari imagegen bawaan; sumber, prompt, exporter dan preview ada di docs/companion/crystal-bloom-v1/.
+- Putaran linear lambat 48/60/72 detik dengan arah bergantian dan shimmer opacity 94–100% setiap delapan detik. Redraw terus berjalan selama efek aktif; Reduce Motion menahan gerakan. Efek lampu tidak diubah.
+- Build dan tes terarah motion/integration lulus, termasuk perbandingan piksel sesudah pertumbuhan selesai dan saat Reduce Motion aktif. Preview memakai renderer AppKit aktual. QA app diblokir/fullscreen/multimonitor serta profiling baterai belum dilakukan.

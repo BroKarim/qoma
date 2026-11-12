@@ -6,6 +6,20 @@ import Testing
 
 @MainActor
 struct DistractionIntegrationTests {
+    @Test func crystalBloomKeepsMovingAfterGrowthAndReducedMotionIsStill() throws {
+        let view = DistractionEffectView(frame: CGRect(x: 0, y: 0, width: 600, height: 400))
+        let state = DistractionVisualState(effect: .iceFlower, startedAt: Date(), seed: 7, ownerPID: 42)
+        func pixels(at time: Double, reduceMotion: Bool) throws -> Data {
+            view.render(state: state, elapsed: time, reduceMotion: reduceMotion)
+            let bitmap = try #require(view.bitmapImageRepForCachingDisplay(in: view.bounds))
+            view.cacheDisplay(in: view.bounds, to: bitmap)
+            return try #require(bitmap.representation(using: .png, properties: [:]))
+        }
+        let first = try pixels(at: 51, reduceMotion: false)
+        #expect(try pixels(at: 55, reduceMotion: false) != first)
+        #expect(try pixels(at: 51, reduceMotion: true) == pixels(at: 55, reduceMotion: true))
+    }
+
     @Test func repeatedPolicyUpdatesKeepEpisodeAndGrowActualSurface() {
         let fixture = DistractionTestFixture()
         let controller = DistractionOverlayController(
@@ -98,7 +112,7 @@ struct DistractionIntegrationTests {
     }
 
     @Test func illustratedEffectsAreBundledAndDrawWithoutLeakingIntoOcclusions() throws {
-        for name in (1...6).map({ "DistractionIceFlower\($0)" })
+        for name in (1...6).map({ "CrystalBloom\($0)" })
             + (1...6).map({ "DistractionSnow\($0)" })
             + ["DistractionWind", "DistractionSnowbank", "PixelHopV2"] {
             let image = try #require(NSImage(named: name))
@@ -153,7 +167,7 @@ struct DistractionIntegrationTests {
         let anchor = character.anchorPoint
         let position = character.position
         let elapsed: Double = switch effect {
-        case .dimBright: 2
+        case .dimBright: 1.2
         case .iceFlower: 0.65
         case .snowstorm: 1.7
         }

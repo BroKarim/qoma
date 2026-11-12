@@ -12,7 +12,7 @@ final class DistractionEffectView: NSView {
     private var reduceMotion = false
     private var layoutSize = CGSize.zero
     private var sprites: [DistractionSprite] = []
-    private static let flowers = (1...6).compactMap { NSImage(named: "DistractionIceFlower\($0)") }
+    private static let flowers = (1...6).compactMap { NSImage(named: "CrystalBloom\($0)") }
     private static let snow = (1...6).compactMap { NSImage(named: "DistractionSnow\($0)") }
     private static let wind = NSImage(named: "DistractionWind")
     private static let snowbank = NSImage(named: "DistractionSnowbank")
@@ -30,10 +30,7 @@ final class DistractionEffectView: NSView {
             ? (reduceMotion ? 0.8 : 0.85 * DistractionMotion.dimStrength(elapsed: time)) : 0
         let changed = self.state != state || self.reduceMotion != reduceMotion || layoutSize != bounds.size
             || flowerCount != count || self.snowCount != snowCount || dimOpacity != opacity
-        let growth = min(1, time.truncatingRemainder(dividingBy: 10) / 0.85)
-        let previousGrowth = min(1, self.elapsed.truncatingRemainder(dividingBy: 10) / 0.85)
-        let animating = !reduceMotion && (state.effect == .snowstorm
-            || (state.effect == .iceFlower && (time < 51 || self.elapsed < 51) && growth != previousGrowth))
+        let animating = !reduceMotion && (state.effect == .snowstorm || state.effect == .iceFlower)
         // Regenerate only when seed or geometry changes; positions stay fixed between frames.
         if self.state?.seed != state.seed || layoutSize != bounds.size {
             sprites = DistractionSprite.make(
@@ -78,6 +75,7 @@ final class DistractionEffectView: NSView {
 
     private func drawFlowers(_ context: CGContext) {
         guard !Self.flowers.isEmpty else { return }
+        context.interpolationQuality = .none
         let area = bounds.width * bounds.height
         for (index, sprite) in sprites.prefix(flowerCount).enumerated() {
             let born = DistractionMotion.iceFlowerBirth(index: index, area: area)
@@ -85,12 +83,13 @@ final class DistractionEffectView: NSView {
             let eased = growth * growth * (3 - 2 * growth)
             guard eased > 0 else { continue }
             let center = CGPoint(x: bounds.width * sprite.x, y: bounds.height * sprite.y)
+            let motion = DistractionMotion.crystalBloom(index: index, age: max(0, elapsed - born), reduceMotion: reduceMotion)
             draw(
                 Self.flowers[index % Self.flowers.count],
                 at: center,
                 width: sprite.width * (0.8 + 0.2 * eased),
-                rotation: sprite.rotation,
-                opacity: eased,
+                rotation: sprite.rotation + motion.rotation,
+                opacity: eased * motion.opacity,
                 context: context)
         }
     }
