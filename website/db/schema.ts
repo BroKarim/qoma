@@ -186,3 +186,16 @@ export const accountLinks = pgTable("account_links", {
   createdAt: time("created_at").notNull().defaultNow(),
   expiresAt: time("expires_at").notNull(),
 }).enableRLS()
+
+export const waitlist = pgTable("waitlist", {
+  email: text("email").primaryKey(),
+  createdAt: time("created_at").notNull().defaultNow(),
+  consentAt: time("consent_at").notNull().defaultNow(),
+  consentVersion: text("consent_version").notNull(),
+  status: text("status").notNull().default("subscribed"),
+}).enableRLS()
+export const waitlistAttempts = pgTable("waitlist_attempts", {
+  id: bigserial("id", { mode: "number" }).primaryKey(),
+  ipHash: text("ip_hash").notNull(),
+  createdAt: time("created_at").notNull().defaultNow(),
+}, table => [index("waitlist_attempts_ip_date").on(table.ipHash, table.createdAt)]).enableRLS()
