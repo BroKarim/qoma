@@ -199,8 +199,8 @@ struct QyubeHomeView: View {
                 Task { await self.access.refreshAccess() }
             }
         } else if !self.access.canStartSession(), self.navigation.page == nil {
-            accessGate(title: "Keep focusing", detail: "Your access needs renewal. Your past sessions and catches are still here.", action: "View plans") {
-                NSWorkspace.shared.open(URL(string: "https://qyube.brokarim.com/pricing")!)
+            accessGate(title: "Keep focusing", detail: "Your access needs renewal. Your past sessions and catches are still here.", action: "Get Qyube Pro") {
+                Task { await self.access.openAccountPurchases(checkout: true) }
             }
         } else if self.isSessionFormPresented {
             NewSessionView(

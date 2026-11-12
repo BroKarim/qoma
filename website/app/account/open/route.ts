@@ -13,7 +13,7 @@ export async function GET(request: Request) {
   if (!rows[0]) return new Response("Link expired. Open Account & purchases again from Qyube.", { status: 410 })
   const context = await new SignJWT({ accountId: rows[0].account_id }).setProtectedHeader({ alg: "HS256" })
     .setAudience("qyube-account-context").setExpirationTime("10m").sign(new TextEncoder().encode(secret))
-  const response = NextResponse.redirect(new URL("/account", request.url))
+  const response = NextResponse.redirect(new URL(new URL(request.url).searchParams.get("checkout") === "1" ? "/account?checkout=app" : "/account", request.url))
   response.cookies.set("qyube-account-context", context, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", maxAge: 600 })
   response.headers.set("Referrer-Policy", "no-referrer")
   response.headers.set("Cache-Control", "no-store")

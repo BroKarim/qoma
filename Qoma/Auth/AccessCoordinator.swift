@@ -63,7 +63,7 @@ final class AccessCoordinator: ObservableObject {
         }
     }
 
-    func openAccountPurchases() async {
+    func openAccountPurchases(checkout: Bool = false) async {
         do {
             guard let credential else { NSWorkspace.shared.open(baseURL.appending(path: "/auth")); return }
             var request = URLRequest(url: baseURL.appending(path: "/api/me/account-link"))
@@ -73,7 +73,13 @@ final class AccessCoordinator: ObservableObject {
             guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw URLError(.userAuthenticationRequired) }
             let result = try JSONDecoder().decode(StartResponse.self, from: data)
             guard result.url.host == baseURL.host, result.url.scheme == baseURL.scheme else { throw URLError(.badURL) }
-            NSWorkspace.shared.open(result.url)
+            var destination = URLComponents(url: result.url, resolvingAgainstBaseURL: false)
+            if checkout {
+                var items = destination?.queryItems ?? []
+                items.append(URLQueryItem(name: "checkout", value: "1"))
+                destination?.queryItems = items
+            }
+            guard let destinationURL = destination?.url, NSWorkspace.shared.open(destinationURL) else { throw URLError(.cannotOpenFile) }
         } catch {
             message = "Could not open your account. Check your connection and sign in again if needed."
             let alert = NSAlert()

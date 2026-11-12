@@ -1,3 +1,4 @@
+import { jwtVerify } from "jose"
 import { randomUUID } from "node:crypto"
 import { database } from "@/lib/db"
 import { getAuth } from "@/lib/auth"
@@ -10,6 +11,13 @@ export async function POST(request: Request) {
   if (request.headers.get("origin") !== process.env.BETTER_AUTH_URL) return Response.json({ error: "Invalid origin" }, { status: 403 })
   const session = await getAuth().api.getSession({ headers: request.headers })
   if (!session?.user.emailVerified) return Response.json({ error: "Sign in first" }, { status: 401 })
+  const context = request.headers.get("cookie")?.split(";").map(part => part.trim()).find(part => part.startsWith("qyube-account-context="))?.slice("qyube-account-context=".length)
+  if (context) {
+    try {
+      const { payload } = await jwtVerify(context, new TextEncoder().encode(process.env.BETTER_AUTH_SECRET), { algorithms: ["HS256"], audience: "qyube-account-context" })
+      if (payload.accountId !== session.user.id) return Response.json({ error: "Account mismatch" }, { status: 403 })
+    } catch { return Response.json({ error: "Account link expired" }, { status: 403 }) }
+  }
   let plan: "lifetime"
   try {
     const body = await request.json()
@@ -74,7 +82,7 @@ export async function POST(request: Request) {
       currency: "usd", allow_trial: false, allow_discount_codes: false,
       discount_id: discountId,
       metadata: { qyube_checkout_id: id, qyube_account_id: accountId },
-      success_url: `${base}/account?checkout=returned`, return_url: `${base}/pricing`,
+      success_url: `${base}/account?checkout=returned`, return_url: `${base}/account`,
     })
     await client.query("UPDATE checkout_attempts SET provider_checkout_id = $2 WHERE id = $1", [id, checkout.id])
     await client.query("COMMIT")
