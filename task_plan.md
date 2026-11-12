@@ -2417,3 +2417,9 @@ Harga $49 dan kalkulasi upgrade yang masih muncul di bagian strategi lama adalah
 - Pilihan distraction runtime dibatasi ke bunga es dan lampu; badai salju disimpan untuk penggunaan nanti. Pemilihan tetap acak setiap episode.
 - Lampu memakai transisi cepat dengan durasi gelap dan terang yang berkurang setiap siklus; timing pose dan penanda suara mengikuti pergantian lampu.
 - Popover ember diperkecil menjadi 210 pt. Kontrol sesi di menu bar tetap tersedia saat floating timer dimatikan.
+
+## Menu bar dark footer — 12 November 2026
+
+- Snapshot perubahan sebelumnya disimpan sebagai 011e1d1; implementasi di branch codex/menu-bar-dark-footer.
+- MenuBarSessionPopover memakai layout player 200 × 110 pt: logo website, judul Arial regular ukuran tetap, progress waktu aktif dibanding durasi rencana, dan footer gelap dengan edit/pause/resume/stop.
+- Logo disalin ke MenuBarSessionLogo.imageset. Konfirmasi stop, pesan error pause/resume, retry saving dan state saving tetap tersedia.
