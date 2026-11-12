@@ -74,7 +74,13 @@ final class AccessCoordinator: ObservableObject {
             let result = try JSONDecoder().decode(StartResponse.self, from: data)
             guard result.url.host == baseURL.host, result.url.scheme == baseURL.scheme else { throw URLError(.badURL) }
             NSWorkspace.shared.open(result.url)
-        } catch { message = "Could not open your account. Check your connection and sign in again if needed." }
+        } catch {
+            message = "Could not open your account. Check your connection and sign in again if needed."
+            let alert = NSAlert()
+            alert.messageText = "Could not open Account & purchases"
+            alert.informativeText = message ?? "Please try again."
+            alert.runModal()
+        }
     }
 
     func canStartSession() -> Bool {
