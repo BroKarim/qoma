@@ -6,7 +6,6 @@ struct FloatingCompanionView: NSViewRepresentable {
     var onTap: (() -> Void)?
     var onBucket: (() -> Void)?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @AppStorage("qyube.reduceMotionOverride") private var reduceMotionOverride = false
 
     init(scene: CompanionScene, onTap: (() -> Void)? = nil, onBucket: (() -> Void)? = nil) {
         self.scene = scene
@@ -24,7 +23,7 @@ struct FloatingCompanionView: NSViewRepresentable {
         view.setAccessibilityElement(true)
         view.setAccessibilityRole(.button)
         view.setAccessibilityLabel("Fishing companion. Press to show session catches; click penguin to show timer.")
-        self.scene.reduceMotion = self.reduceMotion || self.reduceMotionOverride
+        self.scene.reduceMotion = self.reduceMotion
         view.presentScene(self.scene)
         return view
     }
@@ -32,7 +31,7 @@ struct FloatingCompanionView: NSViewRepresentable {
     func updateNSView(_ view: SKView, context: Context) {
         (view as? CompanionSpriteView)?.onTap = onTap
         (view as? CompanionSpriteView)?.onBucket = onBucket
-        let shouldReduceMotion = self.reduceMotion || self.reduceMotionOverride
+        let shouldReduceMotion = self.reduceMotion
         if self.scene.reduceMotion != shouldReduceMotion { self.scene.reduceMotion = shouldReduceMotion }
     }
 

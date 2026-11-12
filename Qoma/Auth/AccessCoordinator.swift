@@ -63,6 +63,20 @@ final class AccessCoordinator: ObservableObject {
         }
     }
 
+    func openAccountPurchases() async {
+        do {
+            guard let credential else { NSWorkspace.shared.open(baseURL.appending(path: "/auth")); return }
+            var request = URLRequest(url: baseURL.appending(path: "/api/me/account-link"))
+            request.httpMethod = "POST"
+            request.setValue("Bearer \(credential.token)", forHTTPHeaderField: "Authorization")
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw URLError(.userAuthenticationRequired) }
+            let result = try JSONDecoder().decode(StartResponse.self, from: data)
+            guard result.url.host == baseURL.host, result.url.scheme == baseURL.scheme else { throw URLError(.badURL) }
+            NSWorkspace.shared.open(result.url)
+        } catch { message = "Could not open your account. Check your connection and sign in again if needed." }
+    }
+
     func canStartSession() -> Bool {
         switch localState(at: trustedNow()) {
         case .trialing, .paid: true

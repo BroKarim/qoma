@@ -2337,6 +2337,12 @@ Harga $49 dan kalkulasi upgrade yang masih muncul di bagian strategi lama adalah
 
 ## Rencana hero website Midnight Aurora — 12 November 2026
 
+### Catatan pelaksanaan Settings sebelum hero
+
+- Snapshot pekerjaan awal tersimpan di commit `3578f68`; branch implementasi Settings adalah `codex/simplify-settings`.
+- Perubahan awal menghapus kontrol preset, target harian dan appearance lama; ringkasan waktu aktual tetap ada. Completion sound dan distraction sound dinonaktifkan; pengumpulan aktivitas dan prompt consent tidak lagi dijalankan. Feedback dan Help diarahkan ke brokariim@gmail.com. Quit diarahkan melalui finalisasi sesi tanpa konfirmasi awal.
+- Status pekerjaan ini belum lengkap: erase local data dan handoff kesesuaian akun browser belum diimplementasikan, fallback pembukaan email belum ditambahkan, dan override Reduce Motion lama belum dibersihkan pada seluruh consumer. Perubahan awal belum dianggap siap rilis. Build/tes dan review akhir belum selesai; branch hero belum dibuat.
+
 **Status: konsep dipilih; ilustrasi produksi, animasi, waitlist dan implementasi belum dibuat.** Referensi utama `design/qyube-hero-pixel-v1/02-midnight-aurora.png`, prompt di `design/qyube-hero-pixel-v1/PROMPTS.md`; geometri dan gaya pulau mengacu pada `output/imagegen/penguin-diorama-drafts/draft-b-ice-cove-pixel-art.png`. Kerjakan pada branch `codex/all-pixel-art`; pertahankan pekerjaan dan dokumentasi yang sudah ada. Ruang lingkup visual hanya hero di `website/app/(marketing)/page.client.tsx`; section di bawah hero tetap sama.
 
 ### Komposisi dan identitas
@@ -2365,3 +2371,12 @@ Harga $49 dan kalkulasi upgrade yang masih muncul di bagian strategi lama adalah
 3. Integrasikan animasi ringan dan reduced motion; verifikasi performa desktop/mobile dan saat tab tidak aktif.
 4. Tambahkan migrasi, endpoint dan form waitlist, termasuk validasi, duplikat, persetujuan dan penanganan kegagalan.
 5. Periksa visual desktop/mobile, kontras, keyboard, screen reader, jaringan lambat, hasil build serta alur database di environment uji. Dokumentasikan hasil dan batas yang belum diuji.
+
+### Implementasi penyederhanaan Settings — 12 November 2026
+
+- Branch `codex/simplify-settings` dari snapshot `3578f68`. Settings compact dan window disederhanakan ke floating timer, suasana, update, versi dan penghapusan data lokal; target harian diganti total fokus aktual. Suara completion/distraction disimpan implementasinya tetapi tidak dipanggil pada runtime MVP. Tracking aktivitas dihentikan tanpa mematikan foreground policy monitoring.
+- Quit langsung menempuh finalisasi sesi existing dan aturan provisional. Jika penyimpanan gagal, keluar dibatalkan dengan pesan agar sesi dapat dipulihkan. Feedback membuka mailto brokariim@gmail.com dengan fallback salin alamat; Help memakai alamat sama.
+- Erase local data memakai transaksi SQLite per account, menolak sesi aktif, menandai migrasi JSON akun agar data tidak muncul kembali, mereset pilihan timer/suasana dan menyegarkan UI. Akun lain, Keychain, trial dan pembelian server tidak diubah. Arsip/backup lama tetap disimpan dan batas ini disebutkan dalam konfirmasi; ini bukan penghapusan akun atau penghapusan seluruh salinan arsip.
+- Account & purchases memakai POST bearer-authenticated untuk membuat link opaque 10 menit, dikonsumsi sekali di server menjadi cookie konteks signed HttpOnly. Cookie tidak memberikan akses akun: halaman tetap memerlukan sesi Better Auth dan menolak akun yang berbeda sebelum query pembelian. Browser yang berbeda akun dapat sign out secara eksplisit; sesi Mac tidak ikut berubah. Tabel baru `account_links` menggunakan RLS dan migrasi Drizzle `0002_damp_the_fallen`.
+- Website typecheck dan Drizzle metadata check lulus. Build Mac awal lulus; pengujian penyimpanan terarah ditambah untuk isolasi akun serta sesi aktif. Test runner awal terhalang mismatch Team ID; pemeriksaan diulang memakai signing ad-hoc lokal. Provider login nyata dan pengujian email default tetap memerlukan QA manual.
+- Hasil pemeriksaan akhir Settings: suite `QomaDatabaseTests` lulus dengan signing ad-hoc, termasuk tes erasure baru. Website typecheck dan Drizzle check lulus. Tidak ada migrasi database hosted yang dijalankan.

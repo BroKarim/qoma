@@ -61,11 +61,8 @@ struct QyubeHomeView: View {
     let onBackToSession: () -> Void
     let onQuit: () -> Void
 
-    @AppStorage(AppConstants.AnalyticsSettings.analyticsConsentDecidedKey)
-    private var analyticsConsentDecided = false
     @AppStorage(AppConstants.MenuBarSettings.selectedPresetMinutesKey)
     private var selectedPresetMinutes = AppConstants.MenuBarSettings.defaultPresetMinutes
-    @State private var isAnalyticsConsentPresented = false
     @State private var isLocalImportPresented = false
     @State private var importError: String?
     @State private var isSessionFormPresented = false
@@ -105,7 +102,7 @@ struct QyubeHomeView: View {
                     self.navigation.page = .settings
                 },
                 onAccountPurchases: {
-                    NSWorkspace.shared.open(URL(string: "https://qyube.brokarim.com/account")!)
+                    Task { await self.access.openAccountPurchases() }
                 },
                 onSignOut: {
                     await self.access.signOutRemote()
@@ -163,18 +160,14 @@ struct QyubeHomeView: View {
             self.navigation.page = nil
             self.navigation.editActiveSessionRequest = nil
         }
+        .onReceive(NotificationCenter.default.publisher(for: .qyubeCollectionChanged)) { _ in navigation.refresh() }
         .onReceive(self.navigation.$page.dropFirst()) { page in
             if page != nil { self.isSessionFormPresented = false }
         }
-        .sheet(isPresented: self.$isAnalyticsConsentPresented) {
-            AnalyticsConsentSheet { _ in self.analyticsConsentDecided = true }
-        }
         .onAppear {
-            if self.access.accountID != nil && !self.analyticsConsentDecided { self.isAnalyticsConsentPresented = true }
             if self.access.accountID != nil { self.isLocalImportPresented = LocalAccountMigrator.hasLocalData() }
         }
         .onChange(of: access.accountID) { _, id in
-            if id != nil && !analyticsConsentDecided { isAnalyticsConsentPresented = true }
             if id != nil { isLocalImportPresented = LocalAccountMigrator.hasLocalData() }
         }
         .alert("Import your earlier Qyube data?", isPresented: $isLocalImportPresented) {

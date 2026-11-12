@@ -12,6 +12,7 @@ struct QyubeSettingsMenuPopover: View {
     @State private var isConfirmingSignOut = false
     @State private var isSigningOut = false
     @State private var signOutError: String?
+    @State private var feedbackUnavailable = false
 
     var body: some View {
         Group {
@@ -67,7 +68,7 @@ struct QyubeSettingsMenuPopover: View {
                         NSWorkspace.shared.open(SupportLinks.help)
                     }
                     QyubeSettingsMenuItem(title: "Give feedback", image: "QyubeMenuFeedback") {
-                        NSWorkspace.shared.open(SupportLinks.feedback)
+                        if !NSWorkspace.shared.open(SupportLinks.feedback) { feedbackUnavailable = true }
                     }
 
                     QyubeSettingsMenuItem(title: "Quit", image: "QyubeMenuQuit", action: self.onQuit)
@@ -83,6 +84,10 @@ struct QyubeSettingsMenuPopover: View {
                 .padding(1)
                 .allowsHitTesting(false)
         }
+        .alert("Email Qyube feedback", isPresented: $feedbackUnavailable) {
+            Button("Copy email") { NSPasteboard.general.clearContents(); NSPasteboard.general.setString("brokariim@gmail.com", forType: .string) }
+            Button("OK", role: .cancel) {}
+        } message: { Text("Send your feedback to brokariim@gmail.com.") }
         .foregroundStyle(Color.qyubeMenuInk)
         .environment(\.colorScheme, .light)
     }

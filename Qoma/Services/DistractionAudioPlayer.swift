@@ -9,7 +9,7 @@ final class DistractionAudioPlayer {
     private let enabled: () -> Bool
 
     init(enabled: @escaping () -> Bool = {
-        UserDefaults.standard.object(forKey: DistractionAudioPlayer.enabledKey) as? Bool ?? true
+        false // MVP: distraction audio remains disabled.
     }) {
         self.enabled = enabled
     }

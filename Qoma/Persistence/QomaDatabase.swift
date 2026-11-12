@@ -88,6 +88,21 @@ final class QomaDatabase: @unchecked Sendable {
 
     deinit { sqlite3_close(connection) }
 
+    func eraseLocalData(accountID: String) throws {
+        guard !accountID.isEmpty else { throw Self.error("No account selected") }
+        try transaction {
+            guard try query("SELECT 1 FROM sessions WHERE account_id = ? AND record_type = 'active' LIMIT 1", [.text(accountID)]).isEmpty else {
+                throw Self.error("Finish or stop your current session before erasing data.")
+            }
+            for table in ["sessions", "catches", "catch_progress", "analytics_sessions", "app_activity", "website_visits"] {
+                try execute("DELETE FROM \(table) WHERE account_id = ?", [.text(accountID)])
+            }
+            for key in ["legacy.active.\(accountID)", "legacy.history.\(accountID)", "legacy.catches.v1.\(accountID)"] {
+                try markMigration(key)
+            }
+        }
+    }
+
     func execute(_ sql: String, _ values: [Value] = []) throws {
         lock.lock()
         defer { lock.unlock() }

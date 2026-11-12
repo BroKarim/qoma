@@ -178,3 +178,11 @@ export const billingActions = pgTable("billing_actions", {
   completedAt: time("completed_at"),
   lastError: text("last_error"),
 }, table => [unique("billing_actions_provider_action_provider_subscription_id_key").on(table.provider, table.action, table.providerSubscriptionId)]).enableRLS()
+
+export const accountLinks = pgTable("account_links", {
+  tokenHash: text("token_hash").primaryKey(),
+  accountId: text("account_id").notNull(),
+  deviceId: uuid("device_id").notNull(),
+  createdAt: time("created_at").notNull().defaultNow(),
+  expiresAt: time("expires_at").notNull(),
+}).enableRLS()

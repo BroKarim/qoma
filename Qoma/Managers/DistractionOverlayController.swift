@@ -99,7 +99,6 @@ final class DistractionOverlayController {
         }
         guard let surface, window?.isVisible == true else { return }
         let reduceMotion = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
-            || UserDefaults.standard.bool(forKey: "qyube.reduceMotionOverride")
         let elapsed = max(0, date.timeIntervalSince(state.startedAt))
         surface.render(state: state, elapsed: elapsed, reduceMotion: reduceMotion)
         if let cue = soundCursor.advance(effect: state.effect, elapsed: elapsed, reduceMotion: reduceMotion) {

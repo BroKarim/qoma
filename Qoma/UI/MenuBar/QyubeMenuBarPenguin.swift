@@ -2,11 +2,10 @@ import SwiftUI
 
 struct QyubeMenuBarPenguin: View {
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
-    @AppStorage("qyube.reduceMotionOverride") private var reduceMotion = false
 
     var body: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 20, paused: systemReduceMotion || reduceMotion)) { context in
-            let movement = systemReduceMotion || reduceMotion
+        TimelineView(.animation(minimumInterval: 1.0 / 20, paused: systemReduceMotion)) { context in
+            let movement = systemReduceMotion
                 ? 0 : sin(context.date.timeIntervalSinceReferenceDate * 1.5)
             Image("JournalArcticPenguin")
                 .resizable().scaledToFit()

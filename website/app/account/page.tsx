@@ -1,5 +1,6 @@
+import { jwtVerify } from "jose"
 import Link from "next/link"
-import { headers } from "next/headers"
+import { cookies, headers } from "next/headers"
 import { redirect } from "next/navigation"
 import { Check, CreditCard, Laptop, Monitor, Sparkles } from "lucide-react"
 import { getAuth } from "@/lib/auth"
@@ -17,6 +18,13 @@ export const dynamic = "force-dynamic"
 export default async function AccountPage({ searchParams }: { searchParams: Promise<{ checkout?: string; portal?: string }> }) {
   const session = await getAuth().api.getSession({ headers: await headers() })
   if (!session) redirect("/auth")
+  const context = (await cookies()).get("qyube-account-context")?.value
+  if (context) {
+    try {
+      const { payload } = await jwtVerify(context, new TextEncoder().encode(process.env.BETTER_AUTH_SECRET), { algorithms: ["HS256"], audience: "qyube-account-context" })
+      if (payload.accountId !== session.user.id) return <main className="mx-auto max-w-lg p-12"><h1>Different account</h1><p>Your browser is signed in as {session.user.email}. Sign out and use the same account as your Mac.</p><Link href="/account/switch">Switch account</Link></main>
+    } catch { return <main className="p-12">This app link expired. Open Account &amp; purchases from Qyube again.</main> }
+  }
   const query = await searchParams
   const currentAccess = await recomputeEntitlement(session.user.id)
   const [entitlement, devices, orders] = await Promise.all([

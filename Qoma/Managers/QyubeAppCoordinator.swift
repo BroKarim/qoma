@@ -369,39 +369,11 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
         navigation.refresh()
         NotificationCenter.default.post(name: .qyubeCollectionChanged, object: nil)
         guard session.status == .completed else { return }
-        let defaults = UserDefaults.standard
-        SoundAlertPlayer.shared.play(
-            soundID: defaults.string(forKey: AppConstants.SoundSettings.selectedSoundKey)
-                ?? AppConstants.SoundSettings.defaultSoundID,
-            volume: defaults.object(forKey: AppConstants.SoundSettings.volumeKey) as? Double
-                ?? AppConstants.SoundSettings.defaultVolume)
         timerController.showCompletion()
     }
 
     private func updateAnalyticsTracking(for snapshot: ActiveSessionSnapshot) {
-        guard AppConstants.AnalyticsSettings.isAnalyticsEnabled else {
-            finishAnalyticsTracking(persist: false)
-            return
-        }
-        let tracker = ActivityTracker.shared
-        if trackedSessionID != snapshot.id {
-            finishAnalyticsTracking()
-            trackedSessionID = snapshot.id
-            if snapshot.status == .active {
-                tracker.startTracking(
-                    sessionID: snapshot.id,
-                    trackWebsites: PermissionManager.shared.automationStatus == .granted
-                )
-            }
-        }
-        if snapshot.status == .paused, tracker.isTracking {
-            tracker.pauseTracking()
-        } else if snapshot.status == .active, !tracker.isTracking {
-            tracker.resumeTracking(
-                sessionID: snapshot.id,
-                trackWebsites: PermissionManager.shared.automationStatus == .granted
-            )
-        }
+        finishAnalyticsTracking(persist: false)
     }
 
     private func finishAnalyticsTracking(persist: Bool = true) {
