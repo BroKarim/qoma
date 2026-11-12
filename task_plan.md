@@ -2423,3 +2423,10 @@ Harga $49 dan kalkulasi upgrade yang masih muncul di bagian strategi lama adalah
 - Snapshot perubahan sebelumnya disimpan sebagai 011e1d1; implementasi di branch codex/menu-bar-dark-footer.
 - MenuBarSessionPopover memakai layout player 200 × 110 pt: logo website, judul Arial regular ukuran tetap, progress waktu aktif dibanding durasi rencana, dan footer gelap dengan edit/pause/resume/stop.
 - Logo disalin ke MenuBarSessionLogo.imageset. Konfirmasi stop, pesan error pause/resume, retry saving dan state saving tetap tersedia.
+
+### Penyesuaian garis ilustrasi player — 12 November 2026
+
+- Border panel memakai QyubeInkBorder asimetris existing untuk clipping dan stroke di dalam bounds.
+- Progress memakai kontur tinta, track warna kertas dan fill teal lebih lembut mengikuti prototype dark footer.
+- Ikon edit, pause, resume dan stop memakai garis vektor dengan ketidaksimetrisan tetap agar tajam pada ukuran kecil; tidak memakai SF Symbols untuk kontrol player.
+- Build Debug berhasil dan git diff --check bersih. Perbandingan visual di aplikasi belum dilakukan.
