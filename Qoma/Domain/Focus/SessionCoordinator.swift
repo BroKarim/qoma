@@ -411,6 +411,7 @@ final class SessionCoordinator: ObservableObject {
     }
 
     func depositCatch() -> (event: CatchEvent, banked: Bool)? {
+        advanceCatchActiveTime()
         guard let snap = snapshot else { return nil }
         guard let result = catchEngine?.deposit(
             sessionID: snap.id,
