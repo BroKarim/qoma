@@ -16,6 +16,6 @@ export default function MarketingInformation() {
         <p>Qyube is made for macOS. Connect the app to start your free trial and make a little space for focus.</p>
       </article>
     </section>
-    <footer className="border-t border-[#ececec] bg-white px-6 py-8 text-[#202020]"><div className="mx-auto flex max-w-[720px] flex-wrap items-center justify-between gap-4"><Link href="#top" className="text-xl font-bold">qyube ↑</Link><p className="text-sm text-[#686868]">A little focus, one session at a time.</p><a href="https://github.com/BroKarim/qoma/releases/latest" className="text-sm underline">Download for Mac</a></div></footer>
+    {/*<footer className="border-t border-[#ececec] bg-white px-6 py-8 text-[#202020]"><div className="mx-auto flex max-w-[720px] flex-wrap items-center justify-between gap-4"></div></footer>*/}
   </>
 }

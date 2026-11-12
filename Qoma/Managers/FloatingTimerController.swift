@@ -116,6 +116,12 @@ final class FloatingTimerController: NSObject, NSWindowDelegate {
         return panel
     }
 
+    func resetPosition() {
+        UserDefaults.standard.removeObject(forKey: positionKey)
+        guard let window else { return }
+        window.setFrameOrigin(initialOrigin(size: window.frame.size))
+    }
+
     private func initialOrigin(size: CGSize) -> CGPoint {
         let screen = NSScreen.screens.first { $0.frame.contains(NSEvent.mouseLocation) } ?? NSScreen.main
         let visible = screen?.visibleFrame ?? CGRect(x: 0, y: 0, width: 1280, height: 800)

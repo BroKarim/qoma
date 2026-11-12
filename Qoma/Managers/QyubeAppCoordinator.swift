@@ -2,6 +2,7 @@ import Cocoa
 import Combine
 import SwiftUI
 import OSLog
+import UserNotifications
 
 /// Owns the qyube runtime: home window, session coordinator, timer panel, companion panel, overlay, and menu bar status.
 @MainActor
@@ -153,6 +154,13 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
     private var homeWindowController: NSWindowController?
 
     private func configurePanels() {
+        NotificationCenter.default.publisher(for: .qyubeResetFloatingPositions)
+            .sink { [weak self] _ in
+                self?.timerController.resetPosition()
+                self?.companionController.resetPosition()
+            }
+            .store(in: &cancellables)
+
         timerController.configure(
             onTogglePause: { [weak self] in
                 guard let self else { return false }
@@ -370,6 +378,15 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
         NotificationCenter.default.post(name: .qyubeCollectionChanged, object: nil)
         guard session.status == .completed else { return }
         timerController.showCompletion()
+        if UserDefaults.standard.bool(forKey: "qyube.sessionNotifications") {
+            let content = UNMutableNotificationContent()
+            content.title = "Nice work!"
+            content.body = "Your focus session is complete. Time for a break."
+            let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+            UNUserNotificationCenter.current().add(request) { error in
+                if let error { Logger.store.error("Session notification failed: \(error.localizedDescription)") }
+            }
+        }
     }
 
     private func updateAnalyticsTracking(for snapshot: ActiveSessionSnapshot) {
