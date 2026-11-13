@@ -1,7 +1,5 @@
-import Link from "next/link"
-
 export default function MarketingInformation() {
-  return <>
+  return (
     <section id="what-is-qyube" className="bg-[#f7f7f6] px-6 py-20 text-[#202020] sm:py-28">
       <article className="mx-auto max-w-[720px] text-[17px] leading-[1.8]">
         <h2 className="mb-6 text-3xl sm:text-4xl">What is Qyube?</h2>
@@ -16,6 +14,5 @@ export default function MarketingInformation() {
         <p>Qyube is made for macOS. Connect the app to start your free trial and make a little space for focus.</p>
       </article>
     </section>
-    {/*<footer className="border-t border-[#ececec] bg-white px-6 py-8 text-[#202020]"><div className="mx-auto flex max-w-[720px] flex-wrap items-center justify-between gap-4"></div></footer>*/}
-  </>
+  )
 }

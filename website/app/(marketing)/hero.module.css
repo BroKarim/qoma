@@ -42,11 +42,6 @@
   font-size: 20px;
   letter-spacing: -1px;
 }
-.header a:last-child {
-  padding: 7px 13px;
-  border: 1px solid #b5cddd40;
-  border-radius: 8px;
-}
 .wordmark {
   position: absolute;
   top: 9%;
@@ -73,53 +68,6 @@
   width: 100%;
   height: auto;
   image-rendering: pixelated;
-}
-.pool {
-  position: absolute;
-  left: 16%;
-  top: 61%;
-  width: 50%;
-  height: 29%;
-  clip-path: polygon(5% 0, 60% 0, 100% 65%, 65% 100%, 22% 86%, 0 37%);
-}
-.fish {
-  position: absolute;
-  width: 15%;
-  animation: swim 16s ease-in-out infinite alternate;
-  opacity: 0.75;
-  filter: brightness(0.75) saturate(0.75);
-  image-rendering: pixelated;
-}
-.fish img {
-  width: 100%;
-  height: auto;
-}
-.fish0 {
-  left: 25%;
-  top: 8%;
-}
-.fish1 {
-  left: 48%;
-  top: 45%;
-  animation-delay: -6s;
-  animation-duration: 21s;
-}
-.fish2 {
-  left: 10%;
-  top: 45%;
-  animation-delay: -11s;
-  animation-duration: 19s;
-}
-.ripple {
-  position: absolute;
-  left: 32%;
-  top: 18%;
-  width: 16%;
-  aspect-ratio: 2;
-  border: 2px solid #8fdfd8;
-  border-radius: 50%;
-  animation: ripple 5s ease-out infinite;
-  opacity: 0;
 }
 .bottom {
   position: absolute;
@@ -170,6 +118,10 @@
   border: 0;
   min-width: 0;
   font-size: 14px;
+}
+.inputRow input:focus-visible {
+  outline: none;
+  background: #b8ccf020;
 }
 .inputRow input::placeholder {
   color: #c0cde0;
@@ -234,36 +186,13 @@
   outline: 2px solid #a0f3dd;
   outline-offset: 4px;
 }
-.hero:not(.live) .aurora,
-.hero:not(.live) .fish,
-.hero:not(.live) .ripple {
+.hero:not(.live) .aurora {
   animation-play-state: paused;
 }
 @keyframes aurora {
   to {
     transform: translate3d(3%, 2%, 0);
     opacity: 0.8;
-  }
-}
-@keyframes swim {
-  0% {
-    transform: translate(0, 0) rotate(-5deg);
-  }
-  50% {
-    transform: translate(55%, 15%) rotate(8deg);
-  }
-  100% {
-    transform: translate(-30%, 30%) rotate(-8deg);
-  }
-}
-@keyframes ripple {
-  0% {
-    transform: scale(0.3);
-    opacity: 0.6;
-  }
-  100% {
-    transform: scale(2);
-    opacity: 0;
   }
 }
 @media (min-width: 1600px) {
@@ -295,7 +224,7 @@
     top: auto;
     left: 50%;
     width: 110%;
-    margin-top: 180px;
+    margin-top: 190px;
   }
   .bottom {
     position: relative;
@@ -329,13 +258,8 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .aurora,
-  .fish,
-  .ripple {
+  .aurora {
     animation: none;
-  }
-  .ripple {
-    opacity: 0.3;
   }
 }
 @media (min-width: 761px) {
@@ -344,11 +268,11 @@
   }
   .island {
     top: auto;
-    bottom: 210px;
+    bottom: 100px;
     width: min(80%, calc((100svh - 350px) * 1.5), 1200px);
   }
   .bottom {
-    bottom: 18px;
+    bottom: 8px;
   }
   .wordmark {
     top: 9%;

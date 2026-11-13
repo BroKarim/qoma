@@ -52,7 +52,18 @@ try {
   )
   assert.equal(verified.payload.accountId, account)
   assert.equal((await open(new Request(url))).status, 410)
-  const other = await (await link(request())).json()
+  await db.query(`INSERT INTO account_links(token_hash, account_id, device_id, expires_at)
+    VALUES($1,$2,$3,now()-interval '1 minute')`, [digest("expired integration link"), account, id])
+  const concurrentLinks = await Promise.all(
+    Array.from({ length: 12 }, () => link(request()))
+  )
+  assert.equal(concurrentLinks.filter(response => response.status === 200).length, 10)
+  assert.equal(concurrentLinks.filter(response => response.status === 429).length, 2)
+  assert.equal(
+    (await db.query("SELECT count(*)::int AS count FROM account_links WHERE device_id=$1 AND expires_at <= now()", [id])).rows[0].count,
+    0
+  )
+  const other = await concurrentLinks.find(response => response.status === 200)!.json()
   await db.query("UPDATE devices SET revoked_at=now() WHERE id=$1", [id])
   assert.equal((await open(new Request(other.url))).status, 410)
   const email = `${id}@example.com`

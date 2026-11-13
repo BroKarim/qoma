@@ -53,7 +53,6 @@ export default function MarketingPageClient() {
         <Link href="/" aria-label="Qyube home">
           qyube
         </Link>
-        <Link href="/auth">Sign in ↗</Link>
       </header>
       <h1 className={styles.wordmark}>
         <span className={styles.srOnly}>qyube</span>
@@ -84,22 +83,6 @@ export default function MarketingPageClient() {
           sizes="(max-width: 760px) 110vw, 76vw"
           priority
         />
-        <div className={styles.pool} aria-hidden="true">
-          {["silverfish", "icefish", "dragonfish"].map((fish, index) => (
-            <div
-              key={fish}
-              className={`${styles.fish} ${styles[`fish${index}`]}`}
-            >
-              <Image
-                src={`/hero/midnight-aurora/${fish}.webp`}
-                alt=""
-                width={160}
-                height={160}
-              />
-            </div>
-          ))}
-          <span className={styles.ripple} />
-        </div>
       </div>
       <div className={styles.bottom}>
         <div className={styles.copy}>
