@@ -40,3 +40,11 @@ For an account with an existing paid subscription, the lifetime upgrade discount
 - Stripe/Xendit are not wired in MVP. Polar payment methods and tax behavior must be verified in its dashboard per market.
 
 No live PostgreSQL, OAuth, or Polar request has been exercised while credentials remain blank. Typecheck/build/unit tests do not replace these gates.
+
+## Settings account links and launch waitlist (12 November 2026)
+
+Apply the latest Drizzle migrations with `bun run db:migrate` before deploying the app's Account & purchases link or the website waitlist. They add `account_links`, `waitlist`, and `waitlist_attempts`; RLS stays enabled and these tables are accessed only by the server database connection.
+
+The waitlist uses existing `DATABASE_URL`, `BETTER_AUTH_URL`, `BETTER_AUTH_SECRET` and `TRUSTED_PROXY_COUNT`. The public site origin must match `BETTER_AUTH_URL`; the reverse proxy must sanitize forwarding headers. No new email provider secret is needed: signup stores consent but does not send mail. Establish unsubscribe handling before sending a launch campaign. Support requests go to brokariim@gmail.com.
+
+For isolated local verification, use a disposable Postgres database on 127.0.0.1:55439, run migrations, then execute `node --import tsx scripts/check-hero-account-integration.ts` with `QYUBE_TEST_DATABASE=1` and test-only environment values. The script removes its fixtures and all rate-limit attempts in that isolated database; never point it at real user data.

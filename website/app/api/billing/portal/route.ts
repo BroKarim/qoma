@@ -8,7 +8,7 @@ export async function GET(request: Request) {
   const session = await getAuth().api.getSession({ headers: request.headers })
   if (!session?.user.emailVerified) return Response.redirect(new URL("/auth", request.url))
   const { rows } = await database().query("SELECT 1 FROM billing_customers WHERE account_id = $1 AND provider = 'polar'", [session.user.id])
-  if (!rows.length) return Response.redirect(new URL("/pricing", request.url))
+  if (!rows.length) return Response.redirect(new URL("/account?portal=unavailable", request.url))
   try {
     const portal = await polar().customerSessions.create({
       external_customer_id: session.user.id,

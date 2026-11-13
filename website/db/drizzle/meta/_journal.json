@@ -15,6 +15,20 @@
       "when": 1793693998896,
       "tag": "0001_webhook_audit_and_ip_limit",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794451754355,
+      "tag": "0002_damp_the_fallen",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794452095462,
+      "tag": "0003_free_lily_hollister",
+      "breakpoints": true
     }
   ]
 }

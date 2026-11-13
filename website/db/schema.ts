@@ -178,3 +178,24 @@ export const billingActions = pgTable("billing_actions", {
   completedAt: time("completed_at"),
   lastError: text("last_error"),
 }, table => [unique("billing_actions_provider_action_provider_subscription_id_key").on(table.provider, table.action, table.providerSubscriptionId)]).enableRLS()
+
+export const accountLinks = pgTable("account_links", {
+  tokenHash: text("token_hash").primaryKey(),
+  accountId: text("account_id").notNull(),
+  deviceId: uuid("device_id").notNull(),
+  createdAt: time("created_at").notNull().defaultNow(),
+  expiresAt: time("expires_at").notNull(),
+}).enableRLS()
+
+export const waitlist = pgTable("waitlist", {
+  email: text("email").primaryKey(),
+  createdAt: time("created_at").notNull().defaultNow(),
+  consentAt: time("consent_at").notNull().defaultNow(),
+  consentVersion: text("consent_version").notNull(),
+  status: text("status").notNull().default("subscribed"),
+}).enableRLS()
+export const waitlistAttempts = pgTable("waitlist_attempts", {
+  id: bigserial("id", { mode: "number" }).primaryKey(),
+  ipHash: text("ip_hash").notNull(),
+  createdAt: time("created_at").notNull().defaultNow(),
+}, table => [index("waitlist_attempts_ip_date").on(table.ipHash, table.createdAt)]).enableRLS()

@@ -1,5 +1,6 @@
+import { jwtVerify } from "jose"
 import Link from "next/link"
-import { headers } from "next/headers"
+import { cookies, headers } from "next/headers"
 import { redirect } from "next/navigation"
 import { Check, CreditCard, Laptop, Monitor, Sparkles } from "lucide-react"
 import { getAuth } from "@/lib/auth"
@@ -9,15 +10,29 @@ import { accountAccessState, showCheckoutPending } from "@/lib/account/status"
 import { DeviceList } from "./device-list"
 import { PendingRefresh } from "./pending-refresh"
 import { LegalFooter } from "@/components/legal-footer"
-import { formatUSD, prices } from "@/lib/billing/polar"
+import { CheckoutButton } from "../pricing/checkout-button"
 import styles from "./account.module.css"
 
 export const dynamic = "force-dynamic"
 
 export default async function AccountPage({ searchParams }: { searchParams: Promise<{ checkout?: string; portal?: string }> }) {
-  const session = await getAuth().api.getSession({ headers: await headers() })
-  if (!session) redirect("/auth")
   const query = await searchParams
+  const session = await getAuth().api.getSession({ headers: await headers() })
+  if (!session) redirect(query.checkout === "app" ? "/auth?next=checkout-app" : query.checkout === "start" ? "/auth?next=checkout" : "/auth")
+  const context = (await cookies()).get("qyube-account-context")?.value
+  if (query.checkout === "app" && !context) return <main className={styles.page}><div className={styles.wrap}><h1>Link expired</h1><p>Open checkout from Qyube again.</p></div></main>
+  let expectedAccount: unknown
+  let invalidContext = false
+  if (context) {
+    try {
+      const { payload } = await jwtVerify(context, new TextEncoder().encode(process.env.BETTER_AUTH_SECRET), {
+        algorithms: ["HS256"], audience: "qyube-account-context",
+      })
+      expectedAccount = payload.accountId
+    } catch { invalidContext = true }
+  }
+  if (invalidContext) return <main className={styles.page}><div className={styles.wrap}><h1>Link expired</h1><p>Open Account &amp; purchases from Qyube again.</p></div></main>
+  if (context && expectedAccount !== session.user.id) return <main className={styles.page}><div className={styles.wrap}><h1>Different account</h1><p className="my-5">Your browser is signed in as {session.user.email}. Sign out and use the same account as your Mac.</p><Link className={styles.primary} href={query.checkout === "app" ? "/account/switch?checkout=app" : query.checkout === "start" ? "/account/switch?checkout=start" : "/account/switch"}>Switch account</Link></div></main>
   const currentAccess = await recomputeEntitlement(session.user.id)
   const [entitlement, devices, orders] = await Promise.all([
     database().query<{ plan: string | null; status: string; trial_ends_at: Date | null; access_until: Date | null }>(
@@ -32,6 +47,10 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
   const lifetime = state.lifetime
   const trial = state.trial
   const active = state.active
+  if (query.checkout === "start" || query.checkout === "app") {
+    if (lifetime) redirect("/account")
+    return <CheckoutButton />
+  }
   const checkout = await database().query<{ final: boolean }>(`
     SELECT EXISTS (SELECT 1 FROM checkout_attempts
       WHERE account_id = $1 AND plan = 'lifetime' AND completed_at IS NOT NULL
@@ -51,7 +70,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
           <div className="flex items-center gap-3"><span className="grid size-11 place-items-center rounded-full bg-sky-100 text-sky-700"><Sparkles size={20} /></span><div><h2 id="access-heading" className="font-semibold">{lifetime ? "Qyube Pro" : trial ? "Free trial" : "Qyube access"}</h2><p className={`${styles.muted} text-sm`}>{lifetime ? "One payment. Yours to keep." : trial && access.trial_ends_at ? `Trial ends ${access.trial_ends_at.toLocaleDateString()}.` : active && access?.access_until ? `Access through ${access.access_until.toLocaleDateString()}.` : access?.status === "revoked" ? "Access was revoked." : devices.rows.length ? "Your trial has ended." : "Connect your Mac to start your 7-day trial."}</p></div></div>
           <span className={styles.badge}>{lifetime ? "Lifetime access" : active ? "Active" : "No active access"}</span>
         </div>
-        {!lifetime && <div className="mt-5"><Link href="/pricing" className={styles.primary}><Sparkles size={15} /> Get Qyube Pro · {formatUSD(prices.lifetime)}</Link></div>}
+        {!lifetime && <div className="mt-5"><Link href="/pricing" className={styles.primary}><Sparkles size={15} /> Get Qyube Pro</Link></div>}
       </section>
 
       <section className={`${styles.card} mb-4`} aria-labelledby="macs-heading">
@@ -61,7 +80,7 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
 
       <section className={styles.card} aria-labelledby="purchases-heading">
         <h2 id="purchases-heading" className="mb-3 font-semibold">Purchases & invoices</h2>
-        {orders.rows.length ? <ul className="mb-4 divide-y divide-gray-100">{orders.rows.map(order => <li key={order.id} className={`${styles.row} py-2 text-sm`}><span><Check className="mr-2 inline text-emerald-700" size={15} />{order.plan === "lifetime" ? "Qyube Pro lifetime" : `Qyube ${order.plan}`} · {order.paid_at.toLocaleDateString()}{order.status === "refunded" ? " · Refunded" : order.refunded_cents > 0 ? " · Partially refunded" : ""}</span><span>{new Intl.NumberFormat("en-US", { style: "currency", currency: order.currency.toUpperCase() }).format(order.total_cents / 100)}</span></li>)}</ul> : <p className={`${styles.muted} mb-4 text-sm`}>Completed purchases and receipts will appear here.</p>}
+        {orders.rows.length ? <ul className="mb-4 divide-y divide-gray-100">{orders.rows.map(order => <li key={order.id} className={`${styles.row} py-2 text-sm`}><span><Check className="mr-2 inline text-emerald-700" size={15} />{order.plan === "lifetime" ? "Qyube Pro lifetime" : `Qyube ${order.plan}`} · {order.paid_at.toLocaleDateString()}{order.status === "refunded" ? " · Refunded" : order.refunded_cents > 0 ? " · Partially refunded" : ""}</span></li>)}</ul> : <p className={`${styles.muted} mb-4 text-sm`}>Completed purchases and receipts will appear here.</p>}
         <div className={styles.actions}><a href="/api/billing/portal" className={styles.button}><CreditCard size={15} /> Purchases & invoices</a><Link href="/" className={styles.button}><Laptop size={15} /> Download for Mac</Link></div>
       </section>
       <p className={`${styles.muted} mt-4 flex items-center gap-1 text-xs`}><Monitor size={13} /> Manage the Macs connected to your account above.</p>

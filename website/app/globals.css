@@ -1,12 +1,25 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@font-face {
+  font-family: "Qyube Geist Pixel";
+  src: url("/fonts/geist-pixel-latin.woff2") format("woff2");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Qyube Geist Pixel";
+  src: url("/fonts/geist-pixel-latin-ext.woff2") format("woff2");
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02FF, U+0304, U+0308, U+0329, U+1D00-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-syne);
+  --font-sans: Arial, sans-serif;
   --font-mono: var(--font-geist-mono);
   --animate-skeleton: skeleton 2s -1s infinite linear;
   --color-warning-foreground: var(--warning-foreground);
@@ -193,3 +206,15 @@
       inset 0px 1px 0px #ffffff33;
   }
 }
+
+body, button, input, select, textarea { font-family: Arial, sans-serif; }
+h1, h2, h3, h4 { font-family: "Qyube Geist Pixel", monospace; }
+.checkout-loading { min-height:100svh; display:grid; place-items:center; padding:2rem; color:#edf3fb; background:radial-gradient(ellipse at 30% 25%,#127b8566,transparent 45%),radial-gradient(ellipse at 83% 30%,#7956b766,transparent 42%),linear-gradient(150deg,#101e42,#07152e 65%,#193451); }
+.checkout-loading__content { display:grid; justify-items:center; gap:1.2rem; text-align:center; }
+.checkout-loading__content h1 { font-size:clamp(1.6rem,4vw,2.7rem); }
+.checkout-loading__content p { color:#c8d6e5; }
+.checkout-loading__content a { text-decoration:underline; color:#b4cbd7; }
+.checkout-loading__content button { background:#82e2d0; color:#102634; padding:.8rem 1.2rem; border-radius:.4rem; }
+.checkout-loading__spark { font-size:3rem; color:#82e2d0; animation:checkout-pulse 1.8s ease-in-out infinite alternate; }
+@keyframes checkout-pulse { from { opacity:.4; transform:scale(.85); } to { opacity:1; transform:scale(1.15); } }
+@media(prefers-reduced-motion:reduce) { .checkout-loading__spark { animation:none; } }

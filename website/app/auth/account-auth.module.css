@@ -5,8 +5,17 @@
   background-position: center bottom;
   background-size: cover;
   color: #203744;
-  font-family: var(--font-syne), sans-serif;
+  font-family: Arial, sans-serif;
 }
+
+.signinScene {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #08152e;
+}
+
+.signinScene .brand { color: #e9edf4; }
 
 .brand {
   position: absolute;
@@ -43,7 +52,6 @@
 .apple { margin-top: .7rem; border: 1px solid #181818; background: #181818; color: #fff; }
 .google:disabled, .apple:disabled, .primary:disabled { cursor: wait; opacity: .65; }
 .primary { border: 0; background: #181818; color: #fff; }
-.helper { margin: 1rem 0 0; color: #687983; text-align: center; font-size: .75rem; line-height: 1.5; }
 .divider { display: flex; align-items: center; gap: .8rem; margin: 1.1rem 0; color: #8a969d; font-size: .75rem; }
 .divider::before, .divider::after { height: 1px; flex: 1; background: #e4e8ea; content: ""; }
 .form { display: grid; gap: .55rem; }

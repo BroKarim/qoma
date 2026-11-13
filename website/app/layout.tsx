@@ -1,11 +1,8 @@
-import { Geist, Geist_Mono } from "next/font/google"
+import { Geist_Mono } from "next/font/google"
 import type { Metadata } from "next"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
-import { syne } from "@/lib/fonts"
-
-const geist = Geist({ subsets: ["latin"], variable: "--font-geist-sans" })
 
 const fontMono = Geist_Mono({
   subsets: ["latin"],
@@ -62,9 +59,7 @@ export default function RootLayout({
       className={cn(
         "antialiased",
         fontMono.variable,
-        "font-sans",
-        geist.variable,
-        syne.variable
+        "font-sans"
       )}
     >
       <body>
