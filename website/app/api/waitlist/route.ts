@@ -1,4 +1,5 @@
 import { createHmac } from "node:crypto"
+import type { PoolClient } from "pg"
 import { database } from "@/lib/db"
 import { trustedClientIp } from "@/lib/access/proxy-ip"
 import { waitlistEmail } from "@/lib/waitlist"
@@ -21,7 +22,7 @@ export async function POST(request: Request) {
   }
   if (!email)
     return Response.json(
-      { error: "Email and consent are required" },
+      { error: "A valid email is required" },
       { status: 400 }
     )
   const ip = trustedClientIp(
@@ -29,14 +30,20 @@ export async function POST(request: Request) {
     Number(process.env.TRUSTED_PROXY_COUNT ?? "1")
   )
   const secret = process.env.BETTER_AUTH_SECRET
-  if (!ip || !secret)
+  if (!ip || !secret) {
+    console.error("[waitlist] request configuration unavailable", {
+      hasClientIp: Boolean(ip),
+      hasSecret: Boolean(secret),
+    })
     return Response.json(
       { error: "Waitlist temporarily unavailable" },
       { status: 503 }
     )
+  }
   const hash = createHmac("sha256", secret).update(ip).digest("hex")
-  const client = await database().connect()
+  let client: PoolClient | undefined
   try {
+    client = await database().connect()
     await client.query("BEGIN")
     await client.query(
       "SELECT pg_advisory_xact_lock(hashtextextended($1, 2))",
@@ -65,13 +72,21 @@ export async function POST(request: Request) {
       { ok: true },
       { headers: { "Cache-Control": "no-store" } }
     )
-  } catch {
-    await client.query("ROLLBACK")
+  } catch (error) {
+    await client?.query("ROLLBACK").catch(() => {})
+    const reason =
+      error instanceof Error &&
+      error.message === "DATABASE_URL is not configured"
+        ? error.message
+        : error && typeof error === "object" && "code" in error
+          ? String(error.code)
+          : "unknown"
+    console.error("[waitlist] database operation failed", { reason })
     return Response.json(
       { error: "Waitlist temporarily unavailable" },
       { status: 503 }
     )
   } finally {
-    client.release()
+    client?.release()
   }
 }

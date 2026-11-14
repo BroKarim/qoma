@@ -2,7 +2,6 @@ export function waitlistEmail(input: unknown): string | null {
   if (!input || typeof input !== "object") return null
   const value = input as Record<string, unknown>
   if (
-    value.consent !== true ||
     typeof value.email !== "string" ||
     (value.website !== undefined && value.website !== "")
   )

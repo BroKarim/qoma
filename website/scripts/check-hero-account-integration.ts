@@ -67,15 +67,14 @@ try {
   await db.query("UPDATE devices SET revoked_at=now() WHERE id=$1", [id])
   assert.equal((await open(new Request(other.url))).status, 410)
   const email = `${id}@example.com`
-  const post = (consent = true) =>
+  const post = () =>
     join(
       new Request(`${origin}/api/waitlist`, {
         method: "POST",
         headers: { origin, "x-forwarded-for": "192.0.2.25" },
-        body: JSON.stringify({ email, consent, website: "" }),
+        body: JSON.stringify({ email, website: "" }),
       })
     )
-  assert.equal((await post(false)).status, 400)
   for (let i = 0; i < 5; i++) assert.equal((await post()).status, 200)
   assert.equal((await post()).status, 429)
   assert.equal(
@@ -96,7 +95,7 @@ try {
     true
   )
   console.log(
-    "PASS: authenticated account handoff, replay/revocation, consent, deduplication, rate limit, RLS"
+    "PASS: authenticated account handoff, replay/revocation, waitlist signup, deduplication, rate limit, RLS"
   )
 } finally {
   await db.query("DELETE FROM account_links WHERE account_id=$1", [account])
