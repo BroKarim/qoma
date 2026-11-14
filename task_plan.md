@@ -2437,3 +2437,10 @@ Harga $49 dan kalkulasi upgrade yang masih muncul di bagian strategi lama adalah
 - Enam bunga es lama diganti Crystal Bloom pixel dari imagegen bawaan; sumber, prompt, exporter dan preview ada di docs/companion/crystal-bloom-v1/.
 - Putaran linear lambat 48/60/72 detik dengan arah bergantian dan shimmer opacity 94–100% setiap delapan detik. Redraw terus berjalan selama efek aktif; Reduce Motion menahan gerakan. Efek lampu tidak diubah.
 - Build dan tes terarah motion/integration lulus, termasuk perbandingan piksel sesudah pertumbuhan selesai dan saat Reduce Motion aktif. Preview memakai renderer AppKit aktual. QA app diblokir/fullscreen/multimonitor serta profiling baterai belum dilakukan.
+
+
+## Banner Today dan New Session — 13 November 2026
+
+- Today menggunakan ilustrasi Quiet Harbor tanpa teks bawaan; goal dan progress tetap menggunakan data dan animasi yang ada.
+- New Session dan detail sesi menggunakan ilustrasi Arctic Inlet di area banner yang sama.
+- Ilustrasi statis; animasi karakter memerlukan aset berlapis.

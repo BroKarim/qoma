@@ -42,30 +42,16 @@ struct NewSessionView: View {
                     .buttonStyle(.plain)
                     .foregroundStyle(Color.qyubeAccent)
 
-                    Text(self.isEditingActiveSession ? "EDIT ACTIVE SESSION"
-                         : self.sourceSession == nil ? "NEW SESSION" : "SESSION DETAIL")
-                        .font(.caption.weight(.medium))
-                        .tracking(1.5)
-                        .foregroundStyle(Color.qyubeAccent)
-                    QyubeMenuBarPenguin()
-                        .frame(height: 76)
-                        .frame(maxWidth: .infinity)
-                        .accessibilityHidden(true)
-
-                    if let sourceSession {
-                        HStack(spacing: 6) {
-                            Text(sourceSession.status == .completed ? "Completed" : "Interrupted")
-                                .fontWeight(.semibold)
-                            Text("·")
-                            Text("\(QyubeFormat.duration(sourceSession.actualActiveSeconds)) actual")
-                            Text("·")
-                            Text("\(sourceSession.plannedMinutes)m planned")
-                        }
-                        .font(.caption)
-                        .foregroundStyle(Color.qyubeAccent)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
+                    GeometryReader { geometry in
+                        Image("SessionInlet")
+                            .resizable().interpolation(.none)
+                            .frame(width: geometry.size.width, height: geometry.size.height)
+                            .scaleEffect(1.08)
+                            .clipped()
                     }
+                        .frame(height: 130)
+                        .accessibilityHidden(true)
+                        .padding(.bottom, -7)
 
                     VStack(alignment: .leading, spacing: 7) {
                         self.sectionTitle("Session name")
