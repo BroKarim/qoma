@@ -13,21 +13,21 @@ struct MenuBarSessionPopover: View {
                 sessionPlayer
             } else if case let .failed(message) = coordinator.finalizationState {
                 VStack(spacing: 12) {
-                    Text(message).font(.callout).multilineTextAlignment(.center)
+                    Text(message).font(.custom("GeistPixel-Regular", size: 13, relativeTo: .callout)).multilineTextAlignment(.center)
                     Button("Retry saving") { coordinator.retryFinalization() }
-                        .font(.callout.weight(.semibold))
+                        .font(.custom("GeistPixel-Regular", size: 13, relativeTo: .callout))
                 }
                 .padding(14)
                 .frame(width: 260, height: 130)
             } else if coordinator.finalizationState == .saving {
                 HStack(spacing: 10) {
                     ProgressView().controlSize(.small)
-                    Text("Saving session…").font(.callout)
+                    Text("Saving session…").font(.custom("GeistPixel-Regular", size: 13, relativeTo: .callout))
                 }
                 .frame(width: 260, height: 130)
             } else {
                 Text("Open Qyube to start a session")
-                    .font(.callout)
+                    .font(.custom("GeistPixel-Regular", size: 13, relativeTo: .callout))
                     .frame(
                         width: 200,
                         height: 110)
@@ -58,7 +58,7 @@ struct MenuBarSessionPopover: View {
                         .frame(width: 30, height: 30)
                         .accessibilityHidden(true)
                     Text(coordinator.currentTaskTitle)
-                        .font(.custom("Arial", fixedSize: 12))
+                        .font(.custom("GeistPixel-Regular", fixedSize: 12))
                         .lineLimit(2)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .help(coordinator.currentTaskTitle)
@@ -82,7 +82,7 @@ struct MenuBarSessionPopover: View {
                         Spacer()
                         Text(QyubeFormat.countdown(total))
                     }
-                    .font(.custom("Arial", fixedSize: 9).monospacedDigit())
+                    .font(.custom("GeistPixel-Regular", fixedSize: 9).monospacedDigit())
                     .foregroundStyle(Color.qyubeAccent)
                 }
             }

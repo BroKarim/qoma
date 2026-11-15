@@ -7,11 +7,11 @@ struct AnalyticsJournalHeading: View {
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
             Text(title)
-                .font(.system(size: 17, design: .serif))
+                .font(.custom("GeistPixel-Regular", size: 17))
                 .foregroundStyle(Color.qyubeMenuInk)
             Spacer(minLength: 4)
             Text(detail)
-                .font(.system(size: 10, weight: .medium))
+                .font(.custom("GeistPixel-Regular", size: 10))
                 .foregroundStyle(Color.qyubeAccent)
         }
     }

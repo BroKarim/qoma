@@ -118,7 +118,7 @@ struct QyubeHomeView: View {
                 onQuit: self.onQuit)
             if case .trialing(let expiresAt) = access.state {
                 Text("Free trial · \(max(1, Int(ceil(expiresAt.timeIntervalSinceNow / 86_400)))) days left")
-                    .font(.system(size: 10, weight: .medium))
+                    .font(.custom("GeistPixel-Regular", size: 10))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 14).padding(.vertical, 5)
                     .background(Color.qyubeSelection)
@@ -259,9 +259,9 @@ struct QyubeHomeView: View {
                 .resizable().scaledToFit().frame(height: 145)
                 .frame(maxWidth: .infinity)
                 .accessibilityHidden(true)
-            Text(title).font(.system(size: 25, design: .serif))
-            Text(detail).font(.system(size: 12)).foregroundStyle(.secondary)
-            if let message = access.message { Text(message).font(.system(size: 11)).foregroundStyle(.red) }
+            Text(title).font(.custom("GeistPixel-Regular", size: 25))
+            Text(detail).font(.custom("GeistPixel-Regular", size: 12)).foregroundStyle(.secondary)
+            if let message = access.message { Text(message).font(.custom("GeistPixel-Regular", size: 11)).foregroundStyle(.red) }
             Button(action, action: onAction)
                 .buttonStyle(.plain)
                 .frame(maxWidth: .infinity).padding(13)

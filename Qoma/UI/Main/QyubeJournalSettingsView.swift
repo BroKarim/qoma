@@ -21,7 +21,7 @@ struct QyubeJournalSettingsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 26) {
-                Text("Settings").font(.system(size: 25, weight: .semibold))
+                Text("Settings").font(.custom("GeistPixel-Regular", size: 25))
 
                 section("GENERAL", seed: 0) {
                     toggleRow("Show floating timer", isOn: Binding(
@@ -37,17 +37,7 @@ struct QyubeJournalSettingsView: View {
                             Spacer(minLength: 12)
                             atmosphereMenu
                         }
-                        Text("Auto follows the time on this Mac.")
-                            .font(.caption).foregroundStyle(.secondary)
                     }
-                    Button {
-                        NotificationCenter.default.post(name: .qyubeResetFloatingPositions, object: nil)
-                    } label: {
-                        Text("Reset floating positions").underline()
-                    }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(Color.qyubeAccent)
-                    .padding(.top, 2)
                 }
 
                 section("APP", seed: 2) {
@@ -56,10 +46,10 @@ struct QyubeJournalSettingsView: View {
                             VStack(alignment: .leading, spacing: 3) {
                                 Text("Check for Updates")
                                 Text(versionText)
-                                    .font(.caption).foregroundStyle(.secondary)
+                                    .font(.custom("GeistPixel-Regular", size: 12, relativeTo: .caption)).foregroundStyle(.secondary)
                             }
                             Spacer()
-                            Image(systemName: "chevron.right").font(.system(size: 11, weight: .semibold))
+                            Image(systemName: "chevron.right").font(.custom("GeistPixel-Regular", size: 11))
                         }
                         .contentShape(Rectangle())
                     }
@@ -70,15 +60,15 @@ struct QyubeJournalSettingsView: View {
                             .buttonStyle(.plain)
                             .foregroundStyle(Color.red.opacity(0.8))
                         Text("Session history, catches and local preferences.")
-                            .font(.caption).foregroundStyle(.secondary)
+                            .font(.custom("GeistPixel-Regular", size: 12, relativeTo: .caption)).foregroundStyle(.secondary)
                         if let errorMessage {
-                            Text(errorMessage).foregroundStyle(.red).font(.caption)
+                            Text(errorMessage).foregroundStyle(.red).font(.custom("GeistPixel-Regular", size: 12, relativeTo: .caption))
                         }
                     }
                     .padding(.top, 8)
                 }
             }
-            .font(.system(size: 14))
+            .font(.custom("GeistPixel-Regular", size: 14))
             .foregroundStyle(Color.qyubeMenuInk)
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -120,7 +110,7 @@ struct QyubeJournalSettingsView: View {
     private func sectionHeading(_ title: String, seed: Int) -> some View {
         HStack(spacing: 10) {
             Text(title)
-                .font(.system(size: 10, weight: .semibold))
+                .font(.custom("GeistPixel-Regular", size: 10))
                 .tracking(1.5)
                 .padding(.horizontal, 8)
                 .padding(.vertical, 3)
@@ -164,7 +154,7 @@ struct QyubeJournalSettingsView: View {
                 Text(atmosphere)
                 Spacer(minLength: 8)
                 Image(systemName: "chevron.down")
-                    .font(.system(size: 10, weight: .semibold))
+                    .font(.custom("GeistPixel-Regular", size: 10))
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 5)

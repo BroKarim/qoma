@@ -34,13 +34,13 @@ struct AnalyticsDashboardView: View {
 
                     // VStack(alignment: .leading, spacing: 7) {
                     //     Text(selectedDay.formatted(.dateTime.weekday(.wide).day().month(.wide)))
-                    //         .font(.system(size: 14, weight: .medium, design: .serif))
+                    //         .font(.custom("GeistPixel-Regular", size: 14))
                     //     HStack(alignment: .firstTextBaseline, spacing: 6) {
                     //         Text(QyubeFormat.duration(daySessions.reduce(0) { $0 + $1.actualFocusSeconds }))
-                    //             .font(.system(size: 26, weight: .medium, design: .rounded))
+                    //             .font(.custom("GeistPixel-Regular", size: 26))
                     //             .monospacedDigit()
                     //         Text("of focus")
-                    //             .font(.system(size: 11))
+                    //             .font(.custom("GeistPixel-Regular", size: 11))
                     //             .foregroundStyle(.secondary)
                     //     }
                     // }

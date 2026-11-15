@@ -8,7 +8,7 @@ struct AnalyticsSessionList: View {
             AnalyticsJournalHeading(title: "Sessions", detail: "\(sessions.count) sessions")
             if sessions.isEmpty {
                 Text("A quiet day. Your focus sessions will appear here.")
-                    .font(.system(size: 11))
+                    .font(.custom("GeistPixel-Regular", size: 11))
                     .foregroundStyle(.secondary)
                     .padding(.vertical, 12)
             } else {
@@ -16,22 +16,22 @@ struct AnalyticsSessionList: View {
                     ForEach(sessions) { session in
                         HStack(spacing: 9) {
                             Text(session.startedAt.formatted(.dateTime.hour().minute()))
-                                .font(.system(size: 9, weight: .medium, design: .rounded))
+                                .font(.custom("GeistPixel-Regular", size: 9))
                                 .monospacedDigit()
                                 .foregroundStyle(Color.qyubeAccent)
                                 .frame(width: 48, alignment: .leading)
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(title(for: session))
-                                    .font(.system(size: 12, weight: .medium))
+                                    .font(.custom("GeistPixel-Regular", size: 12))
                                     .lineLimit(2)
                                 Label(session.completed ? "Completed" : "Interrupted",
                                       systemImage: session.completed ? "checkmark.circle" : "minus.circle")
-                                    .font(.system(size: 9))
+                                    .font(.custom("GeistPixel-Regular", size: 9))
                                     .foregroundStyle(session.completed ? Color.qyubeAccent : Color.qyubeInterrupted)
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                             Text(QyubeFormat.duration(session.actualFocusSeconds))
-                                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                                .font(.custom("GeistPixel-Regular", size: 11))
                                 .monospacedDigit()
                                 .fixedSize()
                         }

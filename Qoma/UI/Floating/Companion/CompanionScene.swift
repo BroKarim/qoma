@@ -33,6 +33,7 @@ final class CompanionScene: SKScene {
     private let snow = (0..<12).map { _ in SKSpriteNode(color: .white, size: CGSize(width: 1, height: 1)) }
     private var snowySession = false
     private var atmosphereID = ""
+    private var atmosphereElapsed: TimeInterval = 0
     private var visitors = CoveVisitorSchedule()
     private let visitor = SKNode()
     private var displayedVisitor: CoveVisitorSchedule.Kind?
@@ -206,6 +207,7 @@ final class CompanionScene: SKScene {
         distractionVisual = nil
         lastTime = nil
         motionTime = 0
+        atmosphereElapsed = 0
         snowySession = Bool.random()
         visitors = CoveVisitorSchedule()
         isPaused = false
@@ -246,6 +248,7 @@ final class CompanionScene: SKScene {
     func advanceAnimation(by delta: TimeInterval) {
         guard delta.isFinite, delta > 0 else { return }
         let previous = playback.phase
+        if playback.isSessionActive && !playback.isPaused { atmosphereElapsed += delta }
         playback.advance(by: delta)
         if playback.phase != .sleeping { motionTime += delta }
         if playback.phase != .hidden { ambientTime += delta }
@@ -507,9 +510,9 @@ final class CompanionScene: SKScene {
         ripple.setScale(0.7 + wave * 0.8)
         ripple.alpha = reduceMotion ? 0.35 : 0.5 * (1 - wave)
         let mode = UserDefaults.standard.string(forKey: "qyube.coveAtmosphere") ?? "Auto"
-        let hour = Calendar.current.component(.hour, from: visualNow())
-        let night = mode == "Night" || (mode == "Auto" && (hour < 6 || hour >= 20))
-        let sunset = mode == "Sunset" || (mode == "Auto" && (17..<20).contains(hour))
+        let cycle = Int(atmosphereElapsed / 900) % 3
+        let night = mode == "Night" || (mode == "Auto" && cycle == 2)
+        let sunset = mode == "Sunset" || (mode == "Auto" && cycle == 1)
         let tint = night ? NSColor(calibratedRed: 0.35, green: 0.44, blue: 0.7, alpha: 1)
             : sunset ? NSColor(calibratedRed: 1, green: 0.77, blue: 0.65, alpha: 1) : .white
         let nextAtmosphere = night ? "Night" : sunset ? "Sunset" : "Morning"

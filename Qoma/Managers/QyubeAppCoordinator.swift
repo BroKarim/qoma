@@ -390,7 +390,17 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
     }
 
     private func updateAnalyticsTracking(for snapshot: ActiveSessionSnapshot) {
-        finishAnalyticsTracking(persist: false)
+        if trackedSessionID != snapshot.id {
+            finishAnalyticsTracking()
+            trackedSessionID = snapshot.id
+            if snapshot.status == .active {
+                ActivityTracker.shared.startTracking(sessionID: snapshot.id, trackWebsites: false)
+            }
+        } else if snapshot.status == .paused && ActivityTracker.shared.isTracking {
+            ActivityTracker.shared.pauseTracking()
+        } else if snapshot.status == .active && !ActivityTracker.shared.isTracking {
+            ActivityTracker.shared.resumeTracking(sessionID: snapshot.id, trackWebsites: false)
+        }
     }
 
     private func finishAnalyticsTracking(persist: Bool = true) {

@@ -19,17 +19,17 @@ struct QyubeSettingsMenuPopover: View {
             if isConfirmingSignOut {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Sign out of Qyube?")
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(.custom("GeistPixel-Regular", size: 12))
                     Text("You’ll need to sign in again to use Qyube on this Mac.")
-                        .font(.system(size: 10.5))
+                        .font(.custom("GeistPixel-Regular", size: 10.5))
                     if showTrialReassurance {
                         Text("Signing out won’t reset your trial.")
-                            .font(.system(size: 9.5))
+                            .font(.custom("GeistPixel-Regular", size: 9.5))
                             .foregroundStyle(.secondary)
                     }
                     if let signOutError {
                         Text(signOutError)
-                            .font(.system(size: 9.5))
+                            .font(.custom("GeistPixel-Regular", size: 9.5))
                             .foregroundStyle(.red)
                             .fixedSize(horizontal: false, vertical: true)
                     }
@@ -108,7 +108,7 @@ private struct QyubeSettingsMenuItem: View {
                     .frame(width: 20, height: 20)
                     .accessibilityHidden(true)
                 Text(self.title)
-                    .font(.system(size: 10.5, weight: .medium))
+                    .font(.custom("GeistPixel-Regular", size: 10.5))
                     .lineLimit(1)
                 Spacer(minLength: 0)
             }

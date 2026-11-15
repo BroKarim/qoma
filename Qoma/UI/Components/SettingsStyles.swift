@@ -7,7 +7,7 @@ struct SettingsPageHeader: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(self.title)
-                .font(.system(size: 38, weight: .regular, design: .serif))
+                .font(.custom("GeistPixel-Regular", size: 38))
 
             Text(self.subtitle)
                 .font(.qoma(size: 13, weight: .medium))
@@ -25,7 +25,7 @@ struct SettingsSectionHeading: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(self.title)
-                .font(.system(size: 22, design: .serif))
+                .font(.custom("GeistPixel-Regular", size: 22))
 
             Text(self.subtitle)
                 .font(.qoma(size: 12.5, weight: .medium))

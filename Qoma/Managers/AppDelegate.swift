@@ -1,4 +1,5 @@
 import Cocoa
+import CoreText
 import SwiftUI
 
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -10,6 +11,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        if let url = Bundle.main.url(forResource: "GeistPixel-Regular-VariableFont_ELSH", withExtension: "ttf") {
+            CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
+        }
         #if DEBUG
         if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil { return }
         let arguments = ProcessInfo.processInfo.arguments

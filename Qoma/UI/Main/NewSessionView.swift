@@ -37,7 +37,7 @@ struct NewSessionView: View {
                 VStack(alignment: .leading, spacing: 15) {
                     Button(action: self.onBack) {
                         Label("Today", systemImage: "chevron.left")
-                            .font(.callout.weight(.medium))
+                            .font(.custom("GeistPixel-Regular", size: 13, relativeTo: .callout))
                     }
                     .buttonStyle(.plain)
                     .foregroundStyle(Color.qyubeAccent)
@@ -74,7 +74,7 @@ struct NewSessionView: View {
                                 Text("\(self.draft.plannedMinutes) minutes")
                                 Spacer()
                                 Image(systemName: self.isEditingActiveSession ? "lock.fill" : "chevron.down")
-                                    .font(.callout)
+                                    .font(.custom("GeistPixel-Regular", size: 13, relativeTo: .callout))
                             }
                             .padding(.horizontal, 14)
                             .frame(height: 40)
@@ -103,7 +103,7 @@ struct NewSessionView: View {
                                     Text(self.modeTitle)
                                     Spacer()
                                     Image(systemName: self.isEditingActiveSession ? "lock.fill" : "chevron.down")
-                                        .font(.callout)
+                                        .font(.custom("GeistPixel-Regular", size: 13, relativeTo: .callout))
                                 }
                                 .padding(.horizontal, 14)
                                 .frame(height: 40)
@@ -124,11 +124,11 @@ struct NewSessionView: View {
                                         AppIcon(bundleID: bundleID).frame(width: 24, height: 24)
                                     }
                                     if self.apps.count > 5 {
-                                        Text("+\(self.apps.count - 5)").font(.caption)
+                                        Text("+\(self.apps.count - 5)").font(.custom("GeistPixel-Regular", size: 12, relativeTo: .caption))
                                     } else if self.apps.isEmpty {
                                         Text(self.draft.policy.mode == .allowing
                                              ? "Choose at least one app" : "No apps blocked")
-                                            .font(.caption)
+                                            .font(.custom("GeistPixel-Regular", size: 12, relativeTo: .caption))
                                             .foregroundStyle(.secondary)
                                     }
                                     Spacer(minLength: 2)
@@ -162,7 +162,7 @@ struct NewSessionView: View {
                             self.sectionTitle("Session catches")
                             if self.catches.isEmpty {
                                 Text("No catches from this session.")
-                                    .font(.callout)
+                                    .font(.custom("GeistPixel-Regular", size: 13, relativeTo: .callout))
                                     .foregroundStyle(.secondary)
                             } else {
                                 ScrollView(.horizontal) {
@@ -187,26 +187,26 @@ struct NewSessionView: View {
                         Text(self.isEditingActiveSession
                              ? "Choose at least one app before saving."
                              : "Choose at least one app to start.")
-                            .font(.caption)
+                            .font(.custom("GeistPixel-Regular", size: 12, relativeTo: .caption))
                             .foregroundStyle(Color.qyubeInterrupted)
                     }
                     if self.draft.taskTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                         Text(self.isEditingActiveSession
                              ? "Enter a session name before saving."
                              : "Enter a session name to start.")
-                            .font(.caption)
+                            .font(.custom("GeistPixel-Regular", size: 12, relativeTo: .caption))
                             .foregroundStyle(Color.qyubeInterrupted)
                     }
                     if self.coordinator.snapshot != nil && !self.isEditingActiveSession {
                         Text("Finish the current session before starting another.")
-                            .font(.caption)
+                            .font(.custom("GeistPixel-Regular", size: 12, relativeTo: .caption))
                             .foregroundStyle(Color.qyubeInterrupted)
                     }
                     if self.startFailed {
                         Text(self.isEditingActiveSession
                              ? "Changes could not be saved. Check your access and try again."
                              : "This session could not start. Check your access and try again.")
-                            .font(.caption)
+                            .font(.custom("GeistPixel-Regular", size: 12, relativeTo: .caption))
                             .foregroundStyle(Color.qyubeInterrupted)
                     }
                 }
@@ -218,7 +218,7 @@ struct NewSessionView: View {
 
             Button(self.isEditingActiveSession ? "SAVE CHANGES" : "START", action: self.isEditingActiveSession
                    ? self.saveActiveSession : self.start)
-                .font(.headline)
+                .font(.custom("GeistPixel-Regular", size: 13, relativeTo: .headline))
                 .tracking(1.2)
                 .frame(maxWidth: .infinity)
                 .frame(height: 46)
@@ -230,6 +230,7 @@ struct NewSessionView: View {
                 .opacity((self.isEditingActiveSession ? self.canSaveActiveSession : self.canStart) ? 1 : 0.55)
                 .overlay(alignment: .top) { QyubeInkDivider().frame(height: 3) }
         }
+        .font(.custom("GeistPixel-Regular", size: 14))
         .foregroundStyle(Color.qyubeMenuInk)
         .background(Color.qyubeBackground)
     }
@@ -256,7 +257,7 @@ struct NewSessionView: View {
 
     private func sectionTitle(_ title: String) -> some View {
         Text(title.uppercased())
-            .font(.caption.weight(.medium))
+            .font(.custom("GeistPixel-Regular", size: 12, relativeTo: .caption))
             .tracking(1.5)
             .foregroundStyle(Color.qyubeAccent)
     }

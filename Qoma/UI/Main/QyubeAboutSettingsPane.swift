@@ -20,33 +20,33 @@ struct QyubeAboutSettingsPane: View {
                             Image("CompanionPoseFishing").resizable().scaledToFit().frame(width: 100, height: 110)
                                 .accessibilityHidden(true)
                             VStack(alignment: .leading, spacing: 8) {
-                                Text("qyube").font(.system(size: 36, design: .serif))
-                                Text(self.version).font(.system(size: 12)).foregroundStyle(.secondary)
+                                Text("qyube").font(.custom("GeistPixel-Regular", size: 36))
+                                Text(self.version).font(.custom("GeistPixel-Regular", size: 12)).foregroundStyle(.secondary)
                             }
                         }
                         QyubeInkDivider()
                         Text("Make room for focused work, one quiet moment at a time.")
-                            .font(.system(size: 21, design: .serif))
+                            .font(.custom("GeistPixel-Regular", size: 21))
                         Text(
                             "Focus with a fishing companion, revisit your day, and collect little finds along the way. "
                                 + "Your focus history and collection are stored on this Mac.")
-                            .font(.system(size: 13)).foregroundStyle(.secondary).lineSpacing(5)
+                            .font(.custom("GeistPixel-Regular", size: 13)).foregroundStyle(.secondary).lineSpacing(5)
                     }
                 }
                 SettingsSurfaceCard {
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("A little help").font(.system(size: 23, design: .serif))
+                        Text("A little help").font(.custom("GeistPixel-Regular", size: 23))
                         QyubeInkDivider()
                         Text("Fishing chances")
-                            .font(.system(size: 14, weight: .semibold))
+                            .font(.custom("GeistPixel-Regular", size: 14))
                         Text(CatchRarityRules.helpOddsText)
-                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .font(.custom("GeistPixel-Regular", size: 12))
                             .foregroundStyle(Color.qyubeMenuInk)
                         Text("The chance of a rare catch can rise after several catches without one.")
-                            .font(.system(size: 12)).foregroundStyle(.secondary).lineSpacing(3)
+                            .font(.custom("GeistPixel-Regular", size: 12)).foregroundStyle(.secondary).lineSpacing(3)
                         Link("Contact support", destination: URL(string: "mailto:support@qoma.app")!)
                         Text("Made for quieter days and moments well spent.")
-                            .font(.system(size: 13, design: .serif)).foregroundStyle(.secondary)
+                            .font(.custom("GeistPixel-Regular", size: 13)).foregroundStyle(.secondary)
                     }
                 }
             }.padding(28).padding(.top, 12).qyubeHideNativeScrollers()

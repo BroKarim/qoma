@@ -8,15 +8,15 @@ struct AnalyticsConsentSheet: View {
     var body: some View {
         VStack(spacing: 18) {
             Image(systemName: "chart.bar.xaxis")
-                .font(.system(size: 28, weight: .medium))
+                .font(.custom("GeistPixel-Regular", size: 28))
                 .foregroundStyle(Color.qyubeAccent)
                 .accessibilityHidden(true)
             Text("Help you reflect on your focus?")
-                .font(.title2)
+                .font(.custom("GeistPixel-Regular", size: 22, relativeTo: .title2))
                 .bold()
                 .multilineTextAlignment(.center)
             Text("qyube can record the apps you use during a focus session, and websites when browser access is enabled. This activity stays on this Mac. You can change this choice in Settings.")
-                .font(.body)
+                .font(.custom("GeistPixel-Regular", size: 13, relativeTo: .body))
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)

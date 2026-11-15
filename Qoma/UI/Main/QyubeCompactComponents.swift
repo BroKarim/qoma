@@ -57,12 +57,12 @@ struct JournalPageHeader: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 9) {
             HStack(spacing: 16) {
-                Text(self.eyebrow).font(.system(size: 9, weight: .medium)).tracking(3)
+                Text(self.eyebrow).font(.custom("GeistPixel-Regular", size: 9)).tracking(3)
                     .foregroundStyle(Color.qyubeAccent)
                 QyubeInkDivider().frame(maxWidth: 260)
             }.padding(.bottom, 8)
-            Text(self.title).font(.system(size: 44, design: .serif))
-            Text(self.subtitle).font(.system(size: 17, design: .serif)).foregroundStyle(.secondary)
+            Text(self.title).font(.custom("GeistPixel-Regular", size: 44))
+            Text(self.subtitle).font(.custom("GeistPixel-Regular", size: 17)).foregroundStyle(.secondary)
         }
         .accessibilityElement(children: .combine)
     }

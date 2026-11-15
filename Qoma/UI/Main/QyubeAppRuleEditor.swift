@@ -29,7 +29,7 @@ struct QyubeAppRuleEditor: View {
       }
       VStack(alignment: .leading, spacing: 16) {
         Text(mode == .allowing ? "What apps do you need?" : "What apps are blocked?")
-          .font(.headline)
+          .font(.custom("GeistPixel-Regular", size: 13, relativeTo: .headline))
         HStack(spacing: 9) {
           Image(systemName: "magnifyingglass").foregroundStyle(Color.qyubeAccent)
           TextField("Search apps…", text: $search).textFieldStyle(.plain)
@@ -41,7 +41,7 @@ struct QyubeAppRuleEditor: View {
         }
         .padding(.horizontal, 12).frame(height: 42)
         .overlay(QyubeInkBorder().stroke(Color.qyubeMenuInk, lineWidth: 1))
-        Text("Changes apply immediately").font(.caption).foregroundStyle(Color.qyubeAccent)
+        Text("Changes apply immediately").font(.custom("GeistPixel-Regular", size: 12, relativeTo: .caption)).foregroundStyle(Color.qyubeAccent)
       }
       .padding(18)
       QyubeInkDivider().frame(height: 3)
@@ -53,9 +53,9 @@ struct QyubeAppRuleEditor: View {
                 AppIcon(bundleID: app.id).frame(width: 27, height: 27)
                 Text(app.name).lineLimit(1)
                 Spacer(minLength: 4)
-                Text("App").font(.callout).foregroundStyle(Color.qyubeAccent)
+                Text("App").font(.custom("GeistPixel-Regular", size: 13, relativeTo: .callout)).foregroundStyle(Color.qyubeAccent)
                 Image(systemName: selectedApps.contains(app.id) ? "checkmark.square.fill" : "square")
-                  .font(.title3).foregroundStyle(Color.qyubeAccent)
+                  .font(.custom("GeistPixel-Regular", size: 17, relativeTo: .title3)).foregroundStyle(Color.qyubeAccent)
               }
               .padding(.horizontal, 18).frame(height: 51)
               .frame(maxWidth: .infinity).contentShape(Rectangle())
@@ -78,12 +78,13 @@ struct QyubeAppRuleEditor: View {
       }
       .scrollIndicators(.hidden)
       if let errorMessage {
-        Text(errorMessage).font(.callout).foregroundStyle(.red).padding(.horizontal, 18).padding(.top, 8)
+        Text(errorMessage).font(.custom("GeistPixel-Regular", size: 13, relativeTo: .callout)).foregroundStyle(.red).padding(.horizontal, 18).padding(.top, 8)
       }
       Button("Choose application…", systemImage: "plus", action: chooseApplication)
         .foregroundStyle(Color.qyubeAccent)
         .frame(maxWidth: .infinity).padding(12)
     }
+    .font(.custom("GeistPixel-Regular", size: 13))
     .buttonStyle(.plain)
     .foregroundStyle(Color.qyubeMenuInk)
     .frame(width: 310, height: 357).background(Color.qyubeBackground)

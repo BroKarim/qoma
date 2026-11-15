@@ -20,7 +20,7 @@ struct TodayGoalSummary: View {
             GeometryReader { geometry in
                 ZStack(alignment: .topLeading) {
                     Text("\(QyubeFormat.duration(self.focusedSeconds)) / \(QyubeFormat.duration(self.goalSeconds))")
-                        .font(.title2).monospacedDigit()
+                        .font(.custom("GeistPixel-Regular", size: 22, relativeTo: .title2)).monospacedDigit()
                         .lineLimit(1).minimumScaleFactor(0.7)
                         .frame(width: max(0, geometry.size.width - 78), alignment: .leading)
                         .padding(.top, 12)
@@ -30,7 +30,7 @@ struct TodayGoalSummary: View {
             }
             .frame(height: 81)
             Text(self.goalSeconds > 0 ? "Focus Goal" : "No daily focus target")
-                .font(.callout).foregroundStyle(Color.qyubeAccent)
+                .font(.custom("GeistPixel-Regular", size: 13, relativeTo: .callout)).foregroundStyle(Color.qyubeAccent)
         }
         .padding(14)
         .background {

@@ -11,7 +11,7 @@ struct SessionControlView: View {
     var body: some View {
         VStack(spacing: 6) {
             Text(title)
-                .font(.system(size: 24, weight: .bold))
+                .font(.custom("GeistPixel-Regular", size: 24))
                 .foregroundStyle(Color.qyubeInk)
                 .lineLimit(3)
                 .minimumScaleFactor(0.1)

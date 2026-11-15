@@ -2444,3 +2444,9 @@ Harga $49 dan kalkulasi upgrade yang masih muncul di bagian strategi lama adalah
 - Today menggunakan ilustrasi Quiet Harbor tanpa teks bawaan; goal dan progress tetap menggunakan data dan animasi yang ada.
 - New Session dan detail sesi menggunakan ilustrasi Arctic Inlet di area banner yang sama.
 - Ilustrasi statis; animasi karakter memerlukan aset berlapis.
+
+## Font pixel, Top Apps, dan suasana Cove — 14 November 2026
+
+- Lengkapi font Geist Pixel pada input New Session dan editor daftar aplikasi; durasi kalender memakai satuan eksplisit seperti `1h20m`.
+- Aktifkan kembali pencatatan aplikasi foreground untuk Top Apps selama sesi aktif, termasuk pause/resume; pelacakan website tetap nonaktif.
+- Auto Cove berganti Morning, Sunset, dan Night setiap 15 menit animasi sesi aktif; opsi manual tetap tersedia. Hapus keterangan lama dan tombol reset posisi dari Settings.

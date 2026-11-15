@@ -35,11 +35,11 @@ struct TodayView: View {
                 VStack(alignment: .leading, spacing: 14) {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("TODAY")
-                            .font(.caption.weight(.medium))
+                            .font(.custom("GeistPixel-Regular", size: 12, relativeTo: .caption))
                             .tracking(1.6)
                             .foregroundStyle(Color.qyubeAccent)
                         Text(Date.now.formatted(.dateTime.weekday(.wide).day().month(.wide)))
-                            .font(.headline)
+                            .font(.custom("GeistPixel-Regular", size: 13, relativeTo: .headline))
                             .foregroundStyle(Color.qyubeMenuInk)
                     }
 
@@ -48,12 +48,12 @@ struct TodayView: View {
                     VStack(alignment: .leading, spacing: 10) {
                         HStack {
                             Text("SESSIONS")
-                                .font(.caption.weight(.medium))
+                                .font(.custom("GeistPixel-Regular", size: 12, relativeTo: .caption))
                                 .tracking(1.4)
                                 .foregroundStyle(Color.qyubeAccent)
                             Spacer()
                             Text("\(self.todaySessions.count + (self.activeSession == nil ? 0 : 1))")
-                                .font(.caption.monospacedDigit())
+                                .font(.custom("GeistPixel-Regular", size: 12, relativeTo: .caption).monospacedDigit())
                                 .foregroundStyle(.secondary)
                         }
 
@@ -97,7 +97,7 @@ struct TodayView: View {
 
             Button(action: self.activeSession == nil ? self.onCreateSession : self.onBackToSession) {
                 Text(self.actionTitle)
-                    .font(.headline)
+                    .font(.custom("GeistPixel-Regular", size: 13, relativeTo: .headline))
                     .tracking(1.2)
                     .frame(maxWidth: .infinity)
                     .frame(height: 46)

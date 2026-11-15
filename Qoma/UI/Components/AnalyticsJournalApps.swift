@@ -8,7 +8,7 @@ struct AnalyticsJournalApps: View {
             AnalyticsJournalHeading(title: "Top apps", detail: "TRACKED TIME")
             if apps.isEmpty {
                 Text("No app activity recorded on this day.")
-                    .font(.system(size: 11))
+                    .font(.custom("GeistPixel-Regular", size: 11))
                     .foregroundStyle(.secondary)
                     .padding(.vertical, 12)
             } else {
@@ -20,11 +20,11 @@ struct AnalyticsJournalApps: View {
                         VStack(alignment: .leading, spacing: 6) {
                             HStack {
                                 Text(app.name)
-                                    .font(.system(size: 11, weight: .medium))
+                                    .font(.custom("GeistPixel-Regular", size: 11))
                                     .lineLimit(1)
                                 Spacer(minLength: 4)
                                 Text(app.displayDuration)
-                                    .font(.system(size: 10, design: .rounded))
+                                    .font(.custom("GeistPixel-Regular", size: 10))
                                     .foregroundStyle(Color.qyubeAccent)
                                     .monospacedDigit()
                                     .fixedSize()

@@ -99,7 +99,7 @@ struct SettingsSidebarFooter: View {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.0"
         let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "0"
         Text("Version \(version) (\(build))")
-            .font(.system(size: 11, weight: .semibold))
+            .font(.custom("GeistPixel-Regular", size: 11))
             .foregroundStyle(.secondary)
             .frame(maxWidth: .infinity, alignment: .leading)
     }

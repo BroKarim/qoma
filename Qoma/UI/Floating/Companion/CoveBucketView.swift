@@ -14,9 +14,9 @@ struct CoveBucketView: View {
             VStack(alignment: .leading, spacing: 9) {
                 VStack(alignment: .leading, spacing: 5) {
                     Text("This session")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.custom("GeistPixel-Regular", size: 16))
                     Text("\(catches.count) catches · \(groups.count) species")
-                        .font(.system(size: 13))
+                        .font(.custom("GeistPixel-Regular", size: 13))
                         .foregroundStyle(Color.qyubeInk.opacity(0.65))
                         .monospacedDigit()
                 }
@@ -25,7 +25,7 @@ struct CoveBucketView: View {
 
                 if catches.isEmpty {
                     Text("Waiting for the first catch")
-                        .font(.system(size: 13))
+                        .font(.custom("GeistPixel-Regular", size: 13))
                         .foregroundStyle(Color.qyubeInk.opacity(0.65))
                         .frame(maxWidth: .infinity, minHeight: 64)
                 } else {
@@ -36,7 +36,7 @@ struct CoveBucketView: View {
                                     QyubeCatchArt(kindID: kindID)
                                         .frame(width: 38, height: 36)
                                     Text("×\(groups[kindID]?.count ?? 0)")
-                                        .font(.system(size: 15, weight: .medium))
+                                        .font(.custom("GeistPixel-Regular", size: 15))
                                         .monospacedDigit()
                                 }
                                 .frame(width: 78, height: 52)
@@ -57,19 +57,19 @@ struct CoveBucketView: View {
                 if discoveries > 0 {
                     Label(discoveries == 1 ? "1 new discovery" : "\(discoveries) new discoveries",
                           systemImage: "sparkles")
-                        .font(.system(size: 12, weight: .medium))
+                        .font(.custom("GeistPixel-Regular", size: 12))
                         .foregroundStyle(Color.qyubeAccent)
                 }
                 if catches.contains(where: { !$0.isBanked }) {
                     Text("Saved permanently after 5 minutes of active focus.")
-                        .font(.system(size: 11))
+                        .font(.custom("GeistPixel-Regular", size: 11))
                         .foregroundStyle(Color.qyubeInk.opacity(0.6))
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
                 Button(action: onCatalog) {
                     Text("Open Catalog")
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.custom("GeistPixel-Regular", size: 13))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 9)
                         .background(Color.qyubeSidebar, in: RoundedRectangle(cornerRadius: 8))
