@@ -32,11 +32,11 @@ struct DistractionMotionTests {
             let frame = DistractionMotion.penguinFrame(effect: effect, elapsed: elapsed, reduceMotion: false)
             #expect((0..<12).contains(frame))
             frames.insert(frame)
-            #expect(DistractionMotion.penguinFrame(effect: effect, elapsed: elapsed, reduceMotion: true) == 0)
+            #expect(DistractionMotion.penguinFrame(effect: effect, elapsed: elapsed, reduceMotion: true) == (effect == .iceFlower ? 2 : 0))
         }
-        #expect(frames == Set(0..<12))
+        #expect(frames == Set(0..<(effect == .iceFlower ? 11 : 12)))
         #expect(DistractionMotion.penguinFrame(effect: effect, elapsed: -1, reduceMotion: false) == 0)
-        #expect(DistractionMotion.penguinFrame(effect: effect, elapsed: .infinity, reduceMotion: false) == 0)
+        #expect(DistractionMotion.penguinFrame(effect: effect, elapsed: .infinity, reduceMotion: false) == (effect == .iceFlower ? 2 : 0))
     }
 
     @Test func dimmingStartsBrightAndReturnsBrightAtCycleBoundary() {
@@ -54,14 +54,11 @@ struct DistractionMotionTests {
     }
 
     @Test func drawnPressMatchesSoundBeatsAndConnectingDrawingsAdvanceInOrder() {
-        for click in [1.2, 5.6, 9.125] {
-            #expect(DistractionMotion.penguinFrame(effect: .dimBright, elapsed: click, reduceMotion: false) == 6)
-            for drawing in 0..<12 {
-                let time = click - 0.5 + (Double(drawing) + 0.1) / 12
-                #expect(DistractionMotion.penguinFrame(effect: .dimBright, elapsed: time, reduceMotion: false) == drawing)
-            }
+        for (click, frame) in [(1.2, 3), (5.6, 9), (9.125, 3)] {
+            #expect(DistractionMotion.penguinFrame(effect: .dimBright, elapsed: click, reduceMotion: false) == frame)
+            #expect(DistractionMotion.penguinFrame(effect: .dimBright, elapsed: click - 0.01, reduceMotion: false) == frame - 1)
         }
-        for effect in [DistractionEffect.iceFlower, .snowstorm] {
+        for effect in [DistractionEffect.snowstorm] {
             for drawing in 0..<12 {
                 let extraHold = effect == .snowstorm && drawing >= 7 ? 11.0 / 12 : 0
                 let time = 0.3 + (Double(drawing) + 0.1) / 12 + extraHold
@@ -70,11 +67,10 @@ struct DistractionMotionTests {
         }
     }
 
-    @Test func hopMovesTheWholeDrawingAndKeepsReducedMotionGrounded() {
-        #expect(DistractionMotion.penguinLift(effect: .iceFlower, elapsed: 0, reduceMotion: false) == 0)
-        #expect(DistractionMotion.penguinLift(effect: .iceFlower, elapsed: 0.85, reduceMotion: false) > 9)
-        for effect in DistractionEffect.allCases {
-            #expect(DistractionMotion.penguinLift(effect: effect, elapsed: 0.85, reduceMotion: true) == 0)
+    @Test func flowersAppearOnFirstBreathFrame() {
+        for (index, time) in [(0, 0.5), (30, 10.5)] {
+            #expect(DistractionMotion.iceFlowerBirth(index: index, area: 900 * 650) == time)
+            #expect(DistractionMotion.penguinFrame(effect: .iceFlower, elapsed: time, reduceMotion: false) == 6)
         }
     }
 }

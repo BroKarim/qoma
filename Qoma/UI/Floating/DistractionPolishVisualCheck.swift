@@ -10,7 +10,7 @@ enum DistractionPolishVisualCheck {
     static func writeDrawnClips(to directory: URL) throws {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         let samples: [(String, DistractionEffect, Double, Double)] = [
-            ("lights", .dimBright, 0.9, 3), ("ice", .iceFlower, 0, 3), ("snow", .snowstorm, 0, 4),
+            ("lights", .dimBright, 0, 7), ("ice", .iceFlower, 0, 3), ("snow", .snowstorm, 0, 4),
         ]
         for (name, effect, offset, duration) in samples {
             let view = SKView(frame: CGRect(x: 0, y: 0, width: 280, height: 280))
@@ -72,7 +72,7 @@ enum DistractionPolishVisualCheck {
                     }
                 }
             }
-            guard CGImageDestinationFinalize(destination), seenDrawings.count == 12
+            guard CGImageDestinationFinalize(destination), seenDrawings.count == (effect == .iceFlower ? 11 : 12)
             else { throw error("Drawn preview must show every connecting drawing") }
             print("DRAWN effect=\(name) drawings=\(seenDrawings.count) renderedFrames=\(count) preview=\(url.path)")
         }

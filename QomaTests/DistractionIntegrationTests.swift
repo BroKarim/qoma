@@ -61,10 +61,10 @@ struct DistractionIntegrationTests {
 
     @Test func eachBatchAndEachLightTransitionHasOnlyOneCue() {
         var ice = DistractionSoundCursor()
-        #expect(ice.advance(effect: .iceFlower, elapsed: 0, reduceMotion: false) == .freeze)
+        #expect(ice.advance(effect: .iceFlower, elapsed: 0.5, reduceMotion: false) == .freeze)
         #expect(ice.advance(effect: .iceFlower, elapsed: 1, reduceMotion: false) == nil)
-        #expect(ice.advance(effect: .iceFlower, elapsed: 10, reduceMotion: false) == .freeze)
-        #expect(ice.advance(effect: .iceFlower, elapsed: 10.1, reduceMotion: false) == nil)
+        #expect(ice.advance(effect: .iceFlower, elapsed: 10.5, reduceMotion: false) == .freeze)
+        #expect(ice.advance(effect: .iceFlower, elapsed: 10.6, reduceMotion: false) == nil)
         var dim = DistractionSoundCursor()
         #expect(dim.advance(effect: .dimBright, elapsed: 0, reduceMotion: false) == nil)
         #expect(dim.advance(effect: .dimBright, elapsed: 2, reduceMotion: false) == .lightSwitch)
@@ -114,7 +114,7 @@ struct DistractionIntegrationTests {
     @Test func illustratedEffectsAreBundledAndDrawWithoutLeakingIntoOcclusions() throws {
         for name in (1...6).map({ "CrystalBloom\($0)" })
             + (1...6).map({ "DistractionSnow\($0)" })
-            + ["DistractionWind", "DistractionSnowbank", "PixelHopV2"] {
+            + ["DistractionWind", "DistractionSnowbank", "PixelDistractionBloom", "PixelDistractionLights"] {
             let image = try #require(NSImage(named: name))
             #expect(image.size.width > 0)
         }
@@ -174,16 +174,12 @@ struct DistractionIntegrationTests {
         scene.visualNow = { Date(timeIntervalSince1970: 100 + elapsed) }
         scene.advanceAnimation(by: 0.01)
         #expect(character.texture !== restTexture)
-        if effect == .iceFlower {
-            #expect(character.position.y > position.y)
-        } else {
-            #expect(character.position == position)
-        }
+        #expect(character.position == position)
         #expect(character.children.isEmpty, "Distraction illustrations must stay whole, without a body-part rig")
         #expect(scene.childNode(withName: "lightSwitch") == nil)
         #expect(character.anchorPoint == anchor)
         scene.reduceMotion = true
-        #expect(character.texture === restTexture)
+        #expect((character.texture === restTexture) == (effect != .iceFlower))
         scene.setDistractionVisual(nil)
         #expect(scene.playback.phase == .casting)
         #expect(character.texture !== restTexture)

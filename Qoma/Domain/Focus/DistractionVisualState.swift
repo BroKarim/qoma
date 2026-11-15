@@ -25,6 +25,11 @@ enum DistractionMotion {
         return (rotation, 0.94 + shimmer * 0.06)
     }
 
+    static let bloomBreathTime = 0.5
+    static let bloomBatchInterval = 10.0
+    static let lightOffPhase = 0.15
+    static let lightOnPhase = 0.70
+
     static func iceFlowerCapacity(area: Double) -> Int {
         min(180, max(24, Int(max(0, area) / 5_000)))
     }
@@ -40,24 +45,30 @@ enum DistractionMotion {
         let capacity = iceFlowerCapacity(area: area)
         let initial = Int(ceil(Double(capacity) * 0.25))
         let batch = Int(ceil(Double(capacity) * 0.15))
-        return index < initial ? 0 : Double((index - initial) / batch + 1) * 10
+        return bloomBreathTime + (index < initial ? 0 : Double((index - initial) / batch + 1) * bloomBatchInterval)
     }
 
     /// Pose changes share the overlay clock, rather than the interrupted fishing clock.
     static func penguinFrame(effect: DistractionEffect, elapsed: TimeInterval, reduceMotion: Bool) -> Int {
-        guard !reduceMotion, elapsed.isFinite else { return 0 }
+        guard !reduceMotion, elapsed.isFinite else { return effect == .iceFlower ? 2 : 0 }
         let time = max(0, elapsed)
         switch effect {
         case .dimBright:
             let cycle = dimCycle(elapsed: time)
             let duration = max(3, 8 - Double(cycle.index) * 0.5)
-            let click = duration * (cycle.phase < 0.425 ? 0.15 : 0.70)
-            // Drawing 6 is the press, exactly on each light-switch sound beat.
-            let drawingTime = cycle.phase * duration - click + 0.5
-            return drawingTime >= 0 && drawingTime < 1 ? min(11, Int(drawingTime * 12 + 0.000001)) : 0
+            let off = (cycle.phase - lightOffPhase) * duration
+            let on = (cycle.phase - lightOnPhase) * duration
+            if on >= -0.25 {
+                return min(11, 9 + Int(floor(on * 12 + 0.000001)))
+            }
+            if off >= -0.25 {
+                return min(5, 3 + Int(floor(off * 12 + 0.000001)))
+            }
+            return 0
         case .iceFlower:
-            let drawingTime = time.truncatingRemainder(dividingBy: 2.8) - 0.3
-            return drawingTime >= 0 && drawingTime < 1 ? min(11, Int(drawingTime * 12 + 0.000001)) : 0
+            let age = time.truncatingRemainder(dividingBy: bloomBatchInterval)
+            let standing = time >= bloomBatchInterval ? 2 : 0
+            return max(standing, min(10, Int(age * 12 + 0.000001)))
         case .snowstorm:
             let drawingTime = time.truncatingRemainder(dividingBy: 4) - 0.3
             guard drawingTime >= 0 else { return 0 }
@@ -66,13 +77,6 @@ enum DistractionMotion {
             if drawingTime < 1.5 + 5.0 / 12 { return min(11, 7 + Int((drawingTime - 1.5) * 12 + 0.000001)) }
             return 0
         }
-    }
-
-    static func penguinLift(effect: DistractionEffect, elapsed: TimeInterval, reduceMotion: Bool) -> Double {
-        guard effect == .iceFlower, !reduceMotion, elapsed.isFinite else { return 0 }
-        let drawingTime = max(0, elapsed).truncatingRemainder(dividingBy: 2.8) - 0.3
-        guard drawingTime > 1.0 / 3, drawingTime < 0.75 else { return 0 }
-        return sin((drawingTime - 1.0 / 3) / (0.75 - 1.0 / 3) * .pi) * 10
     }
 
     /// A complete bright → dim → bright cycle. Duration decreases only at cycle boundaries.
@@ -97,7 +101,7 @@ enum DistractionMotion {
         let phase = dimPhase(elapsed: elapsed)
         let duration = max(3, 8 - Double(dimCycle(elapsed: elapsed).index) * 0.5)
         let transition = 0.15 / duration
-        return min(1, max(0, min((phase - 0.15) / transition, (0.70 - phase) / transition)))
+        return min(1, max(0, min((phase - lightOffPhase) / transition, (lightOnPhase - phase) / transition + 1)))
     }
 }
 
@@ -114,12 +118,13 @@ struct DistractionSoundCursor {
     ) -> DistractionSoundCue? {
         switch effect {
         case .iceFlower:
-            let marker = reduceMotion ? 0 : min(5, Int(max(0, elapsed) / 10))
+            guard reduceMotion || elapsed >= DistractionMotion.bloomBreathTime else { return nil }
+            let marker = reduceMotion ? 0 : min(5, Int((elapsed - DistractionMotion.bloomBreathTime) / DistractionMotion.bloomBatchInterval))
             defer { lastMarker = marker }
             return marker != lastMarker ? .freeze : nil
         case .dimBright:
             let cycle = DistractionMotion.dimCycle(elapsed: elapsed)
-            let marker = cycle.index * 2 + (cycle.phase >= 0.15 ? 1 : 0) + (cycle.phase >= 0.70 ? 1 : 0)
+            let marker = cycle.index * 2 + (cycle.phase >= DistractionMotion.lightOffPhase ? 1 : 0) + (cycle.phase >= DistractionMotion.lightOnPhase ? 1 : 0)
             defer { lastMarker = marker }
             guard !reduceMotion, let lastMarker, marker != lastMarker else { return nil }
             return .lightSwitch

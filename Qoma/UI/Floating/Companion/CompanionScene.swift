@@ -160,7 +160,8 @@ final class CompanionScene: SKScene {
         }
     }
 
-    private static let distractionFrames = fishingTextures(named: "PixelHopV2")
+    private static let bloomFrames = fishingTextures(named: "PixelDistractionBloom")
+    private static let lightFrames = fishingTextures(named: "PixelDistractionLights")
 
     init(playback: CompanionPlayback = CompanionPlayback()) {
         self.playback = playback
@@ -413,11 +414,9 @@ final class CompanionScene: SKScene {
             let effect = distractionVisual?.effect ?? .iceFlower
             let elapsed = distractionVisual.map { visualNow().timeIntervalSince($0.startedAt) } ?? playback.phaseTime
             character.size = CGSize(width: 128, height: 128)
-            character.anchorPoint = CGPoint(x: 0.5, y: 20.0 / 256)
+            character.anchorPoint = CGPoint(x: 0.67, y: 20.0 / 256)
             let frame = DistractionMotion.penguinFrame(effect: effect, elapsed: elapsed, reduceMotion: reduceMotion)
-            character.texture = Self.distractionFrames[frame]
-            character.position.y += CGFloat(DistractionMotion.penguinLift(
-                effect: effect, elapsed: elapsed, reduceMotion: reduceMotion))
+            character.texture = effect == .dimBright ? Self.lightFrames[frame] : Self.bloomFrames[frame]
         } else {
             character.anchorPoint = CGPoint(x: 0.6, y: 0.07)
         }
