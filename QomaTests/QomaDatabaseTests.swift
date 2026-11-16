@@ -3,6 +3,21 @@ import Testing
 @testable import Qoma
 
 struct QomaDatabaseTests {
+    @Test func eraseKeepsOtherAccountsAndBlocksActiveSessions() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let db = try QomaDatabase(url: root.appendingPathComponent("test.sqlite3"))
+        for account in ["a", "b"] {
+            try db.execute("INSERT INTO sessions VALUES (?, ?, 0, NULL, 'history', ?)", [.text(account), .text(account), .blob(Data())])
+        }
+        try db.eraseLocalData(accountID: "a")
+        #expect(try db.query("SELECT 1 FROM sessions WHERE account_id = 'a'").isEmpty)
+        #expect(try db.query("SELECT 1 FROM sessions WHERE account_id = 'b'").count == 1)
+        try db.execute("UPDATE sessions SET record_type = 'active' WHERE account_id = 'b'")
+        #expect(throws: (any Error).self) { try db.eraseLocalData(accountID: "b") }
+        #expect(try db.query("SELECT 1 FROM sessions WHERE account_id = 'b'").count == 1)
+    }
+
     @Test func migratesLegacyCatchFilesIdempotentlyAndKeepsSources() throws {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         defer { try? FileManager.default.removeItem(at: directory) }

@@ -1,0 +1,13 @@
+{
+  "id": "asset-087",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-087.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-snowglass-hourglass.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-snowglass-hourglass.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

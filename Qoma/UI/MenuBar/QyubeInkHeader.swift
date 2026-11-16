@@ -16,10 +16,10 @@ struct QyubeInkHeader<Trailing: View>: View {
             if let titleAction {
                 Button(title, action: titleAction)
                     .buttonStyle(.plain)
-                    .font(.title3.weight(.semibold))
+                    .font(.custom("GeistPixel-Regular", size: 17, relativeTo: .title3))
                     .accessibilityLabel("Go to Today")
             } else {
-                Text(title).font(.title3.weight(.semibold))
+                Text(title).font(.custom("GeistPixel-Regular", size: 17, relativeTo: .title3))
             }
             Spacer(minLength: 8)
             Canvas { context, size in
@@ -39,7 +39,7 @@ struct QyubeInkHeader<Trailing: View>: View {
             }
             .frame(width: 58, height: 15).accessibilityHidden(true)
             Spacer(minLength: 8)
-            trailing().font(.callout.weight(.medium))
+            trailing().font(.custom("GeistPixel-Regular", size: 13, relativeTo: .callout))
         }
         .foregroundStyle(Color.qyubeMenuInk)
         .padding(.horizontal, 18).frame(height: 42)

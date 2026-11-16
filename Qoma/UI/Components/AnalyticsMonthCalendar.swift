@@ -20,7 +20,7 @@ struct AnalyticsMonthCalendar: View {
         VStack(spacing: 13) {
             HStack(spacing: 5) {
                 Text(month.formatted(.dateTime.month(.wide).year()))
-                    .font(.system(size: 17, weight: .medium, design: .serif))
+                    .font(.custom("GeistPixel-Regular", size: 17))
                     .frame(maxWidth: .infinity, alignment: .leading)
                 Button("Previous month", systemImage: "chevron.left") { moveMonth(-1) }
                     .labelStyle(.iconOnly)
@@ -30,7 +30,7 @@ struct AnalyticsMonthCalendar: View {
                     .frame(width: 26, height: 26)
             }
             .buttonStyle(.plain)
-            .font(.system(size: 12, weight: .semibold))
+            .font(.custom("GeistPixel-Regular", size: 12))
             .foregroundStyle(Color.qyubeAccent)
             .controlSize(.small)
 
@@ -38,7 +38,7 @@ struct AnalyticsMonthCalendar: View {
                 ForEach(0..<7, id: \.self) { index in
                     let weekday = (calendar.firstWeekday - 1 + index) % 7
                     Text(calendar.veryShortStandaloneWeekdaySymbols[weekday])
-                        .font(.system(size: 9, weight: .semibold))
+                        .font(.custom("GeistPixel-Regular", size: 9))
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity)
                         .padding(.bottom, 3)
@@ -56,11 +56,11 @@ struct AnalyticsMonthCalendar: View {
 
             HStack {
                 Label("Focus time per day", systemImage: "clock")
-                    .font(.system(size: 9))
+                    .font(.custom("GeistPixel-Regular", size: 9))
                     .foregroundStyle(.secondary)
                 Spacer(minLength: 4)
                 Button("Today") { selectedDay = calendar.startOfDay(for: Date()) }
-                    .font(.system(size: 10, weight: .semibold))
+                    .font(.custom("GeistPixel-Regular", size: 10))
                     .buttonStyle(.plain)
                     .foregroundStyle(Color.qyubeAccent)
             }
@@ -77,9 +77,9 @@ struct AnalyticsMonthCalendar: View {
         } label: {
             VStack(spacing: 4) {
                 Text(day.formatted(.dateTime.day()))
-                    .font(.system(size: 12, weight: selected ? .bold : .medium))
+                    .font(.custom("GeistPixel-Regular", size: 12))
                 Text(Self.focusLabel(seconds))
-                    .font(.system(size: 8, weight: .medium, design: .rounded))
+                    .font(.custom("GeistPixel-Regular", size: 8))
                     .monospacedDigit()
                     .opacity(seconds > 0 || selected ? 1 : 0.45)
                     .lineLimit(1)
@@ -108,7 +108,7 @@ struct AnalyticsMonthCalendar: View {
 
     static func focusLabel(_ seconds: Double) -> String {
         let minutes = max(0, Int(seconds / 60))
-        return minutes < 60 ? "\(minutes)m" : String(format: "%d:%02d", minutes / 60, minutes % 60)
+        return minutes < 60 ? "\(minutes)m" : "\(minutes / 60)h\(minutes % 60)m"
     }
 
     private func moveMonth(_ offset: Int) {

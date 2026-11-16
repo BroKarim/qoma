@@ -1,0 +1,1 @@
+{"name":"qyube-coworker-flippers","private":true,"scripts":{"render":"remotion render src/index.ts Legendary out/constellation-whale.mp4 --concurrency=2 --codec=h264 --crf=18"},"dependencies":{"remotion":"4.0.484","@remotion/cli":"4.0.484","react":"19.0.0","react-dom":"19.0.0"}}

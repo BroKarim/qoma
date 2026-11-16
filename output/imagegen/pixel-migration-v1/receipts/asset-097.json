@@ -1,0 +1,13 @@
+{
+  "id": "asset-097",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-097.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-atlas-nautilus.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-atlas-nautilus.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

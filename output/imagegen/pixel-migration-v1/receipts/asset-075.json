@@ -1,0 +1,13 @@
+{
+  "id": "asset-075",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-075.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-constellation-whale.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-constellation-whale.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

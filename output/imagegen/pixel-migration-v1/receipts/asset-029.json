@@ -1,0 +1,13 @@
+{
+  "id": "asset-029",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-029.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-glass-toothfish.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-glass-toothfish.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "id": "asset-008",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-008.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-starlight-lantern.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-starlight-lantern.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

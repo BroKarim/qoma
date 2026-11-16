@@ -1,0 +1,13 @@
+{
+  "id": "asset-078",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-078.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-frost-archive.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-frost-archive.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

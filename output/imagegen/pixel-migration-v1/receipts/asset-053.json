@@ -1,0 +1,13 @@
+{
+  "id": "asset-053",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-053.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-tide-moon-gong.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-tide-moon-gong.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

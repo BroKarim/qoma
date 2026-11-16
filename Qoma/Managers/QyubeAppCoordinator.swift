@@ -2,6 +2,7 @@ import Cocoa
 import Combine
 import SwiftUI
 import OSLog
+import UserNotifications
 
 /// Owns the qyube runtime: home window, session coordinator, timer panel, companion panel, overlay, and menu bar status.
 @MainActor
@@ -153,6 +154,13 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
     private var homeWindowController: NSWindowController?
 
     private func configurePanels() {
+        NotificationCenter.default.publisher(for: .qyubeResetFloatingPositions)
+            .sink { [weak self] _ in
+                self?.timerController.resetPosition()
+                self?.companionController.resetPosition()
+            }
+            .store(in: &cancellables)
+
         timerController.configure(
             onTogglePause: { [weak self] in
                 guard let self else { return false }
@@ -169,20 +177,13 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
             onStop: { [weak self] in
                 _ = self?.sessionCoordinator.stopSession(reason: "Stopped from floating timer")
             },
-            onRepeat: { [weak self] session in self?.repeatSession(session) ?? false },
-            onReview: { [weak self] session in self?.reviewSession(session) },
             onToday: { [weak self] in
                 self?.navigation.page = nil
                 self?.navigation.sessionToReview = nil
                 self?.navigation.todayRequest = UUID()
                 self?.showHomeWindow()
             })
-        timerController.onBreakChanged = { [weak self] in
-            guard let self else { return }
-            self.navigation.breakRemaining = self.timerController.isOnBreak
-                ? self.timerController.breakRemaining : nil
-            self.updateStatusItem()
-        }
+
 
         overlayController.onVisualStateChanged = { [weak self] visual in
             self?.companionController.setDistractionVisual(visual)
@@ -191,6 +192,19 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
         companionController.configure(onTap: { [weak self] in
             self?.restoreTimerPanel()
         })
+        companionController.bucketEvents = { [weak self] sessionID in
+            guard let self else { return [] }
+            return CatchRepository.shared.listSession(sessionID: sessionID, accountID: self.sessionCoordinator.sessionAccountID)
+        }
+        companionController.onOpenCatalog = { [weak self] in
+            self?.navigation.page = .catalog
+            self?.showHomeWindow()
+        }
+        companionController.previouslyCaughtKinds = { [weak self] sessionID in
+            guard let self else { return [] }
+            return Set(CatchRepository.shared.listBanked(accountID: self.sessionCoordinator.sessionAccountID)
+                .filter { $0.sessionID != sessionID }.map(\.kindID))
+        }
 
         sessionCoordinator.onSessionEnded = { [weak self] session in
             self?.onSessionEnded(session)
@@ -346,10 +360,7 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
 
     private func updateStatusItem() {
         let title: String
-        if timerController.isOnBreak {
-            title = timerController.isBreakFinished
-                ? "Break done" : "Break \(formatTime(timerController.breakRemaining))"
-        } else if let snapshot = sessionCoordinator.snapshot,
+        if let snapshot = sessionCoordinator.snapshot,
                   snapshot.status == .active || snapshot.status == .paused {
             title = snapshot.status == .paused
                 ? "Ⅱ \(formatTime(sessionCoordinator.remainingTime))"
@@ -366,60 +377,29 @@ final class QyubeAppCoordinator: NSObject, NSWindowDelegate {
         navigation.refresh()
         NotificationCenter.default.post(name: .qyubeCollectionChanged, object: nil)
         guard session.status == .completed else { return }
-        let defaults = UserDefaults.standard
-        SoundAlertPlayer.shared.play(
-            soundID: defaults.string(forKey: AppConstants.SoundSettings.selectedSoundKey)
-                ?? AppConstants.SoundSettings.defaultSoundID,
-            volume: defaults.object(forKey: AppConstants.SoundSettings.volumeKey) as? Double
-                ?? AppConstants.SoundSettings.defaultVolume)
-        let catches = CatchRepository.shared.listBanked(accountID: sessionCoordinator.sessionAccountID)
-            .filter { $0.sessionID == session.id }
-        timerController.showCompletion(session: session, catches: catches)
-    }
-
-    private func repeatSession(_ session: FocusSession) -> Bool {
-        guard sessionCoordinator.snapshot == nil, sessionCoordinator.finalizationState == .idle else { return false }
-        guard let draft = Self.repeatDraft(for: session) else { return false }
-        return sessionCoordinator.startSession(draft: draft) != nil
-    }
-
-    static func repeatDraft(for session: FocusSession) -> SessionDraft? {
-        var draft = session.draftSnapshot
-        draft.taskTitle = draft.taskTitle.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !draft.taskTitle.isEmpty else { return nil }
-        guard draft.policy.mode != .allowing || !draft.policy.allowedApps.isEmpty else { return nil }
-        return draft
-    }
-
-    private func reviewSession(_ session: FocusSession) {
-        navigation.page = nil
-        navigation.sessionToReview = session
-        showHomeWindow()
+        timerController.showCompletion()
+        if UserDefaults.standard.bool(forKey: "qyube.sessionNotifications") {
+            let content = UNMutableNotificationContent()
+            content.title = "Nice work!"
+            content.body = "Your focus session is complete. Time for a break."
+            let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+            UNUserNotificationCenter.current().add(request) { error in
+                if let error { Logger.store.error("Session notification failed: \(error.localizedDescription)") }
+            }
+        }
     }
 
     private func updateAnalyticsTracking(for snapshot: ActiveSessionSnapshot) {
-        guard AppConstants.AnalyticsSettings.isAnalyticsEnabled else {
-            finishAnalyticsTracking(persist: false)
-            return
-        }
-        let tracker = ActivityTracker.shared
         if trackedSessionID != snapshot.id {
             finishAnalyticsTracking()
             trackedSessionID = snapshot.id
             if snapshot.status == .active {
-                tracker.startTracking(
-                    sessionID: snapshot.id,
-                    trackWebsites: PermissionManager.shared.automationStatus == .granted
-                )
+                ActivityTracker.shared.startTracking(sessionID: snapshot.id, trackWebsites: false)
             }
-        }
-        if snapshot.status == .paused, tracker.isTracking {
-            tracker.pauseTracking()
-        } else if snapshot.status == .active, !tracker.isTracking {
-            tracker.resumeTracking(
-                sessionID: snapshot.id,
-                trackWebsites: PermissionManager.shared.automationStatus == .granted
-            )
+        } else if snapshot.status == .paused && ActivityTracker.shared.isTracking {
+            ActivityTracker.shared.pauseTracking()
+        } else if snapshot.status == .active && !ActivityTracker.shared.isTracking {
+            ActivityTracker.shared.resumeTracking(sessionID: snapshot.id, trackWebsites: false)
         }
     }
 

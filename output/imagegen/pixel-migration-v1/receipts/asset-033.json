@@ -1,0 +1,13 @@
+{
+  "id": "asset-033",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-033.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-eelpout-curl.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-eelpout-curl.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

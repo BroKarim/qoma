@@ -4,7 +4,6 @@ struct TodayView: View {
     let sessions: [FocusSession]
     let activeSession: ActiveSessionSnapshot?
     let remainingTime: TimeInterval
-    let breakRemaining: TimeInterval?
     let onCreateSession: () -> Void
     let onBackToSession: () -> Void
     let onEditActiveSession: () -> Void
@@ -36,36 +35,25 @@ struct TodayView: View {
                 VStack(alignment: .leading, spacing: 14) {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("TODAY")
-                            .font(.caption.weight(.medium))
+                            .font(.custom("GeistPixel-Regular", size: 12, relativeTo: .caption))
                             .tracking(1.6)
                             .foregroundStyle(Color.qyubeAccent)
                         Text(Date.now.formatted(.dateTime.weekday(.wide).day().month(.wide)))
-                            .font(.headline)
+                            .font(.custom("GeistPixel-Regular", size: 13, relativeTo: .headline))
                             .foregroundStyle(Color.qyubeMenuInk)
                     }
 
                     TodayGoalSummary(focusedSeconds: self.focusedSeconds)
 
-                    if let breakRemaining {
-                        Text(breakRemaining > 0
-                             ? "Break · \(QyubeFormat.countdown(breakRemaining)) remaining"
-                             : "Break finished · choose Repeat or Done in the break panel")
-                            .font(.callout.weight(.medium))
-                            .foregroundStyle(Color.qyubeAccent)
-                            .padding(10)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .qyubeInkSurface(fill: .qyubeSelection.opacity(0.5))
-                    }
-
                     VStack(alignment: .leading, spacing: 10) {
                         HStack {
                             Text("SESSIONS")
-                                .font(.caption.weight(.medium))
+                                .font(.custom("GeistPixel-Regular", size: 12, relativeTo: .caption))
                                 .tracking(1.4)
                                 .foregroundStyle(Color.qyubeAccent)
                             Spacer()
                             Text("\(self.todaySessions.count + (self.activeSession == nil ? 0 : 1))")
-                                .font(.caption.monospacedDigit())
+                                .font(.custom("GeistPixel-Regular", size: 12, relativeTo: .caption).monospacedDigit())
                                 .foregroundStyle(.secondary)
                         }
 
@@ -109,7 +97,7 @@ struct TodayView: View {
 
             Button(action: self.activeSession == nil ? self.onCreateSession : self.onBackToSession) {
                 Text(self.actionTitle)
-                    .font(.headline)
+                    .font(.custom("GeistPixel-Regular", size: 13, relativeTo: .headline))
                     .tracking(1.2)
                     .frame(maxWidth: .infinity)
                     .frame(height: 46)
@@ -163,7 +151,6 @@ struct TodayView: View {
         ],
         activeSession: nil,
         remainingTime: 0,
-        breakRemaining: nil,
         onCreateSession: {},
         onBackToSession: {},
         onEditActiveSession: {},

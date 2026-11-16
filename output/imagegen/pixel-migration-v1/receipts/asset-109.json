@@ -1,0 +1,13 @@
+{
+  "id": "asset-109",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-109.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-sapphire-urchin.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-sapphire-urchin.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

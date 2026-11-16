@@ -1,20 +1,28 @@
 import Cocoa
+import CoreText
 import SwiftUI
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var coordinator: QyubeAppCoordinator?
     private let updaterManager = UpdaterManager.shared
-    private var quitWithoutConfirmationRequested = false
 
     func quitWithoutConfirmation() {
-        quitWithoutConfirmationRequested = true
         NSApp.terminate(nil)
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        if let url = Bundle.main.url(forResource: "GeistPixel-Regular-VariableFont_ELSH", withExtension: "ttf") {
+            CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
+        }
         #if DEBUG
         if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil { return }
         let arguments = ProcessInfo.processInfo.arguments
+        if let index = arguments.firstIndex(of: "--crystal-bloom-snapshots"), arguments.count > index + 1 {
+            do { try DistractionVisualCheck.writeCrystalClip(to: URL(fileURLWithPath: arguments[index + 1])) }
+            catch { NSLog("Crystal Bloom preview failed: %@", error.localizedDescription) }
+            NSApp.terminate(nil)
+            return
+        }
         if let index = arguments.firstIndex(of: "--distraction-snapshots"), arguments.count > index + 1 {
             do {
                 try DistractionVisualCheck.write(to: URL(fileURLWithPath: arguments[index + 1]))
@@ -72,15 +80,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        guard !quitWithoutConfirmationRequested else { return .terminateNow }
         guard let session = coordinator?.sessionCoordinator.snapshot,
               session.status == .active || session.status == .paused else { return .terminateNow }
-        let alert = NSAlert()
-        alert.messageText = "End this focus session and quit?"
-        alert.informativeText = "The session will be saved as interrupted."
-        alert.addButton(withTitle: "Stop and Quit")
-        alert.addButton(withTitle: "Keep Focusing")
-        guard alert.runModal() == .alertFirstButtonReturn else { return .terminateCancel }
         guard coordinator?.sessionCoordinator.stopSession(reason: "Quit application") != nil else {
             let failure = NSAlert()
             failure.messageText = "The session could not be saved"

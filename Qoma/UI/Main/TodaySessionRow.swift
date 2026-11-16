@@ -30,7 +30,7 @@ struct TodaySessionRow: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: self.statusSymbol)
-                .font(.system(size: 17, weight: .medium))
+                .font(.custom("GeistPixel-Regular", size: 17))
                 .foregroundStyle(self.statusColor)
                 .frame(width: 30, height: 30)
                 .background(self.statusColor.opacity(0.1), in: Circle())
@@ -38,7 +38,7 @@ struct TodaySessionRow: View {
 
             VStack(alignment: .leading, spacing: 5) {
                 Text(self.title)
-                    .font(.body.weight(.medium))
+                    .font(.custom("GeistPixel-Regular", size: 13, relativeTo: .body))
                     .lineLimit(1)
                     .truncationMode(.tail)
                 HStack(spacing: 5) {
@@ -47,7 +47,7 @@ struct TodaySessionRow: View {
                     Text("·").foregroundStyle(.tertiary)
                     Text(self.detail).foregroundStyle(.secondary)
                 }
-                .font(.caption)
+                .font(.custom("GeistPixel-Regular", size: 12, relativeTo: .caption))
                 .lineLimit(1)
             }
             .frame(maxWidth: .infinity, alignment: .leading)

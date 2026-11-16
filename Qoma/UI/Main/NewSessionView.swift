@@ -1,6 +1,5 @@
 import AppKit
 import SwiftUI
-import UniformTypeIdentifiers
 
 struct NewSessionView: View {
     @ObservedObject var coordinator: SessionCoordinator
@@ -8,7 +7,6 @@ struct NewSessionView: View {
     let sourceSession: FocusSession?
     let isEditingActiveSession: Bool
     let catches: [CatchEvent]
-    let breakRemaining: TimeInterval?
     let onBack: () -> Void
     let onSaved: () -> Void
     let onStarted: () -> Void
@@ -25,7 +23,6 @@ struct NewSessionView: View {
     private var canStart: Bool {
         !self.draft.taskTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             && self.coordinator.snapshot == nil
-            && self.breakRemaining == nil
             && (self.draft.policy.mode != .allowing || !self.apps.isEmpty)
     }
 
@@ -40,35 +37,21 @@ struct NewSessionView: View {
                 VStack(alignment: .leading, spacing: 15) {
                     Button(action: self.onBack) {
                         Label("Today", systemImage: "chevron.left")
-                            .font(.callout.weight(.medium))
+                            .font(.custom("GeistPixel-Regular", size: 13, relativeTo: .callout))
                     }
                     .buttonStyle(.plain)
                     .foregroundStyle(Color.qyubeAccent)
 
-                    Text(self.isEditingActiveSession ? "EDIT ACTIVE SESSION"
-                         : self.sourceSession == nil ? "NEW SESSION" : "SESSION DETAIL")
-                        .font(.caption.weight(.medium))
-                        .tracking(1.5)
-                        .foregroundStyle(Color.qyubeAccent)
-                    QyubeMenuBarPenguin()
-                        .frame(height: 76)
-                        .frame(maxWidth: .infinity)
-                        .accessibilityHidden(true)
-
-                    if let sourceSession {
-                        HStack(spacing: 6) {
-                            Text(sourceSession.status == .completed ? "Completed" : "Interrupted")
-                                .fontWeight(.semibold)
-                            Text("·")
-                            Text("\(QyubeFormat.duration(sourceSession.actualActiveSeconds)) actual")
-                            Text("·")
-                            Text("\(sourceSession.plannedMinutes)m planned")
-                        }
-                        .font(.caption)
-                        .foregroundStyle(Color.qyubeAccent)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
+                    GeometryReader { geometry in
+                        Image("SessionInlet")
+                            .resizable().interpolation(.none)
+                            .frame(width: geometry.size.width, height: geometry.size.height)
+                            .scaleEffect(1.08)
+                            .clipped()
                     }
+                        .frame(height: 130)
+                        .accessibilityHidden(true)
+                        .padding(.bottom, -7)
 
                     VStack(alignment: .leading, spacing: 7) {
                         self.sectionTitle("Session name")
@@ -91,7 +74,7 @@ struct NewSessionView: View {
                                 Text("\(self.draft.plannedMinutes) minutes")
                                 Spacer()
                                 Image(systemName: self.isEditingActiveSession ? "lock.fill" : "chevron.down")
-                                    .font(.callout)
+                                    .font(.custom("GeistPixel-Regular", size: 13, relativeTo: .callout))
                             }
                             .padding(.horizontal, 14)
                             .frame(height: 40)
@@ -120,7 +103,7 @@ struct NewSessionView: View {
                                     Text(self.modeTitle)
                                     Spacer()
                                     Image(systemName: self.isEditingActiveSession ? "lock.fill" : "chevron.down")
-                                        .font(.callout)
+                                        .font(.custom("GeistPixel-Regular", size: 13, relativeTo: .callout))
                                 }
                                 .padding(.horizontal, 14)
                                 .frame(height: 40)
@@ -141,17 +124,31 @@ struct NewSessionView: View {
                                         AppIcon(bundleID: bundleID).frame(width: 24, height: 24)
                                     }
                                     if self.apps.count > 5 {
-                                        Text("+\(self.apps.count - 5)").font(.caption)
+                                        Text("+\(self.apps.count - 5)").font(.custom("GeistPixel-Regular", size: 12, relativeTo: .caption))
                                     } else if self.apps.isEmpty {
                                         Text(self.draft.policy.mode == .allowing
                                              ? "Choose at least one app" : "No apps blocked")
-                                            .font(.caption)
+                                            .font(.custom("GeistPixel-Regular", size: 12, relativeTo: .caption))
                                             .foregroundStyle(.secondary)
                                     }
                                     Spacer(minLength: 2)
                                     Button("Edit apps", systemImage: "pencil") { self.editingApps = true }
                                         .labelStyle(.iconOnly)
                                         .foregroundStyle(Color.qyubeAccent)
+                                        .popover(isPresented: self.$editingApps) {
+                                            QyubeAppRuleEditor(mode: self.draft.policy.mode, selectedApps: self.apps, onToggle: { id, selected in
+                                                let previous = self.draft.policy
+                                                self.setApp(id, selected: selected)
+                                                if self.isEditingActiveSession {
+                                                    guard self.draft.policy.mode != .allowing || !self.apps.isEmpty,
+                                                          self.coordinator.updateActiveSession(taskTitle: self.coordinator.currentTaskTitle, allowedApps: self.draft.policy.allowedApps, blockedApps: self.draft.policy.blockedApps) else {
+                                                        self.draft.policy = previous
+                                                        return false
+                                                    }
+                                                }
+                                                return true
+                                            })
+                                        }
                                 }
                                 .padding(.horizontal, 14)
                                 .frame(height: 44)
@@ -165,7 +162,7 @@ struct NewSessionView: View {
                             self.sectionTitle("Session catches")
                             if self.catches.isEmpty {
                                 Text("No catches from this session.")
-                                    .font(.callout)
+                                    .font(.custom("GeistPixel-Regular", size: 13, relativeTo: .callout))
                                     .foregroundStyle(.secondary)
                             } else {
                                 ScrollView(.horizontal) {
@@ -190,31 +187,26 @@ struct NewSessionView: View {
                         Text(self.isEditingActiveSession
                              ? "Choose at least one app before saving."
                              : "Choose at least one app to start.")
-                            .font(.caption)
+                            .font(.custom("GeistPixel-Regular", size: 12, relativeTo: .caption))
                             .foregroundStyle(Color.qyubeInterrupted)
                     }
                     if self.draft.taskTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                         Text(self.isEditingActiveSession
                              ? "Enter a session name before saving."
                              : "Enter a session name to start.")
-                            .font(.caption)
+                            .font(.custom("GeistPixel-Regular", size: 12, relativeTo: .caption))
                             .foregroundStyle(Color.qyubeInterrupted)
                     }
                     if self.coordinator.snapshot != nil && !self.isEditingActiveSession {
                         Text("Finish the current session before starting another.")
-                            .font(.caption)
-                            .foregroundStyle(Color.qyubeInterrupted)
-                    }
-                    if self.breakRemaining != nil {
-                        Text("Finish or skip the break before starting another session.")
-                            .font(.caption)
+                            .font(.custom("GeistPixel-Regular", size: 12, relativeTo: .caption))
                             .foregroundStyle(Color.qyubeInterrupted)
                     }
                     if self.startFailed {
                         Text(self.isEditingActiveSession
                              ? "Changes could not be saved. Check your access and try again."
                              : "This session could not start. Check your access and try again.")
-                            .font(.caption)
+                            .font(.custom("GeistPixel-Regular", size: 12, relativeTo: .caption))
                             .foregroundStyle(Color.qyubeInterrupted)
                     }
                 }
@@ -226,7 +218,7 @@ struct NewSessionView: View {
 
             Button(self.isEditingActiveSession ? "SAVE CHANGES" : "START", action: self.isEditingActiveSession
                    ? self.saveActiveSession : self.start)
-                .font(.headline)
+                .font(.custom("GeistPixel-Regular", size: 13, relativeTo: .headline))
                 .tracking(1.2)
                 .frame(maxWidth: .infinity)
                 .frame(height: 46)
@@ -238,17 +230,9 @@ struct NewSessionView: View {
                 .opacity((self.isEditingActiveSession ? self.canSaveActiveSession : self.canStart) ? 1 : 0.55)
                 .overlay(alignment: .top) { QyubeInkDivider().frame(height: 3) }
         }
+        .font(.custom("GeistPixel-Regular", size: 14))
         .foregroundStyle(Color.qyubeMenuInk)
         .background(Color.qyubeBackground)
-        .sheet(isPresented: self.$editingApps) {
-            QyubeAppRuleEditor(
-                mode: self.draft.policy.mode,
-                selectedApps: self.apps,
-                onToggle: { id, selected in
-                    self.setApp(id, selected: selected)
-                    return true
-                })
-        }
     }
 
     private var modeTitle: String {
@@ -273,7 +257,7 @@ struct NewSessionView: View {
 
     private func sectionTitle(_ title: String) -> some View {
         Text(title.uppercased())
-            .font(.caption.weight(.medium))
+            .font(.custom("GeistPixel-Regular", size: 12, relativeTo: .caption))
             .tracking(1.5)
             .foregroundStyle(Color.qyubeAccent)
     }
@@ -327,166 +311,5 @@ struct AppIcon: View {
     } else {
       Image(systemName: "app.dashed").resizable().scaledToFit().accessibilityLabel(bundleID)
     }
-  }
-}
-
-private struct AppChoice: Identifiable, Sendable {
-  let id: String
-  let name: String
-}
-
-struct QyubeAppRuleEditor: View {
-  let mode: FocusPolicyMode
-  let selectedApps: Set<String>
-  let onToggle: (String, Bool) -> Bool
-  @Environment(\.dismiss) private var dismiss
-  @State private var installedApps: [AppChoice] = []
-  @State private var search = ""
-  @State private var errorMessage: String?
-  @State private var loading = true
-
-  private var filteredApps: [AppChoice] {
-    guard !search.isEmpty else { return installedApps }
-    return installedApps.filter { $0.name.localizedStandardContains(search) }
-  }
-
-  var body: some View {
-    VStack(spacing: 0) {
-      QyubeInkHeader(title: "list") {
-        Text(mode == .allowing ? "Allow List" : "Block List")
-      }
-      VStack(alignment: .leading, spacing: 16) {
-        Text(mode == .allowing ? "What apps do you need?" : "What apps are blocked?")
-          .font(.headline)
-        HStack(spacing: 9) {
-          Image(systemName: "magnifyingglass").foregroundStyle(Color.qyubeAccent)
-          TextField("Search apps…", text: $search).textFieldStyle(.plain)
-            .accessibilityLabel("Search applications")
-          if !search.isEmpty {
-            Button("Clear search", systemImage: "xmark.circle.fill") { search = "" }
-              .labelStyle(.iconOnly).foregroundStyle(Color.qyubeAccent)
-          }
-        }
-        .padding(.horizontal, 12).frame(height: 42)
-        .overlay(QyubeInkBorder().stroke(Color.qyubeMenuInk, lineWidth: 1))
-        Text("Changes apply immediately").font(.caption).foregroundStyle(Color.qyubeAccent)
-      }
-      .padding(18)
-      QyubeInkDivider().frame(height: 3)
-      ScrollView {
-        LazyVStack(alignment: .leading, spacing: 0) {
-          ForEach(filteredApps) { app in
-            Button { setApp(app.id, selected: !selectedApps.contains(app.id)) } label: {
-              HStack(spacing: 12) {
-                AppIcon(bundleID: app.id).frame(width: 27, height: 27)
-                Text(app.name).lineLimit(1)
-                Spacer(minLength: 4)
-                Text("App").font(.callout).foregroundStyle(Color.qyubeAccent)
-                Image(systemName: selectedApps.contains(app.id) ? "checkmark.square.fill" : "square")
-                  .font(.title3).foregroundStyle(Color.qyubeAccent)
-              }
-              .padding(.horizontal, 18).frame(height: 51)
-              .frame(maxWidth: .infinity).contentShape(Rectangle())
-              .background(selectedApps.contains(app.id) ? Color.qyubeSelection.opacity(0.55) : .clear)
-            }
-            .accessibilityLabel(app.name)
-            .accessibilityValue(selectedApps.contains(app.id) ? "Selected" : "Not selected")
-            .accessibilityHint("Toggle application in this list")
-            .overlay(alignment: .bottom) {
-              Rectangle().fill(Color.qyubeAccent.opacity(0.45)).frame(height: 1)
-            }
-          }
-          if loading {
-            ProgressView().frame(maxWidth: .infinity).padding()
-          } else if filteredApps.isEmpty {
-            Text("No matching applications.").foregroundStyle(.secondary).padding(18)
-          }
-        }
-        .qyubeHideNativeScrollers()
-      }
-      .scrollIndicators(.hidden)
-      if let errorMessage {
-        Text(errorMessage).font(.callout).foregroundStyle(.red).padding(.horizontal, 18).padding(.top, 8)
-      }
-      Button("Choose application…", systemImage: "plus", action: chooseApplication)
-        .foregroundStyle(Color.qyubeAccent)
-        .frame(maxWidth: .infinity).padding(12)
-      Button { dismiss() } label: {
-        Text("DONE").font(.headline).tracking(1.3)
-          .frame(maxWidth: .infinity).frame(height: 48)
-          .foregroundStyle(.white).background(Color.qyubeMenuInk)
-      }
-      .keyboardShortcut(.defaultAction)
-    }
-    .buttonStyle(.plain)
-    .foregroundStyle(Color.qyubeMenuInk)
-    .frame(width: 310, height: 510).background(Color.qyubeBackground)
-    .clipShape(RoundedRectangle(cornerRadius: 12))
-    .overlay(QyubeInkBorder().stroke(Color.qyubeMenuInk, lineWidth: 1.3)
-      .padding(2).allowsHitTesting(false))
-    .environment(\.colorScheme, .light)
-    .task { await loadApps() }
-  }
-
-  private func loadApps() async {
-    let selectedApps = selectedApps
-    let mainBundleID = Bundle.main.bundleIdentifier
-    let choices = await Task.detached {
-      Self.discoverApplications(selectedApps: selectedApps, excluding: mainBundleID)
-    }.value
-    installedApps = choices
-    loading = false
-  }
-
-  nonisolated private static func discoverApplications(
-    selectedApps: Set<String>,
-    excluding mainBundleID: String?
-  ) -> [AppChoice] {
-    var choices: [String: AppChoice] = [:]
-    let roots = [
-      URL(fileURLWithPath: "/Applications"),
-      URL(fileURLWithPath: "/System/Applications"),
-      FileManager.default.homeDirectoryForCurrentUser.appending(path: "Applications"),
-    ]
-    for root in roots {
-      guard let enumerator = FileManager.default.enumerator(
-        at: root,
-        includingPropertiesForKeys: nil,
-        options: [.skipsHiddenFiles, .skipsPackageDescendants]
-      ) else { continue }
-      for case let url as URL in enumerator where url.pathExtension == "app" {
-        guard let bundle = Bundle(url: url),
-              let id = bundle.bundleIdentifier,
-              id != mainBundleID else { continue }
-        choices[id] = AppChoice(id: id, name: url.deletingPathExtension().lastPathComponent)
-      }
-    }
-    for id in selectedApps where choices[id] == nil {
-      choices[id] = AppChoice(id: id, name: id)
-    }
-    return choices.values.sorted {
-      if selectedApps.contains($0.id) != selectedApps.contains($1.id) {
-        return selectedApps.contains($0.id)
-      }
-      return $0.name.localizedStandardCompare($1.name) == .orderedAscending
-    }
-  }
-
-  private func setApp(_ id: String, selected: Bool) {
-    errorMessage = onToggle(id, selected) ? nil : "Keep at least one allowed app."
-  }
-
-  private func chooseApplication() {
-    let panel = NSOpenPanel()
-    panel.allowedContentTypes = [.application]
-    panel.allowsMultipleSelection = false
-    panel.canChooseDirectories = false
-    guard panel.runModal() == .OK, let url = panel.url,
-          let bundle = Bundle(url: url), let id = bundle.bundleIdentifier,
-          id != Bundle.main.bundleIdentifier else { return }
-    if !installedApps.contains(where: { $0.id == id }) {
-      installedApps.append(AppChoice(id: id, name: url.deletingPathExtension().lastPathComponent))
-    }
-    setApp(id, selected: true)
   }
 }

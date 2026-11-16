@@ -19,6 +19,14 @@
 **Fokus:** macOS lebih dulu. Rancangan iOS tetap pekerjaan lanjutan.
 **Nama target kode saat ini:** `Qoma`; nama produk yang dituju: `qyube`.
 
+### Pembaruan 5 November 2026 — completion langsung ke Today
+
+- Saat countdown selesai, `SessionCoordinator` tetap memfinalisasi dan menyimpan status `completed` seperti biasa. Sesudah finalisasi sukses, bunyi completion diputar, floating timer ditutup, lalu jendela utama dibuka pada `TodayView`.
+- Hapus alur break sepenuhnya dari UI produksi: tidak ada prompt/panel outcome, break timer, status break di menu bar, label break di Today, atau penguncian start sesi baru karena break.
+- Perubahan dibatasi pada presentasi dan navigation; aturan persistence sesi, catches, dan status completed/interrupted tidak berubah.
+- Sumber implementasi: `Qoma/Managers/QyubeAppCoordinator.swift` menangani completion; `Qoma/Managers/FloatingTimerController.swift` menutup timer dan membuka Today; `Qoma/UI/Main/TodayView.swift`, `NewSessionView.swift`, dan `QyubeHomeView.swift` tidak lagi membawa state break.
+- Keputusan ini menggantikan deskripsi alur completed lama di bagian 1 dan 19.3.
+
 ## jangan dihapus, catatan pribadi 
 
 - cara run di terminal : 
@@ -31,18 +39,25 @@ xcodebuild \
 
 open ~/Library/Developer/Xcode/DerivedData/qoma-drxrbpjdzxdevegbhqstemmkbakm/Build/Products/Debug/Qoma.app
 
-atua klo g bisa : 
-DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
-xcodebuild build \
-  -project qoma.xcodeproj \
-  -scheme Qoma \
-  -configuration Debug \
-  -destination 'platform=macOS'
-
-lalu : 
-open ~/Library/Developer/Xcode/DerivedData/qoma-drxrbpjdzxdevegbhqstemmkbakm/Build/Products/Debug/Qoma.app
 
 cara kill : pkill -f Qoma
+
+-------
+KLO PENGEN LIHAT LOG
+
+- pake 2 terminal
+- jalankan ini dlu : 
+pkill -x Qoma 2>/dev/null || true
+open /Users/kiram/Library/Developer/Xcode/DerivedData/qoma-drxrbpjdzxdevegbhqstemmkbakm/Build/Products/Debug/Qoma.app
+log stream --style compact --level debug --predicate 'process == "Qoma"'
+
+- lalu di termianl satunya : 
+xcodebuild -project qoma.xcodeproj \
+  -scheme Qoma \
+  -configuration Debug \
+  -destination 'platform=macOS' \
+  build && \
+open /Users/kiram/Library/Developer/Xcode/DerivedData/qoma-drxrbpjdzxdevegbhqstemmkbakm/Build/Products/Debug/Qoma.app
 
 ## 0. Cara memakai rencana ini
 
@@ -615,7 +630,7 @@ User menguji implementasi §14 dan melaporkan gerak penguin kurang halus, snowfl
 | Identitas sesi | Pengguna tidak diminta memberi nama sesi/tugas dan tidak melihat form New Session. Sesi baru memakai label netral `Focus session` pada riwayat dan aksesibilitas. Data historis yang sudah punya judul tetap dibaca; jangan hapus atau ubah judul lama saat migrasi. Distribusi berdasarkan judul tugas baru tidak relevan, sedangkan metrik fokus, waktu, aplikasi, domain, dan tangkapan tetap ada. |
 | Aturan fokus | Mode `timerOnly`/`allowing`/`blocking`, daftar aplikasi/domain, dan browser pilihan menjadi preferensi global persisten di Settings; `timerOnly` adalah default pertama kali. Daftar Allowing dan Blocking disimpan terpisah ketika mode berganti. Saat Start, salin aturan saat itu ke snapshot sesi agar riwayat dan evaluasi sesi stabil; perubahan Settings berlaku untuk sesi berikutnya, bukan mengubah sesi aktif diam-diam. Jika izin yang diperlukan tidak tersedia, tampilkan keadaan izin dan opsi Timer Only sebelum Start, jangan mengklaim aturan domain sedang bekerja. |
 | Panel floating | Saat active/paused, penguin dan timer tampil otomatis. Pause membuat penguin tidur. Menutup timer hanya menyembunyikan timer; penguin tetap tampil dan dapat memulihkan timer. Preferensi `Hide floating timer` di Settings berlaku langsung dan tetap tersimpan untuk sesi berikutnya; menu bar tetap menyediakan kontrol sesi. Saat idle kedua panel tidak tampil. |
-| Selesai | Countdown nol menghasilkan satu sesi `completed`. Penguin/timer menutup setelah transisi aman; panel menu bar ringkas muncul dengan `Start again` dan `Lihat hasil tangkapan`. Jendela utama tidak terbuka otomatis. Tombol hasil membuka **Insight** pada hari/sesi yang baru selesai, karena Insight menampilkan event tangkapan individual; Catalog tetap halaman koleksi spesies keseluruhan. Panel selesai memuat ringkasan singkat saja, bukan Fishing Report besar. |
+| Selesai | Countdown nol menyimpan satu sesi `completed`, memutar suara completion, menutup floating timer, lalu otomatis membuka Today. Tidak ada panel outcome, pilihan break, atau break timer. |
 | Stop/Restart/Quit | Stop meminta konfirmasi dan menyimpan `interrupted` dengan waktu aktif nyata. Restart mengulang countdown durasi sesi saat ini **dalam sesi logis yang sama**: ID sesi tetap, tidak menambah record interrupted/completed, dan tidak membuat reward tambahan. Quit ketika active/paused meminta konfirmasi `Stop and Quit`, menyimpan interrupted lebih dulu, lalu keluar; menutup jendela utama bukan Quit. |
 | Akses akun | Implementasi auth, trial, langganan, pembayaran, serta gate akses ditunda pada fase ini. Jangan menambahkan gate lokal palsu atau mengubah penyimpanan riwayat/tangkapan karena penundaan ini. |
 
@@ -711,7 +726,7 @@ Semua rekomendasi interview menu bar disetujui pengguna pada 13 Oktober. Bagian 
 | Idle | Ruler durasi 1–60 menit; tiga preset tersimpan di bawahnya | start kiri, … kanan | Ruler dapat diklik/diseret dan disesuaikan via accessibility. Pilihan terakhir tersimpan. Default instalasi baru 5/10/25; durasi awal 25. Preferensi yang sudah tersimpan tidak ditimpa. |
 | Active | Ruler progres menuju kiri, cancel/restart kiri, … kanan | pause kiri, countdown besar kanan | Ruler hanya menampilkan progres terhadap durasi awal sesi; tidak dapat mengubah durasi. Start yang berhasil menutup panel dan menampilkan penguin/timer sesuai preferensi. |
 | Paused | Sama seperti active; indikator berhenti | resume kiri, countdown yang berhenti kanan | Pause/Resume memakai clock yang sama; penguin mengikuti state paused yang sudah ada. |
-| Completed | Focus complete dan ringkasan durasi/jumlah tangkapan | start again dan Lihat hasil tangkapan | Panel otomatis terbuka. Start again memakai durasi sesi yang selesai dan snapshot preferensi global terbaru. Hasil membuka Insight untuk sesi tersebut. |
+| Completed | Tidak ada panel completed terpisah | Jendela utama membuka Today otomatis | Penyelesaian sesi tetap difinalisasi oleh coordinator sebelum Today ditampilkan. |
 | Recovery error | Pesan gagal simpan dan Retry saving | … | Hanya muncul ketika finalisasi benar-benar gagal; perlindungan data dan perbaikan kompatibilitas riwayat lama tetap dipakai. |
 
 ### Kontrol dan lifecycle
@@ -1636,6 +1651,12 @@ Perbaikan dan temuan lanjutan:
 - Setelah review visual, ukuran popover diperkecil dari 246pt menjadi 206pt. Ini sekitar dua pertiga lebar panel utama 310pt; lebar sepertiga (sekitar 103pt) tidak memberi ruang cukup untuk enam label dan ikon yang tetap terbaca.
 - Tinggi isi ikut dipadatkan dengan row 34pt, ikon 25pt, padding lebih kecil, dan header sedikit lebih ringkas. Label tetap utuh dan terbaca.
 
+### Perbaikan build branch popover — 28 Oktober 2026
+
+- Memperbaiki compile error di `Qoma/UI/Main/QyubeSettingsMenuPopover.swift`: tiga modifier `.padding(...)` berdiri sendiri di dalam `VStack` tanpa menerima view sebagai basis. Baris tersebut dihapus; padding container yang valid setelah `VStack` tetap dipertahankan.
+- Perbaikan ini hanya menyentuh popover menu dan tidak menambah bypass/dev mode, login, atau perubahan perilaku sesi. `main` sudah memiliki penghapusan baris yang sama pada rangkaian perubahan berikutnya.
+- Peringatan build tentang `Qoma/Info.plist` yang tercantum di Copy Bundle Resources bersifat terpisah dari compile error; perlu dibersihkan tersendiri bila masih muncul, tetapi bukan bagian dari perbaikan ini.
+- **Verifikasi:** setelah dependency SwiftLintPlugins dan Sparkle berhasil di-resolve, build Debug macOS lulus dengan `xcodebuild build -project qoma.xcodeproj -scheme Qoma -configuration Debug -destination 'platform=macOS' -derivedDataPath /tmp/qyube-settings-popover-derived CODE_SIGNING_ALLOWED=NO`. Warning `Info.plist` di Copy Bundle Resources masih muncul dan terpisah dari compile error ini. `git diff --check` juga lulus.
 ## Roadmap akun, trial, entitlement, dan pembayaran global — 25 Oktober 2026
 
 **Status: perencanaan saja; belum ada implementasi auth/backend/billing pada bagian ini.** Bagian ini menjadi keputusan terbaru bila bertentangan dengan catatan lama tentang Stripe, Xendit sebagai MVP, Apple login, kartu wajib untuk trial, atau trial dimulai saat sesi pertama. Seluruh bagian lama tetap dipertahankan sebagai riwayat. Contoh SQL, Swift, TypeScript, nama file baru, serta endpoint di bawah adalah rancangan kontrak untuk agent implementasi, bukan API yang sudah tersedia atau kode siap salin tanpa verifikasi versi SDK.
@@ -2065,6 +2086,81 @@ Polar signed webhook → order/subscription ledger → recompute entitlement
 6. UI dan copy final: hasil checkout pending berbasis server, error provider yang ramah pengguna, support/privacy/terms, akses histori dari Today saat expired, dan visual polish onboarding/akun. Jangan menjanjikan QRIS sebelum Xendit diintegrasikan.
 
 **Status:** implementasi dasar tersusun dan build, tetapi **belum release-ready**. Tahap yang memerlukan kredensial dan sandbox sengaja ditunda sesuai permintaan pengguna; tidak ada transaksi live atau deploy. Roadmap bagian I di atas tetap menjadi acceptance criteria, bukan otomatis berubah menjadi `[x]` seluruhnya.
+## Account, auth & one-time purchase — 31 Oktober 2026
+
+**Status: implementasi awal selesai; verifikasi sandbox dan visual masih terbuka.** Bagian ini menjadi arah terbaru untuk UI akun/auth dan penjualan baru, menggantikan rencana monthly/annual serta upgrade subscription sebelumnya. Riwayat di bawah tetap disimpan. Baseline autentikasi tersimpan pada commit `01b706b`; pekerjaan baru berada di branch `codex/account-auth-design`.
+
+### Keputusan produk
+
+- Penjualan baru diarahkan ke satu produk **Qyube Pro**, pembayaran sekali untuk akses lifetime macOS, maksimum dua Mac. Gunakan ID/entitlement `lifetime` yang sudah ada agar tidak membuat kontrak kedua. Harga existing $49 menjadi baseline; harga final dan cakupan update besar/support perlu dipastikan sebelum rilis.
+- Trial tujuh hari dimulai pada login native pertama yang selesai. Sign out tidak mengulang atau menghentikan hitungan trial. Klaim akun dan marker instalasi tetap disimpan; histori/koleksi tetap scoped ke akun.
+- Menu **Manage subscription** berubah menjadi **Account & purchases**, membuka `/account`. Tidak ada halaman web khusus untuk sign out app.
+- Mockup adalah arahan visual, bukan kontrak state backend. Jangan tampilkan pembelian sukses atau “Your Mac is connected” sebelum ada konfirmasi yang sesuai dari server/app.
+
+### Frontend website
+
+| Area | Rencana dan state yang wajib tersedia |
+|---|---|
+| `/auth` | Shell putih mengikuti landing page, wordmark existing, latar watercolor es, kartu responsif. Tawarkan Google dan Apple OAuth saja, tanpa email OTP. Request native serta tujuan callback tidak boleh hilang saat OAuth. Tampilkan shell/loading yang terbaca sejak render pertama; jangan ada flash gelap atau tombol dobel saat busy. Apple perlu Service ID, Team ID, Key ID, `.p8`, HTTPS callback, dan client-secret JWT valid. |
+| `/auth/complete` | Connecting, handoff ready, expired/invalid request, dan gagal jaringan punya copy/action berbeda. Tombol **Open Qyube** hanya memakai callback valid dari server. Retry membuka callback yang sama; hindari membuat ulang one-time code tanpa alur pemulihan. “You’re ready to focus” hanya setelah konfirmasi exchange jika status itu memang tersedia; tanpa acknowledgment gunakan “Return to Qyube to finish signing in.” Sediakan instruksi restart dari app bila request sudah kedaluwarsa. |
+| `/account` | Email akun, kartu akses trial/expired/Pro lifetime/revoked/pending verification; tanggal trial dari server, CTA beli untuk akun belum Pro, **Purchases & invoices** untuk pembeli. Daftar Mac dengan nama/last seen dan konfirmasi remove. Browser tidak boleh mengklaim “This Mac” tanpa identitas perangkat yang tepercaya. |
+| Checkout | Satu CTA beli Pro; status return pending sampai webhook paid terverifikasi. Jangan mengaktifkan akses hanya karena query string sukses. Refund penuh menampilkan status akses aktual. Portal failure punya pesan dan retry, bukan halaman kosong. |
+| Visual/accessibility | Pakai font dan komponen website existing, kartu putih/border abu-abu, tombol hitam, ilustrasi es di bawah. Mobile tidak tertutup ilustrasi; teks tetap HTML, ikon dekoratif alt kosong, fokus keyboard jelas, status diumumkan, reduced motion dihormati. |
+
+### Frontend macOS
+
+- `Qoma/UI/Main/QyubeSettingsMenuPopover.swift` dan caller `Qoma/UI/Main/QyubeHomeView.swift`: ubah label/callback account secara konsisten; tetap buka `/account`.
+- Popover custom konfirmasi **Sign out of Qyube?**, mengikuti frame off-white/navy existing. Tombol **Stay signed in** dan **Sign out**, disabled/busy saat request; Escape membatalkan dan fokus kembali ke pemicu. Gunakan ikon `QyubeMenuSignOut` existing.
+- Konfirmasi menjalankan `AccessCoordinator.signOutRemote()`; kredensial lokal baru dibersihkan mengikuti hasil revoke yang berlaku sekarang. Gagal offline tetap signed in dengan error/retry terlihat. Jangan hapus installation ID, klaim trial, atau data lokal akun. Sign out tetap diblokir saat sesi aktif.
+- Trial reassurance hanya ditampilkan pada akun trial; akun Pro tidak mendapat pesan trial. Quit tetap memakai jalur lifecycle existing; konfirmasi sesi aktif serta Help/Feedback bukan perluasan fitur pada tahap desain ini.
+
+### Backend dan kontrak akses
+
+- Audit dan gunakan ulang `/api/native-auth/{start,complete,exchange,refresh}`, `/api/me/entitlement`, `/api/me/device`, serta `/api/me/devices/[id]`. Pertahankan PKCE, state, TTL, one-time exchange, signed entitlement, ownership perangkat dan batas dua Mac. Redesign tidak memerlukan sistem auth baru.
+- `/account` membaca akun dari session server. Portal dibuat server melalui `/api/billing/portal`; token Polar tidak masuk browser/app. Audit dukungan order/invoice one-time pada hosted portal di sandbox; bila cukup gunakan portal existing, jangan membuat sistem invoice sendiri. Pengguna tanpa pembelian mendapat CTA pembelian yang jelas.
+- Perubahan one-time mencakup `website/app/pricing/page.tsx`, API checkout, `website/lib/billing/polar.ts`, lifetime quote/cancellation, webhook, entitlement, env contoh, `website/POLAR_SETUP.md`, `website/SETUP.md`, serta tests/fixtures terkait. Server wajib menolak checkout monthly/annual baru; menyembunyikan kartu harga saja tidak cukup.
+- Sebelum menghapus lifecycle subscription/outbox, periksa adanya subscription sungguhan dan job pending. Jika ada, hormati akses yang dibayar dan selesaikan kewajibannya; jika hanya sandbox, sederhanakan cabang recurring dan diskon upgrade yang tidak lagi digunakan. Jangan drop ledger/data historis hanya untuk merapikan kode.
+- Pertahankan signature webhook, deduplikasi event, validasi produk/nominal/currency, paid/refund grant, retry/reconciliation yang diperlukan. Cron cancellation subscription hanya dapat dilepas setelah dependensinya benar-benar kosong; webhook tetap diperlukan untuk one-time.
+- Tidak merencanakan schema/API baru sebelum terbukti dibutuhkan oleh invoice atau acknowledgment native. Jika diperlukan, dokumentasikan migrasi dan authorization-nya dahulu. Tidak ada perubahan dashboard Polar atau database dalam tahap ini.
+
+### Aset dan referensi
+
+- Board prototype disimpan di `design/account-auth-2026-10-31/prototype-board.png`.
+- Revisi aset: gunakan background utuh dengan penguin/ember menyatu, `signin-fishing-background-v2.png` (penguin kiri berkacamata 3D merah/cyan) dan `account-complete-background-v2.png` (penguin kanan, mata terpejam). Background kosong dan penguin welcome terpisah sebelumnya menjadi eksplorasi historis, bukan pilihan implementasi. Pertahankan karakter saat crop responsif.
+- Aset baru dan prompt lengkap: `design/account-auth-2026-10-31/`; inventaris serta status reuse ada pada `README.md` dalam folder tersebut. Varian WebP teroptimasi dipasang di `website/public/account/`.
+- Gunakan kembali `website/public/hero/` untuk penguin fishing/completed, bucket dan ice floe; gunakan ikon menu app existing. Ikon UI kecil/check/perangkat memakai Lucide atau native symbols; Google memakai aset brand resmi. Jangan menghasilkan logo Google atau teks UI sebagai bitmap.
+
+### Urutan implementasi dan acceptance
+
+1. Finalisasi aset dan copy; konfirmasi lifetime/update policy serta audit data subscription.
+2. Redesign shell auth dan complete sambil mempertahankan Google/Apple OAuth dan PKCE. Verifikasi login baru, existing session, error provider, request expired, retry dan app belum terpasang.
+3. Redesign akun + portal one-time + perangkat, termasuk akses lintas akun ditolak, Mac ketiga, revoke perangkat saat ini dan kegagalan portal.
+4. Terapkan penjualan one-time di FE/BE/config/docs; buktikan checkout batal/pending tidak memberi akses, verified paid mengaktifkan Pro, event duplikat aman, refund penuh mencabut grant yang terkait.
+5. Pasang popover sign out; cek cancel, double click, offline, sesi aktif, login ulang tidak reset trial, data akun A/B tetap terpisah.
+6. Jalankan typecheck/build, tes auth/billing yang relevan, build macOS dan uji sandbox/browser pada desktop/mobile serta keyboard. Deploy/merge mengikuti instruksi berikutnya.
+
+- [x] Simpan perubahan baseline dan buat branch desain baru.
+- [x] Dokumentasikan scope FE/BE, kontrak akses dan acceptance.
+- [x] Implementasikan shell sign-in/email OTP/Google, handoff complete states, halaman Account & purchases/perangkat, UI lifetime saja, validasi backend checkout dan popover sign-out SwiftUI.
+- [x] Tambahkan panduan Polar one-time dan perbarui setup/env; pertahankan compatibility subscription lama sambil menunggu audit ledger production.
+- [ ] Uji OAuth/OTP, callback native sekali pakai, Polar order/invoice dan paid/refund pada sandbox; audit subscription/customer portal production sebelum menghapus lifecycle lama.
+- [ ] Uji responsive visual di browser, keyboard/error states dan production build website.
+- [ ] Migrasi database atau deploy — tidak diperlukan oleh perubahan ini dan belum dilakukan.
+
+### Hasil implementasi awal — 31 Oktober 2026
+
+- Website `/auth`, `/auth/complete`, `/account`, `/pricing` memakai scene watercolor terpadu; form mempertahankan Google, OTP, request handoff, pesan loading/error dan pending checkout. Akun membaca entitlement/order/perangkat hanya milik session, menampilkan order/portal dan konfirmasi remove.
+- Endpoint checkout baru hanya menerima `lifetime`; webhook tetap menerima product bulanan/tahunan historis. API lifecycle, schema dan outbox tidak dihapus karena belum ada bukti ledger production bahwa tak ada paid period atau cancellation job.
+- Menu app memakai label **Account & purchases**. Sign out menampilkan konfirmasi popover, disable saat request, tetap terbuka dengan error saat revoke gagal, dan memanggil revoke server yang sudah ada. Trial reminder hanya ditampilkan untuk status trial; sign out tidak menghapus klaim trial atau data lokal.
+- Verifikasi lokal: `bun run typecheck`, ESLint pada file TS yang berubah, `bun test lib/billing`, `git diff --check`, dan `xcodebuild build -project Qoma.xcodeproj -scheme Qoma -configuration Debug -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO` lulus. Production website build gagal karena runner tidak dapat mengunduh font Google (Geist, Geist Mono, Syne), termasuk saat dicoba di luar sandbox. Belum ada tes browser/OAuth/Polar sandbox, audit ledger production atau transaksi nyata.
+
+### Auth providers — Google + Apple only
+
+- [x] Hapus email OTP dari halaman login dan konfigurasi Better Auth, termasuk helper/env Resend yang hanya dipakai untuk OTP.
+- [x] Tambahkan Apple OAuth dengan client-secret JWT ES256 masa berlaku 180 hari, konfigurasi env dan petunjuk callback HTTPS.
+- [x] Jaga theme hotkey tetap aman ketika event keyboard tidak membawa `key`.
+- [ ] Isi Apple Developer credentials di Dokploy, daftarkan Service ID dan callback `https://qyube.brokarim.com/api/auth/callback/apple`, lalu uji OAuth Apple di domain HTTPS.
+- Verifikasi kode lokal: `bun run typecheck`, ESLint file auth/theme-provider, dan `git diff --check` lulus. Belum ada OAuth Apple test karena credential belum dikonfigurasi.
 
 ## Supabase + Drizzle dan panduan konfigurasi Polar — 26 Oktober 2026
 
@@ -2147,3 +2243,210 @@ Token, product IDs dan webhook secret sandbox berbeda dari production. Kredit up
 - [ ] Selesaikan gate rilis production pada roadmap sebelumnya: webhook/checkout nyata, portal/prorata, refund/cancellation retry, key di build Mac, signing/notarization dan auto-update.
 
 Rujukan resmi untuk panduan: [koneksi Supabase](https://supabase.com/docs/guides/database/connecting-to-postgres), [pengamanan Data API](https://supabase.com/docs/guides/api/securing-your-api), [Drizzle + Supabase](https://orm.drizzle.team/docs/connect-supabase), [Polar sandbox](https://polar.sh/docs/integrate/sandbox), [OAT](https://polar.sh/docs/integrate/oat), [produk](https://polar.sh/docs/features/products), dan [webhook](https://polar.sh/docs/integrate/webhooks/endpoints).
+
+
+## Harga Qyube Pro lifetime diperbarui — 3 November 2026
+
+Keputusan terbaru pengguna menggantikan harga lifetime USD $49 pada catatan sebelumnya: **Qyube Pro lifetime macOS = USD $11 one-time**. Harga website, checkout, Polar product, dan validasi webhook harus cocok pada 1100 cents sebelum pajak. `EXPECTED_LIFETIME_AMOUNT_CENTS` default 1100; checkout upgrade lama hanya diterima bila diskon dan kredit tercatat pada checkout yang sama serta nominal akhir memenuhi batas minimum. Nominal $4.90 ditolak. Harga monthly/annual lama hanya relevan bagi catatan akses langganan historis; produk baru tetap lifetime saja.
+
+Harga $49 dan kalkulasi upgrade yang masih muncul di bagian strategi lama adalah riwayat keputusan terdahulu, bukan harga yang berlaku. Sebelum jual, setel product Polar lifetime ke USD $11 dan samakan environment live `EXPECTED_LIFETIME_AMOUNT_CENTS=1100` serta `MIN_LIFETIME_AMOUNT_CENTS=500`.
+### Floating timer watercolor — 4 November 2026
+
+- Branch `codex/floating-watercolor-timer`: timer memakai latar watercolor biru-putih, angka hitam dan border; shadow SwiftUI dihapus. Kontrol hover memakai ilustrasi Edit, Pause, Resume, dan Stop baru. Jarak HStack dan ukuran target tombol tetap sama.
+- Aset dibuat dengan imagegen bawaan sebagai `FloatingWatercolor-*` di asset catalog. Prompt: watercolor kertas biru-putih dengan tengah terang; simbol terpisah bergaya tinta dan watercolor polar untuk pensil, pause, play, dan stop. Screenshot referensi prototype ada di `output/imagegen/floating-timer-backgrounds-v1/`.
+- Pengaturan warna tema dan liquid glass tidak lagi memengaruhi timer fokus karena desain baru memakai latar watercolor dan teks hitam. Perubahan controller yang sudah ada sebelum pekerjaan ini dipertahankan.
+
+## Living cove bertahap — 11 November 2026
+
+- Satu worktree; branch bertingkat: codex/living-cove-atmosphere → codex/cove-visitors → codex/cove-interactive-bucket.
+- Tahap pertama: scale actors 0.78 → 0.45 dengan posisi kaki dunia tetap, menghapus rotasi/stretch prosedural tambahan di atas animasi gambar, riak pelampung, salju ringan acak per sesi, pilihan suasana Auto/Morning/Sunset/Night dan transisi warna empat detik. Rute ikan dekoratif existing dipertahankan.
+- Tahap kedua: satu camar atau anjing laut pixel, jeda 8–15 menit fokus aktif, kunjungan 10–20 detik. Kedatangan menunggu idle fishing dan scheduling berhenti saat pause. Kapal selam ditunda sesuai rekomendasi yang disetujui.
+- Tahap ketiga: popover ember dengan query account/session terindeks, banked + provisional, count per spesies, penemuan baru dan Open Catalog. Area klik ember diperluas; accessibility press serta Space/Return membuka ringkasan.
+- Build Debug dan 38 tes terarah animasi/pengunjung lulus; tes akhir ditambah isolasi query ember. Renderer aktual sudah mengekspor preview. Detail hasil dan batas ada di docs/companion/pixel-cove-v1/LIVING_COVE.md.
+- Belum final: alpha mask atlas pixel lama masih mengikuti siluet watercolor dan perlu cleanup agar potongan tepi antar-frame terjamin hilang; idle blink/head-turn baru belum ditambahkan. Manual QA popover, kunjungan lama dan transisi suasana belum dilakukan. Completion existing masih menyembunyikan diorama sehingga ringkasan sesi terakhir tidak tersedia melalui ember sesudah panel hilang.
+
+## Pembaruan ilustrasi dan living cove — 11 November 2026
+
+### Konsep dan ilustrasi
+
+- Enam prototype pixel tersimpan di `design/qyube-living-cove-v1/`: living diorama, reaksi tangkapan, perubahan suasana, pengunjung sesekali, ember interaktif, dan kenangan sesi. Prompt masing-masing tersedia di `PROMPTS.md`. Prototype reaksi tangkapan dan kenangan sesi adalah eksplorasi visual, bukan bukti fitur sudah diimplementasikan.
+- Diorama menggunakan referensi pulau dan pose penguin di `docs/companion/pixel-cove-v1/sources/`; preview renderer aktual dan rincian implementasi tersedia dalam folder `docs/companion/pixel-cove-v1/`.
+- Worktree branch `codex/all-pixel-art` saat pencatatan memiliki perubahan ilustrasi yang belum di-commit: sejumlah aset collectible common, uncommon, rare, dan legendary, ikon menu serta pose pause. Hasil kerja terkait berada di `output/imagegen/pixel-migration-v1/` dan `output/imagegen/pixel-today-concepts/`. Status ini perlu ditinjau dan diverifikasi sebelum dianggap sebagai aset final.
+- Worktree juga mencatat penghapusan sejumlah arsip ilustrasi watercolor dan karakter Christmas; penghapusan tersebut belum di-commit dan perlu ditinjau sesuai kebutuhan riwayat aset.
+
+### Implementasi dan tindak lanjut
+
+- Perubahan kode living cove, pengunjung, dan ember sudah dicatat pada bagian sebelumnya dan masuk melalui commit `cfd45a2`, `acf5abd`, dan `37b9847`. Pengunjung dan ember ada di branch turunan; branch `codex/living-cove-atmosphere` hanya memuat tahap pertama.
+- Ukuran penguin, keselarasan frame, suasana, kemunculan pengunjung dan interaksi ember masih perlu diperiksa langsung di aplikasi. Build yang gagal karena project tidak ditemukan dapat membuka binary lama bila perintah `open` dijalankan terpisah; jalankan build dari root project dan buka aplikasi hanya setelah build berhasil.
+- Verifikasi visual aset collectible baru, transparansi dan konsistensi pixel style pada ukuran aktual aplikasi; tinjau kembali penghapusan arsip sebelum commit. Keterbatasan atlas, idle dan QA manual tetap berlaku seperti tercatat di atas.
+
+### Perbaikan siluet dan posisi penguin — 11 November 2026
+
+- Branch tetap `codex/all-pixel-art`. Lima atlas karakter diperbaiki dengan imagegen menjadi V2; seluruh 54 gambar diekspor memakai alpha aslinya, tanpa masker watercolor atau threshold alpha keras.
+- Aset dan sumber karakter V1 yang digantikan dihapus; script V1 tinggal mengekspor pulau/props. Kode memakai `PixelCatchV2`, `PixelCastV2`, `PixelDepositV2`, `PixelHopV2`, `PixelPosesV2`.
+- Posisi actors maju (-4,-5) pt dengan scale tetap 0.45. Pelampung tetap pada titik scene (63.95,55.85), ember dan area kliknya ikut bergeser. Alur memancing dan reaksi gambar dipertahankan.
+- Preview renderer aktual, sumber dan prompt: `docs/companion/pixel-cove-v2/`. Catatan alpha mask lama pada bagian sebelumnya kini digantikan oleh ekspor native-alpha V2 ini.
+
+## Popover ember: ringkasan dan carousel — 12 November 2026
+
+- Branch tetap `codex/all-pixel-art`. `CoveBucketView` mengikuti susunan referensi `05-interactive-bucket.png`: judul This session, total catches dan species, carousel satu baris dengan artwork + jumlah, discovery baru, dan tombol Open Catalog selebar konten.
+- Grid vertikal diganti `ScrollView(.horizontal)` dengan `LazyHStack` dan view-aligned scrolling; scrollbar disembunyikan. Nama tangkapan tersedia lewat tooltip dan label accessibility. Tampilan kosong tetap tersedia.
+- Baris discovery hanya muncul bila jumlah jenis yang belum pernah ditangkap lebih dari nol; bentuk tunggal memakai `1 new discovery`. Perhitungan memakai data sesi dan previouslyCaughtKinds existing.
+- Popover dan kontennya memakai appearance terang dengan warna teks gelap eksplisit, memperbaiki teks putih di atas latar terang saat sistem memakai dark mode. Pesan tangkapan provisional tetap ditampilkan bila belum banked.
+- Exporter debug companion mencakup tiga preview ember: kosong, discovery baru, dan tanpa discovery baru. Query/persistence tangkapan serta aksi Open Catalog tetap memakai jalur existing.
+- Validasi: build Debug berhasil. Tiga kondisi diperiksa lewat render NSHostingView native dan disimpan di `docs/companion/bucket-ui-2026-11-12/`. Kondisi tanpa discovery tidak menyisakan baris kosong; carousel berisi artwork + count tanpa scrollbar. Tidak menambah tes unit untuk perubahan presentasi ini; scroll trackpad dan klik Open Catalog belum diuji manual.
+
+## Rencana penyederhanaan Settings dan menu akun — 12 November 2026
+
+**Status: direncanakan, belum diimplementasikan.** Keputusan ini menggantikan rancangan pengaturan lama yang bertentangan. Kerjakan di branch `codex/all-pixel-art` dengan mempertahankan perubahan worktree yang sudah ada.
+
+### 1. Settings dan tampilan target harian
+
+- Selaraskan dua jalur yang ada: `Qoma/UI/SettingsView.swift` dengan `GeneralSettingsPane` / `AppearanceSettingsPane`, dan halaman compact `Qoma/UI/Main/QyubeJournalSettingsView.swift`. Periksa semua pintu masuk sebelum menghapus kontrol atau kode yang tidak lagi dipakai.
+- Hapus quick presets, daily focus goal beserta target/progress pada `TodayGoalSummary`, reset settings, pilihan distraction sound, reduce companion motion, liquid glass, opacity dan timer color. Pertahankan ringkasan waktu fokus aktual tanpa target. Pastikan sesi masih bisa memilih durasi normal tanpa preset.
+- Nonaktifkan seluruh suara completion dan distraction selama MVP, termasuk pengguna lama yang memiliki preferensi aktif. Pertahankan implementasi suara agar bisa diaktifkan kembali setelah MVP; menghapus kontrol saja tidak cukup karena `QyubeAppCoordinator.onSessionEnded` dan `DistractionAudioPlayer` masih dapat memutar suara.
+- Pertahankan kontrol floating timer, pilihan Cove atmosphere Auto/Morning/Sunset/Night, Check for Updates dan versi. Pastikan pilihan atmosphere juga dapat ditemukan dari Settings compact. Hilangkan override reduce motion aplikasi, tetapi tetap hormati pengaturan Reduce Motion macOS pada companion dan efek lainnya.
+- Hapus Record activity dan prompt persetujuan `AnalyticsConsentSheet`; hentikan pengumpulan aplikasi dan website dalam `QyubeAppCoordinator.updateAnalyticsTracking`, termasuk bila preferensi lama aktif. Jangan matikan pemantauan foreground yang dibutuhkan mode allowing/blocking. Pertahankan riwayat aktivitas lama dan analytics sesi/tangkapan sampai pengguna menghapus data; rincian aplikasi di Analytics akan dihapus pada pekerjaan terpisah.
+
+### 2. Erase local data
+
+- Implementasikan tombol yang saat ini disabled di `QyubeJournalSettingsView`: konfirmasi destruktif menjelaskan bahwa riwayat sesi, koleksi/tangkapan, aktivitas dan preferensi lokal akan dihapus secara permanen. Tangani sesi aktif secara aman sebelum penghapusan dan tampilkan error bila penghapusan gagal.
+- Telusuri repository SQLite, data JSON lama, cache dan UserDefaults yang relevan; lakukan penghapusan melalui mekanisme penyimpanan yang aman. Jelaskan cakupan akun lokal yang dihapus dalam dialog dan jangan menghapus data milik akun lain secara tidak sengaja.
+- Jangan membatalkan, menghapus atau mengubah pembelian, entitlement server, akun, trial atau perangkat terdaftar. Jangan menghapus credential bila hal itu menyebabkan pengguna kehilangan akses tanpa penjelasan. Ini bukan fitur hapus akun atau pembatalan pembelian.
+
+### 3. Feedback, Help dan Quit
+
+- `Qoma/SupportLinks.swift`: ubah feedback placeholder ke `mailto:brokariim@gmail.com` dengan subject Qyube feedback. `QyubeSettingsMenuPopover` tetap membuka aplikasi email default. Jika pembukaan gagal, tampilkan alamat agar dapat disalin.
+- `website/app/(legal)/support/page.tsx`: ganti seluruh placeholder support dengan link email `brokariim@gmail.com`; hapus banner TODO dan cocokkan penjelasan provider login dengan konfigurasi yang benar-benar tersedia.
+- Periksa jalur Quit dari `QyubeSettingsMenuPopover` → `QyubeHomeView` → `QyubeAppCoordinator.quitImmediately` → `AppDelegate`. Saat ini `quitWithoutConfirmation()` melewati finalisasi sesi; jalur lain di `applicationShouldTerminate` justru menampilkan konfirmasi. Satukan perilaku: Quit langsung tanpa popover konfirmasi, finalisasi sesi aktif/paused sebagai interrupted sebelum app keluar, hitung durasi nyata dan terapkan aturan provisional lima menit. Jika penyimpanan gagal, jangan mengorbankan data; laporkan kegagalan dan pertahankan kesempatan pemulihan.
+
+### 4. Account & purchases di browser
+
+- Pertahankan menu Account & purchases di `QyubeSettingsMenuPopover`; jangan duplikasi di Settings compact. Saat ini `QyubeHomeView` hanya membuka `/account`, sedangkan halaman tersebut memakai sesi cookie browser dan redirect `/auth` bila belum login: sesi browser bisa berbeda dari akun di `AccessCoordinator`.
+- Rancang handoff yang aman antara akun Mac dan browser menggunakan identitas akun yang diverifikasi server, token satu kali singkat bila diperlukan, dan validasi sesi/device di backend. Jangan kirim credential native, token jangka panjang atau data sensitif dalam URL/log; cegah open redirect, replay dan pencampuran akun.
+- Jika browser belum login, arahkan ke login dan kembali ke halaman account setelah berhasil. Jika login browser berbeda dari akun Mac, jelaskan perbedaan dan minta login ke akun yang sama sebelum menampilkan pembelian untuk alur yang dimulai dari app. Jangan otomatis menggabungkan atau memindahkan akun. Jika sudah sama, buka account langsung. Tentukan penanganan gagal/offline dengan pesan yang jelas.
+- Halaman account terus membatasi query dan mutasi ke `session.user.id`; identitas yang dikirim client tidak boleh menjadi dasar otorisasi. Hormati alur sign-in dan device limit existing.
+
+### 5. Urutan implementasi dan pemeriksaan
+
+1. Sederhanakan kedua tampilan Settings dan daily goal; matikan suara serta pencatatan aktivitas tanpa memutus distraction monitoring.
+2. Implementasikan dan verifikasi erase local data dengan batas akun dan penanganan error.
+3. Perbaiki feedback, Help dan finalisasi Quit pada semua jalur terminasi.
+4. Implementasikan handoff akun browser dan penanganan mismatch; uji autentikasi server serta redirect.
+5. Build Mac dan jalankan pengujian terarah: sesi di bawah/di atas lima menit saat Quit, kegagalan penyimpanan, preferensi suara/analytics lama, Reduce Motion sistem, mode blocking/allowing, penghapusan lokal tanpa mengubah entitlement, browser tanpa login/sama/berbeda, token kedaluwarsa/replay serta link feedback/support. Verifikasi manual saat provider dan environment tersedia.
+
+## Rencana hero website Midnight Aurora — 12 November 2026
+
+### Catatan pelaksanaan Settings sebelum hero
+
+- Snapshot pekerjaan awal tersimpan di commit `3578f68`; branch implementasi Settings adalah `codex/simplify-settings`.
+- Perubahan awal menghapus kontrol preset, target harian dan appearance lama; ringkasan waktu aktual tetap ada. Completion sound dan distraction sound dinonaktifkan; pengumpulan aktivitas dan prompt consent tidak lagi dijalankan. Feedback dan Help diarahkan ke brokariim@gmail.com. Quit diarahkan melalui finalisasi sesi tanpa konfirmasi awal.
+- Status pekerjaan ini belum lengkap: erase local data dan handoff kesesuaian akun browser belum diimplementasikan, fallback pembukaan email belum ditambahkan, dan override Reduce Motion lama belum dibersihkan pada seluruh consumer. Perubahan awal belum dianggap siap rilis. Build/tes dan review akhir belum selesai; branch hero belum dibuat.
+
+**Status: konsep dipilih; ilustrasi produksi, animasi, waitlist dan implementasi belum dibuat.** Referensi utama `design/qyube-hero-pixel-v1/02-midnight-aurora.png`, prompt di `design/qyube-hero-pixel-v1/PROMPTS.md`; geometri dan gaya pulau mengacu pada `output/imagegen/penguin-diorama-drafts/draft-b-ice-cove-pixel-art.png`. Kerjakan pada branch `codex/all-pixel-art`; pertahankan pekerjaan dan dokumentasi yang sudah ada. Ruang lingkup visual hanya hero di `website/app/(marketing)/page.client.tsx`; section di bawah hero tetap sama.
+
+### Komposisi dan identitas
+
+- Hero memenuhi layar desktop: latar gradasi navy gelap dengan cahaya aurora teal dan ungu, tekstur butir/dither halus serta partikel pixel yang tidak mengganggu keterbacaan. Gunakan gradient CSS; gambar tekstur kecil hanya bila dibutuhkan.
+- Wordmark `qyube` huruf kecil berukuran besar di belakang diorama, warna gading dengan transisi dither pada bagian bawah. Diorama menutupi sebagian huruf tetapi nama tetap terbaca. Gunakan teks HTML/font yang sesuai bila tersedia, bukan membakar seluruh halaman menjadi satu gambar.
+- Pulau es besar di tengah menjadi fokus: bentuk teluk dengan tebing es bertingkat, salju, gua, kolam turquoise, bongkah kecil dan ember. **Tanpa penguin dalam hero**. Tambahkan beberapa spesies ikan berbeda di air, ikan terlihat di ember, serta burung sebagai pengunjung/dekorasi yang proporsional. Detail harus terbaca tanpa terlalu ramai.
+- Copy di kiri bawah: “A tiny penguin island on your desktop.” dan “Stay focused. Go fishing. Collect your catches.” Form waitlist di kanan bawah dengan label platform macOS; sesuaikan posisi pada layar sempit. Konten dan kontrol harus dapat dibaca, diakses keyboard, dan tetap ada pada mobile tanpa saling menutupi.
+
+### Aset ilustrasi dan animasi
+
+- Buat ulang diorama produksi beresolusi cukup tinggi untuk layar Retina desktop menggunakan referensi terpilih; jangan gunakan screenshot prototype lengkap sebagai aset produksi. Siapkan pulau transparan, air, ikan beragam, isi ember dan burung sebagai layer terpisah dengan anchor, perspektif, palet dan ukuran pixel konsisten. Simpan source, prompt, lisensi dan hasil ekspor dalam folder aset project yang jelas; hindari memperbesar raster kecil secara berlebihan.
+- Ekspor format web yang sesuai dengan transparansi (misalnya WebP/AVIF bila dukungan dan kualitas memadai), dengan alternatif seperlunya. Tentukan ukuran aktual dan kompresi setelah uji visual; gunakan `next/image`, ukuran responsif, dimensi eksplisit dan prioritas yang sesuai agar hero cepat muncul serta tidak menggeser layout. Ukur kualitas, berat unduhan dan rendering pada layar Retina/mobile sebelum memilih ukuran akhir.
+- Hidupkan air dengan riak/pergeseran halus, ikan berbeda berenang perlahan di area kolam, ikan di ember bergerak sesekali, dan burung sesekali melintas atau bertengger. Atur kedalaman layer dan clipping agar ikan tetap di air dan ilustrasi tidak keluar batas. Gerak lembut, tidak mengalihkan perhatian dari copy dan form; hormati `prefers-reduced-motion` dengan tampilan statis. Tunda atau hentikan animasi saat hero tidak terlihat dan hindari beban berlebih pada perangkat mobile.
+
+### Waitlist
+
+- Sediakan input email berlabel, tombol `Join the waitlist` dan checkbox persetujuan email update yang belum dicentang secara default; tampilkan keadaan loading, berhasil, duplikat dan gagal dengan pesan yang jelas. Jangan mewajibkan login. Catat tujuan penggunaan email dan tautan kebijakan privasi.
+- Tambahkan tabel waitlist melalui migrasi Drizzle untuk database Supabase/Postgres existing: email yang dinormalisasi, waktu pendaftaran, status serta waktu/versi persetujuan. Terapkan uniqueness di database; validasi di server, batasi spam/rate dan hindari memberi akses publik langsung ke tabel. Endpoint server menyimpan pendaftaran; secret tetap di server. Tidak mengirim email massal otomatis dalam tahap ini.
+- Lindungi data kontak dan tentukan alur unsubscribe/penghapusan sebelum mengirim email update. Jalankan migrasi hanya di environment yang telah dikonfigurasi; jangan menganggap kredensial atau database produksi sudah tersedia.
+
+### Tahapan dan penerimaan
+
+1. Siapkan dan tinjau aset pulau, ikan, ember dan burung dengan ukuran serta layer yang diperlukan.
+2. Bangun hero responsif mengikuti Midnight Aurora, copy dan wordmark; pertahankan section lain dan periksa dampak penggantian demo timer hero yang lama.
+3. Integrasikan animasi ringan dan reduced motion; verifikasi performa desktop/mobile dan saat tab tidak aktif.
+4. Tambahkan migrasi, endpoint dan form waitlist, termasuk validasi, duplikat, persetujuan dan penanganan kegagalan.
+5. Periksa visual desktop/mobile, kontras, keyboard, screen reader, jaringan lambat, hasil build serta alur database di environment uji. Dokumentasikan hasil dan batas yang belum diuji.
+
+### Implementasi penyederhanaan Settings — 12 November 2026
+
+- Branch `codex/simplify-settings` dari snapshot `3578f68`. Settings compact dan window disederhanakan ke floating timer, suasana, update, versi dan penghapusan data lokal; target harian diganti total fokus aktual. Suara completion/distraction disimpan implementasinya tetapi tidak dipanggil pada runtime MVP. Tracking aktivitas dihentikan tanpa mematikan foreground policy monitoring.
+- Quit langsung menempuh finalisasi sesi existing dan aturan provisional. Jika penyimpanan gagal, keluar dibatalkan dengan pesan agar sesi dapat dipulihkan. Feedback membuka mailto brokariim@gmail.com dengan fallback salin alamat; Help memakai alamat sama.
+- Erase local data memakai transaksi SQLite per account, menolak sesi aktif, menandai migrasi JSON akun agar data tidak muncul kembali, mereset pilihan timer/suasana dan menyegarkan UI. Akun lain, Keychain, trial dan pembelian server tidak diubah. Arsip/backup lama tetap disimpan dan batas ini disebutkan dalam konfirmasi; ini bukan penghapusan akun atau penghapusan seluruh salinan arsip.
+- Account & purchases memakai POST bearer-authenticated untuk membuat link opaque 10 menit, dikonsumsi sekali di server menjadi cookie konteks signed HttpOnly. Cookie tidak memberikan akses akun: halaman tetap memerlukan sesi Better Auth dan menolak akun yang berbeda sebelum query pembelian. Browser yang berbeda akun dapat sign out secara eksplisit; sesi Mac tidak ikut berubah. Tabel baru `account_links` menggunakan RLS dan migrasi Drizzle `0002_damp_the_fallen`.
+- Website typecheck dan Drizzle metadata check lulus. Build Mac awal lulus; pengujian penyimpanan terarah ditambah untuk isolasi akun serta sesi aktif. Test runner awal terhalang mismatch Team ID; pemeriksaan diulang memakai signing ad-hoc lokal. Provider login nyata dan pengujian email default tetap memerlukan QA manual.
+- Hasil pemeriksaan akhir Settings: suite `QomaDatabaseTests` lulus dengan signing ad-hoc, termasuk tes erasure baru. Website typecheck dan Drizzle check lulus. Tidak ada migrasi database hosted yang dijalankan.
+
+### Implementasi hero Midnight Aurora — 12 November 2026
+
+- Branch bertingkat `codex/midnight-aurora-hero` mengikuti `codex/simplify-settings` (`c147103`, koreksi `36fc4ec`). Hero lama dengan demo timer diganti di `website/app/(marketing)/page.client.tsx`; `marketing-information.tsx` dan susunan section bawah tidak diubah.
+- Pulau transparan baru dibuat dengan imagegen bawaan: 1536×1024, tanpa penguin, dengan camar kecil dan ikan terlihat di ember. Source serta prompt disimpan di `design/qyube-hero-pixel-v1/production/`; ekspor WebP sekitar 314 KB berada di `website/public/hero/midnight-aurora/`. Tiga ikan memakai ilustrasi collectible pixel existing yang diekspor ulang untuk web. Burung dan isi ember saat ini merupakan detail statis dalam artwork; animasi individual keduanya menjadi polish lanjutan, bukan fitur yang telah dibuat.
+- CSS lokal `hero.module.css` membuat gradasi navy/teal/ungu, tekstur grain kecil, wordmark pixel berbasis SVG, gerak aurora, tiga ikan berenang dan riak. Animasi dihentikan saat hero tidak terlihat atau tab disembunyikan; Reduce Motion menggunakan tampilan statis. Pulau menyesuaikan tinggi viewport desktop dan form disusun vertikal di mobile. Screenshot implementasi desktop/mobile ada di `design/qyube-hero-pixel-v1/implementation/`.
+- Form waitlist tidak membutuhkan login: persetujuan belum dicentang, email dinormalisasi, input divalidasi server, honeypot, pemeriksaan Origin dan rate limit lima percobaan per jam/IP. IP disimpan sebagai HMAC hash. Duplikat mendapat respons sukses yang sama; tidak mengirim email otomatis. Kebijakan privacy mencantumkan waitlist, persetujuan dan kontak penghapusan.
+- Migrasi Drizzle `0003_free_lily_hollister` menambah `waitlist` dan `waitlist_attempts` dengan RLS tanpa akses publik. Endpoint `/api/waitlist` memakai koneksi server existing; secret tidak dikirim ke browser. Data rate-limit lebih lama dari sehari dibersihkan saat endpoint dipakai. Unsubscribe untuk pengiriman email massal harus disiapkan sebelum kampanye; saat ini pengguna dapat meminta keluar melalui email support.
+- Pemeriksaan: typecheck, lint file yang diubah, tes validasi waitlist dan production build website lulus. Migrasi lengkap diterapkan pada PostgreSQL 17 sementara terisolasi; tes integrasi membuktikan token akun sekali pakai, penolakan perangkat dicabut, persetujuan waitlist, deduplikasi, rate limit dan RLS. Script: `website/scripts/check-hero-account-integration.ts` dengan guard environment test dan port localhost khusus 55439. Database hosted tidak disentuh.
+- Sebelum deploy: jalankan `bun run db:migrate` dengan URL migrasi yang benar untuk tabel account_links/waitlist; samakan BETTER_AUTH_URL dengan origin website, konfigurasikan proxy X-Forwarded-For yang tepercaya dan secret auth existing. QA login provider nyata, inbox/email client, perangkat fisik mobile dan profiling frame-rate tetap manual. Tidak ada subscription, akun atau entitlement pengguna yang diubah oleh pengujian ini.
+- Verifikasi tambahan final: `SessionCoordinatorTests` dan `SessionCoordinatorCatchTests` lulus. Tes awal menemukan hook deposit manual belum menyegarkan active time; diperbaiki di Settings commit `3393cbf` dengan memanggil pembaruan durasi existing sebelum deposit. Tes deposit tepat 300 detik kini lulus. Koreksi lint/penanganan error akun ada di `36fc4ec`. Hero branch memuat kedua koreksi melalui fast-forward.
+
+## Penyederhanaan Account, artikel marketing, dan checkout — 12 November 2026
+
+- Branch `codex/all-pixel-art`. Account memakai latar gradien Midnight Aurora dan tampilan lebih ringkas; status akses, perangkat, riwayat pembelian dan portal invoice tetap tersedia. Harga tidak ditampilkan di halaman Account, pricing, terms atau refund; nominal akhir ditampilkan oleh checkout Polar.
+- Halaman marketing setelah hero diubah menjadi satu artikel terang berisi heading, paragraf, teks tebal dan bullet; kolom dan FAQ yang dapat ditutup dihilangkan. Hero dan section lain tidak dibuat ulang.
+- Seluruh paragraf, daftar, link dan kontrol memakai Arial; heading h1–h4 memakai Geist Pixel. Font WOFF2 Latin dan Latin Extended didistribusikan lokal di `website/public/fonts/` dengan lisensi OFL, berasal dari Google Fonts; fallback monospace tersedia. Browser localhost diverifikasi memuat Geist Pixel dan Arial.
+- `/pricing` dipertahankan sebagai redirect sementara ke `/account?checkout=start`. Jika pengguna belum login, tujuan checkout dibawa melalui `/auth?next=checkout`. Setelah session cocok dan akses lifetime belum aktif, layar loading membuat checkout lewat API server dan membuka URL Polar. API menolak akun yang berbeda dengan konteks Mac yang ditandatangani; checkout Polar kembali ke `/account` saat selesai atau dibatalkan. Akses portal tanpa customer juga kembali ke Account, sehingga tidak membuat checkout secara tidak sengaja.
+- Tombol pembelian di Mac memakai account link yang terikat ke akun perangkat, dengan penanda checkout app. Jika konteks kadaluarsa/hilang, alur dari Mac meminta pengguna membuka checkout lagi; jika browser memakai akun lain, pengguna diminta beralih akun sebelum checkout. Penanda dan tujuan login dibatasi pada nilai tetap, bukan URL bebas. Alur Account & purchases biasa tetap dapat digunakan.
+- Verifikasi: build Debug Mac, typecheck, lint serta production build website lulus; redirect `/pricing` tanpa login dan font diperiksa pada preview lokal. Tes status Account existing lulus. Checkout Polar sebenarnya, pergantian akun provider dan tampilan Account yang membutuhkan sesi nyata masih harus diperiksa dengan konfigurasi sandbox sebelum rilis; tidak ada checkout atau pembayaran nyata yang dibuat selama pekerjaan ini.
+
+
+## Redesign Settings berkelompok — 12 November 2026
+
+- Dikerjakan pada branch existing `codex/all-pixel-art`. Pilihan Concept A merujuk layout Everyday essentials pada `output/imagegen/settings-redesign-v2/concept-a.png`; tautan pengguna ke Concept A ikon dipahami melalui konteks review Settings.
+- Halaman compact `QyubeJournalSettingsView` memakai kelompok GENERAL, COVE, APP, label kecil dengan aksen ice-blue, dan divider `QyubeInkDivider` yang melengkung/tidak simetris. Border luar tetap mengikuti shell Qyube.
+- GENERAL tepat dua opsi: Show floating timer dan Session notifications. Tidak ada Launch at login. Notifikasi meminta izin alert macOS ketika diaktifkan, default mati, dikirim hanya untuk sesi completed dan tanpa suara; penolakan/error izin ditampilkan.
+- COVE mempertahankan Auto/Morning/Sunset/Night serta menambahkan Reset floating positions. Aksi reset menghapus posisi tersimpan dan langsung memindahkan timer/Cove ke posisi default layar aktif lewat controller existing, tanpa memulai ulang sesi.
+- APP menampilkan Check for Updates, versi, Erase local data beserta penjelasan singkat. Dialog/error penghapusan existing tetap digunakan. Native scrollbar disembunyikan memakai helper bersama.
+- Perubahan aset ilustrasi yang sudah ada di working tree dipertahankan. Swift parse dan diff whitespace diperiksa; QA interaksi manual dan pengiriman notifikasi pada macOS belum dilakukan.
+- Build Debug macOS berhasil dengan `xcodebuild`, dependency Sparkle/SwiftLint berhasil di-resolve. Artefak verifikasi berada di `/private/tmp/qyube-settings-review/Build/Products/Debug/Qoma.app`; aplikasi yang berjalan tidak direstart otomatis.
+
+## Penyesuaian distraction dan ember — 12 November 2026
+
+- Pilihan distraction runtime dibatasi ke bunga es dan lampu; badai salju disimpan untuk penggunaan nanti. Pemilihan tetap acak setiap episode.
+- Lampu memakai transisi cepat dengan durasi gelap dan terang yang berkurang setiap siklus; timing pose dan penanda suara mengikuti pergantian lampu.
+- Popover ember diperkecil menjadi 210 pt. Kontrol sesi di menu bar tetap tersedia saat floating timer dimatikan.
+
+## Menu bar dark footer — 12 November 2026
+
+- Snapshot perubahan sebelumnya disimpan sebagai 011e1d1; implementasi di branch codex/menu-bar-dark-footer.
+- MenuBarSessionPopover memakai layout player 200 × 110 pt: logo website, judul Arial regular ukuran tetap, progress waktu aktif dibanding durasi rencana, dan footer gelap dengan edit/pause/resume/stop.
+- Logo disalin ke MenuBarSessionLogo.imageset. Konfirmasi stop, pesan error pause/resume, retry saving dan state saving tetap tersedia.
+
+### Penyesuaian garis ilustrasi player — 12 November 2026
+
+- Border panel memakai QyubeInkBorder asimetris existing untuk clipping dan stroke di dalam bounds.
+- Progress memakai kontur tinta, track warna kertas dan fill teal lebih lembut mengikuti prototype dark footer.
+- Ikon edit, pause, resume dan stop memakai garis vektor dengan ketidaksimetrisan tetap agar tajam pada ukuran kecil; tidak memakai SF Symbols untuk kontrol player.
+- Build Debug berhasil dan git diff --check bersih. Perbandingan visual di aplikasi belum dilakukan.
+
+## Crystal Bloom distraction — 13 November 2026
+
+- Branch codex/crystal-bloom-distraction dari snapshot player 4a11be9.
+- Enam bunga es lama diganti Crystal Bloom pixel dari imagegen bawaan; sumber, prompt, exporter dan preview ada di docs/companion/crystal-bloom-v1/.
+- Putaran linear lambat 48/60/72 detik dengan arah bergantian dan shimmer opacity 94–100% setiap delapan detik. Redraw terus berjalan selama efek aktif; Reduce Motion menahan gerakan. Efek lampu tidak diubah.
+- Build dan tes terarah motion/integration lulus, termasuk perbandingan piksel sesudah pertumbuhan selesai dan saat Reduce Motion aktif. Preview memakai renderer AppKit aktual. QA app diblokir/fullscreen/multimonitor serta profiling baterai belum dilakukan.
+
+
+## Banner Today dan New Session — 13 November 2026
+
+- Today menggunakan ilustrasi Quiet Harbor tanpa teks bawaan; goal dan progress tetap menggunakan data dan animasi yang ada.
+- New Session dan detail sesi menggunakan ilustrasi Arctic Inlet di area banner yang sama.
+- Ilustrasi statis; animasi karakter memerlukan aset berlapis.
+
+## Font pixel, Top Apps, dan suasana Cove — 14 November 2026
+
+- Lengkapi font Geist Pixel pada input New Session dan editor daftar aplikasi; durasi kalender memakai satuan eksplisit seperti `1h20m`.
+- Aktifkan kembali pencatatan aplikasi foreground untuk Top Apps selama sesi aktif, termasuk pause/resume; pelacakan website tetap nonaktif.
+- Auto Cove berganti Morning, Sunset, dan Night setiap 15 menit animasi sesi aktif; opsi manual tetap tersedia. Hapus keterangan lama dan tombol reset posisi dari Settings.

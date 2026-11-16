@@ -4,31 +4,34 @@ import SwiftUI
 struct FloatingCompanionView: NSViewRepresentable {
     let scene: CompanionScene
     var onTap: (() -> Void)?
+    var onBucket: (() -> Void)?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @AppStorage("qyube.reduceMotionOverride") private var reduceMotionOverride = false
 
-    init(scene: CompanionScene, onTap: (() -> Void)? = nil) {
+    init(scene: CompanionScene, onTap: (() -> Void)? = nil, onBucket: (() -> Void)? = nil) {
         self.scene = scene
         self.onTap = onTap
+        self.onBucket = onBucket
     }
 
     func makeNSView(context: Context) -> SKView {
         let view = CompanionSpriteView()
         view.onTap = onTap
+        view.onBucket = onBucket
         view.allowsTransparency = true
         view.preferredFramesPerSecond = 60
         view.ignoresSiblingOrder = false
         view.setAccessibilityElement(true)
         view.setAccessibilityRole(.button)
-        view.setAccessibilityLabel("Show timer from fishing companion")
-        self.scene.reduceMotion = self.reduceMotion || self.reduceMotionOverride
+        view.setAccessibilityLabel("Fishing companion. Press to show session catches; click penguin to show timer.")
+        self.scene.reduceMotion = self.reduceMotion
         view.presentScene(self.scene)
         return view
     }
 
     func updateNSView(_ view: SKView, context: Context) {
         (view as? CompanionSpriteView)?.onTap = onTap
-        let shouldReduceMotion = self.reduceMotion || self.reduceMotionOverride
+        (view as? CompanionSpriteView)?.onBucket = onBucket
+        let shouldReduceMotion = self.reduceMotion
         if self.scene.reduceMotion != shouldReduceMotion { self.scene.reduceMotion = shouldReduceMotion }
     }
 
@@ -39,6 +42,7 @@ struct FloatingCompanionView: NSViewRepresentable {
 
 private final class CompanionSpriteView: SKView {
     var onTap: (() -> Void)?
+    var onBucket: (() -> Void)?
     private var dragStartLocation: NSPoint?
     private var hasDragged = false
 
@@ -48,7 +52,7 @@ private final class CompanionSpriteView: SKView {
     }
 
     override var acceptsFirstResponder: Bool {
-        false
+        true
     }
 
     override func mouseDown(with event: NSEvent) {
@@ -67,13 +71,25 @@ private final class CompanionSpriteView: SKView {
     }
 
     override func mouseUp(with event: NSEvent) {
-        if !hasDragged { onTap?() }
+        if !hasDragged {
+            let point = convert(event.locationInWindow, from: nil)
+            if let scene {
+                let location = scene.convertPoint(fromView: point)
+                if CGRect(x: 104, y: 52, width: 28, height: 28).contains(location) { onBucket?() }
+                else { onTap?() }
+            }
+        }
         dragStartLocation = nil
         hasDragged = false
     }
 
     override func accessibilityPerformPress() -> Bool {
-        onTap?()
+        onBucket?()
         return true
+    }
+
+    override func keyDown(with event: NSEvent) {
+        if event.keyCode == 49 || event.keyCode == 36 { onBucket?() }
+        else { super.keyDown(with: event) }
     }
 }

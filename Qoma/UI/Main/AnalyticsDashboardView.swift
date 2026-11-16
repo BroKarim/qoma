@@ -30,40 +30,24 @@ struct AnalyticsDashboardView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("YOUR FOCUS JOURNAL")
-                            .font(.system(size: 9, weight: .medium))
-                            .tracking(1.5)
-                            .foregroundStyle(Color.qyubeAccent)
-                        HStack(alignment: .firstTextBaseline) {
-                            Text("Analytics")
-                                .font(.system(size: 25, design: .serif))
-                            Spacer()
-                            Image(systemName: "book.closed")
-                                .font(.system(size: 18, weight: .light))
-                                .foregroundStyle(Color.qyubeAccent)
-                                .accessibilityHidden(true)
-                        }
-                    }
-
                     AnalyticsMonthCalendar(selectedDay: $selectedDay, focusByDay: focusByDay)
 
-                    VStack(alignment: .leading, spacing: 7) {
-                        Text(selectedDay.formatted(.dateTime.weekday(.wide).day().month(.wide)))
-                            .font(.system(size: 14, weight: .medium, design: .serif))
-                        HStack(alignment: .firstTextBaseline, spacing: 6) {
-                            Text(QyubeFormat.duration(daySessions.reduce(0) { $0 + $1.actualFocusSeconds }))
-                                .font(.system(size: 26, weight: .medium, design: .rounded))
-                                .monospacedDigit()
-                            Text("of focus")
-                                .font(.system(size: 11))
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .padding(12)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .qyubeInkSurface(fill: .qyubeSelection.opacity(0.6), stroke: .qyubeAccent.opacity(0.2))
-                    .accessibilityElement(children: .combine)
+                    // VStack(alignment: .leading, spacing: 7) {
+                    //     Text(selectedDay.formatted(.dateTime.weekday(.wide).day().month(.wide)))
+                    //         .font(.custom("GeistPixel-Regular", size: 14))
+                    //     HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    //         Text(QyubeFormat.duration(daySessions.reduce(0) { $0 + $1.actualFocusSeconds }))
+                    //             .font(.custom("GeistPixel-Regular", size: 26))
+                    //             .monospacedDigit()
+                    //         Text("of focus")
+                    //             .font(.custom("GeistPixel-Regular", size: 11))
+                    //             .foregroundStyle(.secondary)
+                    //     }
+                    // }
+                    // .padding(12)
+                    // .frame(maxWidth: .infinity, alignment: .leading)
+                    // .qyubeInkSurface(fill: .qyubeSelection.opacity(0.6), stroke: .qyubeAccent.opacity(0.2))
+                    // .accessibilityElement(children: .combine)
 
                     AnalyticsSessionList(sessions: daySessions)
                     QyubeInkDivider().frame(height: 1)

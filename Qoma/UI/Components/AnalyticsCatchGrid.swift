@@ -14,7 +14,7 @@ struct AnalyticsCatchGrid: View {
             AnalyticsJournalHeading(title: "Daily catches", detail: "\(events.count) catches")
             if groups.isEmpty {
                 Label("No catches on this day.", systemImage: "water.waves")
-                    .font(.system(size: 11))
+                    .font(.custom("GeistPixel-Regular", size: 11))
                     .foregroundStyle(.secondary)
                     .padding(.vertical, 12)
             } else {
@@ -34,7 +34,7 @@ struct AnalyticsCatchGrid: View {
                             .overlay(alignment: .bottomTrailing) {
                                 if group.events.count > 1 {
                                     Text("×\(group.events.count)")
-                                        .font(.system(size: 8, weight: .semibold, design: .rounded))
+                                        .font(.custom("GeistPixel-Regular", size: 8))
                                         .padding(.horizontal, 4)
                                         .padding(.vertical, 2)
                                         .background(Color.qyubeBackground.opacity(0.95), in: Capsule())

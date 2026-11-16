@@ -1,0 +1,13 @@
+{
+  "id": "asset-025",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-025.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-frostwing-ray.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v1/rare/rare-frostwing-ray.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

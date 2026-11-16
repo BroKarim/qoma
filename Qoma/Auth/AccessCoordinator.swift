@@ -3,6 +3,7 @@ import Combine
 import CryptoKit
 import Foundation
 import Security
+import OSLog
 
 @MainActor
 final class AccessCoordinator: ObservableObject {
@@ -62,6 +63,32 @@ final class AccessCoordinator: ObservableObject {
         }
     }
 
+    func openAccountPurchases(checkout: Bool = false) async {
+        do {
+            guard let credential else { NSWorkspace.shared.open(baseURL.appending(path: "/auth")); return }
+            var request = URLRequest(url: baseURL.appending(path: "/api/me/account-link"))
+            request.httpMethod = "POST"
+            request.setValue("Bearer \(credential.token)", forHTTPHeaderField: "Authorization")
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw URLError(.userAuthenticationRequired) }
+            let result = try JSONDecoder().decode(StartResponse.self, from: data)
+            guard result.url.host == baseURL.host, result.url.scheme == baseURL.scheme else { throw URLError(.badURL) }
+            var destination = URLComponents(url: result.url, resolvingAgainstBaseURL: false)
+            if checkout {
+                var items = destination?.queryItems ?? []
+                items.append(URLQueryItem(name: "checkout", value: "1"))
+                destination?.queryItems = items
+            }
+            guard let destinationURL = destination?.url, NSWorkspace.shared.open(destinationURL) else { throw URLError(.cannotOpenFile) }
+        } catch {
+            message = "Could not open your account. Check your connection and sign in again if needed."
+            let alert = NSAlert()
+            alert.messageText = "Could not open Account & purchases"
+            alert.informativeText = message ?? "Please try again."
+            alert.runModal()
+        }
+    }
+
     func canStartSession() -> Bool {
         switch localState(at: trustedNow()) {
         case .trialing, .paid: true
@@ -113,6 +140,10 @@ final class AccessCoordinator: ObservableObject {
 
     func refreshAccess() async {
         guard var credential else { state = .signedOut; return }
+        let logger = Logger(subsystem: "com.dzulkiram.qoma", category: "AccessRefresh")
+        var stage = "credential rotation"
+        logger.notice("Refresh started; host: \(self.baseURL.host ?? "missing", privacy: .public)")
+        var failureMessage = "Could not refresh access. Check your connection and try again."
         do {
             if credential.issuedAt.map({ $0.timeIntervalSinceNow < -60 * 86_400 }) ?? true {
                 var rotation = URLRequest(url: baseURL.appending(path: "/api/native-auth/refresh"))
@@ -120,6 +151,7 @@ final class AccessCoordinator: ObservableObject {
                 rotation.setValue("Bearer \(credential.token)", forHTTPHeaderField: "Authorization")
                 let (rotationData, rotationResponse) = try await URLSession.shared.data(for: rotation)
                 guard let rotationHTTP = rotationResponse as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+                logger.notice("Credential rotation HTTP status: \(rotationHTTP.statusCode)")
                 if rotationHTTP.statusCode == 401 {
                     signOut()
                     message = "This Mac was signed out. Sign in again."
@@ -132,27 +164,36 @@ final class AccessCoordinator: ObservableObject {
                 try SecretStore.save(JSONEncoder().encode(credential), as: "credential")
                 self.credential = credential
             }
+            stage = "entitlement request"
             var request = URLRequest(url: baseURL.appending(path: "/api/me/entitlement"))
             request.setValue("Bearer \(credential.token)", forHTTPHeaderField: "Authorization")
             let (data, response) = try await URLSession.shared.data(for: request)
             guard let http = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+            logger.notice("Entitlement HTTP status: \(http.statusCode)")
             if http.statusCode == 401 {
                 signOut()
                 message = "This Mac was signed out. Sign in again."
                 return
             }
             guard http.statusCode == 200 else { throw URLError(.badServerResponse) }
+            failureMessage = "Could not verify the access response. Please contact support."
+            stage = "response verification"
             let signed = try JSONDecoder().decode(EntitlementResponse.self, from: data).snapshot
             let value = try verify(signed, credential: credential)
+            failureMessage = "Could not save access on this Mac. Please try again."
+            stage = "saving snapshot"
             try SecretStore.save(Data(signed.utf8), as: "snapshot.\(credential.accountId)")
             snapshot = value
             trustedWall = value.issued_at
             trustedUptime = ProcessInfo.processInfo.systemUptime
             state = localState(at: Date())
             message = nil
+            logger.notice("Refresh succeeded; status: \(value.status, privacy: .public), plan: \(value.plan ?? "none", privacy: .public)")
         } catch {
+            let error = error as NSError
+            logger.error("Refresh failed at \(stage, privacy: .public); domain: \(error.domain, privacy: .public), code: \(error.code)")
             state = localState(at: trustedNow())
-            if case .unknown = state { message = "Could not verify access. Connect to the internet and retry." }
+            message = failureMessage
         }
     }
 
@@ -208,18 +249,28 @@ final class AccessCoordinator: ObservableObject {
     }
 
     private func verify(_ jws: String, credential: Credential?) throws -> Snapshot {
+        let logger = Logger(subsystem: "com.dzulkiram.qoma", category: "AccessRefresh")
         guard let credential,
               let encodedKey = Bundle.main.object(forInfoDictionaryKey: "QyubeEntitlementPublicKey") as? String,
               let keyData = Data(base64Encoded: encodedKey),
-              let key = try? Curve25519.Signing.PublicKey(rawRepresentation: keyData) else { throw URLError(.userAuthenticationRequired) }
+              let key = try? Curve25519.Signing.PublicKey(rawRepresentation: keyData) else {
+            logger.error("Verification failed: missing credential or invalid public key in app bundle")
+            throw URLError(.userAuthenticationRequired)
+        }
         let parts = jws.split(separator: ".")
         guard parts.count == 3,
               let headerData = Self.decodeBase64URL(String(parts[0])),
               let body = Self.decodeBase64URL(String(parts[1])),
               let signature = Self.decodeBase64URL(String(parts[2])),
               let header = try? JSONSerialization.jsonObject(with: headerData) as? [String: String],
-              header["alg"] == "EdDSA", header["kid"] == "v1",
-              key.isValidSignature(signature, for: Data("\(parts[0]).\(parts[1])".utf8)) else { throw URLError(.userAuthenticationRequired) }
+              header["alg"] == "EdDSA", header["kid"] == "v1" else {
+            logger.error("Verification failed: invalid token format or header")
+            throw URLError(.userAuthenticationRequired)
+        }
+        guard key.isValidSignature(signature, for: Data("\(parts[0]).\(parts[1])".utf8)) else {
+            logger.error("Verification failed: signature does not match bundled public key")
+            throw URLError(.userAuthenticationRequired)
+        }
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .custom { decoder in
             let value = try decoder.singleValueContainer().decode(String.self)
@@ -232,7 +283,10 @@ final class AccessCoordinator: ObservableObject {
         }
         let value = try decoder.decode(Snapshot.self, from: body)
         guard value.account_id == credential.accountId, value.device_id == credential.deviceId,
-              value.scope == "macos", value.issued_at <= Date().addingTimeInterval(300) else { throw URLError(.userAuthenticationRequired) }
+              value.scope == "macos", value.issued_at <= Date().addingTimeInterval(300) else {
+            logger.error("Verification failed: account/device, scope or issued time mismatch")
+            throw URLError(.userAuthenticationRequired)
+        }
         return value
     }
 

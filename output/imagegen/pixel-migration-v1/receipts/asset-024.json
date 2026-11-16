@@ -1,0 +1,13 @@
+{
+  "id": "asset-024",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-024.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-silverfish-arch.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-silverfish-arch.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

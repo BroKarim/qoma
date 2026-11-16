@@ -9,6 +9,32 @@ final class CompanionWindowController: NSObject, NSWindowDelegate {
     private var sessionID: UUID?
     private let positionKey = "qyube.companion.origin"
     private var onTap: (() -> Void)?
+    private let bucketPopover = NSPopover()
+    var bucketEvents: ((UUID) -> [CatchEvent])?
+    var previouslyCaughtKinds: ((UUID) -> Set<String>)?
+    var onOpenCatalog: (() -> Void)?
+
+    private func showBucket() {
+        guard let window, let anchor = window.contentView, let sessionID else { return }
+        if bucketPopover.isShown { bucketPopover.close(); return }
+        bucketPopover.behavior = .transient
+        bucketPopover.appearance = NSAppearance(named: .aqua)
+        bucketPopover.contentViewController = NSHostingController(rootView: CoveBucketView(
+            events: { [weak self] in self?.bucketEvents?(sessionID) ?? [] },
+            previouslyCaughtKinds: previouslyCaughtKinds?(sessionID) ?? [],
+            onCatalog: { [weak self] in self?.bucketPopover.close(); self?.onOpenCatalog?() }))
+        let size = bucketPopover.contentViewController?.view.fittingSize ?? NSSize(width: 210, height: 240)
+        let visible = window.screen?.visibleFrame ?? NSScreen.main?.visibleFrame ?? .zero
+        let island = window.convertToScreen(NSRect(x: 0, y: 0, width: 164, height: 164))
+        let options: [(NSRectEdge, CGFloat, CGFloat, NSRect)] = [
+            (.maxY, visible.maxY - island.maxY, size.height, NSRect(x: 82, y: 168, width: 1, height: 1)),
+            (.maxX, visible.maxX - island.maxX, size.width, NSRect(x: 168, y: 82, width: 1, height: 1)),
+            (.minX, island.minX - visible.minX, size.width, NSRect(x: -4, y: 82, width: 1, height: 1)),
+            (.minY, island.minY - visible.minY, size.height, NSRect(x: 82, y: -4, width: 1, height: 1))
+        ]
+        let choice = options.first(where: { $0.1 >= $0.2 + 12 }) ?? options.max(by: { $0.1 - $0.2 < $1.1 - $1.2 })!
+        bucketPopover.show(relativeTo: choice.3, of: anchor, preferredEdge: choice.0)
+    }
 
     var isVisible: Bool { window?.isVisible ?? false }
 
@@ -27,7 +53,7 @@ final class CompanionWindowController: NSObject, NSWindowDelegate {
             return
         }
 
-        let contentSize = CGSize(width: 140, height: 140)
+        let contentSize = CompanionScene.stageSize
         let panel = NSPanel(
             contentRect: NSRect(origin: initialOrigin(size: contentSize), size: contentSize),
             styleMask: [.borderless, .nonactivatingPanel, .fullSizeContentView],
@@ -51,6 +77,8 @@ final class CompanionWindowController: NSObject, NSWindowDelegate {
         scene.setSessionPaused(paused)
         let contentView = FloatingCompanionView(scene: scene, onTap: { [weak self] in
             self?.onTap?()
+        }, onBucket: { [weak self] in
+            self?.showBucket()
         })
         panel.contentView = NSHostingView(rootView: contentView)
         panel.contentView?.wantsLayer = true
@@ -63,6 +91,7 @@ final class CompanionWindowController: NSObject, NSWindowDelegate {
     }
 
     func hide() {
+        bucketPopover.close()
         window?.orderOut(nil)
         scene?.shutDown()
         scene = nil
@@ -86,6 +115,12 @@ final class CompanionWindowController: NSObject, NSWindowDelegate {
     func windowDidMove(_ notification: Notification) {
         guard let window else { return }
         UserDefaults.standard.set(NSStringFromPoint(window.frame.origin), forKey: positionKey)
+    }
+
+    func resetPosition() {
+        UserDefaults.standard.removeObject(forKey: positionKey)
+        guard let window else { return }
+        window.setFrameOrigin(initialOrigin(size: window.frame.size))
     }
 
     private func initialOrigin(size: CGSize) -> CGPoint {

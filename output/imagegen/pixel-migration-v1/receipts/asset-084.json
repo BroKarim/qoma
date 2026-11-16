@@ -1,0 +1,13 @@
+{
+  "id": "asset-084",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-084.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-common-driftwood.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/ocean-finds/common-driftwood.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

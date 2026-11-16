@@ -1,0 +1,13 @@
+{
+  "id": "asset-115",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-115.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionBucket.imageset/CompanionBucket.png",
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/WatercolorCoveV6/CompanionBucketCoveV5.imageset/CompanionBucket.png"
+  ],
+  "status": "installed",
+  "size": [
+    255,
+    265
+  ]
+}

@@ -26,11 +26,11 @@ struct CatalogView: View {
             VStack(alignment: .leading, spacing: 14) {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("COLLECTION")
-                        .font(.caption2.weight(.medium))
+                        .font(.custom("GeistPixel-Regular", size: 10, relativeTo: .caption2))
                         .tracking(1.5)
                         .foregroundStyle(Color.qyubeAccent)
                     Text("Catalog")
-                        .font(.system(size: 23, design: .serif))
+                        .font(.custom("GeistPixel-Regular", size: 23))
                         .foregroundStyle(Color.qyubeMenuInk)
                 }
 
@@ -60,12 +60,12 @@ struct CatalogView: View {
         return VStack(alignment: .leading, spacing: 7) {
             HStack {
                 Text("COLLECTION PROGRESS")
-                    .font(.system(size: 9, weight: .semibold))
+                    .font(.custom("GeistPixel-Regular", size: 9))
                     .tracking(1.1)
                     .foregroundStyle(Color.qyubeAccent)
                 Spacer()
                 Text("\(Int(progress * 100))%")
-                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .font(.custom("GeistPixel-Regular", size: 11))
                     .foregroundStyle(Color.qyubeMenuInk)
             }
 
@@ -96,7 +96,7 @@ struct CatalogView: View {
                     self.selectedFilter = filter
                 } label: {
                     Text(filter.title)
-                        .font(.system(size: 10, weight: self.selectedFilter == filter ? .semibold : .medium))
+                        .font(.custom("GeistPixel-Regular", size: 10))
                         .foregroundStyle(self.selectedFilter == filter ? Color.white : Color.qyubeMenuInk)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 7)

@@ -1,0 +1,13 @@
+{
+  "id": "asset-038",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-038.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-nebula-pebble.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-nebula-pebble.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

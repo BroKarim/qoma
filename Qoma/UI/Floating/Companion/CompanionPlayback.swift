@@ -13,16 +13,16 @@ struct CompanionPlayback {
     private(set) var depositedCatches = 0
     private(set) var releasedCatches = 0
     private(set) var catchIsTree = false
+    private(set) var completedVisualCatches = 0
     private(set) var isSessionActive = false
     private(set) var isPaused = false
     private(set) var isDistracted = false
-    private var cycle = 0
     private let biteWait: () -> TimeInterval
     private let reelTime: () -> TimeInterval
 
     init(
         biteWait: @escaping () -> TimeInterval = { .random(in: 6...10) },
-        reelTime: @escaping () -> TimeInterval = { .random(in: 0.9...1.5) })
+        reelTime: @escaping () -> TimeInterval = { .random(in: 1.4...1.6) })
     {
         self.biteWait = biteWait
         self.reelTime = reelTime
@@ -32,10 +32,21 @@ struct CompanionPlayback {
         min(1, self.phaseTime / max(self.phaseDuration, 0.001))
     }
 
+    var catchFrame: Int {
+        switch phase {
+        case .bite: min(2, Int(progress * 3))
+        case .pulling: min(11, 3 + Int(progress * 16))
+        case .completed: 11
+        default: 0
+        }
+    }
+
+    var movementFrame: Int { min(11, Int(progress * 12)) }
+
     mutating func start() {
         self.depositedCatches = 0
         self.releasedCatches = 0
-        self.cycle = 0
+        self.completedVisualCatches = 0
         self.catchIsTree = false
         self.isSessionActive = true
         self.isPaused = false
@@ -84,7 +95,6 @@ struct CompanionPlayback {
     mutating func recordCatch(kindID: String) {
         guard isSessionActive else { return }
         depositedCatches += 1
-        cycle += 1
         catchIsTree = CatalogDefinitions.kind(id: kindID)?.isFish == false
     }
 
@@ -114,9 +124,10 @@ struct CompanionPlayback {
             case .casting: self.enter(.fishing, duration: max(0.1, self.biteWait()))
             case .fishing: self.enter(.bite, duration: 0.22)
             case .bite: self.enter(.pulling, duration: max(0.1, self.reelTime()))
-            case .pulling: self.enter(.deposit, duration: 0.48)
+            case .pulling: self.enter(.deposit, duration: 1.2)
             case .deposit:
                 // Visual cycle only; rewards arrive from persisted catch events.
+                self.completedVisualCatches += 1
                 self.enter(.casting, duration: 0.55)
             case .releasing: self.enter(.hidden)
             default: return

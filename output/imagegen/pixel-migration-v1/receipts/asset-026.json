@@ -1,0 +1,13 @@
+{
+  "id": "asset-026",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-026.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-aurora-shell.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v1/rare/rare-aurora-shell.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

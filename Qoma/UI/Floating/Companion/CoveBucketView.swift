@@ -1,0 +1,88 @@
+import SwiftUI
+
+struct CoveBucketView: View {
+    let events: () -> [CatchEvent]
+    let previouslyCaughtKinds: Set<String>
+    let onCatalog: () -> Void
+
+    var body: some View {
+        TimelineView(.periodic(from: .now, by: 1)) { _ in
+            let catches = events()
+            let groups = Dictionary(grouping: catches, by: \.kindID)
+            let discoveries = Set(groups.keys).subtracting(previouslyCaughtKinds).count
+
+            VStack(alignment: .leading, spacing: 9) {
+                VStack(alignment: .leading, spacing: 5) {
+                    Text("This session")
+                        .font(.custom("GeistPixel-Regular", size: 16))
+                    Text("\(catches.count) catches · \(groups.count) species")
+                        .font(.custom("GeistPixel-Regular", size: 13))
+                        .foregroundStyle(Color.qyubeInk.opacity(0.65))
+                        .monospacedDigit()
+                }
+
+                Divider()
+
+                if catches.isEmpty {
+                    Text("Waiting for the first catch")
+                        .font(.custom("GeistPixel-Regular", size: 13))
+                        .foregroundStyle(Color.qyubeInk.opacity(0.65))
+                        .frame(maxWidth: .infinity, minHeight: 64)
+                } else {
+                    ScrollView(.horizontal) {
+                        LazyHStack(spacing: 12) {
+                            ForEach(groups.keys.sorted(), id: \.self) { kindID in
+                                HStack(spacing: 6) {
+                                    QyubeCatchArt(kindID: kindID)
+                                        .frame(width: 38, height: 36)
+                                    Text("×\(groups[kindID]?.count ?? 0)")
+                                        .font(.custom("GeistPixel-Regular", size: 15))
+                                        .monospacedDigit()
+                                }
+                                .frame(width: 78, height: 52)
+                                .help(CatalogDefinitions.kind(id: kindID)?.name ?? kindID)
+                                .accessibilityElement(children: .ignore)
+                                .accessibilityLabel("\(CatalogDefinitions.kind(id: kindID)?.name ?? kindID), \(groups[kindID]?.count ?? 0) catches")
+                            }
+                        }
+                        .scrollTargetLayout()
+                    }
+                    .scrollIndicators(.hidden)
+                    .scrollTargetBehavior(.viewAligned)
+                    .frame(height: 52)
+                }
+
+                Divider()
+
+                if discoveries > 0 {
+                    Label(discoveries == 1 ? "1 new discovery" : "\(discoveries) new discoveries",
+                          systemImage: "sparkles")
+                        .font(.custom("GeistPixel-Regular", size: 12))
+                        .foregroundStyle(Color.qyubeAccent)
+                }
+                if catches.contains(where: { !$0.isBanked }) {
+                    Text("Saved permanently after 5 minutes of active focus.")
+                        .font(.custom("GeistPixel-Regular", size: 11))
+                        .foregroundStyle(Color.qyubeInk.opacity(0.6))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Button(action: onCatalog) {
+                    Text("Open Catalog")
+                        .font(.custom("GeistPixel-Regular", size: 13))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 9)
+                        .background(Color.qyubeSidebar, in: RoundedRectangle(cornerRadius: 8))
+                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.qyubeLine))
+                        .contentShape(RoundedRectangle(cornerRadius: 8))
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(12)
+            .frame(width: 210)
+            .foregroundStyle(Color.qyubeInk)
+            .background(Color.qyubeBackground)
+            .environment(\.colorScheme, .light)
+        }
+    }
+}

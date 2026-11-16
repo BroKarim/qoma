@@ -1,0 +1,2841 @@
+[
+  {
+    "id": "asset-001",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-island-turtle.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-island-turtle.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-island-turtle.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-legendary-island-turtle.imageset"
+  },
+  {
+    "id": "asset-002",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-icefish-frill.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-icefish-frill.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-icefish-frill.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-icefish-frill.imageset"
+  },
+  {
+    "id": "asset-003",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-frostfeather-worm.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-frostfeather-worm.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-frostfeather-worm.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-rare-frostfeather-worm.imageset"
+  },
+  {
+    "id": "asset-004",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-eelpout-fan.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-eelpout-fan.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-eelpout-fan.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-eelpout-fan.imageset"
+  },
+  {
+    "id": "asset-005",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-pebble.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-pebble.imageset/image.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-pebble.imageset"
+  },
+  {
+    "id": "asset-006",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-common-sea-glass.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-common-sea-glass.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/ocean-finds/common-sea-glass.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-common-sea-glass.imageset"
+  },
+  {
+    "id": "asset-007",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-snowflake-crab.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-snowflake-crab.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-snowflake-crab.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-rare-snowflake-crab.imageset"
+  },
+  {
+    "id": "asset-008",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-starlight-lantern.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-starlight-lantern.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-starlight-lantern.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-legendary-starlight-lantern.imageset"
+  },
+  {
+    "id": "asset-009",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-prism-driftwood.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-prism-driftwood.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-prism-driftwood.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-rare-prism-driftwood.imageset"
+  },
+  {
+    "id": "asset-010",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-star-map-bottle.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-star-map-bottle.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-star-map-bottle.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-rare-star-map-bottle.imageset"
+  },
+  {
+    "id": "asset-011",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-blueflame-lanternfish.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-blueflame-lanternfish.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-blueflame-lanternfish.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-rare-blueflame-lanternfish.imageset"
+  },
+  {
+    "id": "asset-012",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/QyubeMenuQuit.imageset/qyube-menu-quit.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/QyubeMenuQuit.imageset/qyube-menu-quit.png"
+    ],
+    "status": "pending",
+    "size": [
+      128,
+      128
+    ],
+    "transparent": true,
+    "label": "QyubeMenuQuit.imageset"
+  },
+  {
+    "id": "asset-013",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-common-clam-shell.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-common-clam-shell.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/ocean-finds/common-clam-shell.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-common-clam-shell.imageset"
+  },
+  {
+    "id": "asset-014",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/FloatingWatercolor-pause.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/FloatingWatercolor-pause.imageset/image.png"
+    ],
+    "status": "pending",
+    "size": [
+      1536,
+      1024
+    ],
+    "transparent": true,
+    "label": "FloatingWatercolor-pause.imageset"
+  },
+  {
+    "id": "asset-015",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-winter-music-box.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-winter-music-box.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-winter-music-box.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-legendary-winter-music-box.imageset"
+  },
+  {
+    "id": "asset-016",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-frozen-sea-crown.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-frozen-sea-crown.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-frozen-sea-crown.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-legendary-frozen-sea-crown.imageset"
+  },
+  {
+    "id": "asset-017",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-rime-petrel.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-rime-petrel.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-rime-petrel.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-legendary-rime-petrel.imageset"
+  },
+  {
+    "id": "asset-018",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-toothfish-banded.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-toothfish-banded.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-toothfish-banded.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-toothfish-banded.imageset"
+  },
+  {
+    "id": "asset-019",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-dragonfish-blunt.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-dragonfish-blunt.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-dragonfish-blunt.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-dragonfish-blunt.imageset"
+  },
+  {
+    "id": "asset-020",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-snailfish-pebble.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-snailfish-pebble.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-snailfish-pebble.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-snailfish-pebble.imageset"
+  },
+  {
+    "id": "asset-021",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-glacier-leviathan.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-glacier-leviathan.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v1/legendary/legendary-glacier-leviathan.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-legendary-glacier-leviathan.imageset"
+  },
+  {
+    "id": "asset-022",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/QyubeMenuSettings.imageset/qyube-menu-settings.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/QyubeMenuSettings.imageset/qyube-menu-settings.png"
+    ],
+    "status": "pending",
+    "size": [
+      128,
+      128
+    ],
+    "transparent": true,
+    "label": "QyubeMenuSettings.imageset"
+  },
+  {
+    "id": "asset-023",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-hourglass-conch.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-hourglass-conch.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-hourglass-conch.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-rare-hourglass-conch.imageset"
+  },
+  {
+    "id": "asset-024",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-silverfish-arch.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-silverfish-arch.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-silverfish-arch.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-silverfish-arch.imageset"
+  },
+  {
+    "id": "asset-025",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-frostwing-ray.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-frostwing-ray.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v1/rare/rare-frostwing-ray.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-rare-frostwing-ray.imageset"
+  },
+  {
+    "id": "asset-026",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-aurora-shell.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-aurora-shell.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v1/rare/rare-aurora-shell.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-rare-aurora-shell.imageset"
+  },
+  {
+    "id": "asset-027",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-icefish-cream.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-icefish-cream.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-icefish-cream.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-icefish-cream.imageset"
+  },
+  {
+    "id": "asset-028",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-eelpout-sway.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-eelpout-sway.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-eelpout-sway.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-eelpout-sway.imageset"
+  },
+  {
+    "id": "asset-029",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-glass-toothfish.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-glass-toothfish.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-glass-toothfish.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-rare-glass-toothfish.imageset"
+  },
+  {
+    "id": "asset-030",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-common-shell-shard.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-common-shell-shard.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/ocean-finds/common-shell-shard.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-common-shell-shard.imageset"
+  },
+  {
+    "id": "asset-031",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-memory-lighthouse.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-memory-lighthouse.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-memory-lighthouse.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-legendary-memory-lighthouse.imageset"
+  },
+  {
+    "id": "asset-032",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-silverfish-spindle.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-silverfish-spindle.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-silverfish-spindle.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-silverfish-spindle.imageset"
+  },
+  {
+    "id": "asset-033",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-eelpout-curl.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-eelpout-curl.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-eelpout-curl.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-eelpout-curl.imageset"
+  },
+  {
+    "id": "asset-034",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-snow-hydra.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-snow-hydra.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-snow-hydra.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-legendary-snow-hydra.imageset"
+  },
+  {
+    "id": "asset-035",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-moon-jelly.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-moon-jelly.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-moon-jelly.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-rare-moon-jelly.imageset"
+  },
+  {
+    "id": "asset-036",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-midnight-puffer.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-midnight-puffer.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-midnight-puffer.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-rare-midnight-puffer.imageset"
+  },
+  {
+    "id": "asset-037",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-toothfish-mottle.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-toothfish-mottle.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-toothfish-mottle.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-toothfish-mottle.imageset"
+  },
+  {
+    "id": "asset-038",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-nebula-pebble.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-nebula-pebble.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-nebula-pebble.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-rare-nebula-pebble.imageset"
+  },
+  {
+    "id": "asset-039",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/TodayGoalPenguin.imageset/penguin.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/TodayGoalPenguin.imageset/penguin.png"
+    ],
+    "status": "pending",
+    "size": [
+      384,
+      351
+    ],
+    "transparent": true,
+    "label": "TodayGoalPenguin.imageset"
+  },
+  {
+    "id": "asset-040",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/TodayGoalPenguin.imageset/penguin-standing.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/TodayGoalPenguin.imageset/penguin-standing.png"
+    ],
+    "status": "pending",
+    "size": [
+      384,
+      369
+    ],
+    "transparent": true,
+    "label": "TodayGoalPenguin.imageset"
+  },
+  {
+    "id": "asset-041",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-eelpout-knot.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-eelpout-knot.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-eelpout-knot.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-eelpout-knot.imageset"
+  },
+  {
+    "id": "asset-042",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/FloatingWatercolor-play.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/FloatingWatercolor-play.imageset/image.png"
+    ],
+    "status": "pending",
+    "size": [
+      1536,
+      1024
+    ],
+    "transparent": true,
+    "label": "FloatingWatercolor-play.imageset"
+  },
+  {
+    "id": "asset-043",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-eelpout-crescent.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-eelpout-crescent.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-eelpout-crescent.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-eelpout-crescent.imageset"
+  },
+  {
+    "id": "asset-044",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-ice-kraken.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-ice-kraken.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v1/legendary/legendary-ice-kraken.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-legendary-ice-kraken.imageset"
+  },
+  {
+    "id": "asset-045",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-dreamweaver-squid.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-dreamweaver-squid.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-dreamweaver-squid.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-legendary-dreamweaver-squid.imageset"
+  },
+  {
+    "id": "asset-046",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-lanternfish-indigo.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-lanternfish-indigo.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-lanternfish-indigo.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-lanternfish-indigo.imageset"
+  },
+  {
+    "id": "asset-047",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-opal-amphipod.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-opal-amphipod.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-opal-amphipod.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-rare-opal-amphipod.imageset"
+  },
+  {
+    "id": "asset-048",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/AppIcon.appiconset/qoma.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/AppIcon.appiconset/qoma.png"
+    ],
+    "status": "pending",
+    "size": [
+      1024,
+      1024
+    ],
+    "transparent": true,
+    "label": "AppIcon.appiconset"
+  },
+  {
+    "id": "asset-049",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-winter-oracle-compass.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-winter-oracle-compass.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-winter-oracle-compass.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-legendary-winter-oracle-compass.imageset"
+  },
+  {
+    "id": "asset-050",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-crystal-sea-cucumber.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-crystal-sea-cucumber.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-crystal-sea-cucumber.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-rare-crystal-sea-cucumber.imageset"
+  },
+  {
+    "id": "asset-051",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-ice-kirin.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-ice-kirin.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-ice-kirin.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-legendary-ice-kirin.imageset"
+  },
+  {
+    "id": "asset-052",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-toothfish-stone.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-toothfish-stone.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-toothfish-stone.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-toothfish-stone.imageset"
+  },
+  {
+    "id": "asset-053",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-tide-moon-gong.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-tide-moon-gong.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-tide-moon-gong.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-legendary-tide-moon-gong.imageset"
+  },
+  {
+    "id": "asset-054",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-polestar-key.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-polestar-key.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-polestar-key.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-legendary-polestar-key.imageset"
+  },
+  {
+    "id": "asset-055",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-abyss-bloom.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-abyss-bloom.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-abyss-bloom.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-legendary-abyss-bloom.imageset"
+  },
+  {
+    "id": "asset-056",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/FloatingWatercolor-background.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/FloatingWatercolor-background.imageset/image.png"
+    ],
+    "status": "pending",
+    "size": [
+      1672,
+      941
+    ],
+    "transparent": false,
+    "label": "FloatingWatercolor-background.imageset"
+  },
+  {
+    "id": "asset-057",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-stick.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-stick.imageset/image.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-stick.imageset"
+  },
+  {
+    "id": "asset-058",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/JournalArcticPenguin.imageset/journal-arctic-penguin.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/JournalArcticPenguin.imageset/journal-arctic-penguin.png"
+    ],
+    "status": "pending",
+    "size": [
+      660,
+      440
+    ],
+    "transparent": true,
+    "label": "JournalArcticPenguin.imageset"
+  },
+  {
+    "id": "asset-059",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-rattail-taper.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-rattail-taper.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-rattail-taper.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-rattail-taper.imageset"
+  },
+  {
+    "id": "asset-060",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-glacier-sailing-ship.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-glacier-sailing-ship.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-glacier-sailing-ship.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-legendary-glacier-sailing-ship.imageset"
+  },
+  {
+    "id": "asset-061",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-silverfish-longtail.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-silverfish-longtail.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-silverfish-longtail.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-silverfish-longtail.imageset"
+  },
+  {
+    "id": "asset-062",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-lanternfish-copper.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-lanternfish-copper.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-lanternfish-copper.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-lanternfish-copper.imageset"
+  },
+  {
+    "id": "asset-063",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-spirit-narwhal.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-spirit-narwhal.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-spirit-narwhal.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-legendary-spirit-narwhal.imageset"
+  },
+  {
+    "id": "asset-064",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/QyubeMenuSignOut.imageset/qyube-menu-sign-out.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/QyubeMenuSignOut.imageset/qyube-menu-sign-out.png"
+    ],
+    "status": "pending",
+    "size": [
+      128,
+      128
+    ],
+    "transparent": true,
+    "label": "QyubeMenuSignOut.imageset"
+  },
+  {
+    "id": "asset-065",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-common-spiral-shell.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-common-spiral-shell.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/ocean-finds/common-spiral-shell.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-common-spiral-shell.imageset"
+  },
+  {
+    "id": "asset-066",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-pearl-button.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-pearl-button.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-pearl-button.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-rare-pearl-button.imageset"
+  },
+  {
+    "id": "asset-067",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-toothfish-olive.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-toothfish-olive.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-toothfish-olive.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-toothfish-olive.imageset"
+  },
+  {
+    "id": "asset-068",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-icefish-fan.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-icefish-fan.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-icefish-fan.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-icefish-fan.imageset"
+  },
+  {
+    "id": "asset-069",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-aurora-harp.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-aurora-harp.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-aurora-harp.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-legendary-aurora-harp.imageset"
+  },
+  {
+    "id": "asset-070",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/FloatingWatercolor-edit.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/FloatingWatercolor-edit.imageset/image.png"
+    ],
+    "status": "pending",
+    "size": [
+      1536,
+      1024
+    ],
+    "transparent": true,
+    "label": "FloatingWatercolor-edit.imageset"
+  },
+  {
+    "id": "asset-071",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-skeletal-fish.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-skeletal-fish.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v1/rare/rare-skeletal-fish.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-rare-skeletal-fish.imageset"
+  },
+  {
+    "id": "asset-072",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-storm-trident.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-storm-trident.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-storm-trident.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-legendary-storm-trident.imageset"
+  },
+  {
+    "id": "asset-073",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-skate-kite.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-skate-kite.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-skate-kite.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-skate-kite.imageset"
+  },
+  {
+    "id": "asset-074",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/QyubeMenuHelp.imageset/qyube-menu-help.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/QyubeMenuHelp.imageset/qyube-menu-help.png"
+    ],
+    "status": "pending",
+    "size": [
+      128,
+      128
+    ],
+    "transparent": true,
+    "label": "QyubeMenuHelp.imageset"
+  },
+  {
+    "id": "asset-075",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-constellation-whale.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-constellation-whale.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-constellation-whale.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-legendary-constellation-whale.imageset"
+  },
+  {
+    "id": "asset-076",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-comet-seahorse.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-comet-seahorse.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-comet-seahorse.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-legendary-comet-seahorse.imageset"
+  },
+  {
+    "id": "asset-077",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-tide-astrolabe.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-tide-astrolabe.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-tide-astrolabe.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-legendary-tide-astrolabe.imageset"
+  },
+  {
+    "id": "asset-078",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-frost-archive.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-frost-archive.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-frost-archive.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-legendary-frost-archive.imageset"
+  },
+  {
+    "id": "asset-079",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-shell.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-shell.imageset/image.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-shell.imageset"
+  },
+  {
+    "id": "asset-080",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/FloatingWatercolor-stop.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/FloatingWatercolor-stop.imageset/image.png"
+    ],
+    "status": "pending",
+    "size": [
+      1536,
+      1024
+    ],
+    "transparent": true,
+    "label": "FloatingWatercolor-stop.imageset"
+  },
+  {
+    "id": "asset-081",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-crystal-moth.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-crystal-moth.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-crystal-moth.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-legendary-crystal-moth.imageset"
+  },
+  {
+    "id": "asset-082",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-origami-silverfish.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-origami-silverfish.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-origami-silverfish.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-rare-origami-silverfish.imageset"
+  },
+  {
+    "id": "asset-083",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-crystal-krill.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-crystal-krill.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-crystal-krill.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-rare-crystal-krill.imageset"
+  },
+  {
+    "id": "asset-084",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-common-driftwood.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-common-driftwood.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/ocean-finds/common-driftwood.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-common-driftwood.imageset"
+  },
+  {
+    "id": "asset-085",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-icefish-wingfin.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-icefish-wingfin.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-icefish-wingfin.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-icefish-wingfin.imageset"
+  },
+  {
+    "id": "asset-086",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-lanternfish-plum.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-lanternfish-plum.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-lanternfish-plum.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-lanternfish-plum.imageset"
+  },
+  {
+    "id": "asset-087",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-snowglass-hourglass.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-snowglass-hourglass.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-snowglass-hourglass.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-legendary-snowglass-hourglass.imageset"
+  },
+  {
+    "id": "asset-088",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-aurora-sky-dragon.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-aurora-sky-dragon.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-aurora-sky-dragon.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-legendary-aurora-sky-dragon.imageset"
+  },
+  {
+    "id": "asset-089",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-silverfish-ribbon.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-silverfish-ribbon.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-silverfish-ribbon.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-silverfish-ribbon.imageset"
+  },
+  {
+    "id": "asset-090",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-toothfish-paddle.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-toothfish-paddle.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-toothfish-paddle.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-toothfish-paddle.imageset"
+  },
+  {
+    "id": "asset-091",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-tide-compass.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-tide-compass.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-tide-compass.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-rare-tide-compass.imageset"
+  },
+  {
+    "id": "asset-092",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-lanternfish-amber.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-lanternfish-amber.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-lanternfish-amber.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-lanternfish-amber.imageset"
+  },
+  {
+    "id": "asset-093",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/QyubeMenuFeedback.imageset/qyube-menu-feedback.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/QyubeMenuFeedback.imageset/qyube-menu-feedback.png"
+    ],
+    "status": "pending",
+    "size": [
+      128,
+      128
+    ],
+    "transparent": true,
+    "label": "QyubeMenuFeedback.imageset"
+  },
+  {
+    "id": "asset-094",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-plunderfish-flowerfin.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-plunderfish-flowerfin.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-plunderfish-flowerfin.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-plunderfish-flowerfin.imageset"
+  },
+  {
+    "id": "asset-095",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-toothfish-speckled.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-toothfish-speckled.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-toothfish-speckled.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-toothfish-speckled.imageset"
+  },
+  {
+    "id": "asset-096",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-lanternfish-slate.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-lanternfish-slate.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-lanternfish-slate.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-lanternfish-slate.imageset"
+  },
+  {
+    "id": "asset-097",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-atlas-nautilus.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-atlas-nautilus.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-atlas-nautilus.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-legendary-atlas-nautilus.imageset"
+  },
+  {
+    "id": "asset-098",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-eelpout-loop.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-eelpout-loop.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-eelpout-loop.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-eelpout-loop.imageset"
+  },
+  {
+    "id": "asset-099",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-common-sea-pebble.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-common-sea-pebble.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/ocean-finds/common-sea-pebble.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-common-sea-pebble.imageset"
+  },
+  {
+    "id": "asset-100",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-silverfish-deep.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-silverfish-deep.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-silverfish-deep.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-silverfish-deep.imageset"
+  },
+  {
+    "id": "asset-101",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-notothen-broadfin.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-notothen-broadfin.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-notothen-broadfin.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-notothen-broadfin.imageset"
+  },
+  {
+    "id": "asset-102",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-moonbell-medusa.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-moonbell-medusa.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-moonbell-medusa.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-legendary-moonbell-medusa.imageset"
+  },
+  {
+    "id": "asset-103",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-amber-copepod.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-amber-copepod.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-amber-copepod.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-rare-amber-copepod.imageset"
+  },
+  {
+    "id": "asset-104",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-icefish-petal.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-icefish-petal.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-icefish-petal.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-icefish-petal.imageset"
+  },
+  {
+    "id": "asset-105",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-aurora-lichen.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-aurora-lichen.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-aurora-lichen.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-rare-aurora-lichen.imageset"
+  },
+  {
+    "id": "asset-106",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-golden-icefish.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-golden-icefish.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v1/rare/rare-golden-icefish.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-rare-golden-icefish.imageset"
+  },
+  {
+    "id": "asset-107",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-blizzard-egg.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-blizzard-egg.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-blizzard-egg.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-legendary-blizzard-egg.imageset"
+  },
+  {
+    "id": "asset-108",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-snowforge-crab.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-snowforge-crab.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-snowforge-crab.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-legendary-snowforge-crab.imageset"
+  },
+  {
+    "id": "asset-109",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-sapphire-urchin.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-rare-sapphire-urchin.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-sapphire-urchin.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-rare-sapphire-urchin.imageset"
+  },
+  {
+    "id": "asset-110",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/QyubeMenuSubscription.imageset/qyube-menu-subscription.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/QyubeMenuSubscription.imageset/qyube-menu-subscription.png"
+    ],
+    "status": "pending",
+    "size": [
+      128,
+      128
+    ],
+    "transparent": true,
+    "label": "QyubeMenuSubscription.imageset"
+  },
+  {
+    "id": "asset-111",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-icefish-sail.imageset/image.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-icefish-sail.imageset/image.png",
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-icefish-sail.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "Collectible-uncommon-icefish-sail.imageset"
+  },
+  {
+    "id": "asset-112",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionFloe.imageset/CompanionFloe.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionFloe.imageset/CompanionFloe.png"
+    ],
+    "status": "pending",
+    "size": [
+      520,
+      230
+    ],
+    "transparent": true,
+    "label": "CompanionFloe.imageset"
+  },
+  {
+    "id": "asset-113",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionPoseFishing.imageset/CompanionPoseFishing.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionPoseFishing.imageset/CompanionPoseFishing.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "CompanionPoseFishing.imageset"
+  },
+  {
+    "id": "asset-114",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionFeet.imageset/CompanionFeet.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionFeet.imageset/CompanionFeet.png"
+    ],
+    "status": "pending",
+    "size": [
+      220,
+      40
+    ],
+    "transparent": true,
+    "label": "CompanionFeet.imageset"
+  },
+  {
+    "id": "asset-115",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionBucket.imageset/CompanionBucket.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionBucket.imageset/CompanionBucket.png",
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/WatercolorCoveV6/CompanionBucketCoveV5.imageset/CompanionBucket.png"
+    ],
+    "status": "pending",
+    "size": [
+      255,
+      265
+    ],
+    "transparent": true,
+    "label": "CompanionBucket.imageset"
+  },
+  {
+    "id": "asset-116",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionCatchesV2.imageset/CompanionCatchesV2.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionCatchesV2.imageset/CompanionCatchesV2.png"
+    ],
+    "status": "pending",
+    "size": [
+      2172,
+      724
+    ],
+    "transparent": true,
+    "label": "CompanionCatchesV2.imageset"
+  },
+  {
+    "id": "asset-117",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionFlipperLeft.imageset/CompanionFlipperLeft.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionFlipperLeft.imageset/CompanionFlipperLeft.png"
+    ],
+    "status": "pending",
+    "size": [
+      66,
+      129
+    ],
+    "transparent": true,
+    "label": "CompanionFlipperLeft.imageset"
+  },
+  {
+    "id": "asset-118",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionBite.imageset/CompanionBite.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionBite.imageset/CompanionBite.png"
+    ],
+    "status": "pending",
+    "size": [
+      96,
+      244
+    ],
+    "transparent": true,
+    "label": "CompanionBite.imageset"
+  },
+  {
+    "id": "asset-119",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionRod.imageset/CompanionRod.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionRod.imageset/CompanionRod.png"
+    ],
+    "status": "pending",
+    "size": [
+      346,
+      322
+    ],
+    "transparent": true,
+    "label": "CompanionRod.imageset"
+  },
+  {
+    "id": "asset-120",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionIceWaterV2.imageset/CompanionIceWaterV2.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionIceWaterV2.imageset/CompanionIceWaterV2.png"
+    ],
+    "status": "pending",
+    "size": [
+      2172,
+      724
+    ],
+    "transparent": true,
+    "label": "CompanionIceWaterV2.imageset"
+  },
+  {
+    "id": "asset-121",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionPoseSleeping.imageset/CompanionPoseSleeping.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionPoseSleeping.imageset/CompanionPoseSleeping.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "CompanionPoseSleeping.imageset"
+  },
+  {
+    "id": "asset-122",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionTorso.imageset/CompanionTorso.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionTorso.imageset/CompanionTorso.png"
+    ],
+    "status": "pending",
+    "size": [
+      220,
+      166
+    ],
+    "transparent": true,
+    "label": "CompanionTorso.imageset"
+  },
+  {
+    "id": "asset-123",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionSplash.imageset/CompanionSplash.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionSplash.imageset/CompanionSplash.png"
+    ],
+    "status": "pending",
+    "size": [
+      234,
+      179
+    ],
+    "transparent": true,
+    "label": "CompanionSplash.imageset"
+  },
+  {
+    "id": "asset-124",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionPoseHop.imageset/CompanionPoseHop.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionPoseHop.imageset/CompanionPoseHop.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "CompanionPoseHop.imageset"
+  },
+  {
+    "id": "asset-125",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionHead.imageset/CompanionHead.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionHead.imageset/CompanionHead.png"
+    ],
+    "status": "pending",
+    "size": [
+      217,
+      194
+    ],
+    "transparent": true,
+    "label": "CompanionHead.imageset"
+  },
+  {
+    "id": "asset-126",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionSleepMarks.imageset/CompanionSleepMarks.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionSleepMarks.imageset/CompanionSleepMarks.png"
+    ],
+    "status": "pending",
+    "size": [
+      244,
+      177
+    ],
+    "transparent": true,
+    "label": "CompanionSleepMarks.imageset"
+  },
+  {
+    "id": "asset-127",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionPoseCompleted.imageset/CompanionPoseCompleted.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionPoseCompleted.imageset/CompanionPoseCompleted.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "CompanionPoseCompleted.imageset"
+  },
+  {
+    "id": "asset-128",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionFish.imageset/CompanionFish.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionFish.imageset/CompanionFish.png",
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/WatercolorCoveV6/CompanionFishCoveV5.imageset/CompanionFish.png"
+    ],
+    "status": "pending",
+    "size": [
+      288,
+      144
+    ],
+    "transparent": true,
+    "label": "CompanionFish.imageset"
+  },
+  {
+    "id": "asset-129",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionFlipperRight.imageset/CompanionFlipperRight.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionFlipperRight.imageset/CompanionFlipperRight.png"
+    ],
+    "status": "pending",
+    "size": [
+      69,
+      147
+    ],
+    "transparent": true,
+    "label": "CompanionFlipperRight.imageset"
+  },
+  {
+    "id": "asset-130",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/WatercolorCoveV6/CoveCastV6.imageset/CoveCastV6.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/WatercolorCoveV6/CoveCastV6.imageset/CoveCastV6.png"
+    ],
+    "status": "pending",
+    "size": [
+      1536,
+      1024
+    ],
+    "transparent": true,
+    "label": "CoveCastV6.imageset"
+  },
+  {
+    "id": "asset-131",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/WatercolorCoveV6/CoveCatchV6.imageset/CoveCatchV6.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/WatercolorCoveV6/CoveCatchV6.imageset/CoveCatchV6.png"
+    ],
+    "status": "pending",
+    "size": [
+      1536,
+      1024
+    ],
+    "transparent": true,
+    "label": "CoveCatchV6.imageset"
+  },
+  {
+    "id": "asset-132",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/WatercolorCoveV6/CoveDepositV6.imageset/CoveDepositV6.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/WatercolorCoveV6/CoveDepositV6.imageset/CoveDepositV6.png"
+    ],
+    "status": "pending",
+    "size": [
+      1536,
+      1024
+    ],
+    "transparent": true,
+    "label": "CoveDepositV6.imageset"
+  },
+  {
+    "id": "asset-133",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/WatercolorCoveV6/CoveHopV6.imageset/CoveHopV6.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/WatercolorCoveV6/CoveHopV6.imageset/CoveHopV6.png"
+    ],
+    "status": "pending",
+    "size": [
+      1024,
+      768
+    ],
+    "transparent": true,
+    "label": "CoveHopV6.imageset"
+  },
+  {
+    "id": "asset-134",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/WatercolorCoveV6/CompanionCoveV5.imageset/CompanionCoveV5.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/WatercolorCoveV6/CompanionCoveV5.imageset/CompanionCoveV5.png"
+    ],
+    "status": "pending",
+    "size": [
+      1254,
+      1254
+    ],
+    "transparent": true,
+    "label": "CompanionCoveV5.imageset"
+  },
+  {
+    "id": "asset-135",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/WatercolorCoveV6/CovePosesV6.imageset/CovePosesV6.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/WatercolorCoveV6/CovePosesV6.imageset/CovePosesV6.png"
+    ],
+    "status": "pending",
+    "size": [
+      1536,
+      1024
+    ],
+    "transparent": true,
+    "label": "CovePosesV6.imageset"
+  },
+  {
+    "id": "asset-136",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Distraction/DistractionSnow2.imageset/DistractionSnow2.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Distraction/DistractionSnow2.imageset/DistractionSnow2.png"
+    ],
+    "status": "pending",
+    "size": [
+      128,
+      115
+    ],
+    "transparent": true,
+    "label": "DistractionSnow2.imageset"
+  },
+  {
+    "id": "asset-137",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Distraction/DistractionSnow3.imageset/DistractionSnow3.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Distraction/DistractionSnow3.imageset/DistractionSnow3.png"
+    ],
+    "status": "pending",
+    "size": [
+      128,
+      85
+    ],
+    "transparent": true,
+    "label": "DistractionSnow3.imageset"
+  },
+  {
+    "id": "asset-138",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Distraction/DistractionSnowbank.imageset/DistractionSnowbank.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Distraction/DistractionSnowbank.imageset/DistractionSnowbank.png"
+    ],
+    "status": "pending",
+    "size": [
+      1024,
+      70
+    ],
+    "transparent": true,
+    "label": "DistractionSnowbank.imageset"
+  },
+  {
+    "id": "asset-139",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Distraction/DistractionIceFlower1.imageset/DistractionIceFlower1.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Distraction/DistractionIceFlower1.imageset/DistractionIceFlower1.png"
+    ],
+    "status": "pending",
+    "size": [
+      237,
+      256
+    ],
+    "transparent": true,
+    "label": "DistractionIceFlower1.imageset"
+  },
+  {
+    "id": "asset-140",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Distraction/DistractionIceFlower6.imageset/DistractionIceFlower6.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Distraction/DistractionIceFlower6.imageset/DistractionIceFlower6.png"
+    ],
+    "status": "pending",
+    "size": [
+      240,
+      256
+    ],
+    "transparent": true,
+    "label": "DistractionIceFlower6.imageset"
+  },
+  {
+    "id": "asset-141",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Distraction/DistractionSnow5.imageset/DistractionSnow5.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Distraction/DistractionSnow5.imageset/DistractionSnow5.png"
+    ],
+    "status": "pending",
+    "size": [
+      128,
+      112
+    ],
+    "transparent": true,
+    "label": "DistractionSnow5.imageset"
+  },
+  {
+    "id": "asset-142",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Distraction/DistractionSnow4.imageset/DistractionSnow4.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Distraction/DistractionSnow4.imageset/DistractionSnow4.png"
+    ],
+    "status": "pending",
+    "size": [
+      128,
+      56
+    ],
+    "transparent": true,
+    "label": "DistractionSnow4.imageset"
+  },
+  {
+    "id": "asset-143",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Distraction/DistractionIceFlower3.imageset/DistractionIceFlower3.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Distraction/DistractionIceFlower3.imageset/DistractionIceFlower3.png"
+    ],
+    "status": "pending",
+    "size": [
+      230,
+      256
+    ],
+    "transparent": true,
+    "label": "DistractionIceFlower3.imageset"
+  },
+  {
+    "id": "asset-144",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Distraction/DistractionIceFlower2.imageset/DistractionIceFlower2.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Distraction/DistractionIceFlower2.imageset/DistractionIceFlower2.png"
+    ],
+    "status": "pending",
+    "size": [
+      241,
+      256
+    ],
+    "transparent": true,
+    "label": "DistractionIceFlower2.imageset"
+  },
+  {
+    "id": "asset-145",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Distraction/DistractionWind.imageset/DistractionWind.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Distraction/DistractionWind.imageset/DistractionWind.png"
+    ],
+    "status": "pending",
+    "size": [
+      768,
+      206
+    ],
+    "transparent": true,
+    "label": "DistractionWind.imageset"
+  },
+  {
+    "id": "asset-146",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Distraction/DistractionSnow1.imageset/DistractionSnow1.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Distraction/DistractionSnow1.imageset/DistractionSnow1.png"
+    ],
+    "status": "pending",
+    "size": [
+      128,
+      81
+    ],
+    "transparent": true,
+    "label": "DistractionSnow1.imageset"
+  },
+  {
+    "id": "asset-147",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Distraction/DistractionSnow6.imageset/DistractionSnow6.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Distraction/DistractionSnow6.imageset/DistractionSnow6.png"
+    ],
+    "status": "pending",
+    "size": [
+      127,
+      128
+    ],
+    "transparent": true,
+    "label": "DistractionSnow6.imageset"
+  },
+  {
+    "id": "asset-148",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Distraction/DistractionIceFlower4.imageset/DistractionIceFlower4.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Distraction/DistractionIceFlower4.imageset/DistractionIceFlower4.png"
+    ],
+    "status": "pending",
+    "size": [
+      234,
+      256
+    ],
+    "transparent": true,
+    "label": "DistractionIceFlower4.imageset"
+  },
+  {
+    "id": "asset-149",
+    "source": "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Distraction/DistractionIceFlower5.imageset/DistractionIceFlower5.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Distraction/DistractionIceFlower5.imageset/DistractionIceFlower5.png"
+    ],
+    "status": "pending",
+    "size": [
+      256,
+      255
+    ],
+    "transparent": true,
+    "label": "DistractionIceFlower5.imageset"
+  },
+  {
+    "id": "asset-150",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-01.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-01.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-151",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-02.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-02.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-152",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-03.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-03.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-153",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-04.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-04.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-154",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-05.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-05.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-155",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-06.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-06.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-156",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-07.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-07.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-157",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-08.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-08.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-158",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-09.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-09.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-159",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-10.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-10.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-160",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-11.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-11.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-161",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-12.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-12.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-162",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-13.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-13.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-163",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-14.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-14.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-164",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-15.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-15.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-165",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-16.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-16.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-166",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-17.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-17.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-167",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-18.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-18.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-168",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-19.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-19.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-169",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-20.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-20.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-170",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-21.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-21.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-171",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-22.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-22.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-172",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-23.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-23.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-173",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-24.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-24.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-174",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-25.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-25.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-175",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-26.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-26.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-176",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-27.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-27.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-177",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-28.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-28.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-178",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-29.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-29.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-179",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-30.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-30.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-180",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-31.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-31.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-181",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-32.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/fish/fish-source-32.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-182",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-silverfish-stripe.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-silverfish-stripe.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-183",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-lanternfish-round.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-lanternfish-round.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "fish"
+  },
+  {
+    "id": "asset-184",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-rime-bell.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-rime-bell.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "rare"
+  },
+  {
+    "id": "asset-185",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-honeycomb-shell.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-honeycomb-shell.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "rare"
+  },
+  {
+    "id": "asset-186",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-coral-chime.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-coral-chime.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "rare"
+  },
+  {
+    "id": "asset-187",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-frozen-fern.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-frozen-fern.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "rare"
+  },
+  {
+    "id": "asset-188",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-frost-fan-scallop.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-frost-fan-scallop.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "rare"
+  },
+  {
+    "id": "asset-189",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-ember-mussel.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-ember-mussel.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "rare"
+  },
+  {
+    "id": "asset-190",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-silver-kelp.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-silver-kelp.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "rare"
+  },
+  {
+    "id": "asset-191",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-pumice-labyrinth.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-pumice-labyrinth.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "rare"
+  },
+  {
+    "id": "asset-192",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-frost-lotus-anemone.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-frost-lotus-anemone.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "rare"
+  },
+  {
+    "id": "asset-193",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-clockwork-seahorse.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-clockwork-seahorse.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "rare"
+  },
+  {
+    "id": "asset-194",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-pearl-seedpod.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/rare/rare-pearl-seedpod.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "rare"
+  },
+  {
+    "id": "asset-195",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-cathedral-skate.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-cathedral-skate.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "legendary"
+  },
+  {
+    "id": "asset-196",
+    "source": "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-wreck-hermit.png",
+    "targets": [
+      "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-wreck-hermit.png"
+    ],
+    "status": "pending",
+    "size": [
+      512,
+      512
+    ],
+    "transparent": true,
+    "label": "legendary"
+  }
+]

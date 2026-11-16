@@ -110,7 +110,6 @@ export default function MarketingPageClient() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                   email: form.get("email"),
-                  consent: form.get("consent") === "on",
                   website: form.get("website"),
                 }),
               })
@@ -161,17 +160,8 @@ export default function MarketingPageClient() {
               <input name="website" tabIndex={-1} autoComplete="off" />
             </label>
           </div>
-          <label className={styles.consent}>
-            <input
-              type="checkbox"
-              name="consent"
-              required
-              disabled={status === "success"}
-            />{" "}
-            Email me Qyube launch updates.
-          </label>
           <p className={styles.privacy}>
-            Your email is used for launch updates.{" "}
+            Joining means you’ll receive Qyube launch updates.{" "}
             <Link href="/privacy">Privacy policy</Link>.
           </p>
           <p className={styles.message} role="status" aria-live="polite">

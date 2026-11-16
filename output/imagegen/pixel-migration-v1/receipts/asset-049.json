@@ -1,0 +1,13 @@
+{
+  "id": "asset-049",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-049.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-legendary-winter-oracle-compass.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/rare-legend-collectibles-v2/legendary/legendary-winter-oracle-compass.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

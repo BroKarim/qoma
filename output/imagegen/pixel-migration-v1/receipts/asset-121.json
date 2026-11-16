@@ -1,0 +1,12 @@
+{
+  "id": "asset-121",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-121.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Companion/CompanionPoseSleeping.imageset/CompanionPoseSleeping.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

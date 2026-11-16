@@ -1,0 +1,13 @@
+{
+  "id": "asset-099",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-099.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-common-sea-pebble.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/common-collectibles-v1/ocean-finds/common-sea-pebble.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

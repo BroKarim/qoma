@@ -57,11 +57,11 @@ final class MenuBarController: NSObject {
         super.init()
         statusItem.button?.target = self
         statusItem.button?.action = #selector(togglePopover)
-        statusItem.button?.sendAction(on: [.leftMouseUp, .rightMouseUp])
+        statusItem.button?.sendAction(on: [.leftMouseUp])
         panel.isFloatingPanel = true
         panel.level = .popUpMenu
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
-        panel.hidesOnDeactivate = true
+        panel.hidesOnDeactivate = false
         panel.hasShadow = true
         panel.backgroundColor = .clear
         panel.isOpaque = false
@@ -129,21 +129,24 @@ final class MenuBarController: NSObject {
 
     func dismissPopover() { closePanel() }
 
+    #if DEBUG
+    var isSessionPanelVisible: Bool { panel.isVisible }
+    func clickStatusItem() { statusItem.button?.performClick(nil) }
+    #endif
+
     private func closePanel() {
         panel.orderOut(nil)
     }
 
     @objc private func togglePopover() {
-        if NSApp.currentEvent?.type == .rightMouseUp {
-            showContextMenu()
-        } else if panel.isVisible {
+        if panel.isVisible {
             closePanel()
         } else if Self.shouldShowPopover(
             isRunning: coordinator?.isActive == true || coordinator?.isPaused == true,
             timerHidden: preferences?.hideFloatingTimer == true,
             finalization: coordinator?.finalizationState ?? .idle) {
             showPopover()
-        } else {
+        } else if coordinator?.isActive != true && coordinator?.isPaused != true {
             onOpen?()
         }
     }

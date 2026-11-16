@@ -1,0 +1,13 @@
+{
+  "id": "asset-019",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-019.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-dragonfish-blunt.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-dragonfish-blunt.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "id": "asset-067",
+  "generatedSource": "output/imagegen/pixel-migration-v1/asset-067.png",
+  "targets": [
+    "/Users/kiram/Code/dzenn/Qoma/Assets.xcassets/Collectible-uncommon-toothfish-olive.imageset/image.png",
+    "/Users/kiram/Code/dzenn/output/imagegen/uncommon-collectibles-v1/fish/uncommon-toothfish-olive.png"
+  ],
+  "status": "installed",
+  "size": [
+    512,
+    512
+  ]
+}

@@ -1,128 +1,33 @@
-# Qoma v1.1.0
+# Qyube v1.0.0 release
 
-## Download
+Direct macOS distribution from the official website. The release artifact is a Developer ID-signed, notarized and stapled DMG. Sparkle updates are disabled in v1.0.0 until the Qyube appcast host and EdDSA public/private keys are configured.
 
-| Platform | Architecture | Download |
-|---|---|---|
-| macOS | Universal (Apple Silicon + Intel) | `qoma-1.1.0-mac-universal.dmg` |
+## One-time setup
 
-## Installation
+1. Create a **Developer ID Application** certificate for the Qyube bundle identifier and install it in the release Mac keychain.
+2. Store Apple notarization credentials with `xcrun notarytool store-credentials QyubeNotary --apple-id ... --team-id ... --password ...`. The password is an app-specific password; use the keychain profile rather than saving credentials in this repository.
+3. Ensure the expected team has the Qyube app identifier, entitlements, and signing certificate. Set `DEVELOPER_ID_APPLICATION` to the certificate's exact identity, `APPLE_TEAM_ID` to the 10-character team ID, and `NOTARYTOOL_PROFILE` to the saved keychain profile.
+4. Configure a GitHub CLI login with permission to create or upload releases for `BroKarim/qoma`.
 
-1. Download `qoma-1.1.0-mac-universal.dmg` (works on any Mac).
-2. Open the DMG and drag **Qoma** to **Applications**.
-3. Remove quarantine flag (ad-hoc signed, not notarized):
+## Release v1.0.0
 
-```bash
-xattr -d com.apple.quarantine /Applications/Qoma.app
+From the repository root on a clean, reviewed release commit:
+
+```sh
+export DEVELOPER_ID_APPLICATION='Developer ID Application: <legal seller> (<TEAMID>)'
+export APPLE_TEAM_ID='<TEAMID>'
+export NOTARYTOOL_PROFILE='QyubeNotary'
+scripts/release.sh v1.0.0
 ```
 
-> macOS shows a warning for apps not notarized through Apple's $99/year developer program. The app is safe and open source.
+The script archives the Release target, exports the signed app, verifies the signature, submits an app ZIP and DMG to Apple notarization, staples both accepted artifacts, creates a SHA-256 checksum, then creates or updates the matching GitHub Release with the DMG and checksum. It contains no credentials. Review the exported app, notarization logs, and release page before announcing the download.
 
----
+The website download link must point to the signed DMG asset. Do not publish an ad-hoc build or instruct customers to remove Gatekeeper quarantine.
 
-# Release Checklist
+## Future Sparkle appcast
 
-Alur release manual Qoma. Sehari-hari app dibuka dari Xcode (Debug), tapi untuk distribusi build Release.
+Sparkle remains disabled (`QyubeEnableSparkleUpdates=false`) until all of these are ready: a permanent Qyube HTTPS appcast URL, an EdDSA signing key stored outside Git, the matching `SUPublicEDKey` in the signed app, and an automated feed-generation/upload step using Sparkle's `generate_appcast` tool. At that point, set the feed URL and public key in the release build configuration, enable the updater, generate and sign the appcast for each release, upload the feed and artifacts, and verify update discovery on a clean installed copy. Do not re-enable the Qoma/Pomodoro feed or ship an empty feed.
 
-**Kondisi saat ini:**
-- Belum ada akun Apple Developer (tidak bisa notarize, Sparkle signing di-skip).
-- Repo app: `BroKarim/qoma`
-- Repo Homebrew tap: `BroKarim/homebrew-qoma`
+## Version and checks
 
-## Step 1 - Update MARKETING_VERSION
-
-Di `qoma.xcodeproj/project.pbxproj`, update `MARKETING_VERSION` ke versi baru (Debug + Release config, Qoma + QomaTests target).
-
-## Step 2 - Build universal binary
-
-Build terpisah untuk arm64 dan x86_64, lalu gabungkan dengan `lipo`:
-
-```bash
-# Arm64
-xcodebuild -project qoma.xcodeproj -scheme Qoma -configuration Release \
-  -arch arm64 -derivedDataPath /tmp/qoma-arm64 build
-
-# x86_64
-xcodebuild -project qoma.xcodeproj -scheme Qoma -configuration Release \
-  -arch x86_64 -derivedDataPath /tmp/qoma-x64 build
-
-# Gabungkan jadi universal binary
-lipo -create \
-  /tmp/qoma-arm64/Build/Products/Release/Qoma.app/Contents/MacOS/Qoma \
-  /tmp/qoma-x64/Build/Products/Release/Qoma.app/Contents/MacOS/Qoma \
-  -output /tmp/qoma-universal-binary
-
-# Verifikasi
-lipo -info /tmp/qoma-universal-binary
-# Output: Architectures in the fat file: ... are: x86_64 arm64
-```
-
-## Step 3 - Bungkus universal app
-
-```bash
-mkdir -p /Users/kiram/Code/qoma-release
-cp -R /tmp/qoma-arm64/Build/Products/Release/Qoma.app /Users/kiram/Code/qoma-release/Qoma.app
-cp /tmp/qoma-universal-binary /Users/kiram/Code/qoma-release/Qoma.app/Contents/MacOS/Qoma
-codesign --force --sign - /Users/kiram/Code/qoma-release/Qoma.app
-```
-
-## Step 4 - Buat DMG
-
-```bash
-create-dmg \
-  --overwrite \
-  --volname "Qoma" \
-  --dmg-title "qoma" \
-  --dmg-name "qoma-1.1.0-mac-universal" \
-  /Users/kiram/Code/qoma-release/Qoma.app \
-  /Users/kiram/Code/qoma-release
-
-# Rename (create-dmg auto-append version, hapus spasi)
-mv "/Users/kiram/Code/qoma-release/Qoma 1.1.0.dmg" \
-  /Users/kiram/Code/qoma-release/qoma-1.1.0-mac-universal.dmg
-```
-
-> Note: Warning "Code signing failed" dari `create-dmg` bisa diabaikan — DMG tetap valid, hanya tidak Apple-signed.
-
-Ambil SHA256:
-
-```bash
-shasum -a 256 /Users/kiram/Code/qoma-release/qoma-1.1.0-mac-universal.dmg
-```
-
-## Step 5 - GitHub Release
-
-Di repo `BroKarim/qoma`:
-
-```bash
-git add -A && git commit -m "Release v1.1.0"
-git tag v1.1.0
-git push origin main
-git push origin v1.1.0
-```
-
-Buat GitHub Release dari tag `v1.1.0`, upload `qoma-1.1.0-mac-universal.dmg`.
-
-## Step 6 - Update Homebrew tap
-
-Di repo `BroKarim/homebrew-qoma`, update `Casks/qoma.rb`:
-
-```ruby
-cask "qoma" do
-  version "1.1.0"
-  sha256 "SHA256_DARI_DMG"
-  url "https://github.com/BroKarim/qoma/releases/download/v#{version}/qoma-#{version}-mac-universal.dmg"
-  # ...
-end
-```
-
-Commit & push.
-
----
-
-## What's new (v1.1.0)
-
-- Extensions system: toggle-based Feature Extensions (Todolist as first extension)
-- Dynamic floating panel: collapsed/expanded states with morph transitions
-- Extensions settings pane with dynamic card grid
-- Analytics integration for extension data
+`MARKETING_VERSION` and `CURRENT_PROJECT_VERSION` should be reviewed in the Xcode project before each release. For v1.0.0, keep the public product name **Qyube**. Run the complete website and macOS release checks before creating a GitHub release.

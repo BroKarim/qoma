@@ -1,0 +1,7 @@
+{
+  "id": "asset-075",
+  "label": "Collectible-legendary-constellation-whale.imageset",
+  "source": "/Users/kiram/.codex/generated_images/01a14d18-1275-7fe3-bbaa-4807ee68a130/exec-d3da7eb4-3793-401a-80fa-4354bbdb5a82.png",
+  "prompt": "Use case: style-transfer. Image 1 is the EDIT TARGET, a constellation whale; image 2 is a PIXEL MEDIUM REFERENCE ONLY. Convert ONLY image 1 into cozy crisp handcrafted pixel art. Preserve exact whale identity, curved body silhouette, fins, tail, pose, direction, proportions, indigo blue violet and cream palette, golden stars and constellation lines. Preserve original composition, 512-square canvas and transparent margins. Use coarse 64 logical pixels per subject, crisp square stair-step contours and flat discrete color clusters with three shades per hue. ZERO eyes, dots, sockets or rings on head. Preserve decorative stars on body. No watercolor, paper, blur, gradients, extra scenery, labels or shadows. Real transparent exterior; opaque cream belly.",
+  "status": "generated"
+}
