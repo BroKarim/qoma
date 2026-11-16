@@ -41,3 +41,7 @@ ANALYTIC.md
 website/prod-ca-2021.crt
 
 private-key.pem
+
+output/
+
+design
