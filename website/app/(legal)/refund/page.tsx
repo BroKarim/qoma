@@ -1,4 +1,4 @@
-export const metadata = { title: "Refunds · Qyube", description: "Draft refund information for Qyube purchases." }
+export const metadata = { title: "Refund Policy · Qyube", description: "Read Qyube’s refund policy for purchases and applicable consumer rights.", alternates: { canonical: "/refund" } }
 
 export default function RefundPage() {
   return <main className="mx-auto max-w-3xl px-6 pb-20">

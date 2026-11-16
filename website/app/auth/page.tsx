@@ -2,6 +2,8 @@ import AuthPanel from "./panel"
 
 export const dynamic = "force-dynamic"
 
+export const metadata = { title: "Sign in · Qyube", robots: { index: false, follow: false } }
+
 export default async function AuthPage({ searchParams }: { searchParams: Promise<{ request?: string; next?: string }> }) {
   const { request, next } = await searchParams
   const validRequest = typeof request === "string" && /^[a-f0-9-]{36}$/i.test(request)

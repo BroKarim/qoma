@@ -1,4 +1,4 @@
-export const metadata = { title: "Terms · Qyube", description: "Terms for the Qyube macOS app and account." }
+export const metadata = { title: "Terms of Service · Qyube", description: "Read the terms for using the Qyube macOS app and account.", alternates: { canonical: "/terms" } }
 
 export default function TermsPage() {
   return <main className="mx-auto max-w-3xl px-6 pb-20">

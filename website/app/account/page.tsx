@@ -15,6 +15,8 @@ import styles from "./account.module.css"
 
 export const dynamic = "force-dynamic"
 
+export const metadata = { title: "Account · Qyube", robots: { index: false, follow: false } }
+
 export default async function AccountPage({ searchParams }: { searchParams: Promise<{ checkout?: string; portal?: string }> }) {
   const query = await searchParams
   const session = await getAuth().api.getSession({ headers: await headers() })
