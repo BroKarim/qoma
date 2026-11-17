@@ -1,4 +1,4 @@
-export const metadata = { title: "Privacy · Qyube", description: "How Qyube handles account, device, and purchase information." }
+export const metadata = { title: "Privacy Policy · Qyube", description: "Learn how Qyube handles account, device, and purchase information.", alternates: { canonical: "/privacy" } }
 
 export default function PrivacyPage() {
   return <main className="mx-auto max-w-3xl px-6 pb-20">

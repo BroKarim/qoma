@@ -3,6 +3,9 @@ export default function MarketingLayout({
 }: {
   children: React.ReactNode
 }) {
-  return <div className="min-h-screen bg-white text-[#202020]">{children}<LegalFooter /></div>
+  return <div className="min-h-screen bg-white text-[#202020]">{children}
+
+    {/*<LegalFooter />*/}
+  </div>
 }
 import { LegalFooter } from "@/components/legal-footer"

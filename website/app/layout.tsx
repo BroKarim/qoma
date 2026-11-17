@@ -10,19 +10,20 @@ const fontMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "Qyube — Focus with intention",
+  title: "Qyube — A cozy focus timer for Mac",
   metadataBase: new URL("https://qyube.brokarim.com"),
-  description: "A calm focus timer for macOS, with thoughtful sessions and a little Antarctic companion.",
+  description: "Stay focused with a tiny penguin island on your Mac. Set a timer, go fishing, and collect discoveries as you work.",
+  keywords: ["focus timer", "macOS focus app", "pomodoro timer Mac", "desktop companion", "penguin fishing"],
   openGraph: {
-    title: "Qyube — Focus with intention",
-    description: "A calm focus timer for macOS, with thoughtful sessions and a little Antarctic companion.",
+    title: "Qyube — A cozy focus timer for Mac",
+    description: "Stay focused with a tiny penguin island on your Mac. Set a timer, go fishing, and collect discoveries as you work.",
     siteName: "Qyube",
     images: [
       {
-        url: "/og.png",
+        url: "/og.jpg",
         width: 1200,
         height: 630,
-        alt: "Qyube — Focus with intention",
+        alt: "Qyube — A cozy focus timer for Mac",
       },
     ],
     locale: "en_US",
@@ -30,9 +31,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Qyube — Focus with intention",
-    description: "A calm focus timer for macOS, with thoughtful sessions and a little Antarctic companion.",
-    images: ["/og.png"],
+    title: "Qyube — A cozy focus timer for Mac",
+    description: "Stay focused with a tiny penguin island on your Mac. Set a timer, go fishing, and collect discoveries as you work.",
+    images: ["/og.jpg"],
   },
   robots: {
     index: true,

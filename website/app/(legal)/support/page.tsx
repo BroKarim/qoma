@@ -1,4 +1,4 @@
-export const metadata = { title: "Support · Qyube", description: "Get help with Qyube sign-in, devices, and purchases." }
+export const metadata = { title: "Support · Qyube", description: "Get help with Qyube sign-in, devices, purchases, and the macOS app.", alternates: { canonical: "/support" } }
 
 export default function SupportPage() {
   return <main className="mx-auto max-w-3xl px-6 pb-20">

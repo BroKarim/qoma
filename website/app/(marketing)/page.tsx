@@ -1,11 +1,12 @@
 import type { Metadata } from "next"
 import MarketingPageClient from "./page.client"
-import MarketingInformation from "./marketing-information"
+// import MarketingInformation from "./marketing-information"
 
 export const metadata: Metadata = {
-  title: "qyube — Focus with a little catch",
+  title: "Qyube — A cozy focus timer for Mac",
   description:
-    "A quiet focus timer for Mac, with a penguin who fishes while you work.",
+    "Stay focused with a tiny penguin island on your Mac. Set a timer, go fishing, and collect discoveries as you work.",
+  alternates: { canonical: "/" },
 }
 
 export default function MarketingPage() {
