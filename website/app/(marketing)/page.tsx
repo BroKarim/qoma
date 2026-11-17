@@ -12,7 +12,7 @@ export default function MarketingPage() {
   return (
     <main className="font-sans text-[#202020]">
       <MarketingPageClient />
-      <MarketingInformation />
+      {/*<MarketingInformation />*/}
     </main>
   )
 }
